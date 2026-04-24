@@ -38,6 +38,9 @@ function useCountdown() {
 ══════════════════════════════════════ */
 function CoursesPage({ setPage, user, onLoginClick }) {
   const { h, m, s } = useCountdown();
+  const hasPurchased = (() => {
+    try { return !!JSON.parse(localStorage.getItem('atreox_course_access') || 'null')?.sessionId; } catch { return false; }
+  })();
 
   const features = [
     'FLUX.1 & SDXL photoreal generation',
@@ -60,7 +63,9 @@ function CoursesPage({ setPage, user, onLoginClick }) {
   );
 
   const handleGetAccess = () => {
-    if (!user) {
+    if (hasPurchased) {
+      window.location.href = '/course';
+    } else if (!user) {
       onLoginClick();
     } else {
       setPage('checkout');
@@ -135,7 +140,7 @@ function CoursesPage({ setPage, user, onLoginClick }) {
                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               }}
             >
-              {user ? 'Proceed to Checkout' : 'Get Access Now'} <ArrowUpRight size={16} />
+              {hasPurchased ? 'Continue Learning' : user ? 'Proceed to Checkout' : 'Get Access Now'} <ArrowUpRight size={16} />
             </button>
 
             {!user && (
