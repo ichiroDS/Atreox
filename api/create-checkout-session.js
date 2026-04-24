@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
     || 'http://localhost:3000';
 
   try {
-    const { email, name } = req.body || {};
+    const { email, name, promoCodeId } = req.body || {};
 
     const sessionParams = {
       mode: 'subscription',
@@ -40,8 +40,13 @@ module.exports = async (req, res) => {
       }],
       success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:  `${baseUrl}/Atreox.html`,
-      allow_promotion_codes: true,
     };
+
+    if (promoCodeId) {
+      sessionParams.discounts = [{ promotion_code: promoCodeId }];
+    } else {
+      sessionParams.allow_promotion_codes = true;
+    }
 
     if (email) sessionParams.customer_email = email;
 

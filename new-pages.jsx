@@ -224,8 +224,56 @@ function CoursesPage({ setPage, user, onLoginClick }) {
    CHECKOUT PAGE
 ══════════════════════════════════════ */
 function CheckoutPage({ setPage, user }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState('');
+  const [loading, setLoading]         = useState(false);
+  const [error, setError]             = useState('');
+  const [promoInput, setPromoInput]   = useState('');
+  const [promoStatus, setPromoStatus] = useState('idle'); // idle | loading | valid | invalid
+  const [promoData, setPromoData]     = useState(null);   // { promoCodeId, coupon }
+  const [promoError, setPromoError]   = useState('');
+
+  const BASE_CENTS = 8900;
+
+  const discountCents = promoData?.coupon
+    ? promoData.coupon.percentOff != null
+      ? Math.round(BASE_CENTS * promoData.coupon.percentOff / 100)
+      : (promoData.coupon.amountOff || 0)
+    : 0;
+
+  const finalCents = Math.max(0, BASE_CENTS - discountCents);
+
+  const fmtUSD = cents => '$' + (cents / 100).toFixed(2).replace(/\.00$/, '');
+
+  const handleApplyPromo = async () => {
+    if (!promoInput.trim()) return;
+    setPromoStatus('loading');
+    setPromoError('');
+    setPromoData(null);
+    try {
+      const res  = await fetch('/api/validate-promo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: promoInput }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setPromoData({ promoCodeId: data.promoCodeId, coupon: data.coupon });
+        setPromoStatus('valid');
+      } else {
+        setPromoError(data.error || 'Invalid discount code.');
+        setPromoStatus('invalid');
+      }
+    } catch {
+      setPromoError('Could not validate code. Please try again.');
+      setPromoStatus('invalid');
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setPromoData(null);
+    setPromoInput('');
+    setPromoStatus('idle');
+    setPromoError('');
+  };
 
   const handlePay = async () => {
     setError('');
@@ -234,7 +282,7 @@ function CheckoutPage({ setPage, user }) {
       const res  = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user?.email, name: user?.name }),
+        body: JSON.stringify({ email: user?.email, name: user?.name, promoCodeId: promoData?.promoCodeId }),
       });
       const data = await res.json();
       if (data.url) {
@@ -295,6 +343,45 @@ function CheckoutPage({ setPage, user }) {
               </div>
             </div>
 
+            {/* Promo code */}
+            {promoStatus === 'valid' && promoData ? (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.25)', borderRadius: 12, padding: '12px 16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.83rem', color: '#34d399' }}>{promoData.coupon.name}</span>
+                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.78rem', color: 'rgba(52,211,153,0.7)' }}>
+                    {promoData.coupon.percentOff != null ? `−${promoData.coupon.percentOff}%` : `−${fmtUSD(promoData.coupon.amountOff)}`} applied
+                  </span>
+                </div>
+                <button onClick={handleRemovePromo} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '1rem', lineHeight: 1, padding: '0 2px' }}>×</button>
+              </div>
+            ) : (
+              <div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <div className="liquid-glass glass-field" style={{ flex: 1, borderRadius: 10, padding: '11px 14px' }}>
+                    <input
+                      value={promoInput}
+                      onChange={e => { setPromoInput(e.target.value); setPromoError(''); setPromoStatus('idle'); }}
+                      onKeyDown={e => e.key === 'Enter' && handleApplyPromo()}
+                      placeholder="Discount code"
+                      style={{ background: 'none', border: 'none', outline: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', width: '100%', letterSpacing: '0.04em' }}
+                    />
+                  </div>
+                  <button
+                    onClick={handleApplyPromo}
+                    disabled={promoStatus === 'loading' || !promoInput.trim()}
+                    className="btn-glass-hover"
+                    style={{ borderRadius: 10, padding: '11px 18px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.83rem', cursor: promoStatus === 'loading' || !promoInput.trim() ? 'default' : 'pointer', opacity: !promoInput.trim() ? 0.45 : 1, whiteSpace: 'nowrap' }}
+                  >
+                    {promoStatus === 'loading' ? '…' : 'Apply'}
+                  </button>
+                </div>
+                {promoError && (
+                  <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.76rem', color: '#f87171', marginTop: 6, paddingLeft: 2 }}>{promoError}</p>
+                )}
+              </div>
+            )}
+
             {error && (
               <div style={{ background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.28)', borderRadius: 10, padding: '10px 14px' }}>
                 <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: '#f87171' }}>{error}</span>
@@ -309,7 +396,7 @@ function CheckoutPage({ setPage, user }) {
             }}>
               {loading
                 ? <><svg style={{ animation: 'spin 0.8s linear infinite' }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Redirecting to Stripe…</>
-                : <><Lock size={15} /> Pay $89.00 / month</>
+                : <><Lock size={15} /> Pay {fmtUSD(finalCents)} / month</>
               }
             </button>
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -351,11 +438,22 @@ function CheckoutPage({ setPage, user }) {
               </div>
             ))}
 
+            {promoStatus === 'valid' && promoData && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)' }}>
+                  Code: {promoData.coupon.name}
+                </span>
+                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.85rem', color: '#34d399' }}>
+                  −{fmtUSD(discountCents)}
+                </span>
+              </div>
+            )}
+
             <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '16px 0' }} />
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
               <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.95rem', color: 'white' }}>Total today</span>
-              <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.5rem', color: 'white', lineHeight: 1 }}>$89</span>
+              <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.5rem', color: 'white', lineHeight: 1 }}>{fmtUSD(finalCents)}</span>
             </div>
             <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.73rem', color: 'rgba(255,255,255,0.3)' }}>then $149/month · cancel anytime</p>
           </div>
