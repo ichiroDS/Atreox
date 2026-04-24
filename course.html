@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ATREOX AI — Photoreal Influencer Blueprint</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --glass: rgba(255,255,255,0.05);
+      --glass-border: rgba(255,255,255,0.12);
+      --accent: #4f8ef7;
+      --accent2: #a78bfa;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: #000;
+      color: #fff;
+      font-family: 'Barlow', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Blobs ── */
+    #bg { position: fixed; inset: 0; z-index: -1; background: #000; pointer-events: none; }
+    .blob {
+      position: absolute; border-radius: 50%;
+      filter: blur(140px); opacity: 0.13;
+    }
+    .blob-1 { width: 70vw; height: 70vw; top: -20%; left: -15%; background: #3b4ef7; animation: drift1 22s ease-in-out infinite; }
+    .blob-2 { width: 55vw; height: 55vw; bottom: -15%; right: -15%; background: #7c3aed; animation: drift2 28s ease-in-out infinite; }
+    @keyframes drift1 { 0%,100% { transform:translate(0,0); } 50% { transform:translate(6%,10%); } }
+    @keyframes drift2 { 0%,100% { transform:translate(0,0); } 50% { transform:translate(-8%,-10%); } }
+
+    /* ── Glass ── */
+    .glass {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 5%;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: white;
+    }
+    .nav-logo span {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-size: 1.1rem;
+    }
+    #user-pill {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 9999px; padding: 6px 14px;
+    }
+    #user-avatar {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: linear-gradient(135deg,#4f8ef7,#a78bfa);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 0.72rem; flex-shrink: 0;
+    }
+    #user-name { font-size: 0.82rem; color: rgba(255,255,255,0.8); }
+
+    /* ── Layout ── */
+    main { padding: 100px 5% 80px; max-width: 1200px; margin: 0 auto; }
+
+    /* ── Welcome banner ── */
+    .welcome {
+      margin-bottom: 48px;
+      padding: 40px 48px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(79,142,247,0.08), rgba(167,139,250,0.08));
+      border: 1px solid rgba(79,142,247,0.2);
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;
+    }
+    .welcome-text h1 {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      color: white; line-height: 1.1; margin-bottom: 8px;
+    }
+    .welcome-text p { font-size: 0.9rem; color: rgba(255,255,255,0.5); line-height: 1.6; max-width: 420px; }
+    .badge {
+      background: linear-gradient(135deg, rgba(52,211,153,0.14), rgba(79,142,247,0.14));
+      border: 1px solid rgba(52,211,153,0.3);
+      border-radius: 9999px; padding: 6px 18px;
+      font-size: 0.75rem; color: #34d399; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* ── Video ── */
+    .video-section { margin-bottom: 48px; }
+    .section-label {
+      font-size: 0.7rem; color: rgba(255,255,255,0.35);
+      letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+    }
+    .section-label::after {
+      content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.08);
+    }
+    .video-wrap {
+      border-radius: 20px; overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.02);
+      aspect-ratio: 16/9;
+      position: relative;
+    }
+    .video-wrap iframe {
+      width: 100%; height: 100%; display: block; border: none;
+    }
+    /* Placeholder shown when no embed URL is set */
+    .video-placeholder {
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 16px;
+    }
+    .video-placeholder svg { opacity: 0.18; }
+    .video-placeholder p {
+      font-size: 0.85rem; color: rgba(255,255,255,0.25);
+      text-align: center; max-width: 320px; line-height: 1.6;
+    }
+
+    /* ── Modules ── */
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .module-card {
+      border-radius: 16px; padding: 22px 20px;
+      display: flex; align-items: flex-start; gap: 14px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: default;
+    }
+    .module-card:hover { transform: translateY(-4px); box-shadow: 0 18px 48px rgba(0,0,0,0.4); }
+    .module-num {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: rgba(79,142,247,0.12); border: 1px solid rgba(79,142,247,0.2);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      font-family: 'Instrument Serif', serif; font-style: italic; font-size: 1rem; color: var(--accent);
+    }
+    .module-info h4 {
+      font-weight: 500; font-size: 0.9rem; color: white; margin-bottom: 4px; line-height: 1.3;
+    }
+    .module-info p {
+      font-size: 0.78rem; color: rgba(255,255,255,0.4); line-height: 1.5;
+    }
+    .module-status {
+      margin-left: auto; flex-shrink: 0;
+      font-size: 0.62rem; color: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.05); border-radius: 9999px;
+      padding: 3px 10px; text-transform: uppercase; letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+    .module-status.live { color: #34d399; background: rgba(52,211,153,0.1); }
+
+    /* ── Downloads ── */
+    .downloads-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px;
+    }
+    .download-card {
+      border-radius: 14px; padding: 18px 18px;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .download-icon {
+      width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .download-info { flex: 1; min-width: 0; }
+    .download-info h5 { font-weight: 500; font-size: 0.85rem; color: white; margin-bottom: 3px; }
+    .download-info p { font-size: 0.73rem; color: rgba(255,255,255,0.35); }
+    .dl-btn {
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px; padding: 7px 12px;
+      color: rgba(255,255,255,0.65); font-family: 'Barlow', sans-serif;
+      font-size: 0.75rem; font-weight: 500; cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
+      transition: background 0.2s, color 0.2s;
+      text-decoration: none;
+    }
+    .dl-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+    .dl-btn.placeholder { opacity: 0.35; cursor: default; pointer-events: none; }
+
+    /* ── Discord ── */
+    .discord-banner {
+      margin-top: 48px;
+      border-radius: 20px; padding: 32px 40px;
+      display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+      background: linear-gradient(135deg, rgba(88,101,242,0.12), rgba(79,142,247,0.06));
+      border: 1px solid rgba(88,101,242,0.25);
+    }
+    .discord-banner svg { flex-shrink: 0; opacity: 0.8; }
+    .discord-banner h3 {
+      font-family: 'Instrument Serif', serif; font-style: italic;
+      font-size: 1.5rem; color: white; margin-bottom: 4px;
+    }
+    .discord-banner p { font-size: 0.85rem; color: rgba(255,255,255,0.45); }
+    .discord-btn {
+      margin-left: auto; background: #5865f2; color: white;
+      border: none; border-radius: 10px; padding: 11px 22px;
+      font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 0.88rem;
+      cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .discord-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(88,101,242,0.4); }
+
+    /* ── Access denied ── */
+    #gate {
+      display: none;
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,0.96);
+      flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 40px;
+    }
+    #gate h2 {
+      font-family: 'Instrument Serif', serif; font-style: italic;
+      font-size: 2.2rem; color: white; margin-bottom: 12px;
+    }
+    #gate p { font-size: 0.95rem; color: rgba(255,255,255,0.45); max-width: 400px; margin-bottom: 28px; line-height: 1.6; }
+    .gate-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: white; color: black; border: none;
+      border-radius: 9999px; padding: 13px 28px;
+      font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 0.95rem;
+      cursor: pointer; text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="bg"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
+
+  <!-- Access gate (shown if not paid) -->
+  <div id="gate">
+    <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" style="margin-bottom:20px">
+      <path d="M19 11H5a2 2 0 00-2 2v7a2 2 0 002 2h14a2 2 0 002-2v-7a2 2 0 00-2-2zM7 11V7a5 5 0 0110 0v4"/>
+    </svg>
+    <h2>Course Access Required</h2>
+    <p>This page is only available to enrolled students. Purchase the Photoreal Influencer Blueprint to get instant access.</p>
+    <a href="/Atreox.html" class="gate-btn">View Course →</a>
+  </div>
+
+  <nav>
+    <a href="/Atreox.html" class="nav-logo">
+      <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
+        <rect width="36" height="36" rx="9" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+        <polygon points="18,7 29,14 29,26 18,29 7,22 7,10" fill="none" stroke="white" stroke-width="1.5"/>
+        <circle cx="18" cy="18" r="3" fill="white" opacity="0.9"/>
+      </svg>
+      <span>ATREOX AI</span>
+    </a>
+    <div id="user-pill">
+      <div id="user-avatar">?</div>
+      <span id="user-name">Loading…</span>
+    </div>
+  </nav>
+
+  <main id="content" style="display:none;">
+
+    <!-- Welcome banner -->
+    <div class="welcome">
+      <div class="welcome-text">
+        <h1>Welcome, <span id="greeting-name">creator</span>.</h1>
+        <p>You have full access to the Photoreal Influencer Blueprint. New lessons are added every month — check back regularly.</p>
+      </div>
+      <span class="badge">✦ Enrolled</span>
+    </div>
+
+    <!-- Video section -->
+    <div class="video-section">
+      <div class="section-label">Course Introduction</div>
+      <div class="video-wrap" id="video-container">
+        <!--
+          REPLACE THIS COMMENT with your Google Drive embed iframe, e.g.:
+          <iframe src="https://drive.google.com/file/d/YOUR_FILE_ID/preview" allowfullscreen></iframe>
+
+          To get the embed URL:
+          1. Open the file in Google Drive
+          2. Click Share → change to "Anyone with the link"
+          3. Click ⋮ → Embed item
+          4. Copy the src URL from the iframe tag
+        -->
+        <div class="video-placeholder">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1">
+            <path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+          </svg>
+          <p>Course video will appear here.<br>Add your Google Drive embed URL to <code>course.html</code>.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Course modules -->
+    <div class="section-label" style="margin-bottom:18px">Course Modules</div>
+    <div class="modules-grid">
+      <!-- Module list — edit content as you add lessons -->
+      <div class="module-card glass">
+        <div class="module-num">1</div>
+        <div class="module-info">
+          <h4>Introduction to ComfyUI</h4>
+          <p>Installing, navigating the graph, and your first workflow.</p>
+        </div>
+        <span class="module-status live">Live</span>
+      </div>
+      <div class="module-card glass">
+        <div class="module-num">2</div>
+        <div class="module-info">
+          <h4>Flux.1 Dev — Photoreal Portraits</h4>
+          <p>Loading Flux, prompt engineering, and face consistency.</p>
+        </div>
+        <span class="module-status live">Live</span>
+      </div>
+      <div class="module-card glass">
+        <div class="module-num">3</div>
+        <div class="module-info">
+          <h4>SDXL + LoRA Training</h4>
+          <p>Custom character LoRAs with Kohya — dataset to inference.</p>
+        </div>
+        <span class="module-status live">Live</span>
+      </div>
+      <div class="module-card glass">
+        <div class="module-num">4</div>
+        <div class="module-info">
+          <h4>WAN Video — AI Video Generation</h4>
+          <p>Animating your influencer with WAN Video and temporal consistency.</p>
+        </div>
+        <span class="module-status live">Live</span>
+      </div>
+      <div class="module-card glass">
+        <div class="module-num">5</div>
+        <div class="module-info">
+          <h4>IP-Adapter for Scene Consistency</h4>
+          <p>Lock character identity across any background or outfit.</p>
+        </div>
+        <span class="module-status">Coming soon</span>
+      </div>
+      <div class="module-card glass">
+        <div class="module-num">6</div>
+        <div class="module-info">
+          <h4>Posting & Monetisation Strategy</h4>
+          <p>Instagram, TikTok, brand deals — turning pixels into income.</p>
+        </div>
+        <span class="module-status">Coming soon</span>
+      </div>
+    </div>
+
+    <!-- Downloads -->
+    <div class="section-label" style="margin-bottom:18px">Downloads</div>
+    <div class="downloads-grid" id="downloads-grid">
+      <!--
+        Replace each placeholder href="#" with a real download URL once you have the files.
+        You can link to Google Drive (use the direct download link format):
+        https://drive.google.com/uc?export=download&id=YOUR_FILE_ID
+
+        Or upload files to your Vercel project under /public/ and link directly.
+      -->
+      <div class="download-card glass">
+        <div class="download-icon" style="background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.2);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4f8ef7" stroke-width="1.75"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        </div>
+        <div class="download-info"><h5>Flux Influencer Workflow</h5><p>ComfyUI .json workflow file</p></div>
+        <a href="#" class="dl-btn placeholder">↓ Soon</a>
+      </div>
+      <div class="download-card glass">
+        <div class="download-icon" style="background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.2);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.75"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        </div>
+        <div class="download-info"><h5>SDXL Portrait Workflow</h5><p>ComfyUI .json workflow file</p></div>
+        <a href="#" class="dl-btn placeholder">↓ Soon</a>
+      </div>
+      <div class="download-card glass">
+        <div class="download-icon" style="background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.2);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.75"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        </div>
+        <div class="download-info"><h5>WAN Video Workflow</h5><p>ComfyUI .json workflow file</p></div>
+        <a href="#" class="dl-btn placeholder">↓ Soon</a>
+      </div>
+      <div class="download-card glass">
+        <div class="download-icon" style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.2);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.75"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        </div>
+        <div class="download-info"><h5>Model Download Guide</h5><p>PDF — where to get every model used</p></div>
+        <a href="#" class="dl-btn placeholder">↓ Soon</a>
+      </div>
+    </div>
+
+    <!-- Discord -->
+    <div class="discord-banner">
+      <svg width="36" height="36" viewBox="0 0 127.14 96.36" fill="#5865f2">
+        <path d="M107.7 8.07A105.15 105.15 0 0081.47 0a72.06 72.06 0 00-3.36 6.83 97.68 97.68 0 00-29.11 0A72.37 72.37 0 0045.64 0a105.89 105.89 0 00-26.25 8.09C2.79 32.65-1.71 56.6.54 80.21a105.73 105.73 0 0032.17 16.15 77.7 77.7 0 006.89-11.11 68.42 68.42 0 01-10.85-5.18c.91-.66 1.8-1.34 2.66-2a75.57 75.57 0 0064.32 0c.87.71 1.76 1.39 2.66 2a68.68 68.68 0 01-10.87 5.19 77 77 0 006.89 11.1 105.25 105.25 0 0032.19-16.14c2.64-27.38-4.51-51.11-18.9-72.15zM42.45 65.69C36.18 65.69 31 60 31 53s5-12.74 11.43-12.74S54 46 53.89 53s-5.12 12.69-11.44 12.69zm42.24 0C78.41 65.69 73.25 60 73.25 53s5-12.74 11.44-12.74S96.23 46 96.12 53s-5.12 12.69-11.43 12.69z"/>
+      </svg>
+      <div>
+        <h3>Join the community</h3>
+        <p>12,000+ creators in our Discord — share workflows, get feedback, join live sessions.</p>
+      </div>
+      <a href="#" class="discord-btn">
+        Join Discord
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
+      </a>
+    </div>
+
+  </main>
+
+  <script>
+  (function () {
+    // ── Access check ──────────────────────────────────────────
+    function getAccess() {
+      try { return JSON.parse(localStorage.getItem('atreox_course_access') || 'null'); } catch { return null; }
+    }
+    function getUser() {
+      try { return JSON.parse(localStorage.getItem('atreox_cur_v1') || 'null'); } catch { return null; }
+    }
+
+    const access = getAccess();
+    const user   = getUser();
+
+    // Show gate if no access record at all
+    if (!access || !access.sessionId) {
+      document.getElementById('gate').style.display = 'flex';
+      return;
+    }
+
+    // Re-verify session silently in the background (revokes access if subscription was cancelled)
+    fetch('/api/verify-session?session_id=' + encodeURIComponent(access.sessionId))
+      .then(r => r.json())
+      .then(data => {
+        if (!data.ok) {
+          localStorage.removeItem('atreox_course_access');
+          document.getElementById('content').style.display = 'none';
+          document.getElementById('gate').style.display = 'flex';
+        }
+      })
+      .catch(() => { /* network error — keep showing content, will retry next visit */ });
+
+    // ── Show content ──────────────────────────────────────────
+    document.getElementById('content').style.display = 'block';
+
+    // Populate user info
+    const name = user?.name || access.name || access.email?.split('@')[0] || 'creator';
+    document.getElementById('greeting-name').textContent = name.split(' ')[0];
+    document.getElementById('user-name').textContent = name;
+    document.getElementById('user-avatar').textContent = name[0].toUpperCase();
+  })();
+  </script>
+</body>
+</html>

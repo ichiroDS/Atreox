@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ATREOX AI — Master ComfyUI & Generative AI</title>
+  <!-- Babel standalone emits cross-origin errors for eval'd JSX; suppress only those -->
+  <script>window.onerror=function(m,src){return typeof src==='string'&&(src.indexOf('blob:')>-1||src.indexOf('eval')>-1);};</script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <!-- Lightweight motion shim — no CDN needed -->
+  <script>
+  window.FramerMotion = (() => {
+    const R = window.React;
+    const { useState, useEffect, useRef } = R;
+
+    function useInView(ref, { once = false, amount = 0 } = {}) {
+      const [inView, setInView] = useState(false);
+      useEffect(() => {
+        try {
+          const el = ref.current;
+          if (!el) return;
+          const obs = new IntersectionObserver(([e]) => {
+            try {
+              if (e.isIntersecting) { setInView(true); if (once) obs.disconnect(); }
+              else if (!once) setInView(false);
+            } catch(_) {}
+          }, { threshold: amount });
+          obs.observe(el);
+          return () => { try { obs.disconnect(); } catch(_) {} };
+        } catch(_) {}
+      }, []);
+      return inView;
+    }
+
+    function stateToStyle(s) {
+      if (!s) return {};
+      const css = {};
+      if (s.opacity !== undefined) css.opacity = s.opacity;
+      const t = [];
+      if (s.y !== undefined) t.push(`translateY(${s.y}px)`);
+      if (s.x !== undefined) t.push(`translateX(${s.x}px)`);
+      if (s.scale !== undefined) t.push(`scale(${s.scale})`);
+      if (t.length) css.transform = t.join(' ');
+      if (s.filter !== undefined) css.filter = s.filter;
+      return css;
+    }
+
+    function makeMotion(tag) {
+      return function MotEl({ initial, animate, transition = {}, whileHover, children, style, ...rest }) {
+        const [cur, setCur] = useState(initial || {});
+        const [hov, setHov] = useState(false);
+        const animStr = JSON.stringify(animate);
+        useEffect(() => {
+          try {
+            const target = (hov && whileHover) ? whileHover : (animate || {});
+            const ms = (transition.delay || 0) * 1000;
+            const t = setTimeout(() => { try { setCur(target); } catch(_) {} }, ms);
+            return () => clearTimeout(t);
+          } catch(_) {}
+        }, [animStr, hov]);
+        const dur = transition.duration || 0.4;
+        const finalStyle = {
+          transition: `all ${dur}s cubic-bezier(0.16,1,0.3,1)`,
+          willChange: 'transform,opacity,filter',
+          ...stateToStyle(cur), ...style
+        };
+        const hProps = whileHover ? { onMouseEnter:()=>setHov(true), onMouseLeave:()=>setHov(false) } : {};
+        return R.createElement(tag, { style: finalStyle, ...hProps, ...rest }, children);
+      };
+    }
+
+    const motion = {
+      div: makeMotion('div'), p: makeMotion('p'), span: makeMotion('span'),
+      h1: makeMotion('h1'), h2: makeMotion('h2'), section: makeMotion('section'),
+      button: makeMotion('button'),
+    };
+
+    function AnimatePresence({ children }) { return children; }
+
+    return { motion, AnimatePresence, useInView };
+  })();
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --glass-bg: rgba(255,255,255,0.08);
+      --glass-border: rgba(255,255,255,0.18);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: transparent;
+      color: #fff;
+      font-family: 'Barlow', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+    }
+
+    /* ── Animated background ── */
+    #animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: #000;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .bg-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(150px);
+      opacity: 0;
+      transition: background-color 2s ease, opacity 1.6s ease;
+    }
+    #bg-blob-1 {
+      width: 75vw; height: 75vw;
+      top: -25%; left: -20%;
+      animation: bg-drift-1 20s ease-in-out infinite;
+    }
+    #bg-blob-2 {
+      width: 65vw; height: 65vw;
+      bottom: -20%; right: -20%;
+      animation: bg-drift-2 25s ease-in-out infinite;
+    }
+    #bg-blob-3 {
+      width: 50vw; height: 50vw;
+      top: 40%; left: 35%;
+      animation: bg-drift-3 16s ease-in-out infinite;
+    }
+    @keyframes bg-drift-1 {
+      0%,100% { transform: translate(0,0); }
+      33%  { transform: translate(9%,13%); }
+      66%  { transform: translate(-4%,7%); }
+    }
+    @keyframes bg-drift-2 {
+      0%,100% { transform: translate(0,0); }
+      33%  { transform: translate(-11%,-8%); }
+      66%  { transform: translate(7%,-13%); }
+    }
+    @keyframes bg-drift-3 {
+      0%,100% { transform: translate(-50%,-50%); }
+      50%  { transform: translate(-41%,-57%); }
+    }
+
+    button { cursor: pointer; }
+
+    .liquid-glass {
+      background: rgba(255,255,255,0.01);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    .liquid-glass::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1.4px;
+      background: linear-gradient(180deg,
+        rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 20%,
+        rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
+        rgba(255,255,255,0.15) 80%, rgba(255,255,255,0.45) 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .liquid-glass-strong {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(50px);
+      -webkit-backdrop-filter: blur(50px);
+      box-shadow: 4px 4px 4px rgba(0,0,0,0.05), inset 0 1px 1px rgba(255,255,255,0.15);
+      position: relative;
+      overflow: hidden;
+    }
+    .liquid-glass-strong::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1.4px;
+      background: linear-gradient(180deg,
+        rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.2) 20%,
+        rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
+        rgba(255,255,255,0.2) 80%, rgba(255,255,255,0.5) 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes dash-flow {
+      from { stroke-dashoffset: 60; }
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes pulse-dot {
+      0%,100% { opacity:0.3; transform:scale(1); }
+      50% { opacity:1; transform:scale(1.4); }
+    }
+    @keyframes float-node {
+      0%,100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .node-float-1 { animation: float-node 4s ease-in-out infinite; }
+    .node-float-2 { animation: float-node 4s ease-in-out infinite 0.8s; }
+    .node-float-3 { animation: float-node 4s ease-in-out infinite 1.6s; }
+    .node-float-4 { animation: float-node 4s ease-in-out infinite 0.4s; }
+    .node-float-5 { animation: float-node 4s ease-in-out infinite 1.2s; }
+    .node-float-6 { animation: float-node 4s ease-in-out infinite 2s; }
+    .node-float-7 { animation: float-node 4s ease-in-out infinite 0.6s; }
+
+    /* ── Liquid glass element animations ── */
+    @keyframes border-breathe {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+    @keyframes glass-sheen {
+      0% { transform: translateX(-120%) skewX(-20deg); }
+      100% { transform: translateX(320%) skewX(-20deg); }
+    }
+    .liquid-glass::before {
+      animation: border-breathe 4s ease-in-out infinite;
+    }
+    .liquid-glass-strong::before {
+      animation: border-breathe 3.5s ease-in-out infinite 0.6s;
+    }
+    /* Subtle floating sheen on hover for glass cards */
+    .liquid-glass::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.06) 50%, transparent 60%);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 0;
+    }
+    .liquid-glass:hover::after {
+      opacity: 1;
+      animation: glass-sheen 0.8s ease forwards;
+    }
+
+    /* ── Enhanced interactive card hover ── */
+    .glass-card-interactive {
+      transition: transform 0.38s cubic-bezier(0.16,1,0.3,1),
+                  box-shadow 0.38s cubic-bezier(0.16,1,0.3,1);
+    }
+    .glass-card-interactive:hover {
+      transform: translateY(-6px) scale(1.012);
+      box-shadow: 0 28px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.13);
+    }
+
+    /* ── Liquid-glass CTA button (blue-purple, truly transparent) ── */
+    .btn-gradient {
+      background: rgba(130, 110, 255, 0.05);
+      backdrop-filter: blur(24px) saturate(1.6);
+      -webkit-backdrop-filter: blur(24px) saturate(1.6);
+      border: none;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s cubic-bezier(0.16,1,0.3,1),
+                  box-shadow 0.25s ease, background 0.2s;
+    }
+    /* gradient border via pseudo */
+    .btn-gradient::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(160deg,
+        rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.15) 25%,
+        rgba(255,255,255,0) 50%, rgba(167,139,250,0.25) 80%, rgba(167,139,250,0.55) 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      z-index: 2;
+    }
+    /* top sheen */
+    .btn-gradient::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 42%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.13), transparent);
+      border-radius: inherit;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .btn-gradient:hover {
+      background: rgba(130, 110, 255, 0.12);
+      box-shadow: 0 6px 28px rgba(100, 80, 255, 0.22), inset 0 1px 0 rgba(255,255,255,0.18);
+      transform: translateY(-2px);
+    }
+    .btn-gradient:active { transform: scale(0.97); }
+
+    /* ── Section hover lift ── */
+    .section-hover {
+      transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), box-shadow 0.4s ease;
+      cursor: default;
+    }
+    .section-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 32px 72px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.06);
+    }
+
+    /* ── Glow on white buttons ── */
+    .btn-white-glow {
+      transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s ease, background 0.2s;
+    }
+    .btn-white-glow:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(255,255,255,0.18);
+      background: #ffffff !important;
+    }
+    .btn-white-glow:active { transform: scale(0.97); }
+
+    /* ── Glass btn hover ── */
+    .btn-glass-hover {
+      transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), background 0.2s, box-shadow 0.25s;
+    }
+    .btn-glass-hover:hover {
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.14) !important;
+      box-shadow: 0 6px 24px rgba(255,255,255,0.06);
+    }
+    .btn-glass-hover:active { transform: scale(0.97); }
+
+    /* ── Input field focus glow ── */
+    .glass-field {
+      transition: box-shadow 0.2s ease, background 0.2s;
+    }
+    .glass-field:focus-within {
+      box-shadow: 0 0 0 1.5px rgba(255,255,255,0.22), inset 0 1px 1px rgba(255,255,255,0.1);
+    }
+
+    /* ── FAQ accordion ── */
+    @keyframes accordion-in {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .faq-answer { animation: accordion-in 0.25s ease forwards; }
+
+    /* ── Testimonial card ── */
+    .testimonial-card {
+      transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s ease;
+    }
+    .testimonial-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    }
+
+    /* ── Nav link pill hover ── */
+    .nav-pill-btn {
+      transition: background 0.2s, color 0.2s, transform 0.2s;
+    }
+    .nav-pill-btn:hover { background: rgba(255,255,255,0.1) !important; color: white !important; transform: scale(1.04); }
+
+    /* ── Feature card icon hover ── */
+    .feature-icon-wrap {
+      transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease;
+    }
+    .glass-card-interactive:hover .feature-icon-wrap {
+      transform: scale(1.12) rotate(-4deg);
+      box-shadow: 0 6px 24px rgba(255,255,255,0.08);
+    }
+  </style>
+</head>
+<body>
+  <div id="animated-bg" aria-hidden="true">
+    <div id="bg-blob-1" class="bg-blob"></div>
+    <div id="bg-blob-2" class="bg-blob"></div>
+    <div id="bg-blob-3" class="bg-blob"></div>
+  </div>
+  <div id="root"></div>
+  <script type="text/babel" src="shared.jsx"></script>
+  <script type="text/babel" src="home.jsx"></script>
+  <script type="text/babel" src="inner-pages.jsx"></script>
+  <script type="text/babel" src="new-pages.jsx"></script>
+  <script type="text/babel" src="legal-pages.jsx"></script>
+  <script type="text/babel" src="app.jsx"></script>
+</body>
+</html>

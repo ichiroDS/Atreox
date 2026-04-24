@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ATREOX AI — Payment Successful</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #000;
+      color: #fff;
+      font-family: 'Barlow', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    #bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(79,142,247,0.12) 0%, transparent 70%);
+    }
+    .card {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 64px 48px;
+      max-width: 480px;
+      width: 90vw;
+    }
+    .icon {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: rgba(52,211,153,0.12);
+      border: 1px solid rgba(52,211,153,0.3);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 28px;
+      animation: pop 0.5s cubic-bezier(0.16,1,0.3,1) 0.1s both;
+    }
+    @keyframes pop {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    .title {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-size: clamp(2rem, 5vw, 3rem);
+      color: white;
+      margin-bottom: 12px;
+      animation: rise 0.5s ease 0.2s both;
+    }
+    .sub {
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.65;
+      margin-bottom: 36px;
+      animation: rise 0.5s ease 0.3s both;
+    }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .spinner {
+      width: 24px; height: 24px;
+      border: 2px solid rgba(255,255,255,0.12);
+      border-top-color: rgba(255,255,255,0.6);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #status {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.35);
+      margin-top: 16px;
+    }
+    #error-msg {
+      display: none;
+      background: rgba(248,113,113,0.1);
+      border: 1px solid rgba(248,113,113,0.3);
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: 0.85rem;
+      color: #f87171;
+      margin-top: 20px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 28px;
+      border-radius: 9999px;
+      border: none;
+      background: rgba(255,255,255,0.09);
+      color: white;
+      font-family: 'Barlow', sans-serif;
+      font-weight: 500;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="bg"></div>
+  <div class="card">
+    <div class="icon">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 6L9 17l-5-5"/>
+      </svg>
+    </div>
+    <div class="title" id="title">Payment confirmed!</div>
+    <div class="sub" id="sub">Verifying your subscription…</div>
+    <div class="spinner" id="spinner"></div>
+    <div id="status"></div>
+    <div id="error-msg"></div>
+  </div>
+
+  <script>
+  (async function () {
+    const params   = new URLSearchParams(location.search);
+    const sessionId = params.get('session_id');
+
+    const statusEl = document.getElementById('status');
+    const spinner  = document.getElementById('spinner');
+    const subEl    = document.getElementById('sub');
+    const errEl    = document.getElementById('error-msg');
+
+    function fail(msg) {
+      spinner.style.display = 'none';
+      subEl.textContent = 'Something went wrong verifying your payment.';
+      errEl.style.display = 'block';
+      errEl.textContent = msg || 'Please contact support at dsevcenko006@gmail.com with your receipt.';
+      const btn = document.createElement('a');
+      btn.href = '/Atreox.html';
+      btn.className = 'btn';
+      btn.textContent = '← Back to site';
+      document.querySelector('.card').appendChild(btn);
+    }
+
+    if (!sessionId) { fail('No session ID found in the URL.'); return; }
+
+    statusEl.textContent = 'Contacting Stripe…';
+
+    try {
+      const res  = await fetch(`/api/verify-session?session_id=${encodeURIComponent(sessionId)}`);
+      const data = await res.json();
+
+      if (!data.ok) { fail(data.error || 'Payment could not be verified.'); return; }
+
+      // Persist access locally
+      const access = {
+        sessionId,
+        subscriptionId: data.subscription_id || null,
+        email: data.email || null,
+        name:  data.name  || null,
+        grantedAt: Date.now(),
+      };
+      localStorage.setItem('atreox_course_access', JSON.stringify(access));
+
+      // Merge with existing auth user if names match
+      try {
+        const cur = JSON.parse(localStorage.getItem('atreox_cur_v1') || 'null');
+        if (!cur && data.email) {
+          // Auto-create a lightweight session from Stripe customer details
+          const lite = { name: data.name || data.email.split('@')[0], email: data.email };
+          localStorage.setItem('atreox_cur_v1', JSON.stringify(lite));
+        }
+      } catch (_) {}
+
+      subEl.textContent = `Welcome${data.name ? ', ' + data.name.split(' ')[0] : ''}! Redirecting to your course…`;
+      statusEl.textContent = '';
+      spinner.style.display = 'none';
+
+      setTimeout(() => { location.href = '/course'; }, 1200);
+    } catch (err) {
+      fail('Network error. Please check your connection and try again.');
+    }
+  })();
+  </script>
+</body>
+</html>
