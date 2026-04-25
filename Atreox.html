@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ATREOX AI — Master ComfyUI & Generative AI</title>
+  <title>ATREOX AI — Production-ready AI Influencer Assets</title>
   <!-- Babel standalone emits cross-origin errors for eval'd JSX; suppress only those -->
   <script>window.onerror=function(m,src){return typeof src==='string'&&(src.indexOf('blob:')>-1||src.indexOf('eval')>-1);};</script>
 
@@ -378,6 +378,21 @@
     .glass-card-interactive:hover .feature-icon-wrap {
       transform: scale(1.12) rotate(-4deg);
       box-shadow: 0 6px 24px rgba(255,255,255,0.08);
+    }
+
+    /* ── Delivers showcase grid ── */
+    .delivers-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    @media (max-width: 640px) {
+      .delivers-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ── Hero floating thumbnails — hide on small screens ── */
+    @media (max-width: 860px) {
+      .hero-thumb { display: none !important; }
     }
   </style>
 </head>

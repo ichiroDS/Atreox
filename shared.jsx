@@ -789,7 +789,7 @@ function FooterBar({ setPage }) {
         </div>
         <div style={{ flex: '0 0 auto' }}>
           <h5 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 18 }}>Contact</h5>
-          <a href="mailto:dsevcenko006@gmail.com" style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.42)', textDecoration: 'none', display: 'block', marginBottom: 8 }}>dsevcenko006@gmail.com</a>
+          <a href="mailto:hello@atreoxai.com" style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.42)', textDecoration: 'none', display: 'block', marginBottom: 8 }}>hello@atreoxai.com</a>
           <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.78rem', color: 'rgba(255,255,255,0.25)' }}>Mon–Fri, 9 AM–6 PM UTC</span>
         </div>
       </div>

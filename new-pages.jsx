@@ -574,7 +574,7 @@ function ContactPage({ setPage }) {
         <div style={{ display: 'flex', gap: 36, flexWrap: 'wrap', alignItems: 'flex-start' }}>
           <div className="liquid-glass-strong" style={{ flex: '1 1 360px', borderRadius: 24, padding: '40px 36px' }}>
             <h3 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.9rem', color: 'white', marginBottom: 6 }}>Send a message</h3>
-            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: 'rgba(255,255,255,0.42)', marginBottom: 28, lineHeight: 1.6 }}>Or email <a href="mailto:dsevcenko006@gmail.com" style={{ color: '#4f8ef7', textDecoration: 'none' }}>dsevcenko006@gmail.com</a></p>
+            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: 'rgba(255,255,255,0.42)', marginBottom: 28, lineHeight: 1.6 }}>Or email <a href="mailto:hello@atreoxai.com" style={{ color: '#4f8ef7', textDecoration: 'none' }}>hello@atreoxai.com</a></p>
             {!sent ? (
               <form onSubmit={e => { e.preventDefault(); setSent(true); }} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <div><label style={labelStyle}>Name</label><FieldWrap><input value={name} onChange={e => setName(e.target.value)} placeholder="Your name" style={inputStyle} /></FieldWrap></div>
@@ -597,7 +597,7 @@ function ContactPage({ setPage }) {
           <div style={{ flex: '1 1 260px', display: 'flex', flexDirection: 'column', gap: 18 }}>
             <div className="liquid-glass" style={{ borderRadius: 20, padding: '26px 24px' }}>
               <h4 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.88rem', color: 'white', marginBottom: 6 }}>Email us directly</h4>
-              <a href="mailto:dsevcenko006@gmail.com" style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: '#4f8ef7', textDecoration: 'none', display: 'block', marginBottom: 8 }}>dsevcenko006@gmail.com</a>
+              <a href="mailto:hello@atreoxai.com" style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: '#4f8ef7', textDecoration: 'none', display: 'block', marginBottom: 8 }}>hello@atreoxai.com</a>
               <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.76rem', color: 'rgba(255,255,255,0.3)' }}>Typical response within 24 hours</p>
             </div>
             <div className="liquid-glass" style={{ borderRadius: 20, padding: '26px 24px' }}>
