@@ -68,7 +68,7 @@ function App() {
 
   return (
     <div style={{ minHeight: '100vh' }}>
-      <BgColorSystem />
+      <BgColorSystem page={page} />
       <Navbar
         currentPage={page}
         setPage={navigate}

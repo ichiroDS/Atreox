@@ -172,56 +172,128 @@ function FieldWrap({ children }) {
 
 /* ── Navbar ── */
 function Navbar({ currentPage, setPage, user, onLoginClick, onLogout }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const onResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (!mobile) setMenuOpen(false);
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   const links = [
     { id: 'home', label: 'Home' },
     { id: 'courses', label: 'Courses' },
     { id: 'resources', label: 'Resources' },
     { id: 'contact', label: 'Contact' },
   ];
+
+  const handleNav = (id) => { setPage(id); setMenuOpen(false); };
+
   return (
-    <nav style={{ position: 'fixed', top: 16, left: 0, right: 0, zIndex: 50, padding: '0 2rem', display: 'flex', alignItems: 'center' }}>
-      <div onClick={() => setPage('home')} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', flex: '1 1 0' }}>
-        <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-          <rect width="36" height="36" rx="9" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.18)" strokeWidth="1"/>
-          <polygon points="18,7 29,14 29,26 18,29 7,22 7,10" fill="none" stroke="white" strokeWidth="1.5"/>
-          <circle cx="18" cy="18" r="3" fill="white" opacity="0.9"/>
-        </svg>
-        <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.15rem', color: 'white' }}>ATREOX AI</span>
-      </div>
-      <div className="liquid-glass" style={{ borderRadius: 9999, padding: '4px 6px', display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
-        {links.map(link => (
-          <button key={link.id} className="nav-pill-btn" onClick={() => setPage(link.id)} style={{
-            padding: '7px 16px', borderRadius: 9999, border: 'none',
-            background: currentPage === link.id ? 'rgba(255,255,255,0.12)' : 'transparent',
-            color: currentPage === link.id ? 'white' : 'rgba(255,255,255,0.6)',
-            fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.82rem', cursor: 'pointer',
-          }}>{link.label}</button>
-        ))}
-      </div>
-      <div style={{ flex: '1 1 0', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 10 }}>
-        {user ? (
-          <>
-            <div className="liquid-glass" style={{ borderRadius: 9999, padding: '7px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'linear-gradient(135deg,#4f8ef7,#a78bfa)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.65rem', color: 'white' }}>{user.name[0].toUpperCase()}</span>
-              </div>
-              <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.82rem', color: 'rgba(255,255,255,0.85)', maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.name}</span>
-            </div>
-            <button className="liquid-glass btn-glass-hover" onClick={onLogout} style={{
-              padding: '8px 16px', borderRadius: 9999, border: 'none', color: 'rgba(255,255,255,0.55)',
-              fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.78rem', cursor: 'pointer',
-              background: 'rgba(255,255,255,0.05)',
-            }}>Log out</button>
-          </>
-        ) : (
-          <button className="liquid-glass btn-glass-hover" onClick={onLoginClick} style={{
-            padding: '8px 22px', borderRadius: 9999, border: 'none', color: 'white',
-            fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.82rem',
-            cursor: 'pointer', background: 'rgba(255,255,255,0.08)',
-          }}>Login</button>
+    <>
+      <nav style={{ position: 'fixed', top: 16, left: 0, right: 0, zIndex: 100, padding: '0 1.5rem', display: 'flex', alignItems: 'center', gap: 12 }}>
+        {/* Logo */}
+        <div onClick={() => handleNav('home')} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', flex: '1 1 0', minWidth: 0 }}>
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <rect width="36" height="36" rx="9" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.18)" strokeWidth="1"/>
+            <polygon points="18,7 29,14 29,26 18,29 7,22 7,10" fill="none" stroke="white" strokeWidth="1.5"/>
+            <circle cx="18" cy="18" r="3" fill="white" opacity="0.9"/>
+          </svg>
+          <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.15rem', color: 'white', whiteSpace: 'nowrap' }}>ATREOX AI</span>
+        </div>
+
+        {/* Desktop nav pills */}
+        {!isMobile && (
+          <div className="liquid-glass" style={{ borderRadius: 9999, padding: '4px 6px', display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
+            {links.map(link => (
+              <button key={link.id} className="nav-pill-btn" onClick={() => handleNav(link.id)} style={{
+                padding: '7px 16px', borderRadius: 9999, border: 'none',
+                background: currentPage === link.id ? 'rgba(255,255,255,0.12)' : 'transparent',
+                color: currentPage === link.id ? 'white' : 'rgba(255,255,255,0.6)',
+                fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.82rem', cursor: 'pointer',
+              }}>{link.label}</button>
+            ))}
+          </div>
         )}
-      </div>
-    </nav>
+
+        {/* Desktop auth */}
+        {!isMobile && (
+          <div style={{ flex: '1 1 0', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 10 }}>
+            {user ? (
+              <>
+                <div className="liquid-glass" style={{ borderRadius: 9999, padding: '7px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'linear-gradient(135deg,#4f8ef7,#a78bfa)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.65rem', color: 'white' }}>{user.name[0].toUpperCase()}</span>
+                  </div>
+                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.82rem', color: 'rgba(255,255,255,0.85)', maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.name}</span>
+                </div>
+                <button className="liquid-glass btn-glass-hover" onClick={onLogout} style={{
+                  padding: '8px 16px', borderRadius: 9999, border: 'none', color: 'rgba(255,255,255,0.55)',
+                  fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.78rem', cursor: 'pointer',
+                  background: 'rgba(255,255,255,0.05)',
+                }}>Log out</button>
+              </>
+            ) : (
+              <button className="liquid-glass btn-glass-hover" onClick={onLoginClick} style={{
+                padding: '8px 22px', borderRadius: 9999, border: 'none', color: 'white',
+                fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.82rem',
+                cursor: 'pointer', background: 'rgba(255,255,255,0.08)',
+              }}>Login</button>
+            )}
+          </div>
+        )}
+
+        {/* Mobile hamburger */}
+        {isMobile && (
+          <button onClick={() => setMenuOpen(o => !o)} className="liquid-glass"
+            style={{ flexShrink: 0, background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: 10, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            {menuOpen ? <X size={18} color="white" /> : <Menu size={18} color="white" />}
+          </button>
+        )}
+      </nav>
+
+      {/* Mobile full-screen menu */}
+      {isMobile && menuOpen && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 90, background: 'rgba(0,0,0,0.93)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', display: 'flex', flexDirection: 'column', padding: '88px 24px 40px', gap: 4 }}>
+          {links.map(link => (
+            <button key={link.id} onClick={() => handleNav(link.id)} style={{
+              width: '100%', padding: '16px 20px', border: 'none', borderRadius: 14,
+              background: currentPage === link.id ? 'rgba(255,255,255,0.1)' : 'transparent',
+              color: currentPage === link.id ? 'white' : 'rgba(255,255,255,0.6)',
+              fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '1.1rem',
+              cursor: 'pointer', textAlign: 'left',
+            }}>{link.label}</button>
+          ))}
+          <div style={{ flex: 1 }} />
+          {user ? (
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 4px 10px' }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg,#4f8ef7,#a78bfa)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.9rem', color: 'white' }}>{user.name[0].toUpperCase()}</span>
+                </div>
+                <span style={{ fontFamily: 'Barlow, sans-serif', fontSize: '0.95rem', color: 'rgba(255,255,255,0.85)' }}>{user.name}</span>
+              </div>
+              <button onClick={() => { onLogout(); setMenuOpen(false); }} style={{
+                width: '100%', padding: '14px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12,
+                background: 'transparent', color: 'rgba(255,255,255,0.5)',
+                fontFamily: 'Barlow, sans-serif', fontSize: '0.9rem', cursor: 'pointer',
+              }}>Log out</button>
+            </div>
+          ) : (
+            <button onClick={() => { onLoginClick(); setMenuOpen(false); }} style={{
+              width: '100%', padding: '16px', border: 'none', borderRadius: 14,
+              background: 'rgba(255,255,255,0.08)', color: 'white',
+              fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '1rem', cursor: 'pointer',
+            }}>Login</button>
+          )}
+        </div>
+      )}
+    </>
   );
 }
 
@@ -802,7 +874,7 @@ function FooterBar({ setPage }) {
 }
 
 /* ── Background color system ── */
-function BgColorSystem() {
+function BgColorSystem({ page }) {
   useEffect(() => {
     const PALETTES = {
       'blue-violet':  { b1: '#3b4ef7', b2: '#7c3aed', b3: '#4f46e5', op: 0.16 },
@@ -849,7 +921,7 @@ function BgColorSystem() {
     watch();
     const t = setTimeout(watch, 600);
     return () => { obs.disconnect(); clearTimeout(t); };
-  }, []);
+  }, [page]);
   return null;
 }
 

@@ -14,12 +14,12 @@ const SENA = '/public/showcase/sena/';
 /* ── Hero ── */
 function Hero({ setPage }) {
   const [scrollY, setScrollY]   = useState(0);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 860);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [vidErr, setVidErr]     = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrollY(window.scrollY);
-    const onResize = () => setIsMobile(window.innerWidth < 860);
+    const onResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onResize);
     return () => {
@@ -40,7 +40,7 @@ function Hero({ setPage }) {
     <section style={{ position: 'relative', overflow: 'hidden', minHeight: 900 }}>
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, #000 0%, #000 80%, transparent 100%)', zIndex: 0 }} />
 
-      <div style={{ position: 'relative', zIndex: 10, maxWidth: 1280, margin: '0 auto', padding: '150px 5% 80px', display: 'flex', gap: 64, alignItems: 'center', flexWrap: 'wrap' }}>
+      <div style={{ position: 'relative', zIndex: 10, maxWidth: 1280, margin: '0 auto', padding: isMobile ? '100px 5% 40px' : '150px 5% 80px', display: 'flex', gap: isMobile ? 32 : 64, alignItems: 'center', flexWrap: 'wrap' }}>
 
         {/* Left column */}
         <div style={{ flex: '1 1 400px', minWidth: 0 }}>
@@ -103,10 +103,21 @@ function Hero({ setPage }) {
           </motion.div>
         ) : (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.5 }}
-            style={{ flex: '1 1 100%', display: 'flex', justifyContent: 'center' }}>
-            <div className="liquid-glass" style={{ width: 220, height: 391, borderRadius: 18, overflow: 'hidden' }}>
-              <video autoPlay muted loop playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} src={SENA + 'hero-video.mp4'} />
-            </div>
+            style={{ flex: '1 1 100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            {[
+              { src: SENA + 'hero-2.jpg',     type: 'img' },
+              { src: SENA + 'hero-3.jpeg',    type: 'img' },
+              { src: SENA + 'hero-4.jpg',     type: 'img' },
+              { src: SENA + 'hero-video.mp4', type: 'vid' },
+            ].map(({ src, type }, i) => (
+              <div key={i} className="liquid-glass" style={{ borderRadius: 14, overflow: 'hidden', aspectRatio: '3/4' }}>
+                {type === 'img' ? (
+                  <img src={src} loading="lazy" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                ) : (
+                  <video autoPlay muted loop playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} src={src} />
+                )}
+              </div>
+            ))}
           </motion.div>
         )}
       </div>
@@ -280,40 +291,6 @@ function FAQSection() {
   );
 }
 
-/* ── Final CTA + Footer ── */
-function CtaFooter({ setPage }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, amount: 0.3 });
-  return (
-    <section data-bg-palette="indigo" style={{ position: 'relative', overflow: 'hidden', minHeight: 600, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'rgba(5,5,20,0.65)', zIndex: 0 }} />
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(ellipse 80% 60% at 50% 50%, rgba(79,142,247,0.07) 0%, transparent 70%)', zIndex: 1 }} />
-      <FadeTop /><FadeBottom />
-      <div ref={ref} style={{ position: 'relative', zIndex: 10, textAlign: 'center', padding: '100px 5%' }}>
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
-          <SectionBadge>Start Today</SectionBadge>
-        </motion.div>
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, delay: 0.1 }}>
-          <BlurText text="Your next pipeline starts here." style={{
-            fontFamily: "'Instrument Serif', serif", fontStyle: 'italic',
-            fontSize: 'clamp(2.8rem, 6vw, 5rem)', color: 'white',
-            lineHeight: 0.88, letterSpacing: '-2px', marginTop: 20, marginBottom: 20,
-          }} delay={100} />
-        </motion.div>
-        <motion.p initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ delay: 0.4 }}
-          style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.55)', maxWidth: 480, margin: '0 auto 36px', lineHeight: 1.6 }}>
-          Production-ready assets. Real pipelines. No fluff.
-        </motion.p>
-        <motion.div initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ delay: 0.5 }}>
-          <button className="btn-gradient" onClick={() => setPage('packages')} style={{ borderRadius: 9999, padding: '14px 32px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '1rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginBottom: 52 }}>
-            Browse Packages <ArrowUpRight size={16} />
-          </button>
-        </motion.div>
-        <FooterBar setPage={setPage} />
-      </div>
-    </section>
-  );
-}
 
 /* ── Home Page ── */
 function HomePage({ setPage }) {
@@ -324,7 +301,9 @@ function HomePage({ setPage }) {
       <WhyChooseSection />
       <CtaBannerSection setPage={setPage} />
       <FAQSection />
-      <CtaFooter setPage={setPage} />
+      <div style={{ padding: '0 5%', maxWidth: 900, margin: '0 auto' }}>
+        <FooterBar setPage={setPage} />
+      </div>
     </div>
   );
 }
