@@ -9,6 +9,7 @@ const {
   CurriculumPage, CommunityPage, PricingPage, AboutPage,
   CoursesPage, ResourcesPage, ContactPage,
   CheckoutPage, PackagesPage, HowItWorksPage,
+  SettingsPage,
   PrivacyPage, TermsPage,
 } = window;
 
@@ -62,6 +63,7 @@ function App() {
       case 'community':  return <CommunityPage  setPage={navigate} />;
       case 'pricing':    return <PricingPage    setPage={navigate} />;
       case 'about':      return <AboutPage      setPage={navigate} />;
+      case 'settings':   return <SettingsPage   setPage={navigate} user={user} onLogout={handleLogout} />;
       case 'privacy':    return <PrivacyPage    setPage={navigate} />;
       case 'terms':      return <TermsPage      setPage={navigate} />;
       default:           return <HomePage       setPage={navigate} onLoginClick={openLogin} />;

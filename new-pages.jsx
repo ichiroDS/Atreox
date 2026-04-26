@@ -226,17 +226,25 @@ function CoursesPage({ setPage, user, onLoginClick }) {
 }
 
 /* ══════════════════════════════════════
-   CHECKOUT PAGE
+   CHECKOUT PAGE (unified — course + packages)
 ══════════════════════════════════════ */
 function CheckoutPage({ setPage, user }) {
   const [loading, setLoading]         = useState(false);
   const [error, setError]             = useState('');
   const [promoInput, setPromoInput]   = useState('');
-  const [promoStatus, setPromoStatus] = useState('idle'); // idle | loading | valid | invalid
-  const [promoData, setPromoData]     = useState(null);   // { promoCodeId, coupon }
+  const [promoStatus, setPromoStatus] = useState('idle');
+  const [promoData, setPromoData]     = useState(null);
   const [promoError, setPromoError]   = useState('');
 
-  const BASE_CENTS = 8900;
+  // Read package cart from localStorage
+  const cart = (() => { try { return JSON.parse(localStorage.getItem('atreox_cart_v1') || 'null'); } catch { return null; } })();
+  const isPackage = cart?.type === 'package';
+
+  const COURSE_BASE_CENTS = 8900;
+  const packageTotalCents = isPackage
+    ? (cart.licensePrice + (cart.runpodEnabled ? cart.runpodPrice : 0) + (cart.nsfwEnabled ? cart.nsfwPrice : 0)) * 100
+    : 0;
+  const BASE_CENTS = isPackage ? packageTotalCents : COURSE_BASE_CENTS;
 
   const discountCents = promoData?.coupon
     ? promoData.coupon.percentOff != null
@@ -287,7 +295,7 @@ function CheckoutPage({ setPage, user }) {
       const res  = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user?.email, name: user?.name, promoCodeId: promoData?.promoCodeId }),
+        body: JSON.stringify({ email: user?.email, name: user?.name, promoCodeId: promoData?.promoCodeId, cart: isPackage ? cart : null }),
       });
       const data = await res.json();
       if (data.url) {
@@ -306,9 +314,9 @@ function CheckoutPage({ setPage, user }) {
     <div style={{ paddingTop: 100, paddingBottom: 80, padding: '100px 5% 80px', maxWidth: 1100, margin: '0 auto' }}>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
         style={{ marginBottom: 40 }}>
-        <button onClick={() => setPage('courses')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.45)', fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 24, padding: 0 }}>
+        <button onClick={() => setPage(isPackage ? 'packages' : 'courses')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.45)', fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 24, padding: 0 }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-          Back to Courses
+          {isPackage ? 'Back to Packages' : 'Back to Courses'}
         </button>
         <SectionBadge>Secure Checkout</SectionBadge>
         <h1 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'white', marginTop: 16, letterSpacing: '-0.02em' }}>
@@ -394,14 +402,14 @@ function CheckoutPage({ setPage, user }) {
             )}
 
             <button className="btn-gradient" onClick={handlePay} disabled={loading} style={{
-              borderRadius: 14, padding: '16px', border: 'none', color: 'white',
+              width: '100%', borderRadius: 14, padding: '16px', border: 'none', color: 'white',
               fontFamily: 'Barlow, sans-serif', fontWeight: 700, fontSize: '1rem',
               cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.7 : 1,
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 8,
             }}>
               {loading
                 ? <><svg style={{ animation: 'spin 0.8s linear infinite' }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Redirecting to Stripe…</>
-                : <><Lock size={15} /> Pay {fmtUSD(finalCents)} / month</>
+                : <><Lock size={15} /> Pay {fmtUSD(finalCents)}{isPackage ? '' : ' / month'}</>
               }
             </button>
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -420,47 +428,85 @@ function CheckoutPage({ setPage, user }) {
           <div className="liquid-glass" style={{ borderRadius: 24, padding: '28px' }}>
             <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 20 }}>Order Summary</h3>
 
-            <div className="liquid-glass" style={{ borderRadius: 14, padding: '16px', marginBottom: 20, display: 'flex', gap: 14, alignItems: 'center' }}>
-              <div style={{ width: 48, height: 48, borderRadius: 10, background: 'linear-gradient(135deg, rgba(79,142,247,0.2), rgba(167,139,250,0.2))', border: '1px solid rgba(79,142,247,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg width="20" height="20" viewBox="0 0 36 36" fill="none">
-                  <polygon points="18,7 29,14 29,26 18,29 7,22 7,10" fill="none" stroke="white" strokeWidth="1.5" opacity="0.7"/>
-                  <circle cx="18" cy="18" r="3" fill="white" opacity="0.7"/>
-                </svg>
+            {isPackage ? (
+              /* Package order items */
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+                {/* Main product */}
+                <div className="liquid-glass" style={{ borderRadius: 12, padding: '14px 16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
+                    <div>
+                      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.85rem', color: 'white', marginBottom: 2 }}>{cart.productLabel} · {cart.character}</p>
+                      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>{cart.license}</p>
+                    </div>
+                    <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.9rem', color: 'white', flexShrink: 0 }}>${cart.licensePrice}</span>
+                  </div>
+                </div>
+                {/* RunPod add-on */}
+                {cart.runpodEnabled && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', background: 'rgba(255,255,255,0.03)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.6)' }}>RunPod Setup</span>
+                    {cart.runpodFree
+                      ? <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.82rem', color: '#34d399' }}>FREE</span>
+                      : <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.82rem', color: 'rgba(255,255,255,0.75)' }}>+${cart.runpodPrice}</span>
+                    }
+                  </div>
+                )}
+                {/* NSFW add-on */}
+                {cart.nsfwEnabled && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', background: 'rgba(255,255,255,0.03)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.6)' }}>NSFW Workflow + Anatomy LoRA</span>
+                    {cart.nsfwFree
+                      ? <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.82rem', color: '#34d399' }}>Included</span>
+                      : <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.82rem', color: 'rgba(255,255,255,0.75)' }}>+${cart.nsfwPrice}</span>
+                    }
+                  </div>
+                )}
               </div>
-              <div>
-                <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.85rem', color: 'white', marginBottom: 3 }}>Photoreal Influencer Blueprint</p>
-                <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>Flux · SDXL · WAN Video · ComfyUI</p>
+            ) : (
+              /* Course item */
+              <div className="liquid-glass" style={{ borderRadius: 14, padding: '16px', marginBottom: 20, display: 'flex', gap: 14, alignItems: 'center' }}>
+                <div style={{ width: 48, height: 48, borderRadius: 10, background: 'linear-gradient(135deg, rgba(79,142,247,0.2), rgba(167,139,250,0.2))', border: '1px solid rgba(79,142,247,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="20" height="20" viewBox="0 0 36 36" fill="none">
+                    <polygon points="18,7 29,14 29,26 18,29 7,22 7,10" fill="none" stroke="white" strokeWidth="1.5" opacity="0.7"/>
+                    <circle cx="18" cy="18" r="3" fill="white" opacity="0.7"/>
+                  </svg>
+                </div>
+                <div>
+                  <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.85rem', color: 'white', marginBottom: 3 }}>Photoreal Influencer Blueprint</p>
+                  <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>Flux · SDXL · WAN Video · ComfyUI</p>
+                </div>
               </div>
-            </div>
+            )}
 
-            {[
-              { label: 'Subtotal', val: '$149.00' },
-              { label: 'Discount (40%)', val: '−$60.00', accent: '#34d399' },
-            ].map(({ label, val, accent }) => (
-              <div key={label} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)' }}>{label}</span>
-                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.85rem', color: accent || 'rgba(255,255,255,0.7)' }}>{val}</span>
-              </div>
-            ))}
+            {/* Subtotal / discount rows */}
+            {!isPackage && (
+              <>
+                {[
+                  { label: 'Subtotal', val: '$149.00' },
+                  { label: 'Discount (40%)', val: '−$60.00', accent: '#34d399' },
+                ].map(({ label, val, accent }) => (
+                  <div key={label} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                    <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)' }}>{label}</span>
+                    <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.85rem', color: accent || 'rgba(255,255,255,0.7)' }}>{val}</span>
+                  </div>
+                ))}
+              </>
+            )}
 
             {promoStatus === 'valid' && promoData && (
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)' }}>
-                  Code: {promoData.coupon.name}
-                </span>
-                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.85rem', color: '#34d399' }}>
-                  −{fmtUSD(discountCents)}
-                </span>
+                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)' }}>Code: {promoData.coupon.name}</span>
+                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.85rem', color: '#34d399' }}>−{fmtUSD(discountCents)}</span>
               </div>
             )}
 
             <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '16px 0' }} />
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.95rem', color: 'white' }}>Total today</span>
+              <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.95rem', color: 'white' }}>Total{isPackage ? '' : ' today'}</span>
               <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.5rem', color: 'white', lineHeight: 1 }}>{fmtUSD(finalCents)}</span>
             </div>
-            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.73rem', color: 'rgba(255,255,255,0.3)' }}>then $149/month · cancel anytime</p>
+            {!isPackage && <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.73rem', color: 'rgba(255,255,255,0.3)' }}>then $149/month · cancel anytime</p>}
           </div>
 
           {/* Trust badges */}
@@ -718,7 +764,28 @@ const LICENSE_TIERS = [
 ];
 
 /* ── Tier Modal ── */
-function TierModal({ character, productType, onClose, onContact }) {
+function TierModal({ character, productId, productLabel, runpodEnabled, runpodFree, nsfwEnabled, nsfwFree, setPage, onClose, onContact }) {
+  const handleBuyNow = (tier) => {
+    const licensePrice = tier.name === 'Open License' ? 99 : 249;
+    const cartItem = {
+      type: 'package',
+      productId,
+      productLabel,
+      character,
+      license: tier.name,
+      licensePrice,
+      runpodEnabled: runpodEnabled || false,
+      runpodFree: runpodFree || false,
+      runpodPrice: runpodFree ? 0 : (runpodEnabled ? 30 : 0),
+      nsfwEnabled: nsfwEnabled || false,
+      nsfwFree: nsfwFree || false,
+      nsfwPrice: nsfwFree ? 0 : (nsfwEnabled ? 49 : 0),
+    };
+    localStorage.setItem('atreox_cart_v1', JSON.stringify(cartItem));
+    onClose();
+    setPage('checkout');
+  };
+
   return (
     <div
       onClick={onClose}
@@ -736,7 +803,7 @@ function TierModal({ character, productType, onClose, onContact }) {
 
         <div style={{ marginBottom: 28 }}>
           <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)' }}>
-            {character} · {productType}
+            {character} · {productLabel}
           </span>
           <h2 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: 'white', letterSpacing: '-0.02em', marginTop: 6, lineHeight: 1 }}>
             Choose your license
@@ -778,11 +845,11 @@ function TierModal({ character, productType, onClose, onContact }) {
                   {tier.cta} <ArrowUpRight size={14} />
                 </button>
               ) : tier.highlight ? (
-                <button className="btn-gradient" onClick={() => {}} style={{ width: '100%', borderRadius: 12, padding: '12px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.88rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, minHeight: 44 }}>
+                <button className="btn-gradient" onClick={() => handleBuyNow(tier)} style={{ width: '100%', borderRadius: 12, padding: '12px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.88rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, minHeight: 44 }}>
                   {tier.cta} <ArrowUpRight size={14} />
                 </button>
               ) : (
-                <button className="liquid-glass btn-glass-hover" onClick={() => {}} style={{ width: '100%', borderRadius: 12, padding: '12px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, background: 'rgba(255,255,255,0.07)', minHeight: 44 }}>
+                <button className="liquid-glass btn-glass-hover" onClick={() => handleBuyNow(tier)} style={{ width: '100%', borderRadius: 12, padding: '12px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, background: 'rgba(255,255,255,0.07)', minHeight: 44 }}>
                   {tier.cta} <ArrowUpRight size={14} />
                 </button>
               )}
@@ -802,23 +869,41 @@ const PRODUCT_TYPES = [
   { id: 'complete', label: 'Complete Package',     subtitle: 'Flux + Z-Image LoRA + WAN LoRA + workflow + custom nodes.', bestFor: 'Anyone serious about launching an AI influencer', from: '$249', color: '#f59e0b', popular: true },
 ];
 
-/* ── Product type card (standalone so each card owns its own useState) ── */
-function ProductTypeCard({ pt, index, inView }) {
-  const [runpod, setRunpod] = useState(false);
+/* ── Product type card ── */
+function ProductTypeCard({ pt, index, inView, selectedCard, onSelect, runpodEnabled, onRunpodToggle }) {
   const [showTip, setShowTip] = useState(false);
+  const isComplete = pt.id === 'complete';
   const basePrice = parseInt(pt.from.replace('$', ''));
-  const totalPrice = runpod ? `$${basePrice + 29}` : pt.from;
+  const totalPrice = runpodEnabled ? (isComplete ? pt.from : `$${basePrice + 30}`) : pt.from;
+  const isSelected = selectedCard === pt.id;
+  const isDimmed = selectedCard !== null && !isSelected;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: index * 0.08 }}
       className="liquid-glass glass-card-interactive"
-      style={{ borderRadius: 20, padding: '28px 22px', border: pt.popular ? `1px solid ${pt.color}44` : '1px solid rgba(255,255,255,0.07)', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+      onClick={() => onSelect(pt.id)}
+      style={{
+        borderRadius: 20, padding: '28px 22px',
+        border: isSelected ? `2px solid ${pt.color}99` : (pt.popular ? `1px solid ${pt.color}44` : '1px solid rgba(255,255,255,0.07)'),
+        display: 'flex', flexDirection: 'column', position: 'relative',
+        opacity: isDimmed ? 0.55 : 1,
+        boxShadow: isSelected ? `0 0 28px ${pt.color}30, 0 0 0 1px ${pt.color}44` : undefined,
+        cursor: 'pointer',
+        transition: 'opacity 0.25s, box-shadow 0.25s, border-color 0.25s',
+      }}>
       {/* color top-line */}
-      <div style={{ position: 'absolute', top: 0, left: '10%', right: '10%', height: 1, background: `linear-gradient(90deg, transparent, ${pt.color}55, transparent)` }} />
-      {/* Popular badge — inline, no absolute overflow */}
+      <div style={{ position: 'absolute', top: 0, left: '10%', right: '10%', height: 1, background: `linear-gradient(90deg, transparent, ${isSelected ? pt.color + 'cc' : pt.color + '55'}, transparent)`, transition: 'all 0.25s' }} />
+      {/* Popular badge */}
       {pt.popular && (
         <div style={{ textAlign: 'center', marginBottom: 16 }}>
           <span style={{ background: `linear-gradient(135deg, ${pt.color}, #a78bfa)`, borderRadius: 9999, padding: '4px 14px', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.62rem', color: 'white', letterSpacing: '0.07em', textTransform: 'uppercase', display: 'inline-block' }}>Most Popular</span>
+        </div>
+      )}
+      {/* Selected checkmark */}
+      {isSelected && (
+        <div style={{ position: 'absolute', top: 12, right: 12, width: 20, height: 20, borderRadius: '50%', background: pt.color, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3 }}>
+          <Check size={11} color="black" />
         </div>
       )}
       {/* Icon */}
@@ -846,15 +931,25 @@ function ProductTypeCard({ pt, index, inView }) {
       {/* RunPod toggle */}
       <div style={{ marginBottom: 16, background: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: '10px 14px', border: '1px solid rgba(255,255,255,0.07)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button onClick={() => setRunpod(v => !v)}
-            style={{ width: 36, height: 20, borderRadius: 10, border: 'none', background: runpod ? pt.color : 'rgba(255,255,255,0.12)', cursor: 'pointer', position: 'relative', flexShrink: 0, transition: 'background 0.2s' }}>
-            <div style={{ position: 'absolute', top: 2, left: runpod ? 18 : 2, width: 16, height: 16, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
+          <button
+            onClick={e => { e.stopPropagation(); onRunpodToggle(pt.id); }}
+            style={{ width: 36, height: 20, borderRadius: 10, border: 'none', background: runpodEnabled ? pt.color : 'rgba(255,255,255,0.12)', cursor: 'pointer', position: 'relative', flexShrink: 0, transition: 'background 0.2s' }}>
+            <div style={{ position: 'absolute', top: 2, left: runpodEnabled ? 18 : 2, width: 16, height: 16, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
           </button>
-          <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.78rem', color: runpod ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.45)', flex: 1 }}>
-            + RunPod Setup <span style={{ color: pt.color }}>+$29</span>
-          </span>
+          {isComplete ? (
+            <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.78rem', color: runpodEnabled ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.45)', flex: 1 }}>
+              RunPod Setup — <span style={{ color: '#34d399', fontWeight: 600 }}>FREE</span>
+            </span>
+          ) : (
+            <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.78rem', color: runpodEnabled ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.45)', flex: 1 }}>
+              + RunPod Setup <span style={{ color: pt.color }}>+$30</span>
+            </span>
+          )}
           <div style={{ position: 'relative' }}>
-            <button onMouseEnter={() => setShowTip(true)} onMouseLeave={() => setShowTip(false)} onFocus={() => setShowTip(true)} onBlur={() => setShowTip(false)}
+            <button
+              onClick={e => e.stopPropagation()}
+              onMouseEnter={() => setShowTip(true)} onMouseLeave={() => setShowTip(false)}
+              onFocus={() => setShowTip(true)} onBlur={() => setShowTip(false)}
               style={{ width: 16, height: 16, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.45)', fontSize: '0.6rem', cursor: 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Barlow, sans-serif', fontWeight: 600 }}>?</button>
             {showTip && (
               <div style={{ position: 'absolute', bottom: '130%', right: 0, width: 220, background: 'rgba(18,18,28,0.98)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, padding: '12px 14px', zIndex: 50, pointerEvents: 'none' }}>
@@ -863,14 +958,13 @@ function ProductTypeCard({ pt, index, inView }) {
             )}
           </div>
         </div>
-        {runpod && (
-          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', marginTop: 8, lineHeight: 1.45 }}>RunPod setup will be added at checkout</p>
-        )}
       </div>
       {/* CTA */}
-      <a href="#characters-section" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, borderRadius: 10, padding: '10px 14px', background: `${pt.color}18`, border: `1px solid ${pt.color}30`, color: pt.color, fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'none', minHeight: 44 }}>
+      <button
+        onClick={e => { e.stopPropagation(); onSelect(pt.id); document.getElementById('characters-section')?.scrollIntoView({ behavior: 'smooth' }); }}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, borderRadius: 10, padding: '10px 14px', background: isSelected ? `${pt.color}28` : `${pt.color}18`, border: `1px solid ${pt.color}${isSelected ? '60' : '30'}`, color: pt.color, fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.8rem', cursor: 'pointer', minHeight: 44, transition: 'all 0.2s' }}>
         See characters <ArrowUpRight size={13} />
-      </a>
+      </button>
     </motion.div>
   );
 }
@@ -887,8 +981,14 @@ function TypeBadge({ label, available, color }) {
 
 function PackagesPage({ setPage }) {
   const [openFaq, setOpenFaq] = useState(null);
-  const [modal, setModal] = useState(null); // { character, productType }
+  const [modal, setModal] = useState(null);
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [runpodByCard, setRunpodByCard] = useState({ lora: false, model: false, wan: false, complete: false });
+  const [nsfwEnabled, setNsfwEnabled] = useState(false);
   const SENA = '/public/showcase/sena/';
+
+  const handleSelectCard = (id) => setSelectedCard(prev => prev === id ? null : id);
+  const handleRunpodToggle = (id) => setRunpodByCard(prev => ({ ...prev, [id]: !prev[id] }));
 
   const level1Ref = useRef(null);
   const level1InView = useInView(level1Ref, { once: true, amount: 0.1 });
@@ -962,8 +1062,61 @@ function PackagesPage({ setPage }) {
         `}</style>
         <div className="pkg-type-grid-wrap">
           {PRODUCT_TYPES.map((pt, i) => (
-            <ProductTypeCard key={pt.id} pt={pt} index={i} inView={level1InView} />
+            <ProductTypeCard
+              key={pt.id} pt={pt} index={i} inView={level1InView}
+              selectedCard={selectedCard}
+              onSelect={handleSelectCard}
+              runpodEnabled={runpodByCard[pt.id]}
+              onRunpodToggle={handleRunpodToggle}
+            />
           ))}
+        </div>
+
+        {/* NSFW Add-on card */}
+        <div style={{ marginTop: 20 }}>
+          <div
+            onClick={() => selectedCard !== 'complete' && setNsfwEnabled(v => !v)}
+            className="liquid-glass"
+            style={{
+              borderRadius: 16, padding: '18px 22px',
+              border: (nsfwEnabled || selectedCard === 'complete') ? '1px solid rgba(232,121,249,0.5)' : '1px solid rgba(255,255,255,0.07)',
+              boxShadow: (nsfwEnabled || selectedCard === 'complete') ? '0 0 20px rgba(232,121,249,0.12)' : undefined,
+              display: 'flex', alignItems: 'center', gap: 18, cursor: selectedCard === 'complete' ? 'default' : 'pointer',
+              opacity: 1, transition: 'border-color 0.25s, box-shadow 0.25s',
+              flexWrap: 'wrap',
+            }}>
+            {/* Checkbox */}
+            <div style={{
+              width: 22, height: 22, borderRadius: 6, flexShrink: 0,
+              border: (nsfwEnabled || selectedCard === 'complete') ? '2px solid #e879f9' : '2px solid rgba(255,255,255,0.2)',
+              background: (nsfwEnabled || selectedCard === 'complete') ? 'rgba(232,121,249,0.2)' : 'transparent',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s',
+            }}>
+              {(nsfwEnabled || selectedCard === 'complete') && <Check size={13} color="#e879f9" />}
+            </div>
+            {/* Content */}
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
+                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.92rem', color: 'white' }}>NSFW Workflow + Anatomy LoRA</span>
+                {selectedCard === 'complete' ? (
+                  <span style={{ background: 'rgba(232,121,249,0.15)', border: '1px solid rgba(232,121,249,0.3)', borderRadius: 9999, padding: '2px 10px', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.65rem', color: '#e879f9', letterSpacing: '0.05em' }}>Free with Complete Package</span>
+                ) : (
+                  <span style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9999, padding: '2px 10px', fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)' }}>Free with Complete Package</span>
+                )}
+              </div>
+              <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.48)', lineHeight: 1.55, margin: 0 }}>
+                Our custom anatomy-correcting LoRA + the full ATREOX NSFW workflow for ComfyUI. Fixes common AI anatomy failures — hands, proportions, skin — without heavy prompting.
+              </p>
+            </div>
+            {/* Price */}
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              {selectedCard === 'complete' ? (
+                <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.6rem', color: '#34d399', lineHeight: 1 }}>Included</span>
+              ) : (
+                <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.6rem', color: nsfwEnabled ? '#e879f9' : 'rgba(255,255,255,0.55)', lineHeight: 1 }}>$49</span>
+              )}
+            </div>
+          </div>
         </div>
 
       </section>
@@ -1020,7 +1173,11 @@ function PackagesPage({ setPage }) {
                       Join waitlist
                     </button>
                   ) : (
-                    <button className="btn-gradient" onClick={() => setModal({ character: char.name, productType: 'Complete Package' })} style={{ marginTop: 'auto', borderRadius: 10, padding: '11px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, minHeight: 44 }}>
+                    <button className="btn-gradient" onClick={() => {
+                      const pid = selectedCard || 'complete';
+                      const ptData = PRODUCT_TYPES.find(p => p.id === pid);
+                      setModal({ character: char.name, productId: pid, productLabel: ptData?.label || 'Complete Package' });
+                    }} style={{ marginTop: 'auto', borderRadius: 10, padding: '11px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, minHeight: 44 }}>
                       View options <ArrowUpRight size={14} />
                     </button>
                   )}
@@ -1089,7 +1246,13 @@ function PackagesPage({ setPage }) {
       {modal && (
         <TierModal
           character={modal.character}
-          productType={modal.productType}
+          productId={modal.productId}
+          productLabel={modal.productLabel}
+          runpodEnabled={runpodByCard[modal.productId] || false}
+          runpodFree={modal.productId === 'complete'}
+          nsfwEnabled={nsfwEnabled || modal.productId === 'complete'}
+          nsfwFree={modal.productId === 'complete'}
+          setPage={setPage}
           onClose={() => setModal(null)}
           onContact={() => { setModal(null); setPage('contact'); }}
         />
@@ -1207,7 +1370,7 @@ function HowItWorksPage({ setPage }) {
           <div>
             <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '1rem', color: 'white', marginBottom: 8 }}>Want a ready-to-go setup?</h3>
             <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.65, maxWidth: 540 }}>
-              Add <strong style={{ color: 'white', fontWeight: 500 }}>RunPod Setup (+$29)</strong> to any package at checkout. We configure a RunPod cloud GPU account with your model pre-loaded, ComfyUI installed, and <strong style={{ color: 'white', fontWeight: 500 }}>$15 starter credit</strong> included. Log in and start generating within minutes — no local hardware, no setup headaches.
+              Add <strong style={{ color: 'white', fontWeight: 500 }}>RunPod Setup (+$30)</strong> to any package at checkout. We configure a RunPod cloud GPU account with your model pre-loaded, ComfyUI installed, and <strong style={{ color: 'white', fontWeight: 500 }}>$15 starter credit</strong> included. Log in and start generating within minutes — no local hardware, no setup headaches.
             </p>
           </div>
           <button className="btn-gradient" onClick={() => setPage('packages')}
@@ -1326,4 +1489,165 @@ function HowItWorksPage({ setPage }) {
   );
 }
 
-Object.assign(window, { CoursesPage, CheckoutPage, ResourcesPage, ContactPage, PackagesPage, HowItWorksPage });
+/* ══════════════════════════════════════
+   SETTINGS PAGE
+══════════════════════════════════════ */
+function SettingsPage({ setPage, user, onLogout }) {
+  const [name, setName] = useState(user?.name || '');
+  const [email] = useState(user?.email || '');
+  const [currentPw, setCurrentPw] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [confirmPw, setConfirmPw] = useState('');
+  const [pwError, setPwError] = useState('');
+  const [pwSuccess, setPwSuccess] = useState(false);
+  const [profileSuccess, setProfileSuccess] = useState(false);
+
+  const inputStyle = { background: 'none', border: 'none', outline: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', width: '100%' };
+  const labelStyle = { fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.76rem', color: 'rgba(255,255,255,0.45)', marginBottom: 6, display: 'block' };
+
+  const hasPurchased = (() => { try { return !!JSON.parse(localStorage.getItem('atreox_course_access') || 'null')?.sessionId; } catch { return false; } })();
+  const packageCart = (() => { try { return JSON.parse(localStorage.getItem('atreox_cart_v1') || 'null'); } catch { return null; } })();
+
+  const handleSaveProfile = () => {
+    if (!name.trim()) return;
+    try {
+      const users = JSON.parse(localStorage.getItem('atreox_users_v1') || '[]');
+      const idx = users.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
+      if (idx >= 0) { users[idx].name = name.trim(); localStorage.setItem('atreox_users_v1', JSON.stringify(users)); }
+      localStorage.setItem('atreox_cur_v1', JSON.stringify({ name: name.trim(), email }));
+    } catch {}
+    setProfileSuccess(true);
+    setTimeout(() => setProfileSuccess(false), 2500);
+  };
+
+  const handleChangePassword = () => {
+    setPwError(''); setPwSuccess(false);
+    if (!currentPw || !newPw || !confirmPw) { setPwError('Fill in all password fields.'); return; }
+    if (newPw !== confirmPw) { setPwError('New passwords do not match.'); return; }
+    if (newPw.length < 6) { setPwError('Password must be at least 6 characters.'); return; }
+    try {
+      const users = JSON.parse(localStorage.getItem('atreox_users_v1') || '[]');
+      const idx = users.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
+      if (idx < 0 || users[idx].password !== currentPw) { setPwError('Current password is incorrect.'); return; }
+      users[idx].password = newPw;
+      localStorage.setItem('atreox_users_v1', JSON.stringify(users));
+    } catch { setPwError('Could not update password.'); return; }
+    setPwSuccess(true);
+    setCurrentPw(''); setNewPw(''); setConfirmPw('');
+    setTimeout(() => setPwSuccess(false), 3000);
+  };
+
+  const cardStyle = { borderRadius: 20, padding: '28px 28px', border: '1px solid rgba(255,255,255,0.08)', marginBottom: 20 };
+
+  return (
+    <div>
+      <section data-bg-palette="blue-violet" style={{ paddingTop: 160, paddingBottom: 80, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <SectionBadge>Account</SectionBadge>
+        <h1 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(2.4rem, 4vw, 3.5rem)', color: 'white', marginTop: 18, marginBottom: 12, letterSpacing: '-0.02em', lineHeight: 0.95 }}>Settings</h1>
+        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.45)' }}>Manage your ATREOX AI account</p>
+      </section>
+
+      <div style={{ padding: '60px 5%', maxWidth: 760, margin: '0 auto' }}>
+
+        {/* My Account */}
+        <div className="liquid-glass-strong" style={cardStyle}>
+          <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 22 }}>My Account</h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
+            <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'linear-gradient(135deg,#4f8ef7,#a78bfa)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '1.2rem', color: 'white' }}>{(user?.name || 'U')[0].toUpperCase()}</span>
+            </div>
+            <div>
+              <p style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.25rem', color: 'white', lineHeight: 1.1 }}>{user?.name}</p>
+              <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{user?.email}</p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div>
+              <label style={labelStyle}>Display Name</label>
+              <FieldWrap><input value={name} onChange={e => setName(e.target.value)} placeholder="Your name" style={inputStyle} /></FieldWrap>
+            </div>
+            <div>
+              <label style={labelStyle}>Email</label>
+              <FieldWrap><input value={email} disabled style={{ ...inputStyle, opacity: 0.4, cursor: 'not-allowed' }} /></FieldWrap>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4 }}>
+              <button onClick={handleSaveProfile} style={{ borderRadius: 10, padding: '11px 24px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}>
+                Update Profile
+              </button>
+              {profileSuccess && <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: '#34d399' }}>Saved ✓</span>}
+            </div>
+          </div>
+        </div>
+
+        {/* Change Password */}
+        <div className="liquid-glass-strong" style={cardStyle}>
+          <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 22 }}>Change Password</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div>
+              <label style={labelStyle}>Current Password</label>
+              <FieldWrap><input type="password" value={currentPw} onChange={e => setCurrentPw(e.target.value)} placeholder="Current password" style={inputStyle} /></FieldWrap>
+            </div>
+            <div>
+              <label style={labelStyle}>New Password</label>
+              <FieldWrap><input type="password" value={newPw} onChange={e => setNewPw(e.target.value)} placeholder="New password" style={inputStyle} /></FieldWrap>
+            </div>
+            <div>
+              <label style={labelStyle}>Confirm New Password</label>
+              <FieldWrap><input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} placeholder="Confirm new password" style={inputStyle} /></FieldWrap>
+            </div>
+            {pwError && <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.78rem', color: '#f87171' }}>{pwError}</p>}
+            {pwSuccess && <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.78rem', color: '#34d399' }}>Password updated successfully ✓</p>}
+            <button onClick={handleChangePassword} style={{ alignSelf: 'flex-start', borderRadius: 10, padding: '11px 24px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}>
+              Update Password
+            </button>
+          </div>
+        </div>
+
+        {/* Enrolled Courses */}
+        <div className="liquid-glass-strong" style={cardStyle}>
+          <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 18 }}>Enrolled Courses</h3>
+          {hasPurchased ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'rgba(79,142,247,0.08)', border: '1px solid rgba(79,142,247,0.18)', borderRadius: 12, flexWrap: 'wrap', gap: 10 }}>
+              <div>
+                <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.88rem', color: 'white', marginBottom: 3 }}>Photoreal Influencer Blueprint</p>
+                <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.76rem', color: 'rgba(255,255,255,0.4)' }}>Active subscription</p>
+              </div>
+              <button onClick={() => window.location.href = '/course'} style={{ borderRadius: 9, padding: '8px 18px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.8rem', cursor: 'pointer', background: 'rgba(79,142,247,0.2)' }}>
+                Continue Learning
+              </button>
+            </div>
+          ) : (
+            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1.6 }}>
+              No active courses. <span onClick={() => setPage('courses')} style={{ color: '#4f8ef7', cursor: 'pointer' }}>Browse courses →</span>
+            </p>
+          )}
+        </div>
+
+        {/* Order History */}
+        <div className="liquid-glass-strong" style={cardStyle}>
+          <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 18 }}>Order History</h3>
+          {packageCart ? (
+            <div style={{ padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12 }}>
+              <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.85rem', color: 'white', marginBottom: 3 }}>{packageCart.productLabel} · {packageCart.character}</p>
+              <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.76rem', color: 'rgba(255,255,255,0.4)' }}>{packageCart.license} · ${packageCart.licensePrice}</p>
+            </div>
+          ) : (
+            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)' }}>No orders yet.</p>
+          )}
+        </div>
+
+        {/* Logout */}
+        <div className="liquid-glass-strong" style={{ ...cardStyle, marginBottom: 0 }}>
+          <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 16 }}>Session</h3>
+          <button onClick={() => { onLogout(); setPage('home'); }} style={{ borderRadius: 10, padding: '11px 24px', border: '1px solid rgba(248,113,113,0.25)', color: '#f87171', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.85rem', cursor: 'pointer', background: 'rgba(248,113,113,0.06)' }}>
+            Log out
+          </button>
+        </div>
+
+      </div>
+      <div style={{ padding: '0 5% 64px' }}><FooterBar setPage={setPage} /></div>
+    </div>
+  );
+}
+
+Object.assign(window, { CoursesPage, CheckoutPage, ResourcesPage, ContactPage, PackagesPage, HowItWorksPage, SettingsPage });

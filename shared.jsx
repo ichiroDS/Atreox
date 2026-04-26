@@ -173,7 +173,16 @@ function FieldWrap({ children }) {
 /* ── Navbar ── */
 function Navbar({ currentPage, setPage, user, onLoginClick, onLogout }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const userMenuRef = useRef(null);
+
+  const cartCount = (() => {
+    try {
+      const c = JSON.parse(localStorage.getItem('atreox_cart_v1') || 'null');
+      return c ? 1 : 0;
+    } catch { return 0; }
+  })();
 
   useEffect(() => {
     const onResize = () => {
@@ -184,6 +193,15 @@ function Navbar({ currentPage, setPage, user, onLoginClick, onLogout }) {
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
+
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const handler = (e) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) setUserMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [userMenuOpen]);
 
   const links = [
     { id: 'home',         label: 'Home' },
@@ -228,17 +246,48 @@ function Navbar({ currentPage, setPage, user, onLoginClick, onLogout }) {
           <div style={{ flex: '1 1 0', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 10 }}>
             {user ? (
               <>
-                <div className="liquid-glass" style={{ borderRadius: 9999, padding: '7px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'linear-gradient(135deg,#4f8ef7,#a78bfa)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.65rem', color: 'white' }}>{user.name[0].toUpperCase()}</span>
-                  </div>
-                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.82rem', color: 'rgba(255,255,255,0.85)', maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.name}</span>
+                {/* Cart icon */}
+                <button className="liquid-glass btn-glass-hover" onClick={() => setPage('checkout')} style={{ position: 'relative', width: 36, height: 36, borderRadius: '50%', border: 'none', background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 001.98 1.61h9.72a2 2 0 001.99-1.72l1.38-9.28H6"/>
+                  </svg>
+                  {cartCount > 0 && (
+                    <div style={{ position: 'absolute', top: -3, right: -3, width: 14, height: 14, borderRadius: '50%', background: '#e879f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 700, fontSize: '0.55rem', color: 'white' }}>{cartCount}</span>
+                    </div>
+                  )}
+                </button>
+
+                {/* User dropdown trigger */}
+                <div ref={userMenuRef} style={{ position: 'relative' }}>
+                  <button className="liquid-glass btn-glass-hover" onClick={() => setUserMenuOpen(o => !o)} style={{ borderRadius: 9999, padding: '7px 14px', border: 'none', display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', background: 'rgba(255,255,255,0.06)' }}>
+                    <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'linear-gradient(135deg,#4f8ef7,#a78bfa)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.65rem', color: 'white' }}>{user.name[0].toUpperCase()}</span>
+                    </div>
+                    <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.82rem', color: 'rgba(255,255,255,0.85)', maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.name}</span>
+                    <ChevronDown size={12} color="rgba(255,255,255,0.4)" style={{ transition: 'transform 0.2s', transform: userMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+                  </button>
+
+                  {/* Dropdown */}
+                  {userMenuOpen && (
+                    <div className="liquid-glass-strong" style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, minWidth: 160, borderRadius: 14, padding: '6px', border: '1px solid rgba(255,255,255,0.1)', zIndex: 200, background: 'rgba(10,10,18,0.96)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', boxShadow: '0 16px 48px rgba(0,0,0,0.5)' }}>
+                      <button onClick={() => { setUserMenuOpen(false); setPage('settings'); }} style={{ width: '100%', textAlign: 'left', padding: '10px 14px', borderRadius: 9, border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.8)', fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.84rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 9, transition: 'background 0.15s' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                        Settings
+                      </button>
+                      <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '4px 10px' }} />
+                      <button onClick={() => { setUserMenuOpen(false); onLogout(); }} style={{ width: '100%', textAlign: 'left', padding: '10px 14px', borderRadius: 9, border: 'none', background: 'transparent', color: 'rgba(248,113,113,0.85)', fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.84rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 9, transition: 'background 0.15s' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(248,113,113,0.06)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                        Log out
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <button className="liquid-glass btn-glass-hover" onClick={onLogout} style={{
-                  padding: '8px 16px', borderRadius: 9999, border: 'none', color: 'rgba(255,255,255,0.55)',
-                  fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.78rem', cursor: 'pointer',
-                  background: 'rgba(255,255,255,0.05)',
-                }}>Log out</button>
               </>
             ) : (
               <button className="liquid-glass btn-glass-hover" onClick={onLoginClick} style={{
@@ -280,9 +329,23 @@ function Navbar({ currentPage, setPage, user, onLoginClick, onLogout }) {
                 </div>
                 <span style={{ fontFamily: 'Barlow, sans-serif', fontSize: '0.95rem', color: 'rgba(255,255,255,0.85)' }}>{user.name}</span>
               </div>
+              <button onClick={() => { handleNav('checkout'); }} style={{
+                width: '100%', padding: '14px', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12,
+                background: 'transparent', color: 'rgba(255,255,255,0.6)',
+                fontFamily: 'Barlow, sans-serif', fontSize: '0.9rem', cursor: 'pointer', textAlign: 'left',
+                display: 'flex', alignItems: 'center', gap: 10,
+              }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.98 1.61h9.72a2 2 0 001.99-1.72l1.38-9.28H6"/></svg>
+                Cart{cartCount > 0 ? ` (${cartCount})` : ''}
+              </button>
+              <button onClick={() => { handleNav('settings'); }} style={{
+                width: '100%', padding: '14px', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12,
+                background: 'transparent', color: 'rgba(255,255,255,0.6)',
+                fontFamily: 'Barlow, sans-serif', fontSize: '0.9rem', cursor: 'pointer', textAlign: 'left',
+              }}>Settings</button>
               <button onClick={() => { onLogout(); setMenuOpen(false); }} style={{
                 width: '100%', padding: '14px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12,
-                background: 'transparent', color: 'rgba(255,255,255,0.5)',
+                background: 'transparent', color: 'rgba(248,113,113,0.7)',
                 fontFamily: 'Barlow, sans-serif', fontSize: '0.9rem', cursor: 'pointer',
               }}>Log out</button>
             </div>
