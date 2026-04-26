@@ -487,6 +487,13 @@ function CheckoutPage({ setPage, user }) {
 ══════════════════════════════════════ */
 function ResourcesPage({ setPage }) {
   const [activeFolder, setActiveFolder] = useState(0);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
   const folders = [
     { name: 'FLUX Flexgram', models: [{ type: 'MODEL', name: 'Flux.1 Dev FP8' },{ type: 'CLIP', name: 'Text Encoders' },{ type: 'VAE', name: 'Flux1 VAE' },{ type: 'LORA', name: 'Fluxgram LoRA' }], workflow: { name: 'ComfyUI Workflow', desc: 'Download the ComfyUI workflow file' } },
     { name: 'FLUX Luxury LifeStyle', models: [{ type: 'MODEL', name: 'Flux.1 Dev FP8' },{ type: 'CLIP', name: 'Text Encoders' },{ type: 'VAE', name: 'Flux1 VAE' },{ type: 'LORA', name: 'Luxury Style LoRA' }], workflow: { name: 'ComfyUI Workflow', desc: 'Download the ComfyUI workflow file' } },
@@ -496,20 +503,46 @@ function ResourcesPage({ setPage }) {
   const current = folders[activeFolder];
   const FolderIcon = ({ active }) => (<svg width="14" height="14" viewBox="0 0 24 24" fill={active ? 'rgba(255,255,255,0.25)' : 'none'} stroke="currentColor" strokeWidth="1.75"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>);
   const DownloadIcon = () => (<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>);
+
   return (
     <div>
       <PageHero badge="Resources" title="Models & Workflows." sub="Download the exact AI models and ComfyUI workflows used in every course. Everything you need, in one place." />
+
+      {/* Mobile warning banner */}
+      {isMobile && (
+        <div style={{ margin: '0 5% 24px', borderRadius: 14, padding: '14px 18px', background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)' }}>
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.82rem', color: 'rgba(248,113,113,0.9)', lineHeight: 1.55, margin: 0 }}>
+            Downloads are large. We recommend opening this page on desktop for actual downloads.
+          </p>
+        </div>
+      )}
+
       <PageSection>
-        <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-          <div className="liquid-glass-strong" style={{ width: 220, flexShrink: 0, borderRadius: 20, padding: '20px 12px', minWidth: 175, position: 'sticky', top: 88 }}>
-            <h4 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10, paddingLeft: 10 }}>Folders</h4>
+        {/* Mobile: horizontal scrollable tab chips */}
+        {isMobile ? (
+          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', display: 'flex', gap: 8, paddingBottom: 16, marginBottom: 24, scrollbarWidth: 'none' }}>
             {folders.map((folder, i) => (
-              <button key={i} onClick={() => setActiveFolder(i)} style={{ width: '100%', textAlign: 'left', padding: '10px 12px', borderRadius: 10, border: 'none', background: activeFolder === i ? 'rgba(255,255,255,0.1)' : 'transparent', color: activeFolder === i ? 'white' : 'rgba(255,255,255,0.5)', fontFamily: 'Barlow, sans-serif', fontWeight: activeFolder === i ? 500 : 300, fontSize: '0.83rem', cursor: 'pointer', marginBottom: 3, display: 'flex', alignItems: 'center', gap: 9, transition: 'all 0.2s' }}>
-                <FolderIcon active={activeFolder === i} />{folder.name}
+              <button key={i} onClick={() => setActiveFolder(i)} style={{ flexShrink: 0, whiteSpace: 'nowrap', padding: '8px 16px', borderRadius: 9999, border: 'none', background: activeFolder === i ? 'rgba(79,142,247,0.2)' : 'rgba(255,255,255,0.06)', color: activeFolder === i ? '#4f8ef7' : 'rgba(255,255,255,0.5)', fontFamily: 'Barlow, sans-serif', fontWeight: activeFolder === i ? 500 : 300, fontSize: '0.82rem', cursor: 'pointer', transition: 'all 0.2s', outline: activeFolder === i ? '1px solid rgba(79,142,247,0.35)' : 'none' }}>
+                {folder.name}
               </button>
             ))}
           </div>
-          <div style={{ flex: '1 1 400px' }}>
+        ) : null}
+
+        <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+          {/* Desktop sticky sidebar */}
+          {!isMobile && (
+            <div className="liquid-glass-strong" style={{ width: 220, flexShrink: 0, borderRadius: 20, padding: '20px 12px', minWidth: 175, position: 'sticky', top: 88 }}>
+              <h4 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10, paddingLeft: 10 }}>Folders</h4>
+              {folders.map((folder, i) => (
+                <button key={i} onClick={() => setActiveFolder(i)} style={{ width: '100%', textAlign: 'left', padding: '10px 12px', borderRadius: 10, border: 'none', background: activeFolder === i ? 'rgba(255,255,255,0.1)' : 'transparent', color: activeFolder === i ? 'white' : 'rgba(255,255,255,0.5)', fontFamily: 'Barlow, sans-serif', fontWeight: activeFolder === i ? 500 : 300, fontSize: '0.83rem', cursor: 'pointer', marginBottom: 3, display: 'flex', alignItems: 'center', gap: 9, transition: 'all 0.2s' }}>
+                  <FolderIcon active={activeFolder === i} />{folder.name}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div style={{ flex: '1 1 300px', minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22, flexWrap: 'wrap', gap: 12 }}>
               <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.95rem', color: 'white' }}>AI Models for <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic' }}>"{current.name}"</span></h3>
               <div className="liquid-glass" style={{ borderRadius: 9999, padding: '6px 16px', display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(79,142,247,0.12)', cursor: 'default' }}>
@@ -526,10 +559,12 @@ function ResourcesPage({ setPage }) {
                       <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 700, fontSize: '0.58rem', color: typeColor[model.type], letterSpacing: '0.06em' }}>{model.type}</span>
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.82rem', color: 'white', marginBottom: 9, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{model.name}</p>
-                      <button className="btn-glass-hover" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '5px 10px', color: 'rgba(255,255,255,0.65)', fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.7rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
-                        <DownloadIcon /> Download
-                      </button>
+                      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.82rem', color: 'white', marginBottom: isMobile ? 0 : 9, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{model.name}</p>
+                      {!isMobile && (
+                        <button className="btn-glass-hover" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '5px 10px', color: 'rgba(255,255,255,0.65)', fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.7rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <DownloadIcon /> Download
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -542,9 +577,11 @@ function ResourcesPage({ setPage }) {
                   <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.9rem', color: '#4f8ef7', marginBottom: 5 }}>{current.workflow.name}</p>
                   <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.38)' }}>Download the <span style={{ color: '#4f8ef7', cursor: 'pointer' }}>ComfyUI workflow file</span></p>
                 </div>
-                <button className="btn-white-glow" style={{ background: 'white', color: 'black', border: 'none', borderRadius: 10, padding: '11px 20px', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap' }}>
-                  <DownloadIcon /> Download Workflow
-                </button>
+                {!isMobile && (
+                  <button className="btn-white-glow" style={{ background: 'white', color: 'black', border: 'none', borderRadius: 10, padding: '11px 20px', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap' }}>
+                    <DownloadIcon /> Download Workflow
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -759,11 +796,84 @@ function TierModal({ character, productType, onClose, onContact }) {
 
 /* ── Product type cards (Level 1) ── */
 const PRODUCT_TYPES = [
-  { id: 'lora',     label: 'Character LoRA Only',       subtitle: 'Lightweight. Add to any base model.', bestFor: 'Tinkerers who already know ComfyUI', from: '$49',  color: '#4f8ef7' },
-  { id: 'model',    label: 'Full Flux Fine-tune Model',  subtitle: 'Standalone .safetensors model. Maximum consistency.', bestFor: 'Serious creators who want pro-grade results', from: '$99',  color: '#34d399' },
-  { id: 'wan',      label: 'WAN Video LoRA',             subtitle: 'Animate your character. Talking, walking, posing.', bestFor: 'Creators making video content for TikTok/IG/Fanvue', from: '$149', color: '#a78bfa' },
-  { id: 'complete', label: 'Complete Package',           subtitle: 'Flux fine-tune + WAN LoRA + RunPod setup + custom nodes', bestFor: 'Anyone serious about launching an AI influencer', from: '$249', color: '#f59e0b', popular: true },
+  { id: 'lora',     label: 'Z-Image Turbo LoRA',  subtitle: 'Ultra-realistic character. 200–500 MB. Loads on top of base model.', bestFor: 'Tinkerers and fast movers who already know ComfyUI', from: '$49',  color: '#4f8ef7' },
+  { id: 'model',    label: 'Flux Fine-tune Model', subtitle: 'Ultra-consistent character. 4 files (~24 GB). Standalone.', bestFor: 'Serious creators who want pro-grade results', from: '$99',  color: '#34d399' },
+  { id: 'wan',      label: 'WAN Video LoRA',       subtitle: 'Ultra-realistic motion + character consistency in video.', bestFor: 'Creators making video for TikTok / IG / Fanvue', from: '$149', color: '#a78bfa' },
+  { id: 'complete', label: 'Complete Package',     subtitle: 'Flux + Z-Image LoRA + WAN LoRA + workflow + custom nodes.', bestFor: 'Anyone serious about launching an AI influencer', from: '$249', color: '#f59e0b', popular: true },
 ];
+
+/* ── Product type card (standalone so each card owns its own useState) ── */
+function ProductTypeCard({ pt, index, inView }) {
+  const [runpod, setRunpod] = useState(false);
+  const [showTip, setShowTip] = useState(false);
+  const basePrice = parseInt(pt.from.replace('$', ''));
+  const totalPrice = runpod ? `$${basePrice + 29}` : pt.from;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: index * 0.08 }}
+      className="liquid-glass glass-card-interactive"
+      style={{ borderRadius: 20, padding: '28px 22px', border: pt.popular ? `1px solid ${pt.color}44` : '1px solid rgba(255,255,255,0.07)', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+      {/* color top-line */}
+      <div style={{ position: 'absolute', top: 0, left: '10%', right: '10%', height: 1, background: `linear-gradient(90deg, transparent, ${pt.color}55, transparent)` }} />
+      {/* Popular badge — inline, no absolute overflow */}
+      {pt.popular && (
+        <div style={{ textAlign: 'center', marginBottom: 16 }}>
+          <span style={{ background: `linear-gradient(135deg, ${pt.color}, #a78bfa)`, borderRadius: 9999, padding: '4px 14px', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.62rem', color: 'white', letterSpacing: '0.07em', textTransform: 'uppercase', display: 'inline-block' }}>Most Popular</span>
+        </div>
+      )}
+      {/* Icon */}
+      <div style={{ width: 40, height: 40, borderRadius: 10, background: `${pt.color}18`, border: `1px solid ${pt.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+        <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.1rem', color: pt.color, lineHeight: 1 }}>
+          {pt.id === 'lora' ? 'L' : pt.id === 'model' ? 'M' : pt.id === 'wan' ? 'V' : 'P'}
+        </span>
+      </div>
+      <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.92rem', color: 'white', marginBottom: 6, lineHeight: 1.3 }}>{pt.label}</h3>
+      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginBottom: 14, flex: 1 }}>{pt.subtitle}</p>
+      {/* Best for */}
+      <div style={{ marginBottom: 12 }}>
+        <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)' }}>Best for: </span>
+        <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.77rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.45 }}>{pt.bestFor}</span>
+      </div>
+      {/* Workflow line */}
+      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.71rem', color: 'rgba(255,255,255,0.3)', lineHeight: 1.5, marginBottom: 16, fontStyle: 'italic' }}>
+        Includes ATREOX workflow .json — works with our pipeline or your own setup.
+      </p>
+      {/* Price */}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, marginBottom: 14 }}>
+        <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }}>from</span>
+        <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '2rem', color: pt.color, lineHeight: 1 }}>{totalPrice}</span>
+      </div>
+      {/* RunPod toggle */}
+      <div style={{ marginBottom: 16, background: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: '10px 14px', border: '1px solid rgba(255,255,255,0.07)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button onClick={() => setRunpod(v => !v)}
+            style={{ width: 36, height: 20, borderRadius: 10, border: 'none', background: runpod ? pt.color : 'rgba(255,255,255,0.12)', cursor: 'pointer', position: 'relative', flexShrink: 0, transition: 'background 0.2s' }}>
+            <div style={{ position: 'absolute', top: 2, left: runpod ? 18 : 2, width: 16, height: 16, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
+          </button>
+          <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.78rem', color: runpod ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.45)', flex: 1 }}>
+            + RunPod Setup <span style={{ color: pt.color }}>+$29</span>
+          </span>
+          <div style={{ position: 'relative' }}>
+            <button onMouseEnter={() => setShowTip(true)} onMouseLeave={() => setShowTip(false)} onFocus={() => setShowTip(true)} onBlur={() => setShowTip(false)}
+              style={{ width: 16, height: 16, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.45)', fontSize: '0.6rem', cursor: 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Barlow, sans-serif', fontWeight: 600 }}>?</button>
+            {showTip && (
+              <div style={{ position: 'absolute', bottom: '130%', right: 0, width: 220, background: 'rgba(18,18,28,0.98)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, padding: '12px 14px', zIndex: 50, pointerEvents: 'none' }}>
+                <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.55, margin: 0 }}>We set up a ready-to-go RunPod account with your model, ComfyUI installed, and $15 starter credit. Just log in and generate.</p>
+              </div>
+            )}
+          </div>
+        </div>
+        {runpod && (
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', marginTop: 8, lineHeight: 1.45 }}>RunPod setup will be added at checkout</p>
+        )}
+      </div>
+      {/* CTA */}
+      <a href="#characters-section" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, borderRadius: 10, padding: '10px 14px', background: `${pt.color}18`, border: `1px solid ${pt.color}30`, color: pt.color, fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'none', minHeight: 44 }}>
+        See characters <ArrowUpRight size={13} />
+      </a>
+    </motion.div>
+  );
+}
 
 /* ── Character card badges ── */
 function TypeBadge({ label, available, color }) {
@@ -816,7 +926,7 @@ function PackagesPage({ setPage }) {
   return (
     <div>
       {/* ── Hero ── */}
-      <section style={{ paddingTop: 160, paddingBottom: 80, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <section data-bg-palette="blue-violet" style={{ paddingTop: 160, paddingBottom: 80, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <SectionBadge>Characters & LoRAs</SectionBadge>
         <BlurText text="Character Packages" style={{
           fontFamily: "'Instrument Serif', serif", fontStyle: 'italic',
@@ -852,43 +962,7 @@ function PackagesPage({ setPage }) {
         `}</style>
         <div className="pkg-type-grid-wrap">
           {PRODUCT_TYPES.map((pt, i) => (
-            <motion.div key={pt.id}
-              initial={{ opacity: 0, y: 30 }} animate={level1InView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.08 }}
-              className="liquid-glass glass-card-interactive"
-              style={{ borderRadius: 20, padding: '28px 22px', border: pt.popular ? `1px solid ${pt.color}44` : '1px solid rgba(255,255,255,0.07)', position: 'relative', display: 'flex', flexDirection: 'column' }}>
-              {pt.popular && (
-                <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: `linear-gradient(135deg, ${pt.color}, #a78bfa)`, borderRadius: 9999, padding: '3px 14px', whiteSpace: 'nowrap' }}>
-                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.62rem', color: 'white', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Most Popular</span>
-                </div>
-              )}
-              {/* color top-line */}
-              <div style={{ position: 'absolute', top: 0, left: '10%', right: '10%', height: 1, background: `linear-gradient(90deg, transparent, ${pt.color}55, transparent)` }} />
-
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: `${pt.color}18`, border: `1px solid ${pt.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, marginTop: pt.popular ? 8 : 0 }}>
-                <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.1rem', color: pt.color, lineHeight: 1 }}>
-                  {pt.id === 'lora' ? 'L' : pt.id === 'model' ? 'M' : pt.id === 'wan' ? 'V' : 'P'}
-                </span>
-              </div>
-
-              <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.9rem', color: 'white', marginBottom: 8, lineHeight: 1.3 }}>{pt.label}</h3>
-              <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginBottom: 12, flex: 1 }}>{pt.subtitle}</p>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 18 }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)' }}>Best for:</span>
-                </div>
-                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.78rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.45 }}>{pt.bestFor}</span>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 16 }}>
-                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }}>from</span>
-                <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.5rem', color: pt.color, lineHeight: 1 }}>{pt.from}</span>
-              </div>
-
-              <a href="#characters-section" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, borderRadius: 10, padding: '10px 14px', background: `${pt.color}18`, border: `1px solid ${pt.color}30`, color: pt.color, fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'none', minHeight: 44 }}>
-                See characters <ArrowUpRight size={13} />
-              </a>
-            </motion.div>
+            <ProductTypeCard key={pt.id} pt={pt} index={i} inView={level1InView} />
           ))}
         </div>
 
@@ -1082,61 +1156,65 @@ function HowItWorksPage({ setPage }) {
         </motion.div>
       </section>
 
-      {/* Section 2 — Models vs LoRAs */}
+      {/* Section 2 — What we actually sell */}
       <section ref={s2Ref} data-bg-palette="teal-violet" className="section-block" style={{ padding: '80px 5%', maxWidth: 1100, margin: '0 auto', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <motion.div initial={{ opacity: 0, y: 24 }} animate={s2InView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.65 }}>
           <SectionBadge>Section 2</SectionBadge>
-          <h2 style={{ ...h2Style, marginTop: 14 }}>Models, LoRAs, and the difference</h2>
+          <h2 style={{ ...h2Style, marginTop: 14 }}>What we actually sell</h2>
+          <p style={{ ...bodyText, marginBottom: 36 }}>Four products. Each one solves a different part of the AI influencer pipeline. Mix and match, or go all-in with the Complete Package.</p>
 
-          {/* Two-column comparison */}
-          <style>{`.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}@media(max-width:600px){.compare-grid{grid-template-columns:1fr!important}}`}</style>
-          <div className="compare-grid" style={{ marginBottom: 28 }}>
-            {/* Left — Base Model */}
-            <div className="liquid-glass" style={{ borderRadius: 20, padding: '32px 28px', border: '1px solid rgba(52,211,153,0.2)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 9, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1rem', color: '#34d399' }}>M</span>
+          <style>{`.sell-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}@media(max-width:640px){.sell-grid{grid-template-columns:1fr!important}}`}</style>
+          <div className="sell-grid" style={{ marginBottom: 28 }}>
+            {/* Card A: Flux Fine-tune */}
+            {[
+              { color: '#34d399', letter: 'M', title: 'Flux Fine-tune Model', detail: '4 files · ~24 GB · standalone', desc: 'A complete character model trained entirely on your AI influencer. Maximum consistency — same face, body, and style every generation. Works as a drop-in replacement for any Flux base.', price: '$99', tag: 'Static image · brand-quality shots' },
+              { color: '#4f8ef7', letter: 'L', title: 'Z-Image Turbo LoRA',   detail: '1 file · 200–500 MB · adapter', desc: 'A lightweight LoRA that loads on top of any Flux base model you already have. Fast to use, lower upfront cost, good for experimenting with different styles.', price: '$49',  tag: 'Fastest to get started' },
+              { color: '#a78bfa', letter: 'V', title: 'WAN Video LoRA',       detail: '1 file · ~600 MB · adapter', desc: 'Teaches the WAN video model to render your specific character in motion. Your AI influencer walks, talks, and poses with the same face across every frame — for TikTok, Reels, and Fanvue.', price: '$149', tag: 'Video · requires Flux base or fine-tune' },
+              { color: '#f59e0b', letter: 'P', title: 'NSFW Workflow + Anatomy LoRA', detail: 'workflow + LoRA bundle', desc: 'Our custom anatomy-correcting LoRA + the full ATREOX NSFW workflow for ComfyUI. Fixes the common AI anatomy failures — hands, proportions, skin — without heavy prompting.', price: '$99 standalone', tag: 'Free with Complete Package', tagColor: '#f59e0b' },
+            ].map((card, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 24 }} animate={s2InView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.1 + i * 0.07 }}
+                className="liquid-glass"
+                style={{ borderRadius: 18, padding: '28px 26px', border: `1px solid ${card.color}28`, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width: 38, height: 38, borderRadius: 9, background: `${card.color}18`, border: `1px solid ${card.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.05rem', color: card.color }}>{card.letter}</span>
+                    </div>
+                    <div>
+                      <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.92rem', color: 'white', lineHeight: 1.2, marginBottom: 3 }}>{card.title}</h3>
+                      <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)' }}>{card.detail}</span>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                    <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.5rem', color: card.color, lineHeight: 1 }}>{card.price}</span>
+                  </div>
                 </div>
-                <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem', color: 'white' }}>Base Model (Flux Fine-tune)</h3>
-              </div>
-              {[
-                'A complete .safetensors file (~12 GB)',
-                'Standalone — replaces your base model entirely',
-                'Maximum character consistency',
-                'Best results for hero shots and brand-quality images',
-                'Price: from $99',
-              ].map((item, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 9, marginBottom: 12 }}>
-                  <Check size={13} color="#34d399" style={{ marginTop: 3, flexShrink: 0 }} />
-                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.87rem', color: 'rgba(255,255,255,0.65)', lineHeight: 1.5 }}>{item}</span>
+                <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.6 }}>{card.desc}</p>
+                <div style={{ display: 'inline-flex', alignSelf: 'flex-start', background: `${card.tagColor || card.color}14`, border: `1px solid ${card.tagColor || card.color}30`, borderRadius: 7, padding: '3px 10px' }}>
+                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.67rem', color: card.tagColor || card.color, letterSpacing: '0.04em' }}>{card.tag}</span>
                 </div>
-              ))}
-            </div>
-            {/* Right — LoRA */}
-            <div className="liquid-glass" style={{ borderRadius: 20, padding: '32px 28px', border: '1px solid rgba(79,142,247,0.2)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 9, background: 'rgba(79,142,247,0.12)', border: '1px solid rgba(79,142,247,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1rem', color: '#4f8ef7' }}>L</span>
-                </div>
-                <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem', color: 'white' }}>LoRA</h3>
-              </div>
-              {[
-                'A lightweight adapter (~150 MB)',
-                'Loads on top of your existing base model',
-                'Faster to use, but consistency depends on base',
-                'Good for experiments and variations',
-                'Price: from $49',
-              ].map((item, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 9, marginBottom: 12 }}>
-                  <Check size={13} color="#4f8ef7" style={{ marginTop: 3, flexShrink: 0 }} />
-                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.87rem', color: 'rgba(255,255,255,0.65)', lineHeight: 1.5 }}>{item}</span>
-                </div>
-              ))}
-            </div>
+              </motion.div>
+            ))}
           </div>
 
-          <p style={mutedNote}>A full fine-tune costs more because it requires 10 hours of RunPod training on an 80-photo dataset. A LoRA takes 1–2 hours. Both produce different results — the fine-tune wins on consistency and anatomy accuracy; the LoRA wins on flexibility and file size.</p>
+          <p style={mutedNote}>Every product ships with our ATREOX workflow .json — works with our pipeline or your own ComfyUI setup. No vendor lock-in.</p>
         </motion.div>
+      </section>
+
+      {/* Section 2b — Want a ready-to-go setup? */}
+      <section data-bg-palette="teal-violet" className="section-block" style={{ padding: '0 5% 80px', maxWidth: 1100, margin: '0 auto' }}>
+        <div className="liquid-glass" style={{ borderRadius: 20, padding: '32px 36px', border: '1px solid rgba(79,142,247,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 28, flexWrap: 'wrap' }}>
+          <div>
+            <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '1rem', color: 'white', marginBottom: 8 }}>Want a ready-to-go setup?</h3>
+            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.65, maxWidth: 540 }}>
+              Add <strong style={{ color: 'white', fontWeight: 500 }}>RunPod Setup (+$29)</strong> to any package at checkout. We configure a RunPod cloud GPU account with your model pre-loaded, ComfyUI installed, and <strong style={{ color: 'white', fontWeight: 500 }}>$15 starter credit</strong> included. Log in and start generating within minutes — no local hardware, no setup headaches.
+            </p>
+          </div>
+          <button className="btn-gradient" onClick={() => setPage('packages')}
+            style={{ borderRadius: 9999, padding: '13px 28px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.9rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', whiteSpace: 'nowrap', minHeight: 44, flexShrink: 0 }}>
+            Browse Packages <ArrowUpRight size={15} />
+          </button>
+        </div>
       </section>
 
       {/* Section 3 — WAN Video LoRA */}

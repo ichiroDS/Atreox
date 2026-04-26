@@ -12,7 +12,7 @@ const {
 /* ─── shared inner-page hero ─── */
 function PageHero({ badge, title, sub }) {
   return (
-    <section style={{ paddingTop: 160, paddingBottom: 80, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+    <section data-bg-palette="blue-violet" style={{ paddingTop: 160, paddingBottom: 80, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
       <SectionBadge>{badge}</SectionBadge>
       <BlurText text={title} style={{
         fontFamily: "'Instrument Serif', serif", fontStyle: 'italic',
