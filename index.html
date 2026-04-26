@@ -394,6 +394,19 @@
     @media (max-width: 768px) {
       .hero-thumb { display: none !important; }
     }
+
+    /* ── Mobile background blobs: larger + softer blur so they're visible ── */
+    @media (max-width: 768px) {
+      #bg-blob-1 { width: 160vw; height: 160vw; filter: blur(90px); }
+      #bg-blob-2 { width: 140vw; height: 140vw; filter: blur(90px); }
+      #bg-blob-3 { width: 110vw; height: 110vw; filter: blur(70px); }
+    }
+
+    /* ── Consistent section spacing ── */
+    .section-block { padding-top: 80px; padding-bottom: 80px; }
+    @media (max-width: 768px) {
+      .section-block { padding-top: 48px !important; padding-bottom: 48px !important; }
+    }
   </style>
 </head>
 <body>

@@ -3,7 +3,7 @@ const React = window.React;
 const { useState, useEffect, useRef } = React;
 const {
   motion, useInView,
-  ArrowUpRight, Check, Clock, BookOpen, Play,
+  ArrowUpRight, Check, ChevronDown, Clock, BookOpen, Play,
   Sparkles, Zap, Globe, Brain, Layers, CreditCard, Lock, X,
   SectionBadge, SectionHeading, GlassBtn, FooterBar, BlurText,
   PageHero, PageSection, FieldWrap,
@@ -220,7 +220,7 @@ function CoursesPage({ setPage, user, onLoginClick }) {
         </div>
       </PageSection>
 
-      <div style={{ padding: '0 5% 0' }}><FooterBar setPage={setPage} /></div>
+      <div style={{ padding: '0 5% 64px' }}><FooterBar setPage={setPage} /></div>
     </div>
   );
 }
@@ -550,7 +550,7 @@ function ResourcesPage({ setPage }) {
           </div>
         </div>
       </PageSection>
-      <div style={{ padding: '0 5% 0' }}><FooterBar setPage={setPage} /></div>
+      <div style={{ padding: '0 5% 64px' }}><FooterBar setPage={setPage} /></div>
     </div>
   );
 }
@@ -615,9 +615,252 @@ function ContactPage({ setPage }) {
           </div>
         </div>
       </PageSection>
-      <div style={{ padding: '0 5% 0' }}><FooterBar setPage={setPage} /></div>
+      <div style={{ padding: '0 5% 64px' }}><FooterBar setPage={setPage} /></div>
     </div>
   );
 }
 
-Object.assign(window, { CoursesPage, CheckoutPage, ResourcesPage, ContactPage });
+/* ══════════════════════════════════════
+   PACKAGES PAGE
+══════════════════════════════════════ */
+function PackagesPage({ setPage }) {
+  const [openFaq, setOpenFaq] = useState(null);
+  const SENA = '/public/showcase/sena/';
+
+  const tiersRef = useRef(null);
+  const tiersInView = useInView(tiersRef, { once: true, amount: 0.1 });
+  const charsRef = useRef(null);
+  const charsInView = useInView(charsRef, { once: true, amount: 0.2 });
+  const faqRef = useRef(null);
+  const faqInView = useInView(faqRef, { once: true, amount: 0.15 });
+
+  const tiers = [
+    {
+      name: 'Open License',
+      price: '$99',
+      badge: 'Most Popular',
+      accentColor: '#4f8ef7',
+      desc: 'Unlimited buyers. Same character, no restrictions on who else can use it.',
+      features: [
+        'Flux LoRA fine-tune (.safetensors)',
+        '30+ starter images',
+        'Prompt guide + recommended workflows',
+        'Commercial use license (non-exclusive)',
+        'Discord community access',
+      ],
+      cta: 'Buy Now — $99',
+      onCta: () => {},
+      highlight: false,
+      counter: null,
+    },
+    {
+      name: 'Limited License',
+      price: '$249',
+      badge: 'Best Value',
+      accentColor: '#a78bfa',
+      desc: 'Max 5 buyers per character. Public counter shows remaining slots.',
+      features: [
+        'Everything in Open License',
+        'Limited to 5 total copies',
+        'Priority support',
+        'WAN video LoRA included',
+      ],
+      cta: 'Buy Now — $249',
+      onCta: () => {},
+      highlight: true,
+      counter: '0 / 5 sold',
+    },
+    {
+      name: 'Exclusive License',
+      price: '$899 — $1,499',
+      badge: 'One Owner',
+      accentColor: '#f59e0b',
+      desc: 'Sold once, forever. You are the only person who will ever own this character.',
+      features: [
+        'Everything in Limited License',
+        'Sold exactly once — permanently removed after purchase',
+        'Full character ownership',
+        'Custom prompt pack tailored to your niche',
+        'NSFW anatomy LoRA add-on available',
+        '1-on-1 setup call (30 min)',
+      ],
+      cta: 'Contact for Exclusive',
+      onCta: () => setPage('contact'),
+      highlight: false,
+      counter: null,
+    },
+  ];
+
+  const faqs = [
+    { q: 'What format are the LoRAs?', a: 'Flux .safetensors format, compatible with ComfyUI and other Flux-compatible interfaces.' },
+    { q: 'Can I use these for NSFW?', a: 'Yes. All packages include SFW-ready assets. NSFW anatomy LoRA is available as an add-on with Exclusive packages, or separately.' },
+    { q: "What's your refund policy?", a: 'Due to the digital nature of LoRA files, all sales are final. We offer full support to make sure you get results.' },
+  ];
+
+  return (
+    <div>
+
+      {/* ── Hero ── */}
+      <section style={{ paddingTop: 160, paddingBottom: 80, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <SectionBadge>Characters & LoRAs</SectionBadge>
+        <BlurText text="Character Packages" style={{
+          fontFamily: "'Instrument Serif', serif", fontStyle: 'italic',
+          fontSize: 'clamp(2.8rem, 5vw, 4.5rem)', color: 'white',
+          lineHeight: 0.9, letterSpacing: '-2px', marginTop: 20, marginBottom: 20,
+        }} delay={90} />
+        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.55)', maxWidth: 520, margin: '0 auto 12px', lineHeight: 1.65 }}>
+          Production-ready AI influencer characters. Trained, tested, and ready to deploy.
+        </p>
+        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.35)', maxWidth: 560, margin: '0 auto', lineHeight: 1.65 }}>
+          Every package includes a Flux LoRA fine-tune, starter photo set, prompting guide, and commercial license. Pick your exclusivity level.
+        </p>
+      </section>
+
+      {/* ── License Tiers ── */}
+      <section ref={tiersRef} className="section-block" style={{ padding: '80px 5%', maxWidth: 1280, margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, alignItems: 'start' }}>
+          {tiers.map((tier, i) => (
+            <motion.div key={i}
+              initial={{ opacity: 0, y: 40 }}
+              animate={tiersInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.55, delay: i * 0.1 }}
+              className={tier.highlight ? 'liquid-glass-strong glass-card-interactive' : 'liquid-glass glass-card-interactive'}
+              style={{
+                borderRadius: 24, padding: '44px 30px', position: 'relative',
+                border: tier.highlight ? `1px solid ${tier.accentColor}55` : '1px solid rgba(255,255,255,0.07)',
+              }}>
+              {/* Top gradient line */}
+              <div style={{ position: 'absolute', top: 0, left: '10%', right: '10%', height: 1, background: `linear-gradient(90deg, transparent, ${tier.accentColor}66, transparent)` }} />
+
+              {/* Badge */}
+              <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', background: tier.highlight ? `linear-gradient(135deg, ${tier.accentColor}, #6d28d9)` : 'rgba(255,255,255,0.1)', border: tier.highlight ? 'none' : '1px solid rgba(255,255,255,0.15)', borderRadius: 9999, padding: '4px 16px', whiteSpace: 'nowrap' }}>
+                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.68rem', color: 'white', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{tier.badge}</span>
+              </div>
+
+              <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 14, marginTop: 8 }}>{tier.name}</h3>
+              <div style={{ marginBottom: 10 }}>
+                <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(1.8rem, 3vw, 2.4rem)', color: 'white', lineHeight: 1 }}>{tier.price}</span>
+              </div>
+              <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: 'rgba(255,255,255,0.5)', marginBottom: 20, lineHeight: 1.6 }}>{tier.desc}</p>
+
+              {tier.counter && (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: `${tier.accentColor}18`, border: `1px solid ${tier.accentColor}33`, borderRadius: 9999, padding: '5px 14px', marginBottom: 20 }}>
+                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: tier.accentColor, opacity: 0.85 }} />
+                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.78rem', color: tier.accentColor }}>{tier.counter}</span>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
+                {tier.features.map((f, j) => (
+                  <div key={j} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                    <Check size={13} color={tier.accentColor} style={{ marginTop: 3, flexShrink: 0 }} />
+                    <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.83rem', color: 'rgba(255,255,255,0.65)', lineHeight: 1.5 }}>{f}</span>
+                  </div>
+                ))}
+              </div>
+
+              {tier.highlight ? (
+                <button className="btn-gradient" onClick={tier.onCta} style={{ width: '100%', borderRadius: 14, padding: '14px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.93rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  {tier.cta} <ArrowUpRight size={15} />
+                </button>
+              ) : (
+                <button className="liquid-glass btn-glass-hover" onClick={tier.onCta} style={{ width: '100%', borderRadius: 14, padding: '14px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'rgba(255,255,255,0.07)' }}>
+                  {tier.cta} <ArrowUpRight size={15} />
+                </button>
+              )}
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Available Characters ── */}
+      <section ref={charsRef} className="section-block" style={{ padding: '80px 5%', maxWidth: 1280, margin: '0 auto', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={charsInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.65 }}>
+          <div style={{ textAlign: 'center', marginBottom: 40 }}>
+            <SectionBadge>Characters</SectionBadge>
+            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'white', letterSpacing: '-0.03em', lineHeight: 1.05, marginTop: 14 }}>
+              Available Characters
+            </h2>
+          </div>
+
+          <div className="liquid-glass" style={{ borderRadius: 24, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'stretch' }}>
+              <div style={{ flex: '0 0 280px', minWidth: 220, position: 'relative' }}>
+                <img src={SENA + 'hero-1.jpg'} alt="Character #1" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', minHeight: 300 }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, transparent 60%, rgba(0,0,0,0.45))' }} />
+              </div>
+              <div style={{ flex: '1 1 260px', padding: '40px 36px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.22)', borderRadius: 9999, padding: '4px 14px', marginBottom: 18, alignSelf: 'flex-start' }}>
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#f87171', animation: 'pulse-dot 2s ease-in-out infinite' }} />
+                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.7rem', color: '#f87171', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Coming Soon</span>
+                </div>
+                <h3 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(1.8rem, 3vw, 2.4rem)', color: 'white', lineHeight: 1.05, marginBottom: 12, letterSpacing: '-0.02em' }}>
+                  Character #1
+                </h3>
+                <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.65, marginBottom: 28, maxWidth: 380 }}>
+                  First character drops this week. Join the waitlist to be first in line and get early-access pricing.
+                </p>
+                <button className="btn-gradient" onClick={() => setPage('contact')} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 9999, padding: '13px 28px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer', alignSelf: 'flex-start' }}>
+                  Join the Waitlist <ArrowUpRight size={15} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ── Custom Character ── */}
+      <section className="section-block" style={{ padding: '80px 5%', maxWidth: 1280, margin: '0 auto', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="liquid-glass" style={{ borderRadius: 24, padding: '64px 5%', textAlign: 'center', border: '1px solid rgba(255,255,255,0.07)' }}>
+          <SectionBadge>Custom</SectionBadge>
+          <h2 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'white', letterSpacing: '-0.03em', lineHeight: 1.05, marginTop: 16, marginBottom: 14 }}>
+            Need something unique?
+          </h2>
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.5)', maxWidth: 480, margin: '0 auto 32px', lineHeight: 1.65 }}>
+            We build custom AI characters from scratch — your concept, your face, your brand. Flux LoRA + WAN video + full prompt engineering. Starting at $500.
+          </p>
+          <button className="btn-gradient" onClick={() => setPage('contact')} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 9999, padding: '14px 32px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem', cursor: 'pointer' }}>
+            Get a Quote <ArrowUpRight size={15} />
+          </button>
+        </div>
+      </section>
+
+      {/* ── Package FAQ ── */}
+      <section ref={faqRef} className="section-block" style={{ padding: '80px 5%', maxWidth: 900, margin: '0 auto', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={faqInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}
+          style={{ textAlign: 'center', marginBottom: 40 }}>
+          <SectionBadge>FAQ</SectionBadge>
+          <h2 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: 'white', letterSpacing: '-0.03em', marginTop: 14 }}>
+            Package FAQ
+          </h2>
+        </motion.div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {faqs.map(({ q, a }, i) => (
+            <motion.div key={i}
+              initial={{ opacity: 0, y: 20 }} animate={faqInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.06 }}
+              className="liquid-glass" style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <button onClick={() => setOpenFaq(openFaq === i ? null : i)} style={{ width: '100%', padding: '18px 22px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
+                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.9rem', color: 'white', textAlign: 'left', lineHeight: 1.4 }}>{q}</span>
+                <div style={{ transition: 'transform 0.25s ease', transform: openFaq === i ? 'rotate(180deg)' : 'rotate(0deg)', flexShrink: 0 }}>
+                  <ChevronDown size={16} color="rgba(255,255,255,0.4)" />
+                </div>
+              </button>
+              {openFaq === i && (
+                <div className="faq-answer" style={{ padding: '0 22px 18px' }}>
+                  <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', marginBottom: 14 }} />
+                  <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.86rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7 }}>{a}</p>
+                </div>
+              )}
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      <div style={{ padding: '0 5% 64px' }}>
+        <FooterBar setPage={setPage} />
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { CoursesPage, CheckoutPage, ResourcesPage, ContactPage, PackagesPage });

@@ -140,7 +140,7 @@ function FeatureHeroSection({ setPage }) {
   ];
 
   return (
-    <section ref={ref} data-bg-palette="blue-violet" style={{ padding: '100px 5%', maxWidth: 1280, margin: '0 auto' }}>
+    <section ref={ref} data-bg-palette="blue-violet" className="section-block" style={{ padding: '80px 5%', maxWidth: 1280, margin: '0 auto' }}>
       <div style={{ display: 'flex', gap: 64, alignItems: 'center', flexWrap: 'wrap' }}>
         <motion.div style={{ flex: '1 1 340px' }}
           initial={{ opacity: 0, x: -30 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.7 }}>
@@ -188,7 +188,7 @@ function WhyChooseSection() {
     { icon: Users,    color: '#f59e0b', title: 'Closed-loop community',           body: 'Inner Circle Discord launching mid-May. Monthly LoRA drops, NSFW techniques, my live build journal.' },
   ];
   return (
-    <section ref={ref} data-bg-palette="crimson" style={{ padding: '80px 5%', maxWidth: 1280, margin: '0 auto' }}>
+    <section ref={ref} data-bg-palette="crimson" className="section-block" style={{ padding: '80px 5%', maxWidth: 1280, margin: '0 auto' }}>
       <div style={{ textAlign: 'center', marginBottom: 60 }}>
         <motion.h2 initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}
           style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'white', letterSpacing: '-0.03em', lineHeight: 1.05 }}>
@@ -217,9 +217,9 @@ function CtaBannerSection({ setPage }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.3 });
   return (
-    <section ref={ref} data-bg-palette="blue-rose" style={{ padding: '0 5%', maxWidth: 1280, margin: '0 auto 80px' }}>
+    <section ref={ref} data-bg-palette="blue-rose" className="section-block" style={{ padding: '80px 5%', maxWidth: 1280, margin: '0 auto' }}>
       <motion.div initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }}
-        className="liquid-glass" style={{ borderRadius: 28, padding: '80px 5%', textAlign: 'center', background: 'rgba(10,14,30,0.8)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        className="liquid-glass section-block" style={{ borderRadius: 28, padding: '80px 5%', textAlign: 'center', background: 'rgba(10,14,30,0.8)', border: '1px solid rgba(255,255,255,0.08)' }}>
         <h2 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(2rem, 4.5vw, 3.4rem)', color: 'white', letterSpacing: '-0.03em', lineHeight: 1.05, marginBottom: 16 }}>
           Ready to launch your first AI character?
         </h2>
@@ -257,7 +257,7 @@ function FAQSection() {
       a: 'Inner Circle members get monthly LoRA drops, weekly Q&A access, and direct DM with me. Launching mid-May.' },
   ];
   return (
-    <section ref={ref} data-bg-palette="sky-blue" style={{ padding: '80px 5%', maxWidth: 900, margin: '0 auto' }}>
+    <section ref={ref} data-bg-palette="sky-blue" className="section-block" style={{ padding: '80px 5%', maxWidth: 900, margin: '0 auto' }}>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}
         style={{ textAlign: 'center', marginBottom: 48 }}>
         <h2 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: 'clamp(1.8rem, 3.5vw, 2.4rem)', color: 'white', letterSpacing: '-0.03em', marginBottom: 10 }}>
@@ -301,7 +301,7 @@ function HomePage({ setPage }) {
       <WhyChooseSection />
       <CtaBannerSection setPage={setPage} />
       <FAQSection />
-      <div style={{ padding: '0 5%', maxWidth: 900, margin: '0 auto' }}>
+      <div style={{ padding: '0 5% 60px' }}>
         <FooterBar setPage={setPage} />
       </div>
     </div>

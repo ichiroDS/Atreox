@@ -8,7 +8,7 @@ const {
   HomePage,
   CurriculumPage, CommunityPage, PricingPage, AboutPage,
   CoursesPage, ResourcesPage, ContactPage,
-  CheckoutPage,
+  CheckoutPage, PackagesPage,
   PrivacyPage, TermsPage,
 } = window;
 
@@ -52,6 +52,7 @@ function App() {
 
   const renderPage = () => {
     switch (page) {
+      case 'packages':   return <PackagesPage   setPage={navigate} />;
       case 'courses':    return <CoursesPage    setPage={navigate} user={user} onLoginClick={openLogin} />;
       case 'checkout':   return <CheckoutPage   setPage={navigate} user={user} />;
       case 'resources':  return <ResourcesPage  setPage={navigate} />;

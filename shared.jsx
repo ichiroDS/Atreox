@@ -186,10 +186,11 @@ function Navbar({ currentPage, setPage, user, onLoginClick, onLogout }) {
   }, []);
 
   const links = [
-    { id: 'home', label: 'Home' },
-    { id: 'courses', label: 'Courses' },
+    { id: 'home',      label: 'Home' },
+    { id: 'packages',  label: 'Packages' },
+    { id: 'courses',   label: 'Courses' },
     { id: 'resources', label: 'Resources' },
-    { id: 'contact', label: 'Contact' },
+    { id: 'contact',   label: 'Contact' },
   ];
 
   const handleNav = (id) => { setPage(id); setMenuOpen(false); };
@@ -814,6 +815,7 @@ function NodeWorkflow() {
 function FooterBar({ setPage }) {
   const navLinks = [
     { id: 'home',      label: 'Home' },
+    { id: 'packages',  label: 'Packages' },
     { id: 'courses',   label: 'Courses' },
     { id: 'resources', label: 'Resources' },
     { id: 'about',     label: 'About Us' },

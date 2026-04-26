@@ -32,6 +32,7 @@ function PageSection({ children, style }) {
   const inView = useInView(ref, { once: true, amount: 0.15 });
   return (
     <motion.div ref={ref}
+      className="section-block"
       initial={{ opacity: 0, y: 40 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.65 }}
@@ -171,7 +172,7 @@ function CurriculumPage({ setPage }) {
         </div>
       </PageSection>
 
-      <div style={{ padding: '0 5% 60px' }}><FooterBar setPage={setPage} /></div>
+      <div style={{ padding: '0 5% 64px' }}><FooterBar setPage={setPage} /></div>
     </div>
   );
 }
@@ -255,7 +256,7 @@ function CommunityPage({ setPage }) {
         </div>
       </PageSection>
 
-      <div style={{ padding: '0 5% 60px' }}><FooterBar setPage={setPage} /></div>
+      <div style={{ padding: '0 5% 64px' }}><FooterBar setPage={setPage} /></div>
     </div>
   );
 }
@@ -348,7 +349,7 @@ function PricingPage({ setPage }) {
         </div>
       </PageSection>
 
-      <div style={{ padding: '0 5% 60px' }}><FooterBar setPage={setPage} /></div>
+      <div style={{ padding: '0 5% 64px' }}><FooterBar setPage={setPage} /></div>
     </div>
   );
 }
@@ -435,7 +436,7 @@ function AboutPage({ setPage }) {
         </div>
       </PageSection>
 
-      <div style={{ padding: '0 5% 60px' }}><FooterBar setPage={setPage} /></div>
+      <div style={{ padding: '0 5% 64px' }}><FooterBar setPage={setPage} /></div>
     </div>
   );
 }
