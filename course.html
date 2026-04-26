@@ -31,6 +31,11 @@
     #bg-blob-1 { width:75vw; height:75vw; top:-25%; left:-20%; animation:bg-drift-1 20s ease-in-out infinite; }
     #bg-blob-2 { width:65vw; height:65vw; bottom:-20%; right:-20%; animation:bg-drift-2 25s ease-in-out infinite; }
     #bg-blob-3 { width:50vw; height:50vw; top:40%; left:35%; animation:bg-drift-3 16s ease-in-out infinite; }
+    @media (max-width: 768px) {
+      #bg-blob-1 { width: 160vw; height: 160vw; filter: blur(90px); }
+      #bg-blob-2 { width: 140vw; height: 140vw; filter: blur(90px); }
+      #bg-blob-3 { width: 110vw; height: 110vw; filter: blur(70px); }
+    }
     @keyframes bg-drift-1 { 0%,100%{transform:translate(0,0)} 33%{transform:translate(9%,13%)} 66%{transform:translate(-4%,7%)} }
     @keyframes bg-drift-2 { 0%,100%{transform:translate(0,0)} 33%{transform:translate(-11%,-8%)} 66%{transform:translate(7%,-13%)} }
     @keyframes bg-drift-3 { 0%,100%{transform:translate(-50%,-50%)} 50%{transform:translate(-41%,-57%)} }
@@ -442,7 +447,7 @@
     </div>
     <h2>Course Access Required</h2>
     <p>Purchase the <strong style="color:rgba(255,255,255,0.8);font-weight:500">Photoreal Influencer Blueprint</strong> to unlock all 4 lessons, ComfyUI workflows, and installation scripts.</p>
-    <a href="/Atreox.html" class="gate-cta btn-white-glow">
+    <a href="/" class="gate-cta btn-white-glow">
       Get Access
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
     </a>
@@ -452,7 +457,7 @@
 <!-- ── FLOATING NAVBAR ── -->
 <nav id="topnav">
   <!-- Logo -->
-  <a href="/Atreox.html" class="nav-logo">
+  <a href="/" class="nav-logo">
     <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
       <rect width="36" height="36" rx="9" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
       <polygon points="18,7 29,14 29,26 18,29 7,22 7,10" fill="none" stroke="white" stroke-width="1.5"/>
@@ -463,10 +468,10 @@
 
   <!-- Nav links pill -->
   <div class="liquid-glass nav-links">
-    <a href="/Atreox.html" class="nav-pill-btn" onclick="nav('home')">Home</a>
-    <a href="/Atreox.html" class="nav-pill-btn active" onclick="nav('courses')">Courses</a>
-    <a href="/Atreox.html" class="nav-pill-btn" onclick="nav('resources')">Resources</a>
-    <a href="/Atreox.html" class="nav-pill-btn" onclick="nav('contact')">Contact</a>
+    <a href="/" class="nav-pill-btn" onclick="nav('home')">Home</a>
+    <a href="/" class="nav-pill-btn active" onclick="nav('courses')">Courses</a>
+    <a href="/" class="nav-pill-btn" onclick="nav('resources')">Resources</a>
+    <a href="/" class="nav-pill-btn" onclick="nav('contact')">Contact</a>
   </div>
 
   <!-- Right: progress + user + mobile toggle -->

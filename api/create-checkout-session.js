@@ -39,7 +39,7 @@ module.exports = async (req, res) => {
         quantity: 1,
       }],
       success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url:  `${baseUrl}/Atreox.html`,
+      cancel_url:  `${baseUrl}/`,
     };
 
     if (promoCodeId) {
