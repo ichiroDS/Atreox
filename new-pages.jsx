@@ -623,83 +623,198 @@ function ContactPage({ setPage }) {
 /* ══════════════════════════════════════
    PACKAGES PAGE
 ══════════════════════════════════════ */
+
+/* License tier data — shared between PackagesPage and the tier modal */
+const LICENSE_TIERS = [
+  {
+    name: 'Open License',
+    price: '$99',
+    badge: 'Most Popular',
+    accentColor: '#4f8ef7',
+    desc: 'Unlimited buyers. Same character, no restrictions on who else can use it.',
+    features: [
+      'Flux LoRA fine-tune (.safetensors)',
+      '30+ starter images',
+      'Prompt guide + recommended workflows',
+      'Commercial use license (non-exclusive)',
+      'Discord community access',
+    ],
+    cta: 'Buy Now — $99',
+    highlight: false,
+    counter: null,
+  },
+  {
+    name: 'Limited License',
+    price: '$249',
+    badge: 'Best Value',
+    accentColor: '#a78bfa',
+    desc: 'Max 5 buyers per character. Public counter shows remaining slots.',
+    features: [
+      'Everything in Open License',
+      'Limited to 5 total copies',
+      'Priority support',
+      'WAN video LoRA included',
+    ],
+    cta: 'Buy Now — $249',
+    highlight: true,
+    counter: '0 / 5 sold',
+  },
+  {
+    name: 'Exclusive License',
+    price: '$899 – $1,499',
+    badge: 'One Owner',
+    accentColor: '#f59e0b',
+    desc: 'Sold once, forever. You are the only person who will ever own this character.',
+    features: [
+      'Everything in Limited License',
+      'Sold exactly once — permanently removed after purchase',
+      'Full character ownership',
+      'Custom prompt pack tailored to your niche',
+      'NSFW anatomy LoRA add-on available',
+      '1-on-1 setup call (30 min)',
+    ],
+    cta: 'Contact for Exclusive',
+    highlight: false,
+    counter: null,
+    contactOnly: true,
+  },
+];
+
+/* ── Tier Modal ── */
+function TierModal({ character, productType, onClose, onContact }) {
+  return (
+    <div
+      onClick={onClose}
+      style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.94, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        onClick={e => e.stopPropagation()}
+        className="liquid-glass-strong"
+        style={{ borderRadius: 28, padding: 'clamp(24px,4vw,44px)', width: '100%', maxWidth: 820, maxHeight: '90vh', overflowY: 'auto', position: 'relative', background: 'rgba(8,8,16,0.97)' }}>
+        <button onClick={onClose} className="btn-glass-hover" style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,0.07)', border: 'none', width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+          <X size={14} color="rgba(255,255,255,0.55)" />
+        </button>
+
+        <div style={{ marginBottom: 28 }}>
+          <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)' }}>
+            {character} · {productType}
+          </span>
+          <h2 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: 'white', letterSpacing: '-0.02em', marginTop: 6, lineHeight: 1 }}>
+            Choose your license
+          </h2>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, alignItems: 'start' }}>
+          {LICENSE_TIERS.map((tier, i) => (
+            <div key={i}
+              className={tier.highlight ? 'liquid-glass-strong' : 'liquid-glass'}
+              style={{ borderRadius: 20, padding: '28px 22px', position: 'relative', border: tier.highlight ? `1px solid ${tier.accentColor}55` : '1px solid rgba(255,255,255,0.07)' }}>
+              <div style={{ position: 'absolute', top: 0, left: '10%', right: '10%', height: 1, background: `linear-gradient(90deg, transparent, ${tier.accentColor}66, transparent)` }} />
+              {tier.highlight && (
+                <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: `linear-gradient(135deg, ${tier.accentColor}, #6d28d9)`, borderRadius: 9999, padding: '3px 14px', whiteSpace: 'nowrap' }}>
+                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.65rem', color: 'white', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{tier.badge}</span>
+                </div>
+              )}
+              <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 10, marginTop: tier.highlight ? 8 : 0 }}>{tier.name}</h3>
+              <div style={{ marginBottom: 8 }}>
+                <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(1.5rem, 2.5vw, 2rem)', color: 'white', lineHeight: 1, wordBreak: 'break-word' }}>{tier.price}</span>
+              </div>
+              <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: 16, lineHeight: 1.6 }}>{tier.desc}</p>
+              {tier.counter && (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: `${tier.accentColor}18`, border: `1px solid ${tier.accentColor}33`, borderRadius: 9999, padding: '4px 12px', marginBottom: 14 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: tier.accentColor }} />
+                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.72rem', color: tier.accentColor }}>{tier.counter}</span>
+                </div>
+              )}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+                {tier.features.map((f, j) => (
+                  <div key={j} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                    <Check size={12} color={tier.accentColor} style={{ marginTop: 3, flexShrink: 0 }} />
+                    <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.78rem', color: 'rgba(255,255,255,0.62)', lineHeight: 1.5 }}>{f}</span>
+                  </div>
+                ))}
+              </div>
+              {tier.contactOnly ? (
+                <button className="liquid-glass btn-glass-hover" onClick={onContact} style={{ width: '100%', borderRadius: 12, padding: '12px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, background: 'rgba(255,255,255,0.07)', minHeight: 44 }}>
+                  {tier.cta} <ArrowUpRight size={14} />
+                </button>
+              ) : tier.highlight ? (
+                <button className="btn-gradient" onClick={() => {}} style={{ width: '100%', borderRadius: 12, padding: '12px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.88rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, minHeight: 44 }}>
+                  {tier.cta} <ArrowUpRight size={14} />
+                </button>
+              ) : (
+                <button className="liquid-glass btn-glass-hover" onClick={() => {}} style={{ width: '100%', borderRadius: 12, padding: '12px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, background: 'rgba(255,255,255,0.07)', minHeight: 44 }}>
+                  {tier.cta} <ArrowUpRight size={14} />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+/* ── Product type cards (Level 1) ── */
+const PRODUCT_TYPES = [
+  { id: 'lora',     label: 'Character LoRA Only',       subtitle: 'Lightweight. Add to any base model.', bestFor: 'Tinkerers who already know ComfyUI', from: '$49',  color: '#4f8ef7' },
+  { id: 'model',    label: 'Full Flux Fine-tune Model',  subtitle: 'Standalone .safetensors model. Maximum consistency.', bestFor: 'Serious creators who want pro-grade results', from: '$99',  color: '#34d399' },
+  { id: 'wan',      label: 'WAN Video LoRA',             subtitle: 'Animate your character. Talking, walking, posing.', bestFor: 'Creators making video content for TikTok/IG/Fanvue', from: '$149', color: '#a78bfa' },
+  { id: 'complete', label: 'Complete Package',           subtitle: 'Flux fine-tune + WAN LoRA + RunPod setup + custom nodes', bestFor: 'Anyone serious about launching an AI influencer', from: '$249', color: '#f59e0b', popular: true },
+];
+
+/* ── Character card badges ── */
+function TypeBadge({ label, available, color }) {
+  return (
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: available ? `${color}18` : 'rgba(255,255,255,0.05)', border: `1px solid ${available ? color + '40' : 'rgba(255,255,255,0.1)'}`, borderRadius: 6, padding: '3px 8px' }}>
+      <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.65rem', color: available ? color : 'rgba(255,255,255,0.3)', letterSpacing: '0.04em' }}>{label}</span>
+      {available && <span style={{ fontSize: '0.6rem', color }}>✓</span>}
+    </div>
+  );
+}
+
 function PackagesPage({ setPage }) {
   const [openFaq, setOpenFaq] = useState(null);
+  const [modal, setModal] = useState(null); // { character, productType }
   const SENA = '/public/showcase/sena/';
 
-  const tiersRef = useRef(null);
-  const tiersInView = useInView(tiersRef, { once: true, amount: 0.1 });
+  const level1Ref = useRef(null);
+  const level1InView = useInView(level1Ref, { once: true, amount: 0.1 });
   const charsRef = useRef(null);
-  const charsInView = useInView(charsRef, { once: true, amount: 0.2 });
+  const charsInView = useInView(charsRef, { once: true, amount: 0.1 });
   const faqRef = useRef(null);
   const faqInView = useInView(faqRef, { once: true, amount: 0.15 });
 
-  const tiers = [
+  const characters = [
     {
-      name: 'Open License',
-      price: '$99',
-      badge: 'Most Popular',
-      accentColor: '#4f8ef7',
-      desc: 'Unlimited buyers. Same character, no restrictions on who else can use it.',
-      features: [
-        'Flux LoRA fine-tune (.safetensors)',
-        '30+ starter images',
-        'Prompt guide + recommended workflows',
-        'Commercial use license (non-exclusive)',
-        'Discord community access',
-      ],
-      cta: 'Buy Now — $99',
-      onCta: () => {},
-      highlight: false,
-      counter: null,
+      name: 'Sena',
+      img: SENA + 'hero-1.jpg',
+      available: { lora: false, model: false, wan: false, complete: false },
+      badge: 'Coming April 30',
+      badgeColor: '#f87171',
     },
     {
-      name: 'Limited License',
-      price: '$249',
-      badge: 'Best Value',
-      accentColor: '#a78bfa',
-      desc: 'Max 5 buyers per character. Public counter shows remaining slots.',
-      features: [
-        'Everything in Open License',
-        'Limited to 5 total copies',
-        'Priority support',
-        'WAN video LoRA included',
-      ],
-      cta: 'Buy Now — $249',
-      onCta: () => {},
-      highlight: true,
-      counter: '0 / 5 sold',
-    },
-    {
-      name: 'Exclusive License',
-      price: '$899 — $1,499',
-      badge: 'One Owner',
-      accentColor: '#f59e0b',
-      desc: 'Sold once, forever. You are the only person who will ever own this character.',
-      features: [
-        'Everything in Limited License',
-        'Sold exactly once — permanently removed after purchase',
-        'Full character ownership',
-        'Custom prompt pack tailored to your niche',
-        'NSFW anatomy LoRA add-on available',
-        '1-on-1 setup call (30 min)',
-      ],
-      cta: 'Contact for Exclusive',
-      onCta: () => setPage('contact'),
-      highlight: false,
-      counter: null,
+      name: 'More characters',
+      img: null,
+      available: { lora: false, model: false, wan: false, complete: false },
+      badge: 'Dropping every 2 weeks',
+      badgeColor: 'rgba(255,255,255,0.3)',
+      placeholder: true,
     },
   ];
 
   const faqs = [
-    { q: 'What format are the LoRAs?', a: 'Flux .safetensors format, compatible with ComfyUI and other Flux-compatible interfaces.' },
-    { q: 'Can I use these for NSFW?', a: 'Yes. All packages include SFW-ready assets. NSFW anatomy LoRA is available as an add-on with Exclusive packages, or separately.' },
-    { q: "What's your refund policy?", a: 'Due to the digital nature of LoRA files, all sales are final. We offer full support to make sure you get results.' },
+    { q: 'What format are the files?', a: 'Flux fine-tunes and LoRAs ship as .safetensors files, compatible with ComfyUI, Forge, and any Flux-compatible interface. WAN LoRAs are also .safetensors, loaded with the WAN ComfyUI node.' },
+    { q: 'Can I use these for NSFW?', a: 'Yes. All packages include SFW-ready assets. NSFW anatomy LoRA is available as an add-on with Exclusive packages, or separately on request.' },
+    { q: "What's your refund policy?", a: 'Due to the digital nature of LoRA and model files, all sales are final. We offer full support to make sure you get results — contact us if you hit any issues.' },
+    { q: 'Do I need my own GPU?', a: 'No. All packages include a RunPod-ready setup guide. You can be generating within 30 minutes of purchase using cloud GPUs — no local hardware required.' },
+    { q: 'What is the difference between the LoRA and the Full Model?', a: 'The LoRA (~150 MB) adapts on top of a base model you already have. The Full Flux Fine-tune (~12 GB) is a standalone model trained entirely on the character — it produces stronger consistency and better anatomy, but requires more VRAM. Not sure which? Read the How It Works page.' },
   ];
 
   return (
     <div>
-
       {/* ── Hero ── */}
       <section style={{ paddingTop: 160, paddingBottom: 80, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <SectionBadge>Characters & LoRAs</SectionBadge>
@@ -708,121 +823,157 @@ function PackagesPage({ setPage }) {
           fontSize: 'clamp(2.8rem, 5vw, 4.5rem)', color: 'white',
           lineHeight: 0.9, letterSpacing: '-2px', marginTop: 20, marginBottom: 20,
         }} delay={90} />
-        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.55)', maxWidth: 520, margin: '0 auto 12px', lineHeight: 1.65 }}>
+        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.55)', maxWidth: 520, margin: '0 auto 16px', lineHeight: 1.65 }}>
           Production-ready AI influencer characters. Trained, tested, and ready to deploy.
         </p>
-        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.35)', maxWidth: 560, margin: '0 auto', lineHeight: 1.65 }}>
-          Every package includes a Flux LoRA fine-tune, starter photo set, prompting guide, and commercial license. Pick your exclusivity level.
-        </p>
+        <button className="liquid-glass btn-glass-hover" onClick={() => setPage('how-it-works')}
+          style={{ borderRadius: 9999, padding: '9px 20px', border: 'none', color: 'rgba(255,255,255,0.55)', fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.82rem', cursor: 'pointer', background: 'rgba(255,255,255,0.06)', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          Not sure what to buy? Read: How It Works <ArrowUpRight size={13} />
+        </button>
       </section>
 
-      {/* ── License Tiers ── */}
-      <section ref={tiersRef} className="section-block" style={{ padding: '80px 5%', maxWidth: 1280, margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, alignItems: 'start' }}>
-          {tiers.map((tier, i) => (
-            <motion.div key={i}
-              initial={{ opacity: 0, y: 40 }}
-              animate={tiersInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.55, delay: i * 0.1 }}
-              className={tier.highlight ? 'liquid-glass-strong glass-card-interactive' : 'liquid-glass glass-card-interactive'}
-              style={{
-                borderRadius: 24, padding: '44px 30px', position: 'relative',
-                border: tier.highlight ? `1px solid ${tier.accentColor}55` : '1px solid rgba(255,255,255,0.07)',
-              }}>
-              {/* Top gradient line */}
-              <div style={{ position: 'absolute', top: 0, left: '10%', right: '10%', height: 1, background: `linear-gradient(90deg, transparent, ${tier.accentColor}66, transparent)` }} />
+      {/* ── LEVEL 1: Choose what you need ── */}
+      <section ref={level1Ref} className="section-block" style={{ padding: '80px 5%', maxWidth: 1280, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 44 }}>
+          <SectionBadge>Step 1</SectionBadge>
+          <h2 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(1.9rem, 3.5vw, 2.8rem)', color: 'white', letterSpacing: '-0.03em', lineHeight: 1.05, marginTop: 14 }}>
+            Choose what you need
+          </h2>
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.42)', marginTop: 10 }}>
+            Pick a product type, then select a character below
+          </p>
+        </div>
 
-              {/* Badge */}
-              <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', background: tier.highlight ? `linear-gradient(135deg, ${tier.accentColor}, #6d28d9)` : 'rgba(255,255,255,0.1)', border: tier.highlight ? 'none' : '1px solid rgba(255,255,255,0.15)', borderRadius: 9999, padding: '4px 16px', whiteSpace: 'nowrap' }}>
-                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.68rem', color: 'white', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{tier.badge}</span>
-              </div>
-
-              <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 14, marginTop: 8 }}>{tier.name}</h3>
-              <div style={{ marginBottom: 10 }}>
-                <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(1.8rem, 3vw, 2.4rem)', color: 'white', lineHeight: 1 }}>{tier.price}</span>
-              </div>
-              <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: 'rgba(255,255,255,0.5)', marginBottom: 20, lineHeight: 1.6 }}>{tier.desc}</p>
-
-              {tier.counter && (
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: `${tier.accentColor}18`, border: `1px solid ${tier.accentColor}33`, borderRadius: 9999, padding: '5px 14px', marginBottom: 20 }}>
-                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: tier.accentColor, opacity: 0.85 }} />
-                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.78rem', color: tier.accentColor }}>{tier.counter}</span>
+        {/* 4-column product cards */}
+        <style>{`
+          .pkg-type-grid-wrap { display: grid; grid-template-columns: repeat(4,1fr); gap: 18px; }
+          @media(max-width:900px){ .pkg-type-grid-wrap { grid-template-columns: repeat(2,1fr) !important; } }
+          @media(max-width:480px){ .pkg-type-grid-wrap { grid-template-columns: 1fr !important; } }
+        `}</style>
+        <div className="pkg-type-grid-wrap">
+          {PRODUCT_TYPES.map((pt, i) => (
+            <motion.div key={pt.id}
+              initial={{ opacity: 0, y: 30 }} animate={level1InView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.08 }}
+              className="liquid-glass glass-card-interactive"
+              style={{ borderRadius: 20, padding: '28px 22px', border: pt.popular ? `1px solid ${pt.color}44` : '1px solid rgba(255,255,255,0.07)', position: 'relative', display: 'flex', flexDirection: 'column' }}>
+              {pt.popular && (
+                <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: `linear-gradient(135deg, ${pt.color}, #a78bfa)`, borderRadius: 9999, padding: '3px 14px', whiteSpace: 'nowrap' }}>
+                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.62rem', color: 'white', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Most Popular</span>
                 </div>
               )}
+              {/* color top-line */}
+              <div style={{ position: 'absolute', top: 0, left: '10%', right: '10%', height: 1, background: `linear-gradient(90deg, transparent, ${pt.color}55, transparent)` }} />
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
-                {tier.features.map((f, j) => (
-                  <div key={j} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                    <Check size={13} color={tier.accentColor} style={{ marginTop: 3, flexShrink: 0 }} />
-                    <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.83rem', color: 'rgba(255,255,255,0.65)', lineHeight: 1.5 }}>{f}</span>
-                  </div>
-                ))}
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: `${pt.color}18`, border: `1px solid ${pt.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, marginTop: pt.popular ? 8 : 0 }}>
+                <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.1rem', color: pt.color, lineHeight: 1 }}>
+                  {pt.id === 'lora' ? 'L' : pt.id === 'model' ? 'M' : pt.id === 'wan' ? 'V' : 'P'}
+                </span>
               </div>
 
-              {tier.highlight ? (
-                <button className="btn-gradient" onClick={tier.onCta} style={{ width: '100%', borderRadius: 14, padding: '14px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.93rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                  {tier.cta} <ArrowUpRight size={15} />
-                </button>
-              ) : (
-                <button className="liquid-glass btn-glass-hover" onClick={tier.onCta} style={{ width: '100%', borderRadius: 14, padding: '14px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'rgba(255,255,255,0.07)' }}>
-                  {tier.cta} <ArrowUpRight size={15} />
-                </button>
-              )}
+              <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.9rem', color: 'white', marginBottom: 8, lineHeight: 1.3 }}>{pt.label}</h3>
+              <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginBottom: 12, flex: 1 }}>{pt.subtitle}</p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 18 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)' }}>Best for:</span>
+                </div>
+                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.78rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.45 }}>{pt.bestFor}</span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 16 }}>
+                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }}>from</span>
+                <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.5rem', color: pt.color, lineHeight: 1 }}>{pt.from}</span>
+              </div>
+
+              <a href="#characters-section" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, borderRadius: 10, padding: '10px 14px', background: `${pt.color}18`, border: `1px solid ${pt.color}30`, color: pt.color, fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'none', minHeight: 44 }}>
+                See characters <ArrowUpRight size={13} />
+              </a>
             </motion.div>
           ))}
         </div>
+
       </section>
 
-      {/* ── Available Characters ── */}
-      <section ref={charsRef} className="section-block" style={{ padding: '80px 5%', maxWidth: 1280, margin: '0 auto', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={charsInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.65 }}>
-          <div style={{ textAlign: 'center', marginBottom: 40 }}>
-            <SectionBadge>Characters</SectionBadge>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'white', letterSpacing: '-0.03em', lineHeight: 1.05, marginTop: 14 }}>
+      {/* ── LEVEL 2: Available Characters ── */}
+      <section id="characters-section" ref={charsRef} className="section-block" style={{ padding: '80px 5%', maxWidth: 1280, margin: '0 auto', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={charsInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
+          <div style={{ textAlign: 'center', marginBottom: 44 }}>
+            <SectionBadge>Step 2</SectionBadge>
+            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(1.9rem, 3.5vw, 2.8rem)', color: 'white', letterSpacing: '-0.03em', lineHeight: 1.05, marginTop: 14 }}>
               Available Characters
             </h2>
+            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.42)', marginTop: 10 }}>
+              Click "View options" to see all license tiers for a character
+            </p>
           </div>
 
-          <div className="liquid-glass" style={{ borderRadius: 24, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)' }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'stretch' }}>
-              <div style={{ flex: '0 0 280px', minWidth: 220, position: 'relative' }}>
-                <img src={SENA + 'hero-1.jpg'} alt="Character #1" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', minHeight: 300 }} />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, transparent 60%, rgba(0,0,0,0.45))' }} />
-              </div>
-              <div style={{ flex: '1 1 260px', padding: '40px 36px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.22)', borderRadius: 9999, padding: '4px 14px', marginBottom: 18, alignSelf: 'flex-start' }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#f87171', animation: 'pulse-dot 2s ease-in-out infinite' }} />
-                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.7rem', color: '#f87171', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Coming Soon</span>
+          {/* Character grid — 3 cols desktop, 2 tablet, 1 mobile */}
+          <style>{`.char-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}@media(max-width:900px){.char-grid{grid-template-columns:repeat(2,1fr)!important}}@media(max-width:520px){.char-grid{grid-template-columns:1fr!important}}`}</style>
+          <div className="char-grid">
+            {characters.map((char, i) => (
+              <motion.div key={i}
+                initial={{ opacity: 0, y: 30 }} animate={charsInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="liquid-glass glass-card-interactive"
+                style={{ borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column' }}>
+                {/* Image area */}
+                <div style={{ position: 'relative', aspectRatio: '3/4', background: 'rgba(255,255,255,0.04)' }}>
+                  {char.img ? (
+                    <img src={char.img} loading="lazy" alt={char.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  ) : (
+                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.06))' }}>
+                      <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '3rem', color: 'rgba(255,255,255,0.12)' }}>?</span>
+                    </div>
+                  )}
+                  {/* Status badge */}
+                  <div style={{ position: 'absolute', top: 12, left: 12, display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', borderRadius: 9999, padding: '4px 12px', border: `1px solid ${char.badgeColor}44` }}>
+                    <div style={{ width: 5, height: 5, borderRadius: '50%', background: char.badgeColor, animation: 'pulse-dot 2s ease-in-out infinite', flexShrink: 0 }} />
+                    <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.65rem', color: char.badgeColor, letterSpacing: '0.05em' }}>{char.badge}</span>
+                  </div>
                 </div>
-                <h3 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(1.8rem, 3vw, 2.4rem)', color: 'white', lineHeight: 1.05, marginBottom: 12, letterSpacing: '-0.02em' }}>
-                  Character #1
-                </h3>
-                <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.65, marginBottom: 28, maxWidth: 380 }}>
-                  First character drops this week. Join the waitlist to be first in line and get early-access pricing.
-                </p>
-                <button className="btn-gradient" onClick={() => setPage('contact')} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 9999, padding: '13px 28px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer', alignSelf: 'flex-start' }}>
-                  Join the Waitlist <ArrowUpRight size={15} />
+                {/* Card body */}
+                <div style={{ padding: '18px 18px 20px', display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
+                  <h3 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.3rem', color: 'white', lineHeight: 1 }}>{char.name}</h3>
+                  {/* Type badges */}
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    <TypeBadge label="LoRA" available={char.available.lora} color="#4f8ef7" />
+                    <TypeBadge label="Model" available={char.available.model} color="#34d399" />
+                    <TypeBadge label="WAN" available={char.available.wan} color="#a78bfa" />
+                    <TypeBadge label="Pack" available={char.available.complete} color="#f59e0b" />
+                  </div>
+                  {/* CTA */}
+                  {char.placeholder ? (
+                    <button className="liquid-glass" onClick={() => setPage('contact')} style={{ marginTop: 'auto', borderRadius: 10, padding: '11px', border: 'none', color: 'rgba(255,255,255,0.5)', fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.82rem', cursor: 'pointer', background: 'rgba(255,255,255,0.04)', minHeight: 44 }}>
+                      Join waitlist
+                    </button>
+                  ) : (
+                    <button className="btn-gradient" onClick={() => setModal({ character: char.name, productType: 'Complete Package' })} style={{ marginTop: 'auto', borderRadius: 10, padding: '11px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, minHeight: 44 }}>
+                      View options <ArrowUpRight size={14} />
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+
+            {/* Custom Character card */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }} animate={charsInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.2 }}
+              className="liquid-glass glass-card-interactive"
+              style={{ borderRadius: 20, border: '1px dashed rgba(255,255,255,0.15)', display: 'flex', flexDirection: 'column', minHeight: 300 }}>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 28px', textAlign: 'center', gap: 14 }}>
+                <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>+</span>
+                </div>
+                <div>
+                  <h3 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.3rem', color: 'white', marginBottom: 8 }}>Custom Character</h3>
+                  <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.42)', lineHeight: 1.6, maxWidth: 220 }}>Your concept. Your face. Your brand. Starting at $500.</p>
+                </div>
+                <button className="liquid-glass btn-glass-hover" onClick={() => setPage('contact')} style={{ borderRadius: 10, padding: '11px 20px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.82rem', cursor: 'pointer', background: 'rgba(255,255,255,0.07)', minHeight: 44 }}>
+                  Get a Quote
                 </button>
               </div>
-            </div>
+            </motion.div>
           </div>
         </motion.div>
-      </section>
-
-      {/* ── Custom Character ── */}
-      <section className="section-block" style={{ padding: '80px 5%', maxWidth: 1280, margin: '0 auto', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="liquid-glass" style={{ borderRadius: 24, padding: '64px 5%', textAlign: 'center', border: '1px solid rgba(255,255,255,0.07)' }}>
-          <SectionBadge>Custom</SectionBadge>
-          <h2 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'white', letterSpacing: '-0.03em', lineHeight: 1.05, marginTop: 16, marginBottom: 14 }}>
-            Need something unique?
-          </h2>
-          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.5)', maxWidth: 480, margin: '0 auto 32px', lineHeight: 1.65 }}>
-            We build custom AI characters from scratch — your concept, your face, your brand. Flux LoRA + WAN video + full prompt engineering. Starting at $500.
-          </p>
-          <button className="btn-gradient" onClick={() => setPage('contact')} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 9999, padding: '14px 32px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem', cursor: 'pointer' }}>
-            Get a Quote <ArrowUpRight size={15} />
-          </button>
-        </div>
       </section>
 
       {/* ── Package FAQ ── */}
@@ -839,14 +990,14 @@ function PackagesPage({ setPage }) {
             <motion.div key={i}
               initial={{ opacity: 0, y: 20 }} animate={faqInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.06 }}
               className="liquid-glass" style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)' }}>
-              <button onClick={() => setOpenFaq(openFaq === i ? null : i)} style={{ width: '100%', padding: '18px 22px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
+              <button onClick={() => setOpenFaq(openFaq === i ? null : i)} style={{ width: '100%', padding: '18px 22px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, minHeight: 44 }}>
                 <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.9rem', color: 'white', textAlign: 'left', lineHeight: 1.4 }}>{q}</span>
                 <div style={{ transition: 'transform 0.25s ease', transform: openFaq === i ? 'rotate(180deg)' : 'rotate(0deg)', flexShrink: 0 }}>
                   <ChevronDown size={16} color="rgba(255,255,255,0.4)" />
                 </div>
               </button>
               {openFaq === i && (
-                <div className="faq-answer" style={{ padding: '0 22px 18px' }}>
+                <div style={{ padding: '0 22px 18px' }}>
                   <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', marginBottom: 14 }} />
                   <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.86rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7 }}>{a}</p>
                 </div>
@@ -859,8 +1010,242 @@ function PackagesPage({ setPage }) {
       <div style={{ padding: '0 5% 64px' }}>
         <FooterBar setPage={setPage} />
       </div>
+
+      {/* ── Tier Modal ── */}
+      {modal && (
+        <TierModal
+          character={modal.character}
+          productType={modal.productType}
+          onClose={() => setModal(null)}
+          onContact={() => { setModal(null); setPage('contact'); }}
+        />
+      )}
     </div>
   );
 }
 
-Object.assign(window, { CoursesPage, CheckoutPage, ResourcesPage, ContactPage, PackagesPage });
+/* ══════════════════════════════════════
+   HOW IT WORKS PAGE
+══════════════════════════════════════ */
+function HowItWorksPage({ setPage }) {
+  const s1Ref = useRef(null); const s1InView = useInView(s1Ref, { once: true, amount: 0.15 });
+  const s2Ref = useRef(null); const s2InView = useInView(s2Ref, { once: true, amount: 0.15 });
+  const s3Ref = useRef(null); const s3InView = useInView(s3Ref, { once: true, amount: 0.15 });
+  const s4Ref = useRef(null); const s4InView = useInView(s4Ref, { once: true, amount: 0.1 });
+  const s5Ref = useRef(null); const s5InView = useInView(s5Ref, { once: true, amount: 0.15 });
+  const s6Ref = useRef(null); const s6InView = useInView(s6Ref, { once: true, amount: 0.2 });
+
+  const bodyText = { fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.62)', lineHeight: 1.78 };
+  const h2Style = { fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)', color: 'white', letterSpacing: '-0.03em', lineHeight: 1.05, marginBottom: 24 };
+  const mutedNote = { fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.3)', lineHeight: 1.7, fontStyle: 'italic' };
+
+  const decisions = [
+    { trigger: 'I just want to test ComfyUI with a character', result: 'LoRA Only', price: '$49', color: '#4f8ef7' },
+    { trigger: "I'm making a serious AI influencer for static content", result: 'Flux Fine-tune', price: '$99', color: '#34d399' },
+    { trigger: 'I want video content for TikTok / Reels / Fanvue', result: 'WAN Video LoRA', price: '$149', color: '#a78bfa', note: "You'll also need a Flux model" },
+    { trigger: 'I want everything to start a real AI influencer business', result: 'Complete Package', price: '$249', color: '#f59e0b', highlight: true },
+    { trigger: 'I want to learn how to do all this myself', result: 'Course', price: '$39 founder / $79 normal', color: '#f87171' },
+  ];
+
+  const reasons = [
+    { num: '01', title: 'Quality control', body: 'Every model is hand-tuned — not auto-generated. I run 500+ test generations per character before releasing. If it doesn\'t look right, it doesn\'t ship.' },
+    { num: '02', title: 'Time saved', body: 'Training a single character from scratch takes 35+ hours of compute, dataset curation, and iteration. You get the result without the grind.' },
+    { num: '03', title: 'Ongoing support', body: 'Inner Circle Discord, ATREOX-only custom nodes (anti-plastic-skin, anatomy fix), monthly LoRA drops, and real human help — not just a download link.' },
+  ];
+
+  return (
+    <div>
+      {/* Hero */}
+      <section style={{ paddingTop: 160, paddingBottom: 80, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)', maxWidth: 860, margin: '0 auto' }}>
+        <SectionBadge>Education</SectionBadge>
+        <BlurText text="How ATREOX works" style={{
+          fontFamily: "'Instrument Serif', serif", fontStyle: 'italic',
+          fontSize: 'clamp(2.8rem, 5.5vw, 4.5rem)', color: 'white',
+          lineHeight: 0.92, letterSpacing: '-3px', marginTop: 20, marginBottom: 24,
+        }} delay={90} />
+        <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.6 }}
+          style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1.05rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7 }}>
+          The honest guide to AI Influencer creation. What we sell, why it costs what it does, and how to choose the right product.
+        </motion.p>
+      </section>
+
+      {/* Section 1 — What is ComfyUI */}
+      <section ref={s1Ref} data-bg-palette="blue-violet" className="section-block" style={{ padding: '80px 5%', maxWidth: 860, margin: '0 auto' }}>
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={s1InView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.65 }}>
+          <SectionBadge>Section 1</SectionBadge>
+          <h2 style={{ ...h2Style, marginTop: 14 }}>What is ComfyUI?</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <p style={bodyText}>ComfyUI is the most powerful AI image and video generation interface available — and it's open-source. Unlike consumer tools like Midjourney or DALL-E, ComfyUI gives you precise, node-by-node control over every step of the generation pipeline. Want to inject a LoRA at a specific denoising step? Control exactly how much of a base model bleeds through? Run custom post-processing after every image? ComfyUI can do it.</p>
+            <p style={bodyText}>The trade-off is a steeper learning curve. You work with a visual node graph rather than a simple text box. But the results — especially for consistent AI character creation — are in a different league from any closed platform. Professionals who make real money from AI content use ComfyUI.</p>
+            <p style={bodyText}>All ATREOX products are built for ComfyUI. Every package includes a RunPod-ready setup guide and pre-configured workflow files so you can start generating immediately — no prior ComfyUI experience required. The course teaches you the full system from the ground up if you want to go deeper.</p>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Section 2 — Models vs LoRAs */}
+      <section ref={s2Ref} data-bg-palette="teal-violet" className="section-block" style={{ padding: '80px 5%', maxWidth: 1100, margin: '0 auto', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={s2InView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.65 }}>
+          <SectionBadge>Section 2</SectionBadge>
+          <h2 style={{ ...h2Style, marginTop: 14 }}>Models, LoRAs, and the difference</h2>
+
+          {/* Two-column comparison */}
+          <style>{`.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}@media(max-width:600px){.compare-grid{grid-template-columns:1fr!important}}`}</style>
+          <div className="compare-grid" style={{ marginBottom: 28 }}>
+            {/* Left — Base Model */}
+            <div className="liquid-glass" style={{ borderRadius: 20, padding: '32px 28px', border: '1px solid rgba(52,211,153,0.2)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 9, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1rem', color: '#34d399' }}>M</span>
+                </div>
+                <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem', color: 'white' }}>Base Model (Flux Fine-tune)</h3>
+              </div>
+              {[
+                'A complete .safetensors file (~12 GB)',
+                'Standalone — replaces your base model entirely',
+                'Maximum character consistency',
+                'Best results for hero shots and brand-quality images',
+                'Price: from $99',
+              ].map((item, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 9, marginBottom: 12 }}>
+                  <Check size={13} color="#34d399" style={{ marginTop: 3, flexShrink: 0 }} />
+                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.87rem', color: 'rgba(255,255,255,0.65)', lineHeight: 1.5 }}>{item}</span>
+                </div>
+              ))}
+            </div>
+            {/* Right — LoRA */}
+            <div className="liquid-glass" style={{ borderRadius: 20, padding: '32px 28px', border: '1px solid rgba(79,142,247,0.2)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 9, background: 'rgba(79,142,247,0.12)', border: '1px solid rgba(79,142,247,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1rem', color: '#4f8ef7' }}>L</span>
+                </div>
+                <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem', color: 'white' }}>LoRA</h3>
+              </div>
+              {[
+                'A lightweight adapter (~150 MB)',
+                'Loads on top of your existing base model',
+                'Faster to use, but consistency depends on base',
+                'Good for experiments and variations',
+                'Price: from $49',
+              ].map((item, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 9, marginBottom: 12 }}>
+                  <Check size={13} color="#4f8ef7" style={{ marginTop: 3, flexShrink: 0 }} />
+                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.87rem', color: 'rgba(255,255,255,0.65)', lineHeight: 1.5 }}>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <p style={mutedNote}>A full fine-tune costs more because it requires 10 hours of RunPod training on an 80-photo dataset. A LoRA takes 1–2 hours. Both produce different results — the fine-tune wins on consistency and anatomy accuracy; the LoRA wins on flexibility and file size.</p>
+        </motion.div>
+      </section>
+
+      {/* Section 3 — WAN Video LoRA */}
+      <section ref={s3Ref} data-bg-palette="deep-violet" className="section-block" style={{ padding: '80px 5%', maxWidth: 860, margin: '0 auto', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={s3InView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.65 }}>
+          <SectionBadge>Section 3</SectionBadge>
+          <h2 style={{ ...h2Style, marginTop: 14 }}>What is a WAN Video LoRA?</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <p style={bodyText}>WAN is the latest open-source video generation model — and for character consistency, it outperforms Sora, Kling, and every other closed platform. Where other video models drift (your character's face changes frame-to-frame), WAN with a character LoRA holds identity across every frame of a clip.</p>
+            <p style={bodyText}>A WAN LoRA teaches the video model to render your specific character in motion. Without it, asking WAN to animate "Sena walking" gives you a different person every time. With it, your AI influencer talks, walks, and poses with the same face and body across every clip you generate — usable for TikTok, Instagram Reels, and subscription platform video content.</p>
+            <p style={bodyText}>Training a WAN LoRA takes 24 hours of RunPod compute plus dataset curation and iteration. The price reflects that cost, not arbitrary markup. You're buying the output of that work, ready to deploy in under 30 minutes.</p>
+            <div className="liquid-glass" style={{ borderRadius: 14, padding: '16px 20px', border: '1px solid rgba(167,139,250,0.2)', marginTop: 4 }}>
+              <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.82rem', color: '#a78bfa' }}>WAN Video LoRA — from $149</span>
+              <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.35)' }}> · Requires a Flux base model or fine-tune to use alongside</span>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Section 4 — Decision Tree */}
+      <section ref={s4Ref} data-bg-palette="crimson" className="section-block" style={{ padding: '80px 5%', maxWidth: 860, margin: '0 auto', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={s4InView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.65 }}>
+          <SectionBadge>Section 4</SectionBadge>
+          <h2 style={{ ...h2Style, marginTop: 14 }}>What should you buy?</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {decisions.map((d, i) => (
+              <motion.div key={i}
+                initial={{ opacity: 0, x: -20 }} animate={s4InView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.45, delay: i * 0.08 }}
+                className={d.highlight ? 'liquid-glass-strong' : 'liquid-glass'}
+                style={{ borderRadius: 16, padding: '18px 22px', border: d.highlight ? `1px solid ${d.color}44` : '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', position: 'relative' }}>
+                {d.highlight && <div style={{ position: 'absolute', top: 0, left: '10%', right: '10%', height: 1, background: `linear-gradient(90deg, transparent, ${d.color}55, transparent)` }} />}
+                <div style={{ flex: '1 1 220px', minWidth: 0 }}>
+                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.45 }}>"{d.trigger}"</span>
+                  {d.note && <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>Note: {d.note}</p>}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)' }}>→</span>
+                  <div style={{ background: `${d.color}18`, border: `1px solid ${d.color}33`, borderRadius: 8, padding: '6px 12px', textAlign: 'center' }}>
+                    <div style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.82rem', color: d.color, whiteSpace: 'nowrap' }}>{d.result}</div>
+                    <div style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1rem', color: 'white', lineHeight: 1, marginTop: 2, whiteSpace: 'nowrap' }}>{d.price}</div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Section 5 — Why ATREOX over Civitai / DIY */}
+      <section ref={s5Ref} data-bg-palette="blue-rose" className="section-block" style={{ padding: '80px 5%', maxWidth: 860, margin: '0 auto', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={s5InView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.65 }}>
+          <SectionBadge>Section 5</SectionBadge>
+          <h2 style={{ ...h2Style, marginTop: 14 }}>Why ATREOX over Civitai or DIY?</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {reasons.map(({ num, title, body }, i) => (
+              <motion.div key={i}
+                initial={{ opacity: 0, y: 20 }} animate={s5InView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="liquid-glass"
+                style={{ borderRadius: 16, padding: '24px 26px', border: '1px solid rgba(255,255,255,0.07)', display: 'flex', gap: 20, alignItems: 'flex-start' }}>
+                <div style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.6rem', color: 'rgba(255,255,255,0.15)', lineHeight: 1, flexShrink: 0, minWidth: 36 }}>{num}</div>
+                <div>
+                  <h4 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.92rem', color: 'white', marginBottom: 8 }}>{title}</h4>
+                  <p style={bodyText}>{body}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Section 6 — What about the course? */}
+      <section ref={s6Ref} data-bg-palette="sky-blue" className="section-block" style={{ padding: '80px 5%', maxWidth: 860, margin: '0 auto', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={s6InView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.65 }}>
+          <SectionBadge>Section 6</SectionBadge>
+          <h2 style={{ ...h2Style, marginTop: 14 }}>What about the course?</h2>
+          <p style={{ ...bodyText, marginBottom: 16 }}>
+            The course teaches you the entire pipeline from scratch — ComfyUI setup, Flux training, WAN video generation, prompt engineering, and monetization strategy. If you want to build your own characters and understand every step, the course is the right choice.
+          </p>
+          <p style={bodyText}>
+            If you want a working pipeline <em>today</em>, buy a package. You don't need the course to use ATREOX packages — the setup guide gets you generating in under 30 minutes. Many customers buy both: a package to start immediately, and the course to learn how to build their own.
+          </p>
+        </motion.div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="section-block" style={{ padding: '80px 5%', maxWidth: 860, margin: '0 auto', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="liquid-glass" style={{ borderRadius: 24, padding: 'clamp(40px, 6vw, 72px) clamp(24px, 5%, 60px)', textAlign: 'center', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <h2 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)', color: 'white', letterSpacing: '-0.03em', lineHeight: 1.05, marginBottom: 14 }}>
+            Still not sure? Just ask.
+          </h2>
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)', marginBottom: 32, lineHeight: 1.65 }}>
+            I read every message and reply within 24 hours.
+          </p>
+          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button className="btn-gradient" onClick={() => setPage('packages')}
+              style={{ borderRadius: 9999, padding: '14px 32px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', minHeight: 44 }}>
+              Browse Packages <ArrowUpRight size={16} />
+            </button>
+            <button className="liquid-glass btn-glass-hover" onClick={() => setPage('contact')}
+              style={{ borderRadius: 9999, padding: '14px 28px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.9rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', background: 'rgba(255,255,255,0.07)', minHeight: 44 }}>
+              Contact me <ArrowUpRight size={15} />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <div style={{ padding: '0 5% 64px' }}><FooterBar setPage={setPage} /></div>
+    </div>
+  );
+}
+
+Object.assign(window, { CoursesPage, CheckoutPage, ResourcesPage, ContactPage, PackagesPage, HowItWorksPage });

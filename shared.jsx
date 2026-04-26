@@ -186,11 +186,12 @@ function Navbar({ currentPage, setPage, user, onLoginClick, onLogout }) {
   }, []);
 
   const links = [
-    { id: 'home',      label: 'Home' },
-    { id: 'packages',  label: 'Packages' },
-    { id: 'courses',   label: 'Courses' },
-    { id: 'resources', label: 'Resources' },
-    { id: 'contact',   label: 'Contact' },
+    { id: 'home',         label: 'Home' },
+    { id: 'packages',     label: 'Packages' },
+    { id: 'how-it-works', label: 'How It Works' },
+    { id: 'courses',      label: 'Courses' },
+    { id: 'resources',    label: 'Resources' },
+    { id: 'contact',      label: 'Contact' },
   ];
 
   const handleNav = (id) => { setPage(id); setMenuOpen(false); };
@@ -814,12 +815,13 @@ function NodeWorkflow() {
 /* ── Footer ── */
 function FooterBar({ setPage }) {
   const navLinks = [
-    { id: 'home',      label: 'Home' },
-    { id: 'packages',  label: 'Packages' },
-    { id: 'courses',   label: 'Courses' },
-    { id: 'resources', label: 'Resources' },
-    { id: 'about',     label: 'About Us' },
-    { id: 'contact',   label: 'Contact' },
+    { id: 'home',         label: 'Home' },
+    { id: 'packages',     label: 'Packages' },
+    { id: 'how-it-works', label: 'How It Works' },
+    { id: 'courses',      label: 'Courses' },
+    { id: 'resources',    label: 'Resources' },
+    { id: 'about',        label: 'About Us' },
+    { id: 'contact',      label: 'Contact' },
   ];
   return (
     <footer style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 56, marginTop: 60 }}>

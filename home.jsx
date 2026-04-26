@@ -239,7 +239,39 @@ function CtaBannerSection({ setPage }) {
   );
 }
 
-/* ── Section D: FAQ ── */
+/* ── Section D: Educational CTA ── */
+function EducationalCtaSection({ setPage }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, amount: 0.3 });
+  return (
+    <section ref={ref} data-bg-palette="indigo" className="section-block" style={{ padding: '80px 5%', maxWidth: 1280, margin: '0 auto' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.65 }}
+        className="liquid-glass"
+        style={{ borderRadius: 24, padding: 'clamp(36px, 6vw, 72px) clamp(24px, 5%, 80px)', display: 'flex', gap: 40, alignItems: 'center', flexWrap: 'wrap', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ flex: '1 1 280px', minWidth: 0 }}>
+          <div style={{ display: 'inline-block', background: 'rgba(79,142,247,0.12)', border: '1px solid rgba(79,142,247,0.25)', borderRadius: 9999, padding: '4px 14px', marginBottom: 18 }}>
+            <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.7rem', color: '#4f8ef7', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Education</span>
+          </div>
+          <h2 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', color: 'white', lineHeight: 1.05, letterSpacing: '-0.03em', marginBottom: 14 }}>
+            New to AI character creation?
+          </h2>
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.68, maxWidth: 480 }}>
+            Don't buy blind. Read the honest breakdown of what we sell, what it costs, and how to choose.
+          </p>
+        </div>
+        <div style={{ flexShrink: 0 }}>
+          <button className="btn-gradient" onClick={() => setPage('how-it-works')}
+            style={{ borderRadius: 9999, padding: '14px 32px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            Read: How ATREOX works <ArrowUpRight size={16} />
+          </button>
+        </div>
+      </motion.div>
+    </section>
+  );
+}
+
+/* ── Section E: FAQ ── */
 function FAQSection() {
   const ref  = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.15 });
@@ -300,6 +332,7 @@ function HomePage({ setPage }) {
       <FeatureHeroSection setPage={setPage} />
       <WhyChooseSection />
       <CtaBannerSection setPage={setPage} />
+      <EducationalCtaSection setPage={setPage} />
       <FAQSection />
       <div style={{ padding: '0 5% 60px' }}>
         <FooterBar setPage={setPage} />
