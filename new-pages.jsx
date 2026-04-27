@@ -436,7 +436,9 @@ function CheckoutPage({ setPage, user }) {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
                     <div>
                       <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.85rem', color: 'white', marginBottom: 2 }}>{cart.productLabel} · {cart.character}</p>
-                      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>{cart.license}</p>
+                      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>
+                        {cart.licenseType === 'exclusive' ? 'Exclusive License' : cart.licenseType === 'open' ? 'Open License (50% off)' : (cart.license || '')}
+                      </p>
                     </div>
                     <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.9rem', color: 'white', flexShrink: 0 }}>${cart.licensePrice}</span>
                   </div>
@@ -444,11 +446,8 @@ function CheckoutPage({ setPage, user }) {
                 {/* RunPod add-on */}
                 {cart.runpodEnabled && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', background: 'rgba(255,255,255,0.03)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)' }}>
-                    <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.6)' }}>RunPod Setup</span>
-                    {cart.runpodFree
-                      ? <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.82rem', color: '#34d399' }}>FREE</span>
-                      : <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.82rem', color: 'rgba(255,255,255,0.75)' }}>+${cart.runpodPrice}</span>
-                    }
+                    <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.6)' }}>RunPod Setup{cart.runpodPrice === 15 ? ' (discounted)' : ''}</span>
+                    <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.82rem', color: 'rgba(255,255,255,0.75)' }}>+${cart.runpodPrice}</span>
                   </div>
                 )}
                 {/* NSFW add-on */}
@@ -663,7 +662,7 @@ function ContactPage({ setPage }) {
                 <div><label style={labelStyle}>Name</label><FieldWrap><input value={name} onChange={e => setName(e.target.value)} placeholder="Your name" style={inputStyle} /></FieldWrap></div>
                 <div><label style={labelStyle}>Email</label><FieldWrap><input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" style={inputStyle} /></FieldWrap></div>
                 <div><label style={labelStyle}>Message</label><FieldWrap><textarea value={message} onChange={e => setMessage(e.target.value)} placeholder="How can we help?" rows={5} style={{ ...inputStyle, resize: 'none', lineHeight: 1.6 }} /></FieldWrap></div>
-                <button type="submit" className="btn-white-glow" style={{ background: 'white', color: 'black', border: 'none', borderRadius: 10, padding: '14px', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 4 }}>
+                <button type="submit" className="btn-gradient" style={{ borderRadius: 10, padding: '14px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 4 }}>
                   Send Message <ArrowUpRight size={15} />
                 </button>
               </form>
@@ -707,156 +706,99 @@ function ContactPage({ setPage }) {
    PACKAGES PAGE
 ══════════════════════════════════════ */
 
-/* License tier data — shared between PackagesPage and the tier modal */
-const LICENSE_TIERS = [
-  {
-    name: 'Open License',
-    price: '$99',
-    badge: 'Most Popular',
-    accentColor: '#4f8ef7',
-    desc: 'Unlimited buyers. Same character, no restrictions on who else can use it.',
-    features: [
-      'Flux LoRA fine-tune (.safetensors)',
-      '30+ starter images',
-      'Prompt guide + recommended workflows',
-      'Commercial use license (non-exclusive)',
-      'Discord community access',
-    ],
-    cta: 'Buy Now — $99',
-    highlight: false,
-    counter: null,
-  },
-  {
-    name: 'Limited License',
-    price: '$249',
-    badge: 'Best Value',
-    accentColor: '#a78bfa',
-    desc: 'Max 5 buyers per character. Public counter shows remaining slots.',
-    features: [
-      'Everything in Open License',
-      'Limited to 5 total copies',
-      'Priority support',
-      'WAN video LoRA included',
-    ],
-    cta: 'Buy Now — $249',
-    highlight: true,
-    counter: '0 / 5 sold',
-  },
-  {
-    name: 'Exclusive License',
-    price: '$899 – $1,499',
-    badge: 'One Owner',
-    accentColor: '#f59e0b',
-    desc: 'Sold once, forever. You are the only person who will ever own this character.',
-    features: [
-      'Everything in Limited License',
-      'Sold exactly once — permanently removed after purchase',
-      'Full character ownership',
-      'Custom prompt pack tailored to your niche',
-      'NSFW anatomy LoRA add-on available',
-      '1-on-1 setup call (30 min)',
-    ],
-    cta: 'Contact for Exclusive',
-    highlight: false,
-    counter: null,
-    contactOnly: true,
-  },
-];
+/* ── Inline license picker (shown under each character card) ── */
+function CharLicensePicker({ char, selectedCard, licenseByChar, setLicenseByChar, runpodByCard, nsfwEnabled, setPage }) {
+  if (!selectedCard) {
+    return (
+      <div style={{ marginTop: 'auto', borderRadius: 10, padding: '12px 14px', background: 'rgba(255,255,255,0.03)', textAlign: 'center', border: '1px solid rgba(255,255,255,0.06)' }}>
+        <span style={{ fontFamily: 'Barlow, sans-serif', fontSize: '0.76rem', color: 'rgba(255,255,255,0.3)' }}>
+          ↑ Select a product type above first
+        </span>
+      </div>
+    );
+  }
 
-/* ── Tier Modal ── */
-function TierModal({ character, productId, productLabel, runpodEnabled, runpodFree, nsfwEnabled, nsfwFree, setPage, onClose, onContact }) {
-  const handleBuyNow = (tier) => {
-    const licensePrice = tier.name === 'Open License' ? 99 : 249;
+  const pt = PRODUCT_TYPES.find(p => p.id === selectedCard);
+  const basePrice = parseInt(pt.from.replace('$', ''));
+  const openPrice = Math.round(basePrice * 0.5);
+  const license = licenseByChar[char.name] || null;
+  const isComplete = selectedCard === 'complete';
+  const runpodOn = runpodByCard[selectedCard] || false;
+  const runpodCost = runpodOn ? (isComplete ? 15 : 30) : 0;
+  const nsfwActive = nsfwEnabled || isComplete;
+  const nsfwCost = nsfwActive ? (isComplete ? 0 : 49) : 0;
+  const licensePrice = license === 'exclusive' ? basePrice : license === 'open' ? openPrice : 0;
+  const totalPrice = license ? licensePrice + runpodCost + nsfwCost : 0;
+
+  const handleAddToCart = () => {
+    if (!license) return;
     const cartItem = {
       type: 'package',
-      productId,
-      productLabel,
-      character,
-      license: tier.name,
+      productId: selectedCard,
+      productLabel: pt.label,
+      character: char.name,
+      licenseType: license,
+      baseProductPrice: basePrice,
       licensePrice,
-      runpodEnabled: runpodEnabled || false,
-      runpodFree: false,
-      runpodPrice: runpodFree ? 15 : (runpodEnabled ? 30 : 0),
-      nsfwEnabled: nsfwEnabled || false,
-      nsfwFree: nsfwFree || false,
-      nsfwPrice: nsfwFree ? 0 : (nsfwEnabled ? 49 : 0),
+      runpodEnabled: runpodOn,
+      runpodPrice: isComplete ? 15 : 30,
+      nsfwEnabled: nsfwActive,
+      nsfwFree: isComplete,
+      nsfwPrice: isComplete ? 0 : 49,
     };
     localStorage.setItem('atreox_cart_v1', JSON.stringify(cartItem));
-    onClose();
     setPage('checkout');
   };
 
+  const LicenseOption = ({ type, price, accentColor, label, desc, dealTag }) => {
+    const sel = license === type;
+    return (
+      <div
+        onClick={() => setLicenseByChar(prev => ({ ...prev, [char.name]: type }))}
+        style={{
+          borderRadius: 10, padding: '11px 13px',
+          border: sel ? `1px solid ${accentColor}80` : '1px solid rgba(255,255,255,0.08)',
+          background: sel ? `${accentColor}09` : 'rgba(255,255,255,0.02)',
+          cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10,
+          transition: 'border-color 0.2s, background 0.2s',
+          boxShadow: sel ? `0 0 16px ${accentColor}18` : undefined,
+        }}>
+        <div style={{
+          width: 15, height: 15, borderRadius: '50%', flexShrink: 0, transition: 'all 0.2s',
+          border: sel ? `5px solid ${accentColor}` : '2px solid rgba(255,255,255,0.2)',
+        }} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
+            <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.82rem', color: 'white' }}>{label}</span>
+            <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1rem', color: accentColor }}>${price}</span>
+            {dealTag && <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 700, fontSize: '0.58rem', color: accentColor, background: `${accentColor}18`, borderRadius: 9999, padding: '1px 7px', letterSpacing: '0.06em' }}>{dealTag}</span>}
+          </div>
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.69rem', color: 'rgba(255,255,255,0.38)', lineHeight: 1.35, margin: 0 }}>{desc}</p>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div
-      onClick={onClose}
-      style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.94, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-        onClick={e => e.stopPropagation()}
-        className="liquid-glass-strong"
-        style={{ borderRadius: 28, padding: 'clamp(24px,4vw,44px)', width: '100%', maxWidth: 820, maxHeight: '90vh', overflowY: 'auto', position: 'relative', background: 'rgba(8,8,16,0.97)' }}>
-        <button onClick={onClose} className="btn-glass-hover" style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,0.07)', border: 'none', width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-          <X size={14} color="rgba(255,255,255,0.55)" />
-        </button>
-
-        <div style={{ marginBottom: 28 }}>
-          <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)' }}>
-            {character} · {productLabel}
-          </span>
-          <h2 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: 'white', letterSpacing: '-0.02em', marginTop: 6, lineHeight: 1 }}>
-            Choose your license
-          </h2>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, alignItems: 'start' }}>
-          {LICENSE_TIERS.map((tier, i) => (
-            <div key={i}
-              className={tier.highlight ? 'liquid-glass-strong' : 'liquid-glass'}
-              style={{ borderRadius: 20, padding: '28px 22px', position: 'relative', border: tier.highlight ? `1px solid ${tier.accentColor}55` : '1px solid rgba(255,255,255,0.07)' }}>
-              <div style={{ position: 'absolute', top: 0, left: '10%', right: '10%', height: 1, background: `linear-gradient(90deg, transparent, ${tier.accentColor}66, transparent)` }} />
-              {tier.highlight && (
-                <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: `linear-gradient(135deg, ${tier.accentColor}, #6d28d9)`, borderRadius: 9999, padding: '3px 14px', whiteSpace: 'nowrap' }}>
-                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.65rem', color: 'white', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{tier.badge}</span>
-                </div>
-              )}
-              <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 10, marginTop: tier.highlight ? 8 : 0 }}>{tier.name}</h3>
-              <div style={{ marginBottom: 8 }}>
-                <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(1.5rem, 2.5vw, 2rem)', color: 'white', lineHeight: 1, wordBreak: 'break-word' }}>{tier.price}</span>
-              </div>
-              <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: 16, lineHeight: 1.6 }}>{tier.desc}</p>
-              {tier.counter && (
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: `${tier.accentColor}18`, border: `1px solid ${tier.accentColor}33`, borderRadius: 9999, padding: '4px 12px', marginBottom: 14 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: tier.accentColor }} />
-                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.72rem', color: tier.accentColor }}>{tier.counter}</span>
-                </div>
-              )}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
-                {tier.features.map((f, j) => (
-                  <div key={j} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                    <Check size={12} color={tier.accentColor} style={{ marginTop: 3, flexShrink: 0 }} />
-                    <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.78rem', color: 'rgba(255,255,255,0.62)', lineHeight: 1.5 }}>{f}</span>
-                  </div>
-                ))}
-              </div>
-              {tier.contactOnly ? (
-                <button className="liquid-glass btn-glass-hover" onClick={onContact} style={{ width: '100%', borderRadius: 12, padding: '12px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, background: 'rgba(255,255,255,0.07)', minHeight: 44 }}>
-                  {tier.cta} <ArrowUpRight size={14} />
-                </button>
-              ) : tier.highlight ? (
-                <button className="btn-gradient" onClick={() => handleBuyNow(tier)} style={{ width: '100%', borderRadius: 12, padding: '12px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.88rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, minHeight: 44 }}>
-                  {tier.cta} <ArrowUpRight size={14} />
-                </button>
-              ) : (
-                <button className="liquid-glass btn-glass-hover" onClick={() => handleBuyNow(tier)} style={{ width: '100%', borderRadius: 12, padding: '12px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, background: 'rgba(255,255,255,0.07)', minHeight: 44 }}>
-                  {tier.cta} <ArrowUpRight size={14} />
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-      </motion.div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginTop: 4 }}>
+      <LicenseOption type="exclusive" price={basePrice} accentColor="#f59e0b"
+        label="Exclusive" desc="Yours only. Removed from store after purchase." />
+      <LicenseOption type="open" price={openPrice} accentColor="#34d399"
+        label="Open — 50% off" desc="Same quality. Others can also buy this character." dealTag="BEST DEAL" />
+      <button
+        onClick={handleAddToCart}
+        disabled={!license}
+        className={license ? 'btn-gradient' : ''}
+        style={{
+          marginTop: 2, borderRadius: 10, padding: '12px 14px', border: license ? 'none' : '1px solid rgba(255,255,255,0.1)',
+          color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.85rem',
+          cursor: license ? 'pointer' : 'default', width: '100%', minHeight: 44,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+          opacity: license ? 1 : 0.4,
+          background: license ? undefined : 'rgba(255,255,255,0.04)',
+        }}>
+        {license ? <>Go to Checkout — ${totalPrice} <ArrowUpRight size={13} /></> : 'Select a license first'}
+      </button>
     </div>
   );
 }
@@ -981,8 +923,8 @@ function TypeBadge({ label, available, color }) {
 
 function PackagesPage({ setPage }) {
   const [openFaq, setOpenFaq] = useState(null);
-  const [modal, setModal] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
+  const [licenseByChar, setLicenseByChar] = useState({});
   const [runpodByCard, setRunpodByCard] = useState({ lora: false, model: false, wan: false, complete: false });
   const [nsfwEnabled, setNsfwEnabled] = useState(false);
   const SENA = '/public/showcase/sena/';
@@ -1130,7 +1072,7 @@ function PackagesPage({ setPage }) {
               Available Characters
             </h2>
             <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.42)', marginTop: 10 }}>
-              Click "View options" to see all license tiers for a character
+              Select a product above, then choose your license type below
             </p>
           </div>
 
@@ -1173,13 +1115,15 @@ function PackagesPage({ setPage }) {
                       Join waitlist
                     </button>
                   ) : (
-                    <button className="btn-gradient" onClick={() => {
-                      const pid = selectedCard || 'complete';
-                      const ptData = PRODUCT_TYPES.find(p => p.id === pid);
-                      setModal({ character: char.name, productId: pid, productLabel: ptData?.label || 'Complete Package' });
-                    }} style={{ marginTop: 'auto', borderRadius: 10, padding: '11px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, minHeight: 44 }}>
-                      View options <ArrowUpRight size={14} />
-                    </button>
+                    <CharLicensePicker
+                      char={char}
+                      selectedCard={selectedCard}
+                      licenseByChar={licenseByChar}
+                      setLicenseByChar={setLicenseByChar}
+                      runpodByCard={runpodByCard}
+                      nsfwEnabled={nsfwEnabled}
+                      setPage={setPage}
+                    />
                   )}
                 </div>
               </motion.div>
@@ -1242,21 +1186,6 @@ function PackagesPage({ setPage }) {
         <FooterBar setPage={setPage} />
       </div>
 
-      {/* ── Tier Modal ── */}
-      {modal && (
-        <TierModal
-          character={modal.character}
-          productId={modal.productId}
-          productLabel={modal.productLabel}
-          runpodEnabled={runpodByCard[modal.productId] || false}
-          runpodFree={modal.productId === 'complete'}
-          nsfwEnabled={nsfwEnabled || modal.productId === 'complete'}
-          nsfwFree={modal.productId === 'complete'}
-          setPage={setPage}
-          onClose={() => setModal(null)}
-          onContact={() => { setModal(null); setPage('contact'); }}
-        />
-      )}
     </div>
   );
 }

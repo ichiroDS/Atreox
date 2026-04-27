@@ -415,7 +415,38 @@
     /* ── Consistent section spacing ── */
     .section-block { padding-top: 80px; padding-bottom: 80px; }
     @media (max-width: 768px) {
-      .section-block { padding-top: 48px !important; padding-bottom: 48px !important; }
+      .section-block { padding-top: 40px !important; padding-bottom: 40px !important; }
+
+      /* Tighter card grids */
+      .pkg-type-grid-wrap { gap: 12px !important; }
+      .char-grid { gap: 12px !important; }
+      .delivers-grid { gap: 10px !important; }
+
+      /* Reduce hero padding */
+      section[data-bg-palette] { padding-top: 110px !important; padding-bottom: 48px !important; }
+
+      /* Smaller headlines on mobile */
+      h1, h2 { letter-spacing: -0.02em; }
+
+      /* Character card images — limit height on mobile */
+      .char-grid [style*="aspectRatio"] { max-height: 280px; aspect-ratio: unset !important; }
+
+      /* Product cards: tighter padding */
+      .pkg-type-grid-wrap .liquid-glass,
+      .pkg-type-grid-wrap .liquid-glass-strong { padding: 18px 16px !important; }
+
+      /* NSFW add-on: tighter padding */
+      .nsfw-addon-card { padding: 14px 16px !important; }
+
+      /* Footer tighter */
+      footer { margin-top: 32px !important; padding-top: 36px !important; }
+
+      /* Gap reduction for flex layouts */
+      [style*="gap: 60px"] { gap: 28px !important; }
+      [style*="gap: 64px"] { gap: 28px !important; }
+      [style*="gap: 48px"] { gap: 24px !important; }
+      [style*="gap: 36px"] { gap: 20px !important; }
+      [style*="gap: 32px"] { gap: 16px !important; }
     }
   </style>
 </head>
