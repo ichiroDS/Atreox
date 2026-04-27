@@ -985,26 +985,26 @@ function PackagesPage({ setPage }) {
   const characters = [
     {
       name: 'Lina',
-      preview: '/public/showcase/lina/FluxDev_00024__crop.png',
-      gallery: ['/public/showcase/lina/FluxDev_00024__crop.png', '/public/showcase/lina/FluxDev_00025__crop.png', '/public/showcase/lina/FluxDev_00053__crop.png', '/public/showcase/lina/FluxDev_00061__crop.png', '/public/showcase/lina/FluxDev_00082_.png', '/public/showcase/lina/FluxDev_00083_.png'],
+      preview: '/public/showcase/lina/1.png',
+      gallery: ['/public/showcase/lina/1.png', '/public/showcase/lina/2.png', '/public/showcase/lina/3.png', '/public/showcase/lina/4.png', '/public/showcase/lina/5.png', '/public/showcase/lina/6.png'],
       available: { lora: true, model: true, wan: true, complete: true },
     },
     {
       name: 'Rhein',
-      preview: '/public/showcase/rhein/2_crop.jpeg',
-      gallery: ['/public/showcase/rhein/2_crop.jpeg', '/public/showcase/rhein/5_crop.png', '/public/showcase/rhein/54_crop.jpeg', '/public/showcase/rhein/65_crop.png', '/public/showcase/rhein/71_crop.jpeg', '/public/showcase/rhein/FluxDev_00107__crop.png'],
+      preview: '/public/showcase/rhein/1.jpeg',
+      gallery: ['/public/showcase/rhein/1.jpeg', '/public/showcase/rhein/2.jpeg', '/public/showcase/rhein/3.png', '/public/showcase/rhein/4.png', '/public/showcase/rhein/5.jpeg', '/public/showcase/rhein/6.png'],
       available: { lora: true, model: true, wan: true, complete: true },
     },
     {
       name: 'Katie',
-      preview: '/public/showcase/katie/36d9c844-7b1e-4870-b9e1-ad23e2af5c6f.jpeg',
-      gallery: ['/public/showcase/katie/36d9c844-7b1e-4870-b9e1-ad23e2af5c6f.jpeg', '/public/showcase/katie/7265eaa2-e639-46a8-87d9-37868ba364c2.jpeg', '/public/showcase/katie/947a6c81-f562-47a0-999f-50a6d0bdf0d7.jpeg', '/public/showcase/katie/c0cddf81-ae7b-4e53-ab5f-c2997f724532.jpeg', '/public/showcase/katie/dff7017f-7956-4d1a-bc87-be77e32fd3eb.jpeg', '/public/showcase/katie/e97098e6-99e5-49a9-88c7-c1e3a3ade5b5.jpeg'],
+      preview: '/public/showcase/katie/1.jpeg',
+      gallery: ['/public/showcase/katie/1.jpeg', '/public/showcase/katie/2.jpeg', '/public/showcase/katie/3.jpeg', '/public/showcase/katie/4.jpeg', '/public/showcase/katie/5.jpeg', '/public/showcase/katie/6.jpeg'],
       available: { lora: true, model: true, wan: true, complete: true },
     },
     {
       name: 'Sophie',
-      preview: '/public/showcase/sophie/0f930fd0-c1d3-4d7b-8efb-e97dbddf29f2.jpeg',
-      gallery: ['/public/showcase/sophie/0f930fd0-c1d3-4d7b-8efb-e97dbddf29f2.jpeg', '/public/showcase/sophie/11708e61-c65c-4f10-b9ec-b8a2464a30f8.jpeg', '/public/showcase/sophie/3bd4e8b0-c7f2-447b-a0cf-b05f32c27bdb.jpeg', '/public/showcase/sophie/3d7d57e7-a20e-4f22-86bd-2a4da371aebe.jpeg', '/public/showcase/sophie/acfb3d9b-e61c-4cd2-b935-3e7e5c32bab8.jpeg', '/public/showcase/sophie/c1f90223-d53d-42f4-bcde-75b5a59cdecc.jpeg'],
+      preview: '/public/showcase/sophie/1.jpeg',
+      gallery: ['/public/showcase/sophie/1.jpeg', '/public/showcase/sophie/2.jpeg', '/public/showcase/sophie/3.jpeg', '/public/showcase/sophie/4.jpeg', '/public/showcase/sophie/5.jpeg', '/public/showcase/sophie/6.jpeg'],
       available: { lora: true, model: true, wan: true, complete: true },
     },
   ];
