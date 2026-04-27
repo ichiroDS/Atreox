@@ -117,9 +117,12 @@
       position: absolute;
       border-radius: 50%;
       filter: blur(150px);
-      opacity: 0;
+      opacity: 0.16;
       transition: background-color 2s ease, opacity 1.6s ease;
     }
+    #bg-blob-1 { background-color: #3b4ef7; }
+    #bg-blob-2 { background-color: #7c3aed; opacity: 0.16; }
+    #bg-blob-3 { background-color: #4f46e5; opacity: 0.11; }
     #bg-blob-1 {
       width: 75vw; height: 75vw;
       top: -25%; left: -20%;
@@ -257,12 +260,12 @@
 
     /* ── Enhanced interactive card hover ── */
     .glass-card-interactive {
-      transition: transform 0.38s cubic-bezier(0.16,1,0.3,1),
-                  box-shadow 0.38s cubic-bezier(0.16,1,0.3,1);
+      transition: transform 0.4s cubic-bezier(0.4,0,0.2,1),
+                  box-shadow 0.4s cubic-bezier(0.4,0,0.2,1);
     }
     .glass-card-interactive:hover {
-      transform: translateY(-6px) scale(1.012);
-      box-shadow: 0 28px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.13);
+      transform: translateY(-4px);
+      box-shadow: 0 24px 56px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.1);
     }
 
     /* ── Liquid-glass CTA button (blue-purple, truly transparent) ── */
@@ -350,6 +353,12 @@
       box-shadow: 0 0 0 1.5px rgba(255,255,255,0.22), inset 0 1px 1px rgba(255,255,255,0.1);
     }
 
+    /* ── Dropdown open animation ── */
+    @keyframes dropdown-in {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
     /* ── FAQ accordion ── */
     @keyframes accordion-in {
       from { opacity: 0; transform: translateY(-6px); }
@@ -368,9 +377,9 @@
 
     /* ── Nav link pill hover ── */
     .nav-pill-btn {
-      transition: background 0.2s, color 0.2s, transform 0.2s;
+      transition: background 0.2s, color 0.2s;
     }
-    .nav-pill-btn:hover { background: rgba(255,255,255,0.1) !important; color: white !important; transform: scale(1.04); }
+    .nav-pill-btn:hover { background: rgba(255,255,255,0.1) !important; color: white !important; }
 
     /* ── Feature card icon hover ── */
     .feature-icon-wrap {

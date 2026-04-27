@@ -219,7 +219,7 @@ function CtaBannerSection({ setPage }) {
   return (
     <section ref={ref} data-bg-palette="blue-rose" className="section-block" style={{ padding: '80px 5%', maxWidth: 1280, margin: '0 auto' }}>
       <motion.div initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }}
-        className="liquid-glass section-block" style={{ borderRadius: 28, padding: '80px 5%', textAlign: 'center', background: 'rgba(10,14,30,0.8)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        className="liquid-glass section-block" style={{ borderRadius: 28, padding: '80px 5%', textAlign: 'center', border: '1px solid rgba(255,255,255,0.08)' }}>
         <h2 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(2rem, 4.5vw, 3.4rem)', color: 'white', letterSpacing: '-0.03em', lineHeight: 1.05, marginBottom: 16 }}>
           Ready to launch your first AI character?
         </h2>

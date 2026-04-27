@@ -6,7 +6,7 @@ const {
   ArrowUpRight, Check, Star, ChevronRight,
   BookOpen, Users, Clock, Award, Brain, Cpu, Layers, Server,
   MessageSquare, Globe, Sparkles, Code2, GitBranch, Zap, Lock,
-  SectionBadge, SectionHeading, GlassBtn, FooterBar, BlurText
+  SectionBadge, SectionHeading, GlassBtn, FooterBar, BlurText,
 } = window;
 
 /* ─── shared inner-page hero ─── */
@@ -359,37 +359,32 @@ function PricingPage({ setPage }) {
 ══════════════════════════════════════ */
 function AboutPage({ setPage }) {
   const values = [
-    { icon: Cpu, title: 'Node-first pedagogy', body: 'We teach the graph paradigm from day one. Understanding the architecture is the only path to mastery.' },
-    { icon: Layers, title: 'Production over theory', body: 'Every lesson ends with something you can ship. No isolated demos. No sandbox-only techniques.' },
-    { icon: GitBranch, title: 'Open knowledge', body: 'Our community registry, critiques, and workflows are public. We believe generative AI grows when its practitioners share.' },
-    { icon: Globe, title: 'Global cohorts', body: 'Creators from 60+ countries. The diversity of context and style makes every critique session exceptional.' },
+    { icon: Layers, title: 'Production over theory', body: 'Every package and lesson ends with something you can use immediately. No sandbox demos. No theory-only modules.' },
+    { icon: Globe, title: 'No fake scarcity', body: 'Honest pricing. Honest limits. Limited licenses are limited because the model loses value otherwise — not as a sales tactic.' },
+    { icon: Sparkles, title: 'NSFW without shame', body: 'We sell NSFW add-ons openly. The demand is real. The income is real. We treat it as a legitimate creative vertical.' },
+    { icon: GitBranch, title: 'Open knowledge', body: 'The workflows, nodes, and pipeline I use to run Sena Xo are the same ones you get. Nothing held back for a higher tier.' },
   ];
 
-  const team = [
-    { name: 'Orion Vex', role: 'Founder & Curriculum Lead', note: 'Former Stability AI research engineer. Wrote the original ComfyUI ControlNet integration.' },
-    { name: 'Dara Nkosi', role: 'Head of Instruction', note: 'Cinematic AI director. Credits include three Sundance-screened generative films.' },
-    { name: 'Maya Reyes', role: 'Node Engineering Lead', note: 'Published 40+ custom ComfyUI nodes. Author of the ATREOX Sampler Suite.' },
-    { name: 'Leo Park', role: 'Community & Growth', note: 'Built a 50K-member generative art community before joining ATREOX AI.' },
-  ];
+  const stack = ['Flux 1.dev', 'WAN 2.2', 'ComfyUI', 'RunPod', 'Vercel'];
 
   return (
     <div>
       <PageHero
         badge="About"
-        title="Built by practitioners. For practitioners."
-        sub="ATREOX AI was founded by generative artists who were tired of tutorials that stopped at the surface."
+        title="Built by creators. For creators."
+        sub="ATREOX AI is a one-person operation built in public. Every asset sold is one I built and used myself."
       />
 
-      {/* Mission */}
+      {/* Origin story */}
       <PageSection>
         <div style={{ display: 'flex', gap: 60, alignItems: 'flex-start', flexWrap: 'wrap' }}>
           <div style={{ flex: '1 1 320px' }}>
-            <SectionBadge>Our Mission</SectionBadge>
-            <SectionHeading style={{ marginTop: 16, marginBottom: 24 }}>Make the complex inevitable.</SectionHeading>
+            <SectionBadge>The story</SectionBadge>
+            <SectionHeading style={{ marginTop: 16, marginBottom: 24 }}>One founder. One character. Real revenue.</SectionHeading>
             <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.75 }}>
-              ComfyUI is the most powerful open-source generative AI platform ever built. It is also deeply intimidating.
+              I'm Dmytro. I built Sena Xo — an AI influencer generating real income on Fanvue and Telegram — using the exact Flux fine-tunes and ComfyUI pipelines I now sell through ATREOX.
               <br /><br />
-              ATREOX AI exists to bridge that gap—with a curriculum that respects your intelligence, demands production-grade output, and builds the kind of intuition that no YouTube tutorial ever will.
+              There's no team of instructors. No fake credentials. Just a working pipeline, a public build journey, and assets that I use every day.
             </p>
           </div>
           <div style={{ flex: '1 1 320px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
@@ -404,35 +399,28 @@ function AboutPage({ setPage }) {
         </div>
       </PageSection>
 
-      {/* Team */}
-      <PageSection style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ textAlign: 'center', marginBottom: 56 }}>
-          <SectionBadge>The Team</SectionBadge>
-          <SectionHeading style={{ marginTop: 16 }}>People who actually ship.</SectionHeading>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
-          {team.map(({ name, role, note }, i) => (
-            <div key={i} className="liquid-glass" style={{ borderRadius: 20, padding: '28px 24px' }}>
-              {/* avatar placeholder */}
-              <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
-                <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.3rem', color: 'rgba(255,255,255,0.4)' }}>{name[0]}</span>
-              </div>
-              <h4 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.95rem', color: 'white', marginBottom: 4 }}>{name}</h4>
-              <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginBottom: 14, letterSpacing: '0.03em' }}>{role}</p>
-              <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>{note}</p>
+      {/* Tech stack */}
+      <PageSection style={{ borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
+        <SectionBadge>Tech Stack</SectionBadge>
+        <SectionHeading style={{ marginTop: 16, marginBottom: 40 }}>What powers ATREOX.</SectionHeading>
+        <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
+          {stack.map(item => (
+            <div key={item} className="liquid-glass" style={{ borderRadius: 9999, padding: '10px 24px' }}>
+              <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>{item}</span>
             </div>
           ))}
         </div>
       </PageSection>
 
-      {/* Partners */}
+      {/* CTA */}
       <PageSection style={{ borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
-        <SectionBadge>Ecosystem Partners</SectionBadge>
-        <SectionHeading style={{ marginTop: 16, marginBottom: 40 }}>In good company.</SectionHeading>
-        <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
-          {['Midjourney', 'Stable Diffusion', 'RunPod', 'JarvisLabs'].map(p => (
-            <span key={p} style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(1.4rem, 3vw, 2rem)', color: 'rgba(255,255,255,0.35)' }}>{p}</span>
-          ))}
+        <SectionHeading style={{ marginBottom: 20 }}>Ready to start?</SectionHeading>
+        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.5)', maxWidth: 420, margin: '0 auto 36px', lineHeight: 1.65 }}>
+          Browse the packages, read how it works, or jump straight to the course.
+        </p>
+        <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <GlassBtn white onClick={() => setPage('packages')}>Browse Packages <ArrowUpRight size={14} /></GlassBtn>
+          <GlassBtn onClick={() => setPage('how-it-works')}>How It Works <ArrowUpRight size={14} /></GlassBtn>
         </div>
       </PageSection>
 

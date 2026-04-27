@@ -775,8 +775,8 @@ function TierModal({ character, productId, productLabel, runpodEnabled, runpodFr
       license: tier.name,
       licensePrice,
       runpodEnabled: runpodEnabled || false,
-      runpodFree: runpodFree || false,
-      runpodPrice: runpodFree ? 0 : (runpodEnabled ? 30 : 0),
+      runpodFree: false,
+      runpodPrice: runpodFree ? 15 : (runpodEnabled ? 30 : 0),
       nsfwEnabled: nsfwEnabled || false,
       nsfwFree: nsfwFree || false,
       nsfwPrice: nsfwFree ? 0 : (nsfwEnabled ? 49 : 0),
@@ -866,7 +866,7 @@ const PRODUCT_TYPES = [
   { id: 'lora',     label: 'Z-Image Turbo LoRA',  subtitle: 'Ultra-realistic character. 200–500 MB. Loads on top of base model.', bestFor: 'Tinkerers and fast movers who already know ComfyUI', from: '$49',  color: '#4f8ef7' },
   { id: 'model',    label: 'Flux Fine-tune Model', subtitle: 'Ultra-consistent character. 4 files (~24 GB). Standalone.', bestFor: 'Serious creators who want pro-grade results', from: '$99',  color: '#34d399' },
   { id: 'wan',      label: 'WAN Video LoRA',       subtitle: 'Ultra-realistic motion + character consistency in video.', bestFor: 'Creators making video for TikTok / IG / Fanvue', from: '$149', color: '#a78bfa' },
-  { id: 'complete', label: 'Complete Package',     subtitle: 'Flux + Z-Image LoRA + WAN LoRA + workflow + custom nodes.', bestFor: 'Anyone serious about launching an AI influencer', from: '$249', color: '#f59e0b', popular: true },
+  { id: 'complete', label: 'Complete Package',     subtitle: 'Flux + Z-Image LoRA + WAN LoRA + workflow + custom nodes.', bestFor: 'Anyone serious about launching an AI influencer', from: '$299', color: '#f59e0b', popular: true },
 ];
 
 /* ── Product type card ── */
@@ -874,7 +874,7 @@ function ProductTypeCard({ pt, index, inView, selectedCard, onSelect, runpodEnab
   const [showTip, setShowTip] = useState(false);
   const isComplete = pt.id === 'complete';
   const basePrice = parseInt(pt.from.replace('$', ''));
-  const totalPrice = runpodEnabled ? (isComplete ? pt.from : `$${basePrice + 30}`) : pt.from;
+  const totalPrice = runpodEnabled ? `$${basePrice + (isComplete ? 15 : 30)}` : pt.from;
   const isSelected = selectedCard === pt.id;
   const isDimmed = selectedCard !== null && !isSelected;
 
@@ -938,7 +938,7 @@ function ProductTypeCard({ pt, index, inView, selectedCard, onSelect, runpodEnab
           </button>
           {isComplete ? (
             <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.78rem', color: runpodEnabled ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.45)', flex: 1 }}>
-              RunPod Setup — <span style={{ color: '#34d399', fontWeight: 600 }}>FREE</span>
+              RunPod Setup — <span style={{ textDecoration: 'line-through', color: 'rgba(255,255,255,0.3)', fontSize: '0.72rem' }}>$30</span> <span style={{ color: '#34d399', fontWeight: 600 }}>$15</span>
             </span>
           ) : (
             <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.78rem', color: runpodEnabled ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.45)', flex: 1 }}>
@@ -1280,7 +1280,7 @@ function HowItWorksPage({ setPage }) {
     { trigger: 'I just want to test ComfyUI with a character', result: 'LoRA Only', price: '$49', color: '#4f8ef7' },
     { trigger: "I'm making a serious AI influencer for static content", result: 'Flux Fine-tune', price: '$99', color: '#34d399' },
     { trigger: 'I want video content for TikTok / Reels / Fanvue', result: 'WAN Video LoRA', price: '$149', color: '#a78bfa', note: "You'll also need a Flux model" },
-    { trigger: 'I want everything to start a real AI influencer business', result: 'Complete Package', price: '$249', color: '#f59e0b', highlight: true },
+    { trigger: 'I want everything to start a real AI influencer business', result: 'Complete Package', price: '$299', color: '#f59e0b', highlight: true },
     { trigger: 'I want to learn how to do all this myself', result: 'Course', price: '$39 founder / $79 normal', color: '#f87171' },
   ];
 

@@ -27,14 +27,33 @@ class ErrorBoundary extends React.Component {
 }
 
 function App() {
-  const [page, setPage]         = useState(() => localStorage.getItem('atreox_page') || 'home');
+  const [page, setPage]         = useState(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('p') || localStorage.getItem('atreox_page') || 'home';
+  });
   const [user, setUser]         = useState(() => getCurrentUser());
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState('login');
 
+  React.useEffect(() => {
+    history.replaceState({ page }, '', `?p=${page}`);
+  }, []);
+
+  React.useEffect(() => {
+    const onPop = (e) => {
+      const p = e.state?.page || new URLSearchParams(location.search).get('p') || 'home';
+      setPage(p);
+      localStorage.setItem('atreox_page', p);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
   const navigate = (p) => {
     setPage(p);
     localStorage.setItem('atreox_page', p);
+    history.pushState({ page: p }, '', `?p=${p}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

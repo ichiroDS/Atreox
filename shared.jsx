@@ -205,8 +205,8 @@ function Navbar({ currentPage, setPage, user, onLoginClick, onLogout }) {
 
   const links = [
     { id: 'home',         label: 'Home' },
-    { id: 'packages',     label: 'Packages' },
     { id: 'how-it-works', label: 'How It Works' },
+    { id: 'packages',     label: 'Packages' },
     { id: 'courses',      label: 'Courses' },
     { id: 'resources',    label: 'Resources' },
     { id: 'contact',      label: 'Contact' },
@@ -271,7 +271,7 @@ function Navbar({ currentPage, setPage, user, onLoginClick, onLogout }) {
 
                   {/* Dropdown */}
                   {userMenuOpen && (
-                    <div className="liquid-glass-strong" style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, minWidth: 160, borderRadius: 14, padding: '6px', border: '1px solid rgba(255,255,255,0.1)', zIndex: 200, background: 'rgba(10,10,18,0.96)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', boxShadow: '0 16px 48px rgba(0,0,0,0.5)' }}>
+                    <div className="liquid-glass-strong" style={{ position: 'absolute', top: '100%', right: 0, minWidth: 160, borderRadius: '0 0 14px 14px', padding: '4px 6px 6px', border: '1px solid rgba(255,255,255,0.1)', borderTop: 'none', zIndex: 200, background: 'rgba(14,12,24,0.97)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', boxShadow: '0 16px 48px rgba(0,0,0,0.55)', animation: 'dropdown-in 0.18s cubic-bezier(0.16,1,0.3,1) both' }}>
                       <button onClick={() => { setUserMenuOpen(false); setPage('settings'); }} style={{ width: '100%', textAlign: 'left', padding: '10px 14px', borderRadius: 9, border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.8)', fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.84rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 9, transition: 'background 0.15s' }}
                         onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
