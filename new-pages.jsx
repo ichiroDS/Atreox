@@ -911,6 +911,49 @@ function ProductTypeCard({ pt, index, inView, selectedCard, onSelect, runpodEnab
   );
 }
 
+/* ── Character Gallery Modal ── */
+function CharGalleryModal({ char, onClose }) {
+  const [fullImg, setFullImg] = useState(null);
+  useEffect(() => {
+    const fn = e => { if (e.key === 'Escape') { if (fullImg) setFullImg(null); else onClose(); } };
+    document.addEventListener('keydown', fn);
+    return () => document.removeEventListener('keydown', fn);
+  }, [fullImg, onClose]);
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(5,5,15,0.9)', backdropFilter: 'blur(14px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.22 }}
+        onClick={e => e.stopPropagation()}
+        style={{ width: '100%', maxWidth: 800, background: 'rgba(10,10,22,0.97)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 24, overflow: 'hidden', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '22px 26px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
+          <h2 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.8rem', color: 'white', margin: 0 }}>{char.name}</h2>
+          <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <X size={16} />
+          </button>
+        </div>
+        <div style={{ padding: 18, overflowY: 'auto' }}>
+          <style>{`.gal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}@media(max-width:520px){.gal-grid{grid-template-columns:repeat(2,1fr)!important}}.gal-thumb{overflow:hidden;border-radius:10px;cursor:pointer;border:1px solid rgba(255,255,255,0.07);aspect-ratio:1/1}.gal-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.3s ease}.gal-thumb:hover img{transform:scale(1.05)}`}</style>
+          <div className="gal-grid">
+            {char.gallery.map((src, i) => (
+              <div key={i} className="gal-thumb" onClick={() => setFullImg(src)}>
+                <img src={src} loading="lazy" alt={`${char.name} ${i + 1}`} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+      {fullImg && (
+        <div onClick={() => setFullImg(null)} style={{ position: 'fixed', inset: 0, zIndex: 10000, background: 'rgba(0,0,0,0.93)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <img src={fullImg} alt="Full size" style={{ maxWidth: '100%', maxHeight: '90vh', objectFit: 'contain', borderRadius: 12 }} />
+          <button onClick={() => setFullImg(null)} style={{ position: 'absolute', top: 20, right: 20, width: 40, height: 40, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(0,0,0,0.6)', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <X size={18} />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Character card badges ── */
 function TypeBadge({ label, available, color }) {
   return (
@@ -927,7 +970,7 @@ function PackagesPage({ setPage }) {
   const [licenseByChar, setLicenseByChar] = useState({});
   const [runpodByCard, setRunpodByCard] = useState({ lora: false, model: false, wan: false, complete: false });
   const [nsfwEnabled, setNsfwEnabled] = useState(false);
-  const SENA = '/public/showcase/sena/';
+  const [galleryChar, setGalleryChar] = useState(null);
 
   const handleSelectCard = (id) => setSelectedCard(prev => prev === id ? null : id);
   const handleRunpodToggle = (id) => setRunpodByCard(prev => ({ ...prev, [id]: !prev[id] }));
@@ -941,19 +984,28 @@ function PackagesPage({ setPage }) {
 
   const characters = [
     {
-      name: 'Sena',
-      img: SENA + 'hero-1.jpg',
-      available: { lora: false, model: false, wan: false, complete: false },
-      badge: 'Coming April 30',
-      badgeColor: '#f87171',
+      name: 'Lina',
+      preview: ['/public/showcase/lina/FluxDev_00024__crop.png', '/public/showcase/lina/FluxDev_00025__crop.png'],
+      gallery: ['/public/showcase/lina/FluxDev_00024__crop.png', '/public/showcase/lina/FluxDev_00025__crop.png', '/public/showcase/lina/FluxDev_00053__crop.png', '/public/showcase/lina/FluxDev_00061__crop.png', '/public/showcase/lina/FluxDev_00082_.png', '/public/showcase/lina/FluxDev_00083_.png'],
+      available: { lora: true, model: true, wan: true, complete: true },
     },
     {
-      name: 'More characters',
-      img: null,
-      available: { lora: false, model: false, wan: false, complete: false },
-      badge: 'Dropping every 2 weeks',
-      badgeColor: 'rgba(255,255,255,0.3)',
-      placeholder: true,
+      name: 'Rhein',
+      preview: ['/public/showcase/rhein/2_crop.jpeg', '/public/showcase/rhein/5_crop.png'],
+      gallery: ['/public/showcase/rhein/2_crop.jpeg', '/public/showcase/rhein/5_crop.png', '/public/showcase/rhein/54_crop.jpeg', '/public/showcase/rhein/65_crop.png', '/public/showcase/rhein/71_crop.jpeg', '/public/showcase/rhein/FluxDev_00107__crop.png'],
+      available: { lora: true, model: true, wan: true, complete: true },
+    },
+    {
+      name: 'Katie',
+      preview: ['/public/showcase/katie/36d9c844-7b1e-4870-b9e1-ad23e2af5c6f.jpeg', '/public/showcase/katie/7265eaa2-e639-46a8-87d9-37868ba364c2.jpeg'],
+      gallery: ['/public/showcase/katie/36d9c844-7b1e-4870-b9e1-ad23e2af5c6f.jpeg', '/public/showcase/katie/7265eaa2-e639-46a8-87d9-37868ba364c2.jpeg', '/public/showcase/katie/947a6c81-f562-47a0-999f-50a6d0bdf0d7.jpeg', '/public/showcase/katie/c0cddf81-ae7b-4e53-ab5f-c2997f724532.jpeg', '/public/showcase/katie/dff7017f-7956-4d1a-bc87-be77e32fd3eb.jpeg', '/public/showcase/katie/e97098e6-99e5-49a9-88c7-c1e3a3ade5b5.jpeg'],
+      available: { lora: true, model: true, wan: true, complete: true },
+    },
+    {
+      name: 'Sophie',
+      preview: ['/public/showcase/sophie/0f930fd0-c1d3-4d7b-8efb-e97dbddf29f2.jpeg', '/public/showcase/sophie/11708e61-c65c-4f10-b9ec-b8a2464a30f8.jpeg'],
+      gallery: ['/public/showcase/sophie/0f930fd0-c1d3-4d7b-8efb-e97dbddf29f2.jpeg', '/public/showcase/sophie/11708e61-c65c-4f10-b9ec-b8a2464a30f8.jpeg', '/public/showcase/sophie/3bd4e8b0-c7f2-447b-a0cf-b05f32c27bdb.jpeg', '/public/showcase/sophie/3d7d57e7-a20e-4f22-86bd-2a4da371aebe.jpeg', '/public/showcase/sophie/acfb3d9b-e61c-4cd2-b935-3e7e5c32bab8.jpeg', '/public/showcase/sophie/c1f90223-d53d-42f4-bcde-75b5a59cdecc.jpeg'],
+      available: { lora: true, model: true, wan: true, complete: true },
     },
   ];
 
@@ -1077,73 +1129,95 @@ function PackagesPage({ setPage }) {
           </div>
 
           {/* Character grid — 3 cols desktop, 2 tablet, 1 mobile */}
-          <style>{`.char-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}@media(max-width:900px){.char-grid{grid-template-columns:repeat(2,1fr)!important}}@media(max-width:520px){.char-grid{grid-template-columns:1fr!important}}`}</style>
+          <style>{`
+            .char-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+            @media(max-width:900px){.char-grid{grid-template-columns:repeat(2,1fr)!important}}
+            @media(max-width:520px){.char-grid{grid-template-columns:1fr!important}}
+            .char-card{transition:transform 0.3s ease,border-color 0.3s ease,box-shadow 0.3s ease}
+            .char-card:hover{transform:translateY(-4px);border-color:rgba(139,92,246,0.45)!important;box-shadow:0 10px 36px rgba(139,92,246,0.14)}
+            .char-preview-img{transition:transform 0.4s ease}
+            .char-card:hover .char-preview-img{transform:scale(1.04)}
+          `}</style>
           <div className="char-grid">
+            {/* Available character cards */}
             {characters.map((char, i) => (
               <motion.div key={i}
-                initial={{ opacity: 0, y: 30 }} animate={charsInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="liquid-glass glass-card-interactive"
+                initial={{ opacity: 0, y: 30 }} animate={charsInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.09 }}
+                className="liquid-glass char-card"
                 style={{ borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column' }}>
-                {/* Image area */}
-                <div style={{ position: 'relative', aspectRatio: '3/4', background: 'rgba(255,255,255,0.04)' }}>
-                  {char.img ? (
-                    <img src={char.img} loading="lazy" alt={char.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                  ) : (
-                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.06))' }}>
-                      <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '3rem', color: 'rgba(255,255,255,0.12)' }}>?</span>
+                {/* Preview: 2 photos side-by-side in a 1:1 square */}
+                <div style={{ position: 'relative', aspectRatio: '1/1', display: 'flex', overflow: 'hidden', background: 'rgba(255,255,255,0.03)' }}>
+                  {char.preview.map((src, pi) => (
+                    <div key={pi} style={{ width: '50%', height: '100%', overflow: 'hidden', flexShrink: 0 }}>
+                      <img src={src} loading="lazy" alt={`${char.name} ${pi + 1}`} className="char-preview-img"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                     </div>
-                  )}
-                  {/* Status badge */}
-                  <div style={{ position: 'absolute', top: 12, left: 12, display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', borderRadius: 9999, padding: '4px 12px', border: `1px solid ${char.badgeColor}44` }}>
-                    <div style={{ width: 5, height: 5, borderRadius: '50%', background: char.badgeColor, animation: 'pulse-dot 2s ease-in-out infinite', flexShrink: 0 }} />
-                    <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.65rem', color: char.badgeColor, letterSpacing: '0.05em' }}>{char.badge}</span>
-                  </div>
+                  ))}
+                  <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, background: 'rgba(0,0,0,0.5)', pointerEvents: 'none' }} />
                 </div>
                 {/* Card body */}
-                <div style={{ padding: '18px 18px 20px', display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
+                <div style={{ padding: '18px 18px 20px', display: 'flex', flexDirection: 'column', gap: 11, flex: 1 }}>
                   <h3 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.3rem', color: 'white', lineHeight: 1 }}>{char.name}</h3>
-                  {/* Type badges */}
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                     <TypeBadge label="LoRA" available={char.available.lora} color="#4f8ef7" />
                     <TypeBadge label="Model" available={char.available.model} color="#34d399" />
                     <TypeBadge label="WAN" available={char.available.wan} color="#a78bfa" />
                     <TypeBadge label="Pack" available={char.available.complete} color="#f59e0b" />
                   </div>
-                  {/* CTA */}
-                  {char.placeholder ? (
-                    <button className="liquid-glass" onClick={() => setPage('contact')} style={{ marginTop: 'auto', borderRadius: 10, padding: '11px', border: 'none', color: 'rgba(255,255,255,0.5)', fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.82rem', cursor: 'pointer', background: 'rgba(255,255,255,0.04)', minHeight: 44 }}>
-                      Join waitlist
-                    </button>
-                  ) : (
-                    <CharLicensePicker
-                      char={char}
-                      selectedCard={selectedCard}
-                      licenseByChar={licenseByChar}
-                      setLicenseByChar={setLicenseByChar}
-                      runpodByCard={runpodByCard}
-                      nsfwEnabled={nsfwEnabled}
-                      setPage={setPage}
-                    />
-                  )}
+                  <button
+                    onClick={() => setGalleryChar(char)}
+                    className="liquid-glass btn-glass-hover"
+                    style={{ borderRadius: 10, padding: '9px 14px', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.65)', fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.8rem', cursor: 'pointer', background: 'rgba(255,255,255,0.04)', minHeight: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+                    View Gallery <ArrowUpRight size={12} />
+                  </button>
+                  <CharLicensePicker
+                    char={char}
+                    selectedCard={selectedCard}
+                    licenseByChar={licenseByChar}
+                    setLicenseByChar={setLicenseByChar}
+                    runpodByCard={runpodByCard}
+                    nsfwEnabled={nsfwEnabled}
+                    setPage={setPage}
+                  />
                 </div>
               </motion.div>
             ))}
 
-            {/* Custom Character card */}
+            {/* Card 5: Coming Soon */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }} animate={charsInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.2 }}
+              initial={{ opacity: 0, y: 30 }} animate={charsInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.36 }}
+              className="liquid-glass"
+              style={{ borderRadius: 20, border: '1px dashed rgba(255,255,255,0.13)', display: 'flex', flexDirection: 'column', opacity: 0.72 }}>
+              <div style={{ aspectRatio: '1/1', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.05))' }}>
+                <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '5rem', color: 'rgba(255,255,255,0.07)', lineHeight: 1, userSelect: 'none' }}>?</span>
+              </div>
+              <div style={{ padding: '18px 18px 20px', display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <h3 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.3rem', color: 'white', lineHeight: 1 }}>New character</h3>
+                  <span style={{ background: 'rgba(248,113,113,0.12)', border: '1px solid rgba(248,113,113,0.28)', borderRadius: 9999, padding: '2px 10px', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.6rem', color: '#f87171', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>Dropping soon</span>
+                </div>
+                <button className="liquid-glass" onClick={() => setPage('contact')} style={{ marginTop: 'auto', borderRadius: 10, padding: '11px', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.82rem', cursor: 'pointer', background: 'rgba(255,255,255,0.03)', minHeight: 44 }}>
+                  Join waitlist
+                </button>
+              </div>
+            </motion.div>
+
+            {/* Card 6: Custom Character */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }} animate={charsInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.45 }}
               className="liquid-glass glass-card-interactive"
               style={{ borderRadius: 20, border: '1px dashed rgba(255,255,255,0.15)', display: 'flex', flexDirection: 'column', minHeight: 300 }}>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 28px', textAlign: 'center', gap: 14 }}>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '36px 28px', textAlign: 'center', gap: 14 }}>
                 <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>+</span>
+                  <span style={{ fontSize: '1.5rem', lineHeight: 1, color: 'rgba(255,255,255,0.7)' }}>+</span>
                 </div>
                 <div>
                   <h3 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.3rem', color: 'white', marginBottom: 8 }}>Custom Character</h3>
-                  <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.42)', lineHeight: 1.6, maxWidth: 220 }}>Your concept. Your face. Your brand. Starting at $500.</p>
+                  <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.42)', lineHeight: 1.6, maxWidth: 220, margin: '0 auto 10px' }}>Your concept. Your face. Your brand. We build it from scratch.</p>
+                  <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)', margin: 0 }}>Starting at +10% of selected package</p>
                 </div>
                 <button className="liquid-glass btn-glass-hover" onClick={() => setPage('contact')} style={{ borderRadius: 10, padding: '11px 20px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.82rem', cursor: 'pointer', background: 'rgba(255,255,255,0.07)', minHeight: 44 }}>
-                  Get a Quote
+                  Request Custom
                 </button>
               </div>
             </motion.div>
@@ -1186,6 +1260,7 @@ function PackagesPage({ setPage }) {
         <FooterBar setPage={setPage} />
       </div>
 
+      {galleryChar && <CharGalleryModal char={galleryChar} onClose={() => setGalleryChar(null)} />}
     </div>
   );
 }
