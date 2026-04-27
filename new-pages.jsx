@@ -985,25 +985,25 @@ function PackagesPage({ setPage }) {
   const characters = [
     {
       name: 'Lina',
-      preview: ['/public/showcase/lina/FluxDev_00024__crop.png', '/public/showcase/lina/FluxDev_00025__crop.png'],
+      preview: '/public/showcase/lina/FluxDev_00024__crop.png',
       gallery: ['/public/showcase/lina/FluxDev_00024__crop.png', '/public/showcase/lina/FluxDev_00025__crop.png', '/public/showcase/lina/FluxDev_00053__crop.png', '/public/showcase/lina/FluxDev_00061__crop.png', '/public/showcase/lina/FluxDev_00082_.png', '/public/showcase/lina/FluxDev_00083_.png'],
       available: { lora: true, model: true, wan: true, complete: true },
     },
     {
       name: 'Rhein',
-      preview: ['/public/showcase/rhein/2_crop.jpeg', '/public/showcase/rhein/5_crop.png'],
+      preview: '/public/showcase/rhein/2_crop.jpeg',
       gallery: ['/public/showcase/rhein/2_crop.jpeg', '/public/showcase/rhein/5_crop.png', '/public/showcase/rhein/54_crop.jpeg', '/public/showcase/rhein/65_crop.png', '/public/showcase/rhein/71_crop.jpeg', '/public/showcase/rhein/FluxDev_00107__crop.png'],
       available: { lora: true, model: true, wan: true, complete: true },
     },
     {
       name: 'Katie',
-      preview: ['/public/showcase/katie/36d9c844-7b1e-4870-b9e1-ad23e2af5c6f.jpeg', '/public/showcase/katie/7265eaa2-e639-46a8-87d9-37868ba364c2.jpeg'],
+      preview: '/public/showcase/katie/36d9c844-7b1e-4870-b9e1-ad23e2af5c6f.jpeg',
       gallery: ['/public/showcase/katie/36d9c844-7b1e-4870-b9e1-ad23e2af5c6f.jpeg', '/public/showcase/katie/7265eaa2-e639-46a8-87d9-37868ba364c2.jpeg', '/public/showcase/katie/947a6c81-f562-47a0-999f-50a6d0bdf0d7.jpeg', '/public/showcase/katie/c0cddf81-ae7b-4e53-ab5f-c2997f724532.jpeg', '/public/showcase/katie/dff7017f-7956-4d1a-bc87-be77e32fd3eb.jpeg', '/public/showcase/katie/e97098e6-99e5-49a9-88c7-c1e3a3ade5b5.jpeg'],
       available: { lora: true, model: true, wan: true, complete: true },
     },
     {
       name: 'Sophie',
-      preview: ['/public/showcase/sophie/0f930fd0-c1d3-4d7b-8efb-e97dbddf29f2.jpeg', '/public/showcase/sophie/11708e61-c65c-4f10-b9ec-b8a2464a30f8.jpeg'],
+      preview: '/public/showcase/sophie/0f930fd0-c1d3-4d7b-8efb-e97dbddf29f2.jpeg',
       gallery: ['/public/showcase/sophie/0f930fd0-c1d3-4d7b-8efb-e97dbddf29f2.jpeg', '/public/showcase/sophie/11708e61-c65c-4f10-b9ec-b8a2464a30f8.jpeg', '/public/showcase/sophie/3bd4e8b0-c7f2-447b-a0cf-b05f32c27bdb.jpeg', '/public/showcase/sophie/3d7d57e7-a20e-4f22-86bd-2a4da371aebe.jpeg', '/public/showcase/sophie/acfb3d9b-e61c-4cd2-b935-3e7e5c32bab8.jpeg', '/public/showcase/sophie/c1f90223-d53d-42f4-bcde-75b5a59cdecc.jpeg'],
       available: { lora: true, model: true, wan: true, complete: true },
     },
@@ -1137,6 +1137,7 @@ function PackagesPage({ setPage }) {
             .char-card:hover{transform:translateY(-4px);border-color:rgba(139,92,246,0.45)!important;box-shadow:0 10px 36px rgba(139,92,246,0.14)}
             .char-preview-img{transition:transform 0.4s ease}
             .char-card:hover .char-preview-img{transform:scale(1.04)}
+            @media(max-width:520px){.char-preview{height:220px!important}}
           `}</style>
           <div className="char-grid">
             {/* Available character cards */}
@@ -1145,18 +1146,13 @@ function PackagesPage({ setPage }) {
                 initial={{ opacity: 0, y: 30 }} animate={charsInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.09 }}
                 className="liquid-glass char-card"
                 style={{ borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column' }}>
-                {/* Preview: 2 photos side-by-side in a 1:1 square */}
-                <div style={{ position: 'relative', aspectRatio: '1/1', display: 'flex', overflow: 'hidden', background: 'rgba(255,255,255,0.03)' }}>
-                  {char.preview.map((src, pi) => (
-                    <div key={pi} style={{ width: '50%', height: '100%', overflow: 'hidden', flexShrink: 0 }}>
-                      <img src={src} loading="lazy" alt={`${char.name} ${pi + 1}`} className="char-preview-img"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                    </div>
-                  ))}
-                  <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, background: 'rgba(0,0,0,0.5)', pointerEvents: 'none' }} />
+                {/* Preview: single image */}
+                <div className="char-preview" style={{ height: 280, overflow: 'hidden', background: 'rgba(255,255,255,0.03)', flexShrink: 0 }}>
+                  <img src={char.preview} loading="lazy" alt={char.name} className="char-preview-img"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 </div>
                 {/* Card body */}
-                <div style={{ padding: '18px 18px 20px', display: 'flex', flexDirection: 'column', gap: 11, flex: 1 }}>
+                <div style={{ padding: '16px 16px 18px', display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
                   <h3 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.3rem', color: 'white', lineHeight: 1 }}>{char.name}</h3>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                     <TypeBadge label="LoRA" available={char.available.lora} color="#4f8ef7" />
