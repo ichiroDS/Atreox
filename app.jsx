@@ -72,7 +72,7 @@ function App() {
 
   const renderPage = () => {
     switch (page) {
-      case 'meet':         return <MeetAtreoxPage  setPage={navigate} />;
+      case 'meet':         return <HomePage       setPage={navigate} onLoginClick={openLogin} />;
       case 'how-it-works': return <HowItWorksPage  setPage={navigate} />;
       case 'pricing':
       case 'packages':
@@ -82,7 +82,7 @@ function App() {
       case 'settings':     return <SettingsPage   setPage={navigate} user={user} onLogout={handleLogout} />;
       case 'privacy':      return <PrivacyPage    setPage={navigate} />;
       case 'terms':        return <TermsPage      setPage={navigate} />;
-      default:             return <HomePage       setPage={navigate} onLoginClick={openLogin} />;
+      default:             return <MeetAtreoxPage  setPage={navigate} />;
     }
   };
 

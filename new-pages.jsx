@@ -1400,8 +1400,9 @@ function HowItWorksPage({ setPage }) {
 
   return (
     <div>
-      {/* Hero — solid black bg */}
-      <section style={{ position: 'relative', background: '#000', paddingTop: 160, paddingBottom: 0, overflow: 'hidden' }}>
+      {/* Hero */}
+      <section style={{ position: 'relative', paddingTop: 160, paddingBottom: 0, overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, #000 0%, #000 80%, transparent 100%)', zIndex: 0 }} />
         <div style={{ textAlign: 'center', paddingLeft: '5%', paddingRight: '5%', maxWidth: 860, margin: '0 auto', position: 'relative', zIndex: 2 }}>
           <SectionBadge>Education</SectionBadge>
           <BlurText text="How ATREOX works" style={{
@@ -1812,8 +1813,9 @@ function MeetAtreoxPage({ setPage }) {
 
   return (
     <div>
-      {/* Section 1 — Quote Hero (solid black) */}
-      <section style={{ position: 'relative', background: '#000', paddingTop: 160, paddingBottom: 0, overflow: 'hidden', minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+      {/* Section 1 — Quote Hero */}
+      <section style={{ position: 'relative', paddingTop: 160, paddingBottom: 0, overflow: 'hidden', minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, #000 0%, #000 80%, transparent 100%)', zIndex: 0 }} />
         {/* Particle canvas */}
         <style>{`
           @keyframes meet-float-1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(18px,-22px) scale(1.15)} }
