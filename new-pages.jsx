@@ -919,7 +919,7 @@ function CharGalleryModal({ char, onClose }) {
     document.addEventListener('keydown', fn);
     return () => document.removeEventListener('keydown', fn);
   }, [fullImg, onClose]);
-  return (
+  const content = (
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(5,5,15,0.9)', backdropFilter: 'blur(14px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.22 }}
@@ -952,6 +952,7 @@ function CharGalleryModal({ char, onClose }) {
       )}
     </div>
   );
+  return window.ReactDOM.createPortal(content, document.body);
 }
 
 /* ── Character card badges ── */
@@ -1415,8 +1416,7 @@ function HowItWorksPage({ setPage }) {
             The honest guide to AI Influencer creation. What we sell, why it costs what it does, and how to choose the right product.
           </motion.p>
         </div>
-        {/* Fade to dark */}
-        <div style={{ height: 100, background: 'linear-gradient(to bottom, transparent, #050510)', position: 'relative', zIndex: 2 }} />
+        <div style={{ height: 100, position: 'relative', zIndex: 2 }} />
       </section>
 
       {/* Section 0 — The 3-step version (still on dark bg) */}
@@ -1855,14 +1855,14 @@ function MeetAtreoxPage({ setPage }) {
         ))}
 
         {/* Quote text */}
-        <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '0 5%', maxWidth: 860, margin: '0 auto' }}>
+        <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '0 5%', maxWidth: 1100, margin: '0 auto' }}>
           <motion.p
             initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
-            style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: 'clamp(2rem, 5vw, 3.8rem)', color: 'white', lineHeight: 1.18, marginBottom: 20, letterSpacing: '-0.01em', fontStyle: 'normal' }}>
-            "Creativity is intelligence<br />having fun."
+            style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: 'clamp(1.5rem, 3.5vw, 2.8rem)', color: 'white', lineHeight: 1.18, marginBottom: 16, letterSpacing: '-0.01em', fontStyle: 'normal', whiteSpace: 'normal' }}>
+            Creativity is intelligence having fun.
           </motion.p>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.7 }}
-            style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.38)', marginBottom: 56, letterSpacing: '0.02em' }}>
+            style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: 'clamp(1.5rem, 3.5vw, 2.8rem)', color: 'white', marginBottom: 56, letterSpacing: '-0.01em' }}>
             — Albert Einstein
           </motion.p>
           <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.0 }}
@@ -1871,8 +1871,7 @@ function MeetAtreoxPage({ setPage }) {
           </motion.p>
         </div>
 
-        {/* Fade to next section */}
-        <div style={{ position: 'relative', zIndex: 2, width: '100%', height: 140, marginTop: 80, background: 'linear-gradient(to bottom, transparent, #050510)', flexShrink: 0 }} />
+        <div style={{ position: 'relative', zIndex: 2, width: '100%', height: 140, marginTop: 80, flexShrink: 0 }} />
       </section>
 
       {/* Section 1b — Hook stats */}

@@ -204,7 +204,7 @@ function Navbar({ currentPage, setPage, user, onLoginClick, onLogout }) {
   }, [userMenuOpen]);
 
   const links = [
-    { id: 'meet',         label: 'Meet ATREOX' },
+    { id: 'home',         label: 'Home' },
     { id: 'how-it-works', label: 'How It Works' },
     { id: 'pricing',      label: 'Pricing' },
     { id: 'contact',      label: 'Contact' },
@@ -216,7 +216,7 @@ function Navbar({ currentPage, setPage, user, onLoginClick, onLogout }) {
     <>
       <nav style={{ position: 'fixed', top: 16, left: 0, right: 0, zIndex: 100, padding: '0 1.5rem', display: 'flex', alignItems: 'center', gap: 12 }}>
         {/* Logo */}
-        <div onClick={() => handleNav('home')} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', flex: '1 1 0', minWidth: 0 }}>
+        <div onClick={() => handleNav('meet')} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', flex: '1 1 0', minWidth: 0 }}>
           <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
             <rect width="36" height="36" rx="9" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.18)" strokeWidth="1"/>
             <polygon points="18,7 29,14 29,26 18,29 7,22 7,10" fill="none" stroke="white" strokeWidth="1.5"/>
@@ -876,7 +876,7 @@ function NodeWorkflow() {
 /* ── Footer ── */
 function FooterBar({ setPage }) {
   const navLinks = [
-    { id: 'meet',         label: 'Meet ATREOX' },
+    { id: 'home',         label: 'Home' },
     { id: 'how-it-works', label: 'How It Works' },
     { id: 'pricing',      label: 'Pricing' },
     { id: 'contact',      label: 'Contact' },
