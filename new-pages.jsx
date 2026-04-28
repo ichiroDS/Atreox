@@ -985,25 +985,25 @@ function PackagesPage({ setPage }) {
   const characters = [
     {
       name: 'Lina',
-      preview: '/public/showcase/lina/1.png',
+      preview: '/public/showcase/lina/4.jpeg',
       gallery: ['/public/showcase/lina/1.png', '/public/showcase/lina/2.png', '/public/showcase/lina/3.png', '/public/showcase/lina/4.png', '/public/showcase/lina/5.png', '/public/showcase/lina/6.png'],
       available: { lora: true, model: true, wan: true, complete: true },
     },
     {
       name: 'Rhein',
-      preview: '/public/showcase/rhein/1.jpeg',
+      preview: '/public/showcase/rhein/4.jpeg',
       gallery: ['/public/showcase/rhein/1.jpeg', '/public/showcase/rhein/2.jpeg', '/public/showcase/rhein/3.png', '/public/showcase/rhein/4.png', '/public/showcase/rhein/5.jpeg', '/public/showcase/rhein/6.png'],
       available: { lora: true, model: true, wan: true, complete: true },
     },
     {
       name: 'Katie',
-      preview: '/public/showcase/katie/1.jpeg',
+      preview: '/public/showcase/katie/3.jpeg',
       gallery: ['/public/showcase/katie/1.jpeg', '/public/showcase/katie/2.jpeg', '/public/showcase/katie/3.jpeg', '/public/showcase/katie/4.jpeg', '/public/showcase/katie/5.jpeg', '/public/showcase/katie/6.jpeg'],
       available: { lora: true, model: true, wan: true, complete: true },
     },
     {
       name: 'Sophie',
-      preview: '/public/showcase/sophie/1.jpeg',
+      preview: '/public/showcase/sophie/2.jpeg',
       gallery: ['/public/showcase/sophie/1.jpeg', '/public/showcase/sophie/2.jpeg', '/public/showcase/sophie/3.jpeg', '/public/showcase/sophie/4.jpeg', '/public/showcase/sophie/5.jpeg', '/public/showcase/sophie/6.jpeg'],
       available: { lora: true, model: true, wan: true, complete: true },
     },
@@ -1137,7 +1137,7 @@ function PackagesPage({ setPage }) {
             .char-card:hover{transform:translateY(-4px);border-color:rgba(139,92,246,0.45)!important;box-shadow:0 10px 36px rgba(139,92,246,0.14)}
             .char-preview-img{transition:transform 0.4s ease}
             .char-card:hover .char-preview-img{transform:scale(1.04)}
-            @media(max-width:520px){.char-preview{height:220px!important}}
+            @media(max-width:768px){.char-preview{height:280px!important}}
           `}</style>
           <div className="char-grid">
             {/* Available character cards */}
@@ -1147,7 +1147,7 @@ function PackagesPage({ setPage }) {
                 className="liquid-glass char-card"
                 style={{ borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column' }}>
                 {/* Preview: single image */}
-                <div className="char-preview" style={{ height: 280, overflow: 'hidden', background: 'rgba(255,255,255,0.03)', flexShrink: 0 }}>
+                <div className="char-preview" style={{ height: 380, overflow: 'hidden', background: 'rgba(255,255,255,0.03)', flexShrink: 0 }}>
                   <img src={char.preview} loading="lazy" alt={char.name} className="char-preview-img"
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 </div>
@@ -1304,6 +1304,35 @@ function HowItWorksPage({ setPage }) {
           style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1.05rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7 }}>
           The honest guide to AI Influencer creation. What we sell, why it costs what it does, and how to choose the right product.
         </motion.p>
+      </section>
+
+      {/* Section 0 — The 3-step version */}
+      <section data-bg-palette="blue-violet" className="section-block" style={{ padding: '80px 5%', maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 52 }}>
+          <h2 style={{ ...h2Style, marginBottom: 16 }}>The 3-step version</h2>
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.48)', lineHeight: 1.65 }}>
+            Here's what the whole process looks like — no jargon.
+          </p>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20, marginBottom: 52 }}>
+          {[
+            { step: '01', title: 'Pick a character', body: 'Browse our ready-made characters or request a custom one. Each one is a unique AI person with a consistent face.' },
+            { step: '02', title: 'Get your files', body: 'You receive an AI model that generates unlimited photos and videos of your character. Plus workflows, guides, and starter content.' },
+            { step: '03', title: 'Launch and grow', body: 'Post on your platforms. Build an audience. Start earning. We give you the tools — you run the show.' },
+          ].map(({ step, title, body }, i) => (
+            <div key={i} className="liquid-glass" style={{ borderRadius: 24, padding: '36px 30px', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '3rem', color: 'rgba(255,255,255,0.08)', lineHeight: 1, marginBottom: 16 }}>{step}</div>
+              <h3 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.5rem', color: 'white', lineHeight: 1.1, marginBottom: 12 }}>{title}</h3>
+              <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.65 }}>{body}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ height: 1, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)', marginBottom: 20 }} />
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.28)', fontStyle: 'italic' }}>
+            Want the technical details? Keep reading.
+          </p>
+        </div>
       </section>
 
       {/* Section 1 — What is ComfyUI */}
@@ -1650,4 +1679,144 @@ function SettingsPage({ setPage, user, onLogout }) {
   );
 }
 
-Object.assign(window, { CoursesPage, CheckoutPage, ResourcesPage, ContactPage, PackagesPage, HowItWorksPage, SettingsPage });
+/* ══════════════════════════════════════
+   MEET ATREOX PAGE
+══════════════════════════════════════ */
+function MeetAtreoxPage({ setPage }) {
+  const [openFaq, setOpenFaq] = useState(null);
+  const s2Ref = useRef(null); const s2InView = useInView(s2Ref, { once: true, amount: 0.15 });
+  const s3Ref = useRef(null); const s3InView = useInView(s3Ref, { once: true, amount: 0.15 });
+  const s4Ref = useRef(null); const s4InView = useInView(s4Ref, { once: true, amount: 0.15 });
+  const s5Ref = useRef(null); const s5InView = useInView(s5Ref, { once: true, amount: 0.15 });
+
+  const bodyText = { fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.65)', lineHeight: 1.82 };
+  const h2Style = { fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(2rem, 4vw, 3.2rem)', color: 'white', letterSpacing: '-0.03em', lineHeight: 1.05, marginBottom: 28 };
+
+  const faqs = [
+    { q: 'Is this legal?', a: 'Yes. AI-generated content is legal to create and monetize. You own the character and all generated content.' },
+    { q: 'Do I need to know anything about AI?', a: 'No. Our packages come ready to use. If you want to learn the process, we have a course for that too.' },
+    { q: 'How much can I actually make?', a: 'It depends on your niche, effort, and audience. Some creators make $500/month. Others make $20,000+. We give you the tools — you bring the hustle.' },
+  ];
+
+  return (
+    <div>
+      {/* Section 1 — Hook */}
+      <section data-bg-palette="blue-violet" style={{ paddingTop: 160, paddingBottom: 100, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)', maxWidth: 960, margin: '0 auto' }}>
+        <BlurText text="People are making $5,000–$30,000/month with AI influencers."
+          style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(2.4rem, 5vw, 4rem)', color: 'white', lineHeight: 1.0, letterSpacing: '-2px', marginBottom: 28 }}
+          delay={80}
+        />
+        <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.6 }}
+          style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1.1rem', color: 'rgba(255,255,255,0.52)', lineHeight: 1.72, maxWidth: 620, margin: '0 auto 56px' }}>
+          No face. No camera. No followers to start. Just an AI character that looks real — and an audience willing to pay for it.
+        </motion.p>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.0, duration: 0.6 }}
+          style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 24 }}>
+          {[
+            { val: '$2.1B', label: 'Creator economy revenue from AI-generated content in 2025' },
+            { val: '83%', label: 'of fans can\'t tell AI influencers from real ones' },
+          ].map(({ val, label }, i) => (
+            <div key={i} className="liquid-glass" style={{ borderRadius: 24, padding: '36px 40px', flex: '1 1 220px', maxWidth: 300, border: '1px solid rgba(255,255,255,0.14)', boxShadow: '0 0 40px rgba(79,142,247,0.08), 0 0 1px rgba(79,142,247,0.3)' }}>
+              <div style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(3rem, 5vw, 4rem)', color: 'white', lineHeight: 1, marginBottom: 14 }}>{val}</div>
+              <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.45)', lineHeight: 1.6 }}>{label}</p>
+            </div>
+          ))}
+        </motion.div>
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.3, duration: 0.6 }}
+          style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.72rem', color: 'rgba(255,255,255,0.22)', fontStyle: 'italic' }}>
+          Source: industry estimates. Individual results vary.
+        </motion.p>
+      </section>
+
+      {/* Section 2 — What is an AI influencer? */}
+      <section ref={s2Ref} data-bg-palette="indigo" className="section-block" style={{ padding: '100px 5%', maxWidth: 860, margin: '0 auto', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={s2InView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.65 }}>
+          <h2 style={h2Style}>It's a fake person that makes real money.</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
+            <p style={bodyText}>An AI influencer is a digital character — a face, a personality, a brand — that doesn't exist in real life. You create her (or him) once, and then you generate unlimited photos, videos, and content. No scheduling shoots. No bad hair days. No diva moments.</p>
+            <p style={bodyText}>The audience doesn't care if she's real. They care if she's interesting. And right now, AI influencers are pulling subscribers on Fanvue, building audiences on Telegram and Instagram, and generating income that rivals real creators.</p>
+            <p style={bodyText}>This isn't a fantasy. It's a business model.</p>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Section 3 — What do you need? */}
+      <section ref={s3Ref} data-bg-palette="blue-rose" className="section-block" style={{ padding: '100px 5%', maxWidth: 1100, margin: '0 auto', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={s3InView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.65 }}>
+          <h2 style={{ ...h2Style, textAlign: 'center' }}>What it takes to launch</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
+            {[
+              { title: 'A character', body: 'A face, a name, a vibe. We create this for you — a unique AI person that generates consistent photos and videos every single time.' },
+              { title: 'A platform', body: 'Telegram, Instagram, Fanvue, OnlyFans — pick where your audience lives. We give you the content engine. You pick the stage.' },
+              { title: '30 minutes a day', body: 'Post content, reply to messages, grow the audience. The AI makes the content. You run the business.' },
+            ].map(({ title, body }, i) => (
+              <motion.div key={i}
+                initial={{ opacity: 0, y: 30 }} animate={s3InView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="liquid-glass"
+                style={{ borderRadius: 24, padding: '44px 32px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '3.5rem', color: 'rgba(255,255,255,0.06)', lineHeight: 1, marginBottom: 18 }}>0{i + 1}</div>
+                <h3 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.65rem', color: 'white', lineHeight: 1.1, marginBottom: 14 }}>{title}</h3>
+                <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.9rem', color: 'rgba(255,255,255,0.52)', lineHeight: 1.72 }}>{body}</p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Section 4 — Where ATREOX comes in */}
+      <section ref={s4Ref} data-bg-palette="deep-violet" className="section-block" style={{ padding: '100px 5%', maxWidth: 860, margin: '0 auto', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={s4InView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.65 }}>
+          <h2 style={h2Style}>We build the character. You build the business.</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 22, marginBottom: 48 }}>
+            <p style={bodyText}>ATREOX gives you production-ready AI characters — the kind that actually fool people. Not blurry AI art. Not uncanny valley. Real-looking humans with consistent faces across hundreds of photos and videos.</p>
+            <p style={bodyText}>Every character package includes a trained AI model, starter content, and everything you need to launch in a weekend.</p>
+          </div>
+          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+            <button className="btn-gradient" onClick={() => setPage('packages')}
+              style={{ borderRadius: 9999, padding: '14px 32px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+              See what we sell <ArrowUpRight size={16} />
+            </button>
+            <button className="liquid-glass btn-glass-hover" onClick={() => setPage('how-it-works')}
+              style={{ borderRadius: 9999, padding: '14px 28px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', background: 'rgba(255,255,255,0.07)' }}>
+              Understand the tech <ArrowUpRight size={15} />
+            </button>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Section 5 — FAQ */}
+      <section ref={s5Ref} data-bg-palette="sky-blue" className="section-block" style={{ padding: '100px 5%', maxWidth: 860, margin: '0 auto' }}>
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={s5InView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.65 }}>
+          <h2 style={{ ...h2Style, textAlign: 'center' }}>Quick answers</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {faqs.map(({ q, a }, i) => (
+              <motion.div key={i}
+                initial={{ opacity: 0, y: 20 }} animate={s5InView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.08 }}
+                className="liquid-glass" style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)' }}>
+                <button onClick={() => setOpenFaq(openFaq === i ? null : i)} style={{ width: '100%', padding: '20px 24px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
+                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.95rem', color: 'white', textAlign: 'left', lineHeight: 1.4 }}>{q}</span>
+                  <div style={{ transition: 'transform 0.25s ease', transform: openFaq === i ? 'rotate(180deg)' : 'rotate(0deg)', flexShrink: 0 }}>
+                    <ChevronDown size={16} color="rgba(255,255,255,0.4)" />
+                  </div>
+                </button>
+                {openFaq === i && (
+                  <div className="faq-answer" style={{ padding: '0 24px 20px' }}>
+                    <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', marginBottom: 14 }} />
+                    <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.9rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7 }}>{a}</p>
+                  </div>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </section>
+
+      <div style={{ padding: '0 5% 60px' }}>
+        <FooterBar setPage={setPage} />
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { CoursesPage, CheckoutPage, ResourcesPage, ContactPage, PackagesPage, HowItWorksPage, MeetAtreoxPage, SettingsPage });

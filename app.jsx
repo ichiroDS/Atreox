@@ -8,7 +8,7 @@ const {
   HomePage,
   CurriculumPage, CommunityPage, PricingPage, AboutPage,
   CoursesPage, ResourcesPage, ContactPage,
-  CheckoutPage, PackagesPage, HowItWorksPage,
+  CheckoutPage, PackagesPage, HowItWorksPage, MeetAtreoxPage,
   SettingsPage,
   PrivacyPage, TermsPage,
 } = window;
@@ -72,6 +72,7 @@ function App() {
 
   const renderPage = () => {
     switch (page) {
+      case 'meet':         return <MeetAtreoxPage  setPage={navigate} />;
       case 'packages':     return <PackagesPage    setPage={navigate} />;
       case 'how-it-works': return <HowItWorksPage  setPage={navigate} />;
       case 'courses':    return <CoursesPage    setPage={navigate} user={user} onLoginClick={openLogin} />;

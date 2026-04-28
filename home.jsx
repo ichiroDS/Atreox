@@ -44,13 +44,17 @@ function Hero({ setPage }) {
 
         {/* Left column */}
         <div style={{ flex: '1 1 400px', minWidth: 0 }}>
+          <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}
+            style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '2.5px', textTransform: 'uppercase', marginBottom: 18 }}>
+            The face is fake. The money is real.
+          </motion.p>
           <BlurText text="Production-ready AI Influencer assets."
             style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(3rem, 6.5vw, 5rem)', color: 'white', lineHeight: 0.9, letterSpacing: '-3px', maxWidth: 620, marginBottom: 28 }}
             delay={110}
           />
           <motion.p initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }} animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.8 }}
             style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.72)', maxWidth: 500, lineHeight: 1.65, marginBottom: 36 }}>
-            Flux fine-tunes. WAN video LoRAs. Custom ComfyUI nodes. Built and proven by ATREOX — used to grow real AI characters that make real money.
+            We build AI influencer characters that look real, post daily, and make money. You pick the face — we handle everything else.
           </motion.p>
           <motion.div initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }} animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.1 }}
             style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', marginBottom: 28 }}>

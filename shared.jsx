@@ -204,6 +204,7 @@ function Navbar({ currentPage, setPage, user, onLoginClick, onLogout }) {
   }, [userMenuOpen]);
 
   const links = [
+    { id: 'meet',         label: 'Meet ATREOX' },
     { id: 'home',         label: 'Home' },
     { id: 'how-it-works', label: 'How It Works' },
     { id: 'packages',     label: 'Packages' },
