@@ -7,6 +7,7 @@
   <link rel="icon" href="/public/favicon.svg" type="image/svg+xml">
   <script>window.onerror=function(m,src){return typeof src==='string'&&(src.indexOf('blob:')>-1||src.indexOf('eval')>-1);};</script>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/public/bg-animation.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -18,28 +19,6 @@
       font-weight: 300;
       overflow-x: hidden;
     }
-
-    /* ── Animated background ── */
-    #animated-bg {
-      position: fixed; inset: 0; z-index: -1;
-      background: #000; pointer-events: none; overflow: hidden;
-    }
-    .bg-blob {
-      position: absolute; border-radius: 50%;
-      filter: blur(150px); opacity: 0;
-      transition: background-color 2s ease, opacity 1.6s ease;
-    }
-    #bg-blob-1 { width:75vw; height:75vw; top:-25%; left:-20%; animation:bg-drift-1 20s ease-in-out infinite; }
-    #bg-blob-2 { width:65vw; height:65vw; bottom:-20%; right:-20%; animation:bg-drift-2 25s ease-in-out infinite; }
-    #bg-blob-3 { width:50vw; height:50vw; top:40%; left:35%; animation:bg-drift-3 16s ease-in-out infinite; }
-    @media (max-width: 768px) {
-      #bg-blob-1 { width: 160vw; height: 160vw; filter: blur(90px); }
-      #bg-blob-2 { width: 140vw; height: 140vw; filter: blur(90px); }
-      #bg-blob-3 { width: 110vw; height: 110vw; filter: blur(70px); }
-    }
-    @keyframes bg-drift-1 { 0%,100%{transform:translate(0,0)} 33%{transform:translate(9%,13%)} 66%{transform:translate(-4%,7%)} }
-    @keyframes bg-drift-2 { 0%,100%{transform:translate(0,0)} 33%{transform:translate(-11%,-8%)} 66%{transform:translate(7%,-13%)} }
-    @keyframes bg-drift-3 { 0%,100%{transform:translate(-50%,-50%)} 50%{transform:translate(-41%,-57%)} }
 
     /* ── Liquid glass ── */
     .liquid-glass {
@@ -430,13 +409,6 @@
 </head>
 <body>
 
-<!-- ── ANIMATED BACKGROUND ── -->
-<div id="animated-bg" aria-hidden="true">
-  <div id="bg-blob-1" class="bg-blob"></div>
-  <div id="bg-blob-2" class="bg-blob"></div>
-  <div id="bg-blob-3" class="bg-blob"></div>
-</div>
-
 <!-- ── PAYMENT GATE ── -->
 <div id="gate">
   <div class="gate-card liquid-glass-strong">
@@ -549,17 +521,8 @@
   </div>
 </div>
 
+<script src="/public/bg-animation.js"></script>
 <script>
-/* ── Blob colors ── */
-(function() {
-  const b1 = document.getElementById('bg-blob-1');
-  const b2 = document.getElementById('bg-blob-2');
-  const b3 = document.getElementById('bg-blob-3');
-  b1.style.backgroundColor = '#3b4ef7'; b1.style.opacity = '0.16';
-  b2.style.backgroundColor = '#7c3aed'; b2.style.opacity = '0.16';
-  b3.style.backgroundColor = '#4f46e5'; b3.style.opacity = '0.11';
-})();
-
 /* ── Nav helper (sets localStorage page before going back to main site) ── */
 function nav(page) {
   localStorage.setItem('atreox_page', page);

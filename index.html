@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>atreoxai</title>
   <link rel="icon" href="/public/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/public/bg-animation.css">
   <!-- Babel standalone emits cross-origin errors for eval'd JSX; suppress only those -->
   <script>window.onerror=function(m,src){return typeof src==='string'&&(src.indexOf('blob:')>-1||src.indexOf('eval')>-1);};</script>
 
@@ -102,55 +103,6 @@
       font-family: 'Barlow', sans-serif;
       font-weight: 300;
       overflow-x: hidden;
-    }
-
-    /* ── Animated background ── */
-    #animated-bg {
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      background: #000;
-      pointer-events: none;
-      overflow: hidden;
-    }
-    .bg-blob {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(150px);
-      opacity: 0.16;
-      transition: background-color 2s ease, opacity 1.6s ease;
-    }
-    #bg-blob-1 { background-color: #3b4ef7; }
-    #bg-blob-2 { background-color: #7c3aed; opacity: 0.16; }
-    #bg-blob-3 { background-color: #4f46e5; opacity: 0.11; }
-    #bg-blob-1 {
-      width: 75vw; height: 75vw;
-      top: -25%; left: -20%;
-      animation: bg-drift-1 20s ease-in-out infinite;
-    }
-    #bg-blob-2 {
-      width: 65vw; height: 65vw;
-      bottom: -20%; right: -20%;
-      animation: bg-drift-2 25s ease-in-out infinite;
-    }
-    #bg-blob-3 {
-      width: 50vw; height: 50vw;
-      top: 40%; left: 35%;
-      animation: bg-drift-3 16s ease-in-out infinite;
-    }
-    @keyframes bg-drift-1 {
-      0%,100% { transform: translate(0,0); }
-      33%  { transform: translate(9%,13%); }
-      66%  { transform: translate(-4%,7%); }
-    }
-    @keyframes bg-drift-2 {
-      0%,100% { transform: translate(0,0); }
-      33%  { transform: translate(-11%,-8%); }
-      66%  { transform: translate(7%,-13%); }
-    }
-    @keyframes bg-drift-3 {
-      0%,100% { transform: translate(-50%,-50%); }
-      50%  { transform: translate(-41%,-57%); }
     }
 
     button { cursor: pointer; }
@@ -405,13 +357,6 @@
       .hero-thumb { display: none !important; }
     }
 
-    /* ── Mobile background blobs: larger + softer blur so they're visible ── */
-    @media (max-width: 768px) {
-      #bg-blob-1 { width: 160vw; height: 160vw; filter: blur(90px); }
-      #bg-blob-2 { width: 140vw; height: 140vw; filter: blur(90px); }
-      #bg-blob-3 { width: 110vw; height: 110vw; filter: blur(70px); }
-    }
-
     /* ── Consistent section spacing ── */
     .section-block { padding-top: 80px; padding-bottom: 80px; }
     @media (max-width: 768px) {
@@ -451,12 +396,8 @@
   </style>
 </head>
 <body>
-  <div id="animated-bg" aria-hidden="true">
-    <div id="bg-blob-1" class="bg-blob"></div>
-    <div id="bg-blob-2" class="bg-blob"></div>
-    <div id="bg-blob-3" class="bg-blob"></div>
-  </div>
   <div id="root"></div>
+  <script src="/public/bg-animation.js"></script>
   <script type="text/babel" src="shared.jsx"></script>
   <script type="text/babel" src="home.jsx"></script>
   <script type="text/babel" src="inner-pages.jsx"></script>
