@@ -1402,18 +1402,22 @@ function HowItWorksPage({ setPage }) {
   return (
     <div>
       {/* Hero */}
-      <section style={{ position: 'relative', paddingTop: 160, paddingBottom: 0, overflow: 'hidden', minHeight: '80vh' }}>
+      <section style={{ position: 'relative', paddingTop: 0, paddingBottom: 0, overflow: 'hidden', minHeight: 900, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, #000 0%, #000 85%, transparent 100%)', zIndex: 0 }} />
         <div style={{ textAlign: 'center', paddingLeft: '5%', paddingRight: '5%', maxWidth: 860, margin: '0 auto', position: 'relative', zIndex: 2 }}>
           <SectionBadge>Education</SectionBadge>
           <BlurText text="How ATREOX works" style={{
             fontFamily: "'Instrument Serif', serif", fontStyle: 'italic',
             fontSize: 'clamp(2.8rem, 5.5vw, 4.5rem)', color: 'white',
-            lineHeight: 0.92, letterSpacing: '-3px', marginTop: 20, marginBottom: 24,
+            lineHeight: 0.92, letterSpacing: '-3px', marginTop: 20, marginBottom: 32,
           }} delay={90} />
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.6 }}
-            style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1.05rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, paddingBottom: 80 }}>
-            The honest guide to AI Influencer creation. What we sell, why it costs what it does, and how to choose the right product.
+            style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1.05rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.75, marginBottom: 20 }}>
+            ATREOX builds production-ready AI influencer characters — trained faces, video models, and full ComfyUI workflows. We train each character by hand, run 500+ test generations before release, and ship everything you need to start publishing content and earning from day one.
+          </motion.p>
+          <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.0, duration: 0.6 }}
+            style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1.05rem', color: 'rgba(255,255,255,0.42)', lineHeight: 1.75 }}>
+            This page covers what we sell, why it's priced the way it is, and how to pick the right product for where you're starting from.
           </motion.p>
         </div>
         <div style={{ height: 100, position: 'relative', zIndex: 2 }} />
@@ -1862,12 +1866,21 @@ function MeetAtreoxPage({ setPage }) {
             Creativity is intelligence having fun.
           </motion.p>
           <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.0 }}
-            style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: 'clamp(0.85rem, 2vw, 1.05rem)', color: 'rgba(255,255,255,0.7)', letterSpacing: '3.5px', textTransform: 'uppercase', marginBottom: 0 }}>
+            style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: 'clamp(0.85rem, 2vw, 1.05rem)', color: 'rgba(255,255,255,0.7)', letterSpacing: '3.5px', textTransform: 'uppercase', marginBottom: 40 }}>
             The face is fake. The money is real.
           </motion.p>
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.3 }}
+            style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <button className="btn-gradient" onClick={() => setPage('home')} style={{ borderRadius: 9999, padding: '13px 28px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+              Home <ArrowUpRight size={16} />
+            </button>
+            <button className="liquid-glass btn-glass-hover" onClick={() => setPage('how-it-works')} style={{ borderRadius: 9999, padding: '13px 24px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.9rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', background: 'rgba(255,255,255,0.07)' }}>
+              How It Works <ArrowUpRight size={15} />
+            </button>
+          </motion.div>
         </div>
 
-        <div style={{ position: 'relative', zIndex: 2, width: '100%', height: 140, marginTop: 80, flexShrink: 0 }} />
+        <div style={{ position: 'relative', zIndex: 2, width: '100%', height: 140, marginTop: 60, flexShrink: 0 }} />
       </section>
 
       {/* Section 1b — Hook stats */}
