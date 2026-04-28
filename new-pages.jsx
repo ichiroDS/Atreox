@@ -1854,11 +1854,11 @@ function MeetAtreoxPage({ setPage }) {
 
         {/* Quote text */}
         <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '0 5%', maxWidth: 860, margin: '0 auto' }}>
-          <motion.blockquote
+          <motion.p
             initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
             style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: 'clamp(2rem, 5vw, 3.8rem)', color: 'white', lineHeight: 1.18, marginBottom: 20, letterSpacing: '-0.01em', fontStyle: 'normal' }}>
             "Creativity is intelligence<br />having fun."
-          </motion.blockquote>
+          </motion.p>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.7 }}
             style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.38)', marginBottom: 56, letterSpacing: '0.02em' }}>
             — Albert Einstein
