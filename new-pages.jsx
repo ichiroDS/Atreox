@@ -1403,21 +1403,6 @@ function HowItWorksPage({ setPage }) {
     <div>
       {/* Hero */}
       <section style={{ position: 'relative', height: '70vh', minHeight: 580, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', paddingTop: 80 }}>
-        {/* Blurred character image background */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: 'url(/showcase/katie/3.jpeg)',
-          backgroundSize: 'cover', backgroundPosition: 'center 20%',
-          filter: 'blur(22px) saturate(0.65)',
-          transform: 'scale(1.1)',
-          zIndex: 0,
-        }} />
-        {/* Dark gradient overlay — fades to solid black at bottom */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.82) 55%, rgba(10,10,15,1) 100%)',
-          zIndex: 1,
-        }} />
         {/* Content */}
         <div style={{ textAlign: 'center', paddingLeft: '5%', paddingRight: '5%', maxWidth: 700, margin: '0 auto', position: 'relative', zIndex: 2 }}>
           <SectionBadge>Education</SectionBadge>
