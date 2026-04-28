@@ -26,24 +26,55 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+const PATH_TO_PAGE = {
+  '/meet':         'meet',
+  '/how-it-works': 'how-it-works',
+  '/pricing':      'pricing',
+  '/packages':     'pricing',
+  '/courses':      'pricing',
+  '/checkout':     'checkout',
+  '/contact':      'contact',
+  '/settings':     'settings',
+  '/privacy':      'privacy',
+  '/terms':        'terms',
+};
+
+const PAGE_TO_PATH = {
+  'home':         '/',
+  'meet':         '/meet',
+  'how-it-works': '/how-it-works',
+  'pricing':      '/pricing',
+  'packages':     '/pricing',
+  'courses':      '/pricing',
+  'checkout':     '/checkout',
+  'contact':      '/contact',
+  'settings':     '/settings',
+  'privacy':      '/privacy',
+  'terms':        '/terms',
+};
+
+function getInitialPage() {
+  /* Redirect legacy ?p= URLs to clean paths */
+  const params = new URLSearchParams(location.search);
+  const legacy = params.get('p');
+  if (legacy) {
+    const path = PAGE_TO_PATH[legacy] || '/';
+    history.replaceState({ page: legacy || 'home' }, '', path);
+    return legacy || 'home';
+  }
+  return PATH_TO_PAGE[location.pathname] || 'home';
+}
+
 function App() {
-  const [page, setPage]         = useState(() => {
-    const params = new URLSearchParams(location.search);
-    return params.get('p') || localStorage.getItem('atreox_page') || 'home';
-  });
+  const [page, setPage]         = useState(getInitialPage);
   const [user, setUser]         = useState(() => getCurrentUser());
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState('login');
 
   React.useEffect(() => {
-    history.replaceState({ page }, '', `?p=${page}`);
-  }, []);
-
-  React.useEffect(() => {
     const onPop = (e) => {
-      const p = e.state?.page || new URLSearchParams(location.search).get('p') || 'home';
+      const p = e.state?.page || PATH_TO_PAGE[location.pathname] || 'home';
       setPage(p);
-      localStorage.setItem('atreox_page', p);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
     window.addEventListener('popstate', onPop);
@@ -51,9 +82,9 @@ function App() {
   }, []);
 
   const navigate = (p) => {
+    const path = PAGE_TO_PATH[p] || '/';
     setPage(p);
-    localStorage.setItem('atreox_page', p);
-    history.pushState({ page: p }, '', `?p=${p}`);
+    history.pushState({ page: p }, '', path);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

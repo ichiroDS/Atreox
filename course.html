@@ -441,10 +441,10 @@
 
   <!-- Nav links pill -->
   <div class="liquid-glass nav-links">
-    <a href="/" class="nav-pill-btn" onclick="nav('meet')">Meet ATREOX</a>
-    <a href="/" class="nav-pill-btn" onclick="nav('how-it-works')">How It Works</a>
-    <a href="/" class="nav-pill-btn active" onclick="nav('pricing')">Pricing</a>
-    <a href="/" class="nav-pill-btn" onclick="nav('contact')">Contact</a>
+    <a href="/" class="nav-pill-btn">Home</a>
+    <a href="/how-it-works" class="nav-pill-btn">How It Works</a>
+    <a href="/pricing" class="nav-pill-btn">Pricing</a>
+    <a href="/contact" class="nav-pill-btn">Contact</a>
   </div>
 
   <!-- Right: progress + user + mobile toggle -->
@@ -523,11 +523,6 @@
 
 <script src="/public/bg-animation.js"></script>
 <script>
-/* ── Nav helper (sets localStorage page before going back to main site) ── */
-function nav(page) {
-  localStorage.setItem('atreox_page', page);
-}
-
 /* ── Course data ── */
 const LESSONS = [
   {

@@ -1402,9 +1402,24 @@ function HowItWorksPage({ setPage }) {
   return (
     <div>
       {/* Hero */}
-      <section style={{ position: 'relative', paddingTop: 0, paddingBottom: 0, overflow: 'hidden', minHeight: 900, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, #000 0%, #000 85%, transparent 100%)', zIndex: 0 }} />
-        <div style={{ textAlign: 'center', paddingLeft: '5%', paddingRight: '5%', maxWidth: 860, margin: '0 auto', position: 'relative', zIndex: 2 }}>
+      <section style={{ position: 'relative', height: '70vh', minHeight: 580, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', paddingTop: 80 }}>
+        {/* Blurred character image background */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'url(/showcase/katie/3.jpeg)',
+          backgroundSize: 'cover', backgroundPosition: 'center 20%',
+          filter: 'blur(22px) saturate(0.65)',
+          transform: 'scale(1.1)',
+          zIndex: 0,
+        }} />
+        {/* Dark gradient overlay — fades to solid black at bottom */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(to bottom, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.82) 55%, rgba(10,10,15,1) 100%)',
+          zIndex: 1,
+        }} />
+        {/* Content */}
+        <div style={{ textAlign: 'center', paddingLeft: '5%', paddingRight: '5%', maxWidth: 700, margin: '0 auto', position: 'relative', zIndex: 2 }}>
           <SectionBadge>Education</SectionBadge>
           <BlurText text="How ATREOX works" style={{
             fontFamily: "'Instrument Serif', serif", fontStyle: 'italic',
@@ -1412,15 +1427,14 @@ function HowItWorksPage({ setPage }) {
             lineHeight: 0.92, letterSpacing: '-3px', marginTop: 20, marginBottom: 32,
           }} delay={90} />
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.6 }}
-            style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1.05rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.75, marginBottom: 20 }}>
+            style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1.05rem', color: 'rgba(255,255,255,0.75)', lineHeight: 1.75, marginBottom: 20 }}>
             ATREOX builds production-ready AI influencer characters — trained faces, video models, and full ComfyUI workflows. We train each character by hand, run 500+ test generations before release, and ship everything you need to start publishing content and earning from day one.
           </motion.p>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.0, duration: 0.6 }}
-            style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1.05rem', color: 'rgba(255,255,255,0.42)', lineHeight: 1.75 }}>
+            style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1.05rem', color: 'rgba(255,255,255,0.48)', lineHeight: 1.75 }}>
             This page covers what we sell, why it's priced the way it is, and how to pick the right product for where you're starting from.
           </motion.p>
         </div>
-        <div style={{ height: 100, position: 'relative', zIndex: 2 }} />
       </section>
 
       {/* Section 0 — The 3-step version (still on dark bg) */}
