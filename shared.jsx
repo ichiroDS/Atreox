@@ -205,11 +205,8 @@ function Navbar({ currentPage, setPage, user, onLoginClick, onLogout }) {
 
   const links = [
     { id: 'meet',         label: 'Meet ATREOX' },
-    { id: 'home',         label: 'Home' },
     { id: 'how-it-works', label: 'How It Works' },
-    { id: 'packages',     label: 'Packages' },
-    { id: 'courses',      label: 'Courses' },
-    { id: 'resources',    label: 'Resources' },
+    { id: 'pricing',      label: 'Pricing' },
     { id: 'contact',      label: 'Contact' },
   ];
 
@@ -879,12 +876,9 @@ function NodeWorkflow() {
 /* ── Footer ── */
 function FooterBar({ setPage }) {
   const navLinks = [
-    { id: 'home',         label: 'Home' },
-    { id: 'packages',     label: 'Packages' },
+    { id: 'meet',         label: 'Meet ATREOX' },
     { id: 'how-it-works', label: 'How It Works' },
-    { id: 'courses',      label: 'Courses' },
-    { id: 'resources',    label: 'Resources' },
-    { id: 'about',        label: 'About Us' },
+    { id: 'pricing',      label: 'Pricing' },
     { id: 'contact',      label: 'Contact' },
   ];
   return (
@@ -900,7 +894,7 @@ function FooterBar({ setPage }) {
             <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.1rem', color: 'white' }}>ATREOX AI</span>
           </div>
           <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.32)', lineHeight: 1.65, maxWidth: 210 }}>
-            The definitive ComfyUI academy for cinematic AI generation.
+            Production-ready AI influencer characters. Real faces. Real income.
           </p>
         </div>
         <div style={{ flex: '0 0 auto' }}>

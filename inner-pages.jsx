@@ -419,7 +419,7 @@ function AboutPage({ setPage }) {
           Browse the packages, read how it works, or jump straight to the course.
         </p>
         <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <GlassBtn white onClick={() => setPage('packages')}>Browse Packages <ArrowUpRight size={14} /></GlassBtn>
+          <GlassBtn white onClick={() => setPage('pricing')}>Browse Pricing <ArrowUpRight size={14} /></GlassBtn>
           <GlassBtn onClick={() => setPage('how-it-works')}>How It Works <ArrowUpRight size={14} /></GlassBtn>
         </div>
       </PageSection>

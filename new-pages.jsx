@@ -314,9 +314,9 @@ function CheckoutPage({ setPage, user }) {
     <div style={{ paddingTop: 100, paddingBottom: 80, padding: '100px 5% 80px', maxWidth: 1100, margin: '0 auto' }}>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
         style={{ marginBottom: 40 }}>
-        <button onClick={() => setPage(isPackage ? 'packages' : 'courses')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.45)', fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 24, padding: 0 }}>
+        <button onClick={() => setPage('pricing')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.45)', fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 24, padding: 0 }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-          {isPackage ? 'Back to Packages' : 'Back to Courses'}
+          Back to Pricing
         </button>
         <SectionBadge>Secure Checkout</SectionBadge>
         <h1 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'white', marginTop: 16, letterSpacing: '-0.02em' }}>
@@ -964,13 +964,31 @@ function TypeBadge({ label, available, color }) {
   );
 }
 
-function PackagesPage({ setPage }) {
+function PricingPage({ setPage, user, onLoginClick }) {
   const [openFaq, setOpenFaq] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
   const [licenseByChar, setLicenseByChar] = useState({});
   const [runpodByCard, setRunpodByCard] = useState({ lora: false, model: false, wan: false, complete: false });
   const [nsfwEnabled, setNsfwEnabled] = useState(false);
   const [galleryChar, setGalleryChar] = useState(null);
+
+  const { h: ch, m: cm, s: cs } = useCountdown();
+  const hasPurchased = (() => {
+    try { return !!JSON.parse(localStorage.getItem('atreox_course_access') || 'null')?.sessionId; } catch { return false; }
+  })();
+  const handleGetAccess = () => {
+    if (hasPurchased) { window.location.href = '/course'; }
+    else if (!user) { onLoginClick(); }
+    else { setPage('checkout'); }
+  };
+  const CourseTimerBlock = ({ val, label }) => (
+    <div style={{ textAlign: 'center', flex: 1 }}>
+      <div className="liquid-glass" style={{ borderRadius: 10, padding: '10px 6px', marginBottom: 5 }}>
+        <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '2rem', color: 'white', lineHeight: 1, display: 'block' }}>{val}</span>
+      </div>
+      <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.62rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{label}</span>
+    </div>
+  );
 
   const handleSelectCard = (id) => setSelectedCard(prev => prev === id ? null : id);
   const handleRunpodToggle = (id) => setRunpodByCard(prev => ({ ...prev, [id]: !prev[id] }));
@@ -986,13 +1004,13 @@ function PackagesPage({ setPage }) {
     {
       name: 'Lina',
       preview: '/public/showcase/lina/4.jpeg',
-      gallery: ['/public/showcase/lina/1.png', '/public/showcase/lina/2.png', '/public/showcase/lina/3.png', '/public/showcase/lina/4.png', '/public/showcase/lina/5.png', '/public/showcase/lina/6.png'],
+      gallery: ['/public/showcase/lina/1.jpeg', '/public/showcase/lina/2.jpeg', '/public/showcase/lina/3.jpeg', '/public/showcase/lina/4.jpeg', '/public/showcase/lina/5.jpeg', '/public/showcase/lina/6.jpeg'],
       available: { lora: true, model: true, wan: true, complete: true },
     },
     {
       name: 'Rhein',
       preview: '/public/showcase/rhein/4.jpeg',
-      gallery: ['/public/showcase/rhein/1.jpeg', '/public/showcase/rhein/2.jpeg', '/public/showcase/rhein/3.png', '/public/showcase/rhein/4.png', '/public/showcase/rhein/5.jpeg', '/public/showcase/rhein/6.png'],
+      gallery: ['/public/showcase/rhein/1.jpeg', '/public/showcase/rhein/2.jpeg', '/public/showcase/rhein/3.jpeg', '/public/showcase/rhein/4.jpeg', '/public/showcase/rhein/5.jpeg', '/public/showcase/rhein/6.jpeg'],
       available: { lora: true, model: true, wan: true, complete: true },
     },
     {
@@ -1252,6 +1270,96 @@ function PackagesPage({ setPage }) {
         </div>
       </section>
 
+      {/* ── Course Section Divider ── */}
+      <section data-bg-palette="blue-violet" style={{ padding: '100px 5% 0', maxWidth: 1280, margin: '0 auto', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ textAlign: 'center', marginBottom: 56 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(79,142,247,0.12)', border: '1px solid rgba(79,142,247,0.25)', borderRadius: 9999, padding: '5px 18px', marginBottom: 24 }}>
+            <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.7rem', color: '#4f8ef7', letterSpacing: '0.14em', textTransform: 'uppercase' }}>Course</span>
+          </div>
+          <h2 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(2rem, 4vw, 3.2rem)', color: 'white', letterSpacing: '-0.03em', lineHeight: 1.05, marginBottom: 16 }}>
+            Learn to do it yourself
+          </h2>
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.48)', maxWidth: 480, margin: '0 auto', lineHeight: 1.65 }}>
+            Master the full pipeline — Flux fine-tuning, WAN video, ComfyUI workflows. Build your own characters from scratch.
+          </p>
+        </div>
+      </section>
+
+      {/* ── Course Card ── */}
+      <section style={{ padding: '48px 5% 100px', maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+          <div className="liquid-glass-strong" style={{ flex: '1 1 500px', borderRadius: 28, padding: '44px 40px', border: '1px solid rgba(255,255,255,0.13)', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: 24, right: 24, background: 'linear-gradient(135deg, #f87171, #fb923c)', borderRadius: 9999, padding: '4px 14px' }}>
+              <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 700, fontSize: '0.68rem', color: 'white', letterSpacing: '0.08em', textTransform: 'uppercase' }}>SALE</span>
+            </div>
+            <div style={{ marginBottom: 18 }}>
+              <span style={{ background: 'rgba(79,142,247,0.14)', borderRadius: 9999, padding: '4px 14px', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.7rem', color: '#4f8ef7', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Blueprint Course</span>
+            </div>
+            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', color: 'white', lineHeight: 1.12, marginBottom: 20, letterSpacing: '-0.02em' }}>
+              Photoreal Influencer Blueprint:<br />Flux — SDXL — WAN Video (ComfyUI)
+            </h2>
+            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.93rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.72, marginBottom: 30 }}>
+              Everything you need to create your own AI influencer — from photorealistic image generation to full AI video production. Lessons are live <strong style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>right now</strong>, and{' '}
+              <strong style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>4 new lessons added every month</strong> to keep you at the cutting edge.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 28px', marginBottom: 36 }}>
+              {['FLUX.1 & SDXL photoreal generation','WAN Video for AI video creation','Full ComfyUI node-based workflows','4 new lessons added every month','Build your own AI influencer','Downloadable workflow files','Community Discord access','Lifetime course updates'].map((f, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 9 }}>
+                  <Check size={13} color="#34d399" style={{ marginTop: 3, flexShrink: 0 }} />
+                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.68)', lineHeight: 1.45 }}>{f}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 28, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '3.2rem', color: 'white', lineHeight: 1 }}>$89</span>
+                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)' }}>/month</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '1.25rem', color: 'rgba(255,255,255,0.28)', textDecoration: 'line-through' }}>$149</span>
+                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.75rem', color: 'rgba(255,255,255,0.28)' }}>/month regular</span>
+              </div>
+            </div>
+            <button className="btn-white-glow" onClick={handleGetAccess} style={{ width: '100%', padding: '16px', borderRadius: 14, border: 'none', background: 'white', color: 'black', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              {hasPurchased ? 'Continue Learning' : user ? 'Proceed to Checkout' : 'Get Access Now'} <ArrowUpRight size={16} />
+            </button>
+            {!user && <p style={{ textAlign: 'center', marginTop: 10, fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.73rem', color: 'rgba(255,255,255,0.3)' }}>Login or create an account to purchase</p>}
+            <p style={{ textAlign: 'center', marginTop: user ? 12 : 6, fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.73rem', color: 'rgba(255,255,255,0.3)' }}>Cancel anytime · Instant access · 4 new lessons / month</p>
+          </div>
+
+          <div style={{ flex: '1 1 260px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div className="liquid-glass" style={{ borderRadius: 20, padding: '24px', border: '1px solid rgba(248,113,113,0.18)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <Clock size={15} color="#f87171" />
+                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.82rem', color: '#f87171' }}>Offer expires in</span>
+              </div>
+              <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', marginBottom: 16 }}>Save 40% — limited time discount</p>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <CourseTimerBlock val={ch} label="Hours" />
+                <CourseTimerBlock val={cm} label="Minutes" />
+                <CourseTimerBlock val={cs} label="Seconds" />
+              </div>
+            </div>
+            <div className="liquid-glass" style={{ borderRadius: 20, padding: '24px' }}>
+              <h4 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.85rem', color: 'white', marginBottom: 16 }}>What's included</h4>
+              {[
+                { icon: Play,     text: 'FLUX.1 & SDXL workflows' },
+                { icon: Layers,   text: 'WAN Video generation' },
+                { icon: Zap,      text: '4 new lessons / month' },
+                { icon: Globe,    text: 'Community Discord' },
+                { icon: BookOpen, text: 'All workflow files' },
+                { icon: Brain,    text: 'AI influencer blueprint' },
+              ].map(({ icon: Icon, text }, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 11 }}>
+                  <Icon size={13} color="rgba(255,255,255,0.4)" style={{ flexShrink: 0 }} />
+                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.62)' }}>{text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       <div style={{ padding: '0 5% 64px' }}>
         <FooterBar setPage={setPage} />
       </div>
@@ -1292,21 +1400,25 @@ function HowItWorksPage({ setPage }) {
 
   return (
     <div>
-      {/* Hero */}
-      <section style={{ paddingTop: 160, paddingBottom: 80, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)', maxWidth: 860, margin: '0 auto' }}>
-        <SectionBadge>Education</SectionBadge>
-        <BlurText text="How ATREOX works" style={{
-          fontFamily: "'Instrument Serif', serif", fontStyle: 'italic',
-          fontSize: 'clamp(2.8rem, 5.5vw, 4.5rem)', color: 'white',
-          lineHeight: 0.92, letterSpacing: '-3px', marginTop: 20, marginBottom: 24,
-        }} delay={90} />
-        <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.6 }}
-          style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1.05rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7 }}>
-          The honest guide to AI Influencer creation. What we sell, why it costs what it does, and how to choose the right product.
-        </motion.p>
+      {/* Hero — solid black bg */}
+      <section style={{ position: 'relative', background: '#000', paddingTop: 160, paddingBottom: 0, overflow: 'hidden' }}>
+        <div style={{ textAlign: 'center', paddingLeft: '5%', paddingRight: '5%', maxWidth: 860, margin: '0 auto', position: 'relative', zIndex: 2 }}>
+          <SectionBadge>Education</SectionBadge>
+          <BlurText text="How ATREOX works" style={{
+            fontFamily: "'Instrument Serif', serif", fontStyle: 'italic',
+            fontSize: 'clamp(2.8rem, 5.5vw, 4.5rem)', color: 'white',
+            lineHeight: 0.92, letterSpacing: '-3px', marginTop: 20, marginBottom: 24,
+          }} delay={90} />
+          <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.6 }}
+            style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1.05rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, paddingBottom: 80 }}>
+            The honest guide to AI Influencer creation. What we sell, why it costs what it does, and how to choose the right product.
+          </motion.p>
+        </div>
+        {/* Fade to dark */}
+        <div style={{ height: 100, background: 'linear-gradient(to bottom, transparent, #050510)', position: 'relative', zIndex: 2 }} />
       </section>
 
-      {/* Section 0 — The 3-step version */}
+      {/* Section 0 — The 3-step version (still on dark bg) */}
       <section data-bg-palette="blue-violet" className="section-block" style={{ padding: '80px 5%', maxWidth: 1100, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 52 }}>
           <h2 style={{ ...h2Style, marginBottom: 16 }}>The 3-step version</h2>
@@ -1402,7 +1514,7 @@ function HowItWorksPage({ setPage }) {
               Add <strong style={{ color: 'white', fontWeight: 500 }}>RunPod Setup (+$30)</strong> to any package at checkout. We configure a RunPod cloud GPU account with your model pre-loaded, ComfyUI installed, and <strong style={{ color: 'white', fontWeight: 500 }}>$15 starter credit</strong> included. Log in and start generating within minutes — no local hardware, no setup headaches.
             </p>
           </div>
-          <button className="btn-gradient" onClick={() => setPage('packages')}
+          <button className="btn-gradient" onClick={() => setPage('pricing')}
             style={{ borderRadius: 9999, padding: '13px 28px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.9rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', whiteSpace: 'nowrap', minHeight: 44, flexShrink: 0 }}>
             Browse Packages <ArrowUpRight size={15} />
           </button>
@@ -1501,7 +1613,7 @@ function HowItWorksPage({ setPage }) {
             I read every message and reply within 24 hours.
           </p>
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button className="btn-gradient" onClick={() => setPage('packages')}
+            <button className="btn-gradient" onClick={() => setPage('pricing')}
               style={{ borderRadius: 9999, padding: '14px 32px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', minHeight: 44 }}>
               Browse Packages <ArrowUpRight size={16} />
             </button>
@@ -1647,7 +1759,7 @@ function SettingsPage({ setPage, user, onLogout }) {
             </div>
           ) : (
             <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1.6 }}>
-              No active courses. <span onClick={() => setPage('courses')} style={{ color: '#4f8ef7', cursor: 'pointer' }}>Browse courses →</span>
+              No active courses. <span onClick={() => setPage('pricing')} style={{ color: '#4f8ef7', cursor: 'pointer' }}>Browse courses →</span>
             </p>
           )}
         </div>
@@ -1700,8 +1812,69 @@ function MeetAtreoxPage({ setPage }) {
 
   return (
     <div>
-      {/* Section 1 — Hook */}
-      <section data-bg-palette="blue-violet" style={{ paddingTop: 160, paddingBottom: 100, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)', maxWidth: 960, margin: '0 auto' }}>
+      {/* Section 1 — Quote Hero (solid black) */}
+      <section style={{ position: 'relative', background: '#000', paddingTop: 160, paddingBottom: 0, overflow: 'hidden', minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        {/* Particle canvas */}
+        <style>{`
+          @keyframes meet-float-1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(18px,-22px) scale(1.15)} }
+          @keyframes meet-float-2 { 0%,100%{transform:translate(0,0)} 33%{transform:translate(-14px,18px)} 66%{transform:translate(20px,8px)} }
+          @keyframes meet-float-3 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-20px,-12px) scale(0.85)} }
+          @keyframes meet-float-4 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(12px,24px)} }
+          @keyframes meet-float-5 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-8px,-16px) scale(1.2)} }
+          .meet-particle { position:absolute; border-radius:50%; pointer-events:none; }
+        `}</style>
+        {[
+          {w:3,h:3,top:'12%',left:'8%',op:0.25,anim:'meet-float-1 7s ease-in-out infinite'},
+          {w:2,h:2,top:'22%',left:'15%',op:0.18,anim:'meet-float-2 9s ease-in-out infinite 1s'},
+          {w:4,h:4,top:'8%',left:'28%',op:0.2,anim:'meet-float-3 6s ease-in-out infinite 0.5s'},
+          {w:2,h:2,top:'35%',left:'5%',op:0.15,anim:'meet-float-4 11s ease-in-out infinite'},
+          {w:3,h:3,top:'55%',left:'12%',op:0.22,anim:'meet-float-1 8s ease-in-out infinite 2s'},
+          {w:2,h:2,top:'70%',left:'22%',op:0.16,anim:'meet-float-2 10s ease-in-out infinite 0.8s'},
+          {w:4,h:4,top:'18%',left:'40%',op:0.12,anim:'meet-float-3 7s ease-in-out infinite 1.5s'},
+          {w:2,h:2,top:'80%',left:'35%',op:0.2,anim:'meet-float-5 9s ease-in-out infinite'},
+          {w:3,h:3,top:'10%',left:'55%',op:0.18,anim:'meet-float-1 12s ease-in-out infinite 0.3s'},
+          {w:2,h:2,top:'42%',left:'62%',op:0.25,anim:'meet-float-2 8s ease-in-out infinite 1.2s'},
+          {w:4,h:4,top:'72%',left:'58%',op:0.14,anim:'meet-float-3 6s ease-in-out infinite 2.5s'},
+          {w:2,h:2,top:'25%',left:'75%',op:0.2,anim:'meet-float-4 10s ease-in-out infinite 0.7s'},
+          {w:3,h:3,top:'60%',left:'80%',op:0.18,anim:'meet-float-5 7s ease-in-out infinite 1.8s'},
+          {w:2,h:2,top:'15%',left:'88%',op:0.22,anim:'meet-float-1 9s ease-in-out infinite 0.4s'},
+          {w:4,h:4,top:'85%',left:'78%',op:0.15,anim:'meet-float-2 11s ease-in-out infinite 1.1s'},
+          {w:2,h:2,top:'48%',left:'92%',op:0.2,anim:'meet-float-3 8s ease-in-out infinite'},
+          {w:3,h:3,top:'30%',left:'48%',op:0.1,anim:'meet-float-4 14s ease-in-out infinite 2.2s'},
+          {w:2,h:2,top:'65%',left:'45%',op:0.17,anim:'meet-float-5 7s ease-in-out infinite 0.9s'},
+          {w:3,h:3,top:'5%',left:'70%',op:0.14,anim:'meet-float-1 10s ease-in-out infinite 1.6s'},
+          {w:2,h:2,top:'92%',left:'50%',op:0.19,anim:'meet-float-2 9s ease-in-out infinite 0.2s'},
+        ].map((p, i) => (
+          <div key={i} className="meet-particle" style={{
+            width: p.w, height: p.h, top: p.top, left: p.left,
+            background: `rgba(255,255,255,${p.op})`,
+            animation: p.anim,
+          }} />
+        ))}
+
+        {/* Quote text */}
+        <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '0 5%', maxWidth: 860, margin: '0 auto' }}>
+          <motion.blockquote
+            initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
+            style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: 'clamp(2rem, 5vw, 3.8rem)', color: 'white', lineHeight: 1.18, marginBottom: 20, letterSpacing: '-0.01em', fontStyle: 'normal' }}>
+            "Creativity is intelligence<br />having fun."
+          </motion.blockquote>
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.7 }}
+            style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.38)', marginBottom: 56, letterSpacing: '0.02em' }}>
+            — Albert Einstein
+          </motion.p>
+          <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.0 }}
+            style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: 'clamp(0.85rem, 2vw, 1.05rem)', color: 'rgba(255,255,255,0.7)', letterSpacing: '3.5px', textTransform: 'uppercase', marginBottom: 0 }}>
+            The face is fake. The money is real.
+          </motion.p>
+        </div>
+
+        {/* Fade to next section */}
+        <div style={{ position: 'relative', zIndex: 2, width: '100%', height: 140, marginTop: 80, background: 'linear-gradient(to bottom, transparent, #050510)', flexShrink: 0 }} />
+      </section>
+
+      {/* Section 1b — Hook stats */}
+      <section data-bg-palette="blue-violet" style={{ paddingTop: 60, paddingBottom: 100, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)', maxWidth: 960, margin: '0 auto' }}>
         <BlurText text="People are making $5,000–$30,000/month with AI influencers."
           style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(2.4rem, 5vw, 4rem)', color: 'white', lineHeight: 1.0, letterSpacing: '-2px', marginBottom: 28 }}
           delay={80}
@@ -1710,7 +1883,6 @@ function MeetAtreoxPage({ setPage }) {
           style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1.1rem', color: 'rgba(255,255,255,0.52)', lineHeight: 1.72, maxWidth: 620, margin: '0 auto 56px' }}>
           No face. No camera. No followers to start. Just an AI character that looks real — and an audience willing to pay for it.
         </motion.p>
-
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.0, duration: 0.6 }}
           style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 24 }}>
           {[
@@ -1773,7 +1945,7 @@ function MeetAtreoxPage({ setPage }) {
             <p style={bodyText}>Every character package includes a trained AI model, starter content, and everything you need to launch in a weekend.</p>
           </div>
           <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-            <button className="btn-gradient" onClick={() => setPage('packages')}
+            <button className="btn-gradient" onClick={() => setPage('pricing')}
               style={{ borderRadius: 9999, padding: '14px 32px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
               See what we sell <ArrowUpRight size={16} />
             </button>
@@ -1819,4 +1991,4 @@ function MeetAtreoxPage({ setPage }) {
   );
 }
 
-Object.assign(window, { CoursesPage, CheckoutPage, ResourcesPage, ContactPage, PackagesPage, HowItWorksPage, MeetAtreoxPage, SettingsPage });
+Object.assign(window, { CoursesPage, CheckoutPage, ResourcesPage, ContactPage, PricingPage, HowItWorksPage, MeetAtreoxPage, SettingsPage });

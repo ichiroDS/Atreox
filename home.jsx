@@ -58,10 +58,10 @@ function Hero({ setPage }) {
           </motion.p>
           <motion.div initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }} animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.1 }}
             style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', marginBottom: 28 }}>
-            <button className="btn-gradient" onClick={() => setPage('packages')} style={{ borderRadius: 9999, padding: '13px 28px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+            <button className="btn-gradient" onClick={() => setPage('pricing')} style={{ borderRadius: 9999, padding: '13px 28px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
               View Packages <ArrowUpRight size={16} />
             </button>
-            <button className="liquid-glass btn-glass-hover" onClick={() => setPage('courses')} style={{ borderRadius: 9999, padding: '13px 24px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.9rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', background: 'rgba(255,255,255,0.07)' }}>
+            <button className="liquid-glass btn-glass-hover" onClick={() => setPage('pricing')} style={{ borderRadius: 9999, padding: '13px 24px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.9rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', background: 'rgba(255,255,255,0.07)' }}>
               Get the Course <ArrowUpRight size={15} />
             </button>
           </motion.div>
@@ -157,7 +157,7 @@ function FeatureHeroSection({ setPage }) {
           <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.32)', marginBottom: 32, lineHeight: 1.65 }}>
             Built by Dmytro · Public build journey · Founder-tier pricing for early access
           </p>
-          <button className="btn-gradient" onClick={() => setPage('packages')} style={{ borderRadius: 9999, padding: '14px 30px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+          <button className="btn-gradient" onClick={() => setPage('pricing')} style={{ borderRadius: 9999, padding: '14px 30px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
             Browse Packages <ArrowUpRight size={16} />
           </button>
         </motion.div>
@@ -231,10 +231,10 @@ function CtaBannerSection({ setPage }) {
           Pick a production-ready package or start with the course.
         </p>
         <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="btn-gradient" onClick={() => setPage('packages')} style={{ borderRadius: 9999, padding: '14px 32px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '1rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+          <button className="btn-gradient" onClick={() => setPage('pricing')} style={{ borderRadius: 9999, padding: '14px 32px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '1rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
             Browse Packages <ArrowUpRight size={16} />
           </button>
-          <button className="liquid-glass btn-glass-hover" onClick={() => setPage('courses')} style={{ borderRadius: 9999, padding: '14px 28px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', background: 'rgba(255,255,255,0.07)' }}>
+          <button className="liquid-glass btn-glass-hover" onClick={() => setPage('pricing')} style={{ borderRadius: 9999, padding: '14px 28px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', background: 'rgba(255,255,255,0.07)' }}>
             Get the Course <ArrowUpRight size={15} />
           </button>
         </div>

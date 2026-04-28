@@ -6,9 +6,9 @@ const {
   getCurrentUser, logoutUser,
   Navbar, AuthModal, BgColorSystem,
   HomePage,
-  CurriculumPage, CommunityPage, PricingPage, AboutPage,
-  CoursesPage, ResourcesPage, ContactPage,
-  CheckoutPage, PackagesPage, HowItWorksPage, MeetAtreoxPage,
+  PricingPage,
+  ContactPage,
+  CheckoutPage, HowItWorksPage, MeetAtreoxPage,
   SettingsPage,
   PrivacyPage, TermsPage,
 } = window;
@@ -73,20 +73,16 @@ function App() {
   const renderPage = () => {
     switch (page) {
       case 'meet':         return <MeetAtreoxPage  setPage={navigate} />;
-      case 'packages':     return <PackagesPage    setPage={navigate} />;
       case 'how-it-works': return <HowItWorksPage  setPage={navigate} />;
-      case 'courses':    return <CoursesPage    setPage={navigate} user={user} onLoginClick={openLogin} />;
-      case 'checkout':   return <CheckoutPage   setPage={navigate} user={user} />;
-      case 'resources':  return <ResourcesPage  setPage={navigate} />;
-      case 'contact':    return <ContactPage    setPage={navigate} />;
-      case 'curriculum': return <CurriculumPage setPage={navigate} />;
-      case 'community':  return <CommunityPage  setPage={navigate} />;
-      case 'pricing':    return <PricingPage    setPage={navigate} />;
-      case 'about':      return <AboutPage      setPage={navigate} />;
-      case 'settings':   return <SettingsPage   setPage={navigate} user={user} onLogout={handleLogout} />;
-      case 'privacy':    return <PrivacyPage    setPage={navigate} />;
-      case 'terms':      return <TermsPage      setPage={navigate} />;
-      default:           return <HomePage       setPage={navigate} onLoginClick={openLogin} />;
+      case 'pricing':
+      case 'packages':
+      case 'courses':      return <PricingPage    setPage={navigate} user={user} onLoginClick={openLogin} />;
+      case 'checkout':     return <CheckoutPage   setPage={navigate} user={user} />;
+      case 'contact':      return <ContactPage    setPage={navigate} />;
+      case 'settings':     return <SettingsPage   setPage={navigate} user={user} onLogout={handleLogout} />;
+      case 'privacy':      return <PrivacyPage    setPage={navigate} />;
+      case 'terms':        return <TermsPage      setPage={navigate} />;
+      default:             return <HomePage       setPage={navigate} onLoginClick={openLogin} />;
     }
   };
 
