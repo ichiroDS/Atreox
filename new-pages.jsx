@@ -781,9 +781,9 @@ function CharLicensePicker({ char, selectedCard, licenseByChar, setLicenseByChar
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginTop: 4 }}>
-      <LicenseOption type="exclusive" price={basePrice} accentColor="#f59e0b"
+      <LicenseOption type="exclusive" price={basePrice + runpodCost} accentColor="#f59e0b"
         label="Exclusive" desc="Yours only. Removed from store after purchase." />
-      <LicenseOption type="open" price={openPrice} accentColor="#34d399"
+      <LicenseOption type="open" price={openPrice + runpodCost} accentColor="#34d399"
         label="Open — 50% off" desc="Same quality. Others can also buy this character." dealTag="BEST DEAL" />
       <button
         onClick={handleAddToCart}
@@ -1402,8 +1402,8 @@ function HowItWorksPage({ setPage }) {
   return (
     <div>
       {/* Hero */}
-      <section style={{ position: 'relative', paddingTop: 160, paddingBottom: 0, overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, #000 0%, #000 80%, transparent 100%)', zIndex: 0 }} />
+      <section style={{ position: 'relative', paddingTop: 160, paddingBottom: 0, overflow: 'hidden', minHeight: '80vh' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, #000 0%, #000 85%, transparent 100%)', zIndex: 0 }} />
         <div style={{ textAlign: 'center', paddingLeft: '5%', paddingRight: '5%', maxWidth: 860, margin: '0 auto', position: 'relative', zIndex: 2 }}>
           <SectionBadge>Education</SectionBadge>
           <BlurText text="How ATREOX works" style={{
@@ -1814,8 +1814,8 @@ function MeetAtreoxPage({ setPage }) {
   return (
     <div>
       {/* Section 1 — Quote Hero */}
-      <section style={{ position: 'relative', paddingTop: 160, paddingBottom: 0, overflow: 'hidden', minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, #000 0%, #000 80%, transparent 100%)', zIndex: 0 }} />
+      <section style={{ position: 'relative', paddingTop: 160, paddingBottom: 0, overflow: 'hidden', minHeight: '90vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, #000 0%, #000 85%, transparent 100%)', zIndex: 0 }} />
         {/* Particle canvas */}
         <style>{`
           @keyframes meet-float-1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(18px,-22px) scale(1.15)} }
@@ -1858,12 +1858,8 @@ function MeetAtreoxPage({ setPage }) {
         <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '0 5%', maxWidth: 1100, margin: '0 auto' }}>
           <motion.p
             initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
-            style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: 'clamp(1.5rem, 3.5vw, 2.8rem)', color: 'white', lineHeight: 1.18, marginBottom: 16, letterSpacing: '-0.01em', fontStyle: 'normal', whiteSpace: 'normal' }}>
+            style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(2.4rem, 5.5vw, 4.5rem)', color: 'white', lineHeight: 1.1, marginBottom: 56, letterSpacing: '-0.02em' }}>
             Creativity is intelligence having fun.
-          </motion.p>
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.7 }}
-            style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: 'clamp(1.5rem, 3.5vw, 2.8rem)', color: 'white', marginBottom: 56, letterSpacing: '-0.01em' }}>
-            — Albert Einstein
           </motion.p>
           <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.0 }}
             style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: 'clamp(0.85rem, 2vw, 1.05rem)', color: 'rgba(255,255,255,0.7)', letterSpacing: '3.5px', textTransform: 'uppercase', marginBottom: 0 }}>
