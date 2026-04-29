@@ -120,12 +120,8 @@ function CoursesPage({ setPage, user, onLoginClick }) {
             {/* Price */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 28, flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '3.2rem', color: 'white', lineHeight: 1 }}>$89</span>
-                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)' }}>/month</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '1.25rem', color: 'rgba(255,255,255,0.28)', textDecoration: 'line-through' }}>$149</span>
-                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.75rem', color: 'rgba(255,255,255,0.28)' }}>/month regular</span>
+                <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '3.2rem', color: 'white', lineHeight: 1 }}>$79</span>
+                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)' }}>one-time</span>
               </div>
             </div>
 
@@ -240,7 +236,7 @@ function CheckoutPage({ setPage, user }) {
   const cart = (() => { try { return JSON.parse(localStorage.getItem('atreox_cart_v1') || 'null'); } catch { return null; } })();
   const isPackage = cart?.type === 'package';
 
-  const COURSE_BASE_CENTS = 8900;
+  const COURSE_BASE_CENTS = 7900;
   const packageTotalCents = isPackage
     ? (cart.licensePrice + (cart.runpodEnabled ? cart.runpodPrice : 0) + (cart.nsfwEnabled ? cart.nsfwPrice : 0)) * 100
     : 0;
@@ -409,7 +405,7 @@ function CheckoutPage({ setPage, user }) {
             }}>
               {loading
                 ? <><svg style={{ animation: 'spin 0.8s linear infinite' }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Redirecting to Stripe…</>
-                : <><Lock size={15} /> Pay {fmtUSD(finalCents)}{isPackage ? '' : ' / month'}</>
+                : <><Lock size={15} /> Pay {fmtUSD(finalCents)}</>
               }
             </button>
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -505,7 +501,6 @@ function CheckoutPage({ setPage, user }) {
               <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.95rem', color: 'white' }}>Total{isPackage ? '' : ' today'}</span>
               <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.5rem', color: 'white', lineHeight: 1 }}>{fmtUSD(finalCents)}</span>
             </div>
-            {!isPackage && <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.73rem', color: 'rgba(255,255,255,0.3)' }}>then $149/month · cancel anytime</p>}
           </div>
 
           {/* Trust badges */}
@@ -1313,19 +1308,15 @@ function PricingPage({ setPage, user, onLoginClick }) {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 28, flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '3.2rem', color: 'white', lineHeight: 1 }}>$89</span>
-                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)' }}>/month</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '1.25rem', color: 'rgba(255,255,255,0.28)', textDecoration: 'line-through' }}>$149</span>
-                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.75rem', color: 'rgba(255,255,255,0.28)' }}>/month regular</span>
+                <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '3.2rem', color: 'white', lineHeight: 1 }}>$79</span>
+                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)' }}>one-time</span>
               </div>
             </div>
             <button className="btn-white-glow" onClick={handleGetAccess} style={{ width: '100%', padding: '16px', borderRadius: 14, border: 'none', background: 'white', color: 'black', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               {hasPurchased ? 'Continue Learning' : user ? 'Proceed to Checkout' : 'Get Access Now'} <ArrowUpRight size={16} />
             </button>
             {!user && <p style={{ textAlign: 'center', marginTop: 10, fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.73rem', color: 'rgba(255,255,255,0.3)' }}>Login or create an account to purchase</p>}
-            <p style={{ textAlign: 'center', marginTop: user ? 12 : 6, fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.73rem', color: 'rgba(255,255,255,0.3)' }}>Cancel anytime · Instant access · 4 new lessons / month</p>
+            <p style={{ textAlign: 'center', marginTop: user ? 12 : 6, fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.73rem', color: 'rgba(255,255,255,0.3)' }}>Lifetime access · 4 new lessons / month</p>
           </div>
 
           <div style={{ flex: '1 1 260px', display: 'flex', flexDirection: 'column', gap: 16 }}>
