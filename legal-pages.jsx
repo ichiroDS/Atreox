@@ -5,14 +5,14 @@ const { SectionBadge, FooterBar, BlurText, GlassBtn, ArrowUpRight } = window;
 function LegalPage({ badge, title, lastUpdated, sections, setPage }) {
   return (
     <div>
-      <section style={{ paddingTop: 140, paddingBottom: 60, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <section style={{ paddingTop: 160, paddingBottom: 60, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: '1px solid rgba(0,230,118,0.12)' }}>
         <SectionBadge>{badge}</SectionBadge>
         <BlurText text={title} style={{
           fontFamily: "'Instrument Serif', serif", fontStyle: 'italic',
           fontSize: 'clamp(2.4rem, 4.5vw, 4rem)', color: 'white',
-          lineHeight: 0.9, letterSpacing: '-2px', marginTop: 20, marginBottom: 16,
+          lineHeight: 0.9, letterSpacing: '-2px', marginTop: 22, marginBottom: 16,
         }} delay={80} />
-        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.3)' }}>
+        <p style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.66rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)' }}>
           Last updated: {lastUpdated}
         </p>
       </section>
@@ -21,8 +21,9 @@ function LegalPage({ badge, title, lastUpdated, sections, setPage }) {
         {sections.map(({ heading, body }, i) => (
           <div key={i} style={{ marginBottom: 48 }}>
             {heading && (
-              <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '1rem', color: 'white', marginBottom: 14, letterSpacing: '-0.01em' }}>
-                {i + 1}. {heading}
+              <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '1rem', color: 'white', marginBottom: 14, letterSpacing: '-0.01em', display: 'flex', alignItems: 'baseline', gap: 12 }}>
+                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.66rem', letterSpacing: '0.1em', color: 'rgba(0,230,118,0.55)' }}>{String(i + 1).padStart(2, '0')}</span>
+                {heading}
               </h3>
             )}
             {Array.isArray(body) ? (
@@ -39,12 +40,12 @@ function LegalPage({ badge, title, lastUpdated, sections, setPage }) {
               </p>
             )}
             {i < sections.length - 1 && (
-              <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', marginTop: 48 }} />
+              <div style={{ height: 1, background: 'rgba(0,230,118,0.08)', marginTop: 48 }} />
             )}
           </div>
         ))}
 
-        <div className="liquid-glass" style={{ borderRadius: 18, padding: '24px 28px', display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap', marginTop: 20 }}>
+        <div className="panel" style={{ padding: '24px 28px', display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap', marginTop: 20 }}>
           <div style={{ flex: 1 }}>
             <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.88rem', color: 'white', marginBottom: 4 }}>Questions about this policy?</p>
             <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>Contact us at <a href="mailto:dsevcenko006@gmail.com" style={{ color: '#00e676', textDecoration: 'none' }}>dsevcenko006@gmail.com</a></p>

@@ -82,15 +82,31 @@ const X             = _icon('X');
 const Menu          = _icon('Menu');
 const Info          = _icon('Info');
 
+/* ── Wordmark: serif italic logotype, the "O" set as a ring+dot glyph ──
+   The ring+dot is the brand mark — it repeats in the splash screen and
+   favicon. Sized against the serif cap height; tuned visually. */
+function Wordmark({ size = '1.3rem', glow = true, color = '#00e676' }) {
+  return (
+    <span role="img" aria-label="ATREOX" style={{
+      fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontWeight: 400,
+      fontSize: size, color, letterSpacing: '0.1em', lineHeight: 1,
+      display: 'inline-flex', alignItems: 'baseline', userSelect: 'none',
+      textShadow: glow ? '0 0 24px rgba(0,230,118,0.4)' : 'none',
+    }}>
+      ATRE
+      <svg width="0.64em" height="0.64em" viewBox="0 0 24 24" fill="none" aria-hidden="true"
+        style={{ margin: '0 0.08em', overflow: 'visible' }}>
+        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.8"/>
+        <circle cx="12" cy="12" r="3.2" fill="currentColor"/>
+      </svg>
+      X
+    </span>
+  );
+}
+
 /* ── Helpers ── */
 function SectionBadge({ children }) {
-  return (
-    <span className="liquid-glass" style={{
-      borderRadius: 9999, padding: '4px 14px', fontSize: '0.72rem',
-      fontFamily: 'Barlow, sans-serif', fontWeight: 500, color: 'white',
-      display: 'inline-block', letterSpacing: '0.06em', textTransform: 'uppercase'
-    }}>{children}</span>
-  );
+  return <span className="overline">{'// '}{children}</span>;
 }
 function SectionHeading({ children, style }) {
   return (
@@ -102,21 +118,10 @@ function SectionHeading({ children, style }) {
   );
 }
 function GlassBtn({ children, onClick, white, style }) {
-  if (white) return (
-    <button className="btn-white-glow" onClick={onClick} style={{
-      background: 'white', color: 'black', border: 'none', borderRadius: 9999,
-      padding: '10px 24px', fontFamily: 'Barlow, sans-serif', fontWeight: 500,
-      fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: 6,
-      cursor: 'pointer', ...style
-    }}>{children}</button>
-  );
   return (
-    <button className="liquid-glass-strong btn-glass-hover" onClick={onClick} style={{
-      borderRadius: 9999, padding: '10px 24px', border: 'none', color: 'white',
-      fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.875rem',
-      display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer',
-      background: 'rgba(255,255,255,0.08)', ...style
-    }}>{children}</button>
+    <button className={white ? 'btn-solid' : 'btn-outline'} onClick={onClick} style={style}>
+      {children}
+    </button>
   );
 }
 
@@ -124,6 +129,7 @@ function GlassBtn({ children, onClick, white, style }) {
 function Navbar({ currentPage, setPage }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [scrolled, setScrolled] = useState(window.scrollY > 8);
 
   useEffect(() => {
     const onResize = () => {
@@ -131,8 +137,13 @@ function Navbar({ currentPage, setPage }) {
       setIsMobile(mobile);
       if (!mobile) setMenuOpen(false);
     };
+    const onScroll = () => setScrolled(window.scrollY > 8);
     window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('scroll', onScroll);
+    };
   }, []);
 
   const links = [
@@ -143,39 +154,30 @@ function Navbar({ currentPage, setPage }) {
 
   const handleNav = (id) => { setPage(id); setMenuOpen(false); };
 
-  const EnterPanelBtn = ({ style }) => (
-    <a href={DASHBOARD_URL} target="_self" className="btn-gradient" style={{
-      borderRadius: 9999, padding: '9px 22px', color: 'white', textDecoration: 'none',
-      fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.85rem',
-      display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer', ...style,
-    }}>
-      Enter panel <ArrowUpRight size={14} />
-    </a>
-  );
-
   return (
     <>
-      <nav style={{ position: 'fixed', top: 16, left: 0, right: 0, zIndex: 100, padding: '0 1.5rem', display: 'flex', alignItems: 'center', gap: 12 }}>
-        {/* Logo */}
-        <div onClick={() => handleNav('home')} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', flex: '1 1 0', minWidth: 0 }}>
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-            <rect width="36" height="36" rx="9" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.18)" strokeWidth="1"/>
-            <polygon points="18,7 29,14 29,26 18,29 7,22 7,10" fill="none" stroke="white" strokeWidth="1.5"/>
-            <circle cx="18" cy="18" r="3" fill="#00e676" opacity="0.9"/>
-          </svg>
-          <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.15rem', color: 'white', whiteSpace: 'nowrap' }}>ATREOX AI</span>
+      <nav style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, height: 64,
+        padding: '0 clamp(16px, 4vw, 40px)', display: 'flex', alignItems: 'center', gap: 16,
+        background: scrolled ? 'rgba(2,6,4,0.88)' : 'rgba(2,6,4,0.5)',
+        backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+        borderBottom: `1px solid rgba(0,230,118,${scrolled ? 0.18 : 0.09})`,
+        transition: 'background 0.25s ease, border-color 0.25s ease',
+      }}>
+        {/* Wordmark */}
+        <div onClick={() => handleNav('home')} style={{ cursor: 'pointer', flex: '1 1 0', minWidth: 0, display: 'flex', alignItems: 'center' }}>
+          <Wordmark />
         </div>
 
-        {/* Desktop nav pills */}
+        {/* Desktop nav */}
         {!isMobile && (
-          <div className="liquid-glass" style={{ borderRadius: 9999, padding: '4px 6px', display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 30, flexShrink: 0 }}>
             {links.map(link => (
-              <button key={link.id} className="nav-pill-btn" onClick={() => handleNav(link.id)} style={{
-                padding: '7px 16px', borderRadius: 9999, border: 'none',
-                background: currentPage === link.id ? 'rgba(255,255,255,0.12)' : 'transparent',
-                color: currentPage === link.id ? 'white' : 'rgba(255,255,255,0.6)',
-                fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.82rem', cursor: 'pointer',
-              }}>{link.label}</button>
+              <button key={link.id}
+                className={'nav-link' + (currentPage === link.id ? ' active' : '')}
+                onClick={() => handleNav(link.id)}>
+                {link.label}
+              </button>
             ))}
           </div>
         )}
@@ -183,33 +185,45 @@ function Navbar({ currentPage, setPage }) {
         {/* Desktop CTA */}
         {!isMobile && (
           <div style={{ flex: '1 1 0', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-            <EnterPanelBtn />
+            <a href={DASHBOARD_URL} target="_self" className="btn-solid" style={{ padding: '10px 20px', fontSize: '0.7rem' }}>
+              Enter panel <ArrowUpRight size={13} />
+            </a>
           </div>
         )}
 
         {/* Mobile hamburger */}
         {isMobile && (
-          <button onClick={() => setMenuOpen(o => !o)} className="liquid-glass"
-            style={{ flexShrink: 0, background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: 10, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-            {menuOpen ? <X size={18} color="white" /> : <Menu size={18} color="white" />}
+          <button onClick={() => setMenuOpen(o => !o)} aria-label="Menu"
+            style={{ flexShrink: 0, background: 'rgba(0,230,118,0.07)', border: '1px solid rgba(0,230,118,0.22)', borderRadius: 4, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            {menuOpen ? <X size={17} color="#00e676" /> : <Menu size={17} color="#00e676" />}
           </button>
         )}
       </nav>
 
-      {/* Mobile full-screen menu */}
+      {/* Mobile full-screen menu — editorial serif links with mono indices */}
       {isMobile && menuOpen && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 90, background: 'rgba(0,0,0,0.93)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', display: 'flex', flexDirection: 'column', padding: '88px 24px 40px', gap: 4 }}>
-          {links.map(link => (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 90, background: 'rgba(2,4,3,0.97)', backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)', display: 'flex', flexDirection: 'column', padding: '96px 28px 40px', gap: 2 }}>
+          {links.map((link, i) => (
             <button key={link.id} onClick={() => handleNav(link.id)} style={{
-              width: '100%', padding: '16px 20px', border: 'none', borderRadius: 14,
-              background: currentPage === link.id ? 'rgba(255,255,255,0.1)' : 'transparent',
-              color: currentPage === link.id ? 'white' : 'rgba(255,255,255,0.6)',
-              fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '1.1rem',
-              cursor: 'pointer', textAlign: 'left',
-            }}>{link.label}</button>
+              width: '100%', padding: '20px 4px', border: 'none',
+              borderBottom: '1px solid rgba(0,230,118,0.12)',
+              background: 'transparent', textAlign: 'left',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              fontFamily: "'Instrument Serif', serif", fontStyle: 'italic',
+              fontSize: '2.1rem', letterSpacing: '-0.02em',
+              color: currentPage === link.id ? '#00e676' : 'white',
+              cursor: 'pointer',
+            }}>
+              {link.label}
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontStyle: 'normal', fontSize: '0.68rem', letterSpacing: '0.2em', color: 'rgba(0,230,118,0.5)' }}>
+                {String(i + 1).padStart(2, '0')}
+              </span>
+            </button>
           ))}
           <div style={{ flex: 1 }} />
-          <EnterPanelBtn style={{ width: '100%', justifyContent: 'center', padding: '16px', fontSize: '1rem' }} />
+          <a href={DASHBOARD_URL} target="_self" className="btn-solid" style={{ width: '100%', justifyContent: 'center', padding: '17px', fontSize: '0.82rem' }}>
+            Enter panel <ArrowUpRight size={15} />
+          </a>
         </div>
       )}
     </>
@@ -249,55 +263,54 @@ function FooterBar({ setPage }) {
     { id: 'functions', label: 'Functions' },
     { id: 'pricing',   label: 'Pricing' },
   ];
+  const colHead = { fontFamily: "'JetBrains Mono', monospace", fontWeight: 500, fontSize: '0.6rem', color: 'rgba(0,230,118,0.55)', letterSpacing: '0.24em', textTransform: 'uppercase', marginBottom: 18 };
   return (
-    <footer style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 56, marginTop: 60 }}>
+    <footer style={{ borderTop: '1px solid rgba(0,230,118,0.14)', paddingTop: 56, marginTop: 60, position: 'relative' }}>
       <div style={{ display: 'flex', gap: 60, flexWrap: 'wrap', marginBottom: 48 }}>
         <div style={{ flex: '1 1 220px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', marginBottom: 14 }} onClick={() => setPage('home')}>
-            <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
-              <rect width="36" height="36" rx="9" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.18)" strokeWidth="1"/>
-              <polygon points="18,7 29,14 29,26 18,29 7,22 7,10" fill="none" stroke="white" strokeWidth="1.5"/>
-              <circle cx="18" cy="18" r="3" fill="#00e676" opacity="0.9"/>
-            </svg>
-            <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.1rem', color: 'white' }}>ATREOX AI</span>
+          <div style={{ cursor: 'pointer', marginBottom: 16 }} onClick={() => setPage('home')}>
+            <Wordmark size="1.1rem" glow={false} />
           </div>
           <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.32)', lineHeight: 1.65, maxWidth: 210 }}>
             AI-powered Telegram neuro-commenting. Real accounts, real growth.
           </p>
         </div>
         <div style={{ flex: '0 0 auto' }}>
-          <h5 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 18 }}>Navigation</h5>
+          <h5 style={colHead}>Navigation</h5>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {navLinks.map(link => (
               <span key={link.id} onClick={() => setPage(link.id)}
                 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.48)', cursor: 'pointer', transition: 'color 0.2s' }}
-                onMouseEnter={e => e.target.style.color = 'white'}
+                onMouseEnter={e => e.target.style.color = '#00e676'}
                 onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.48)'}
               >{link.label}</span>
             ))}
           </div>
         </div>
         <div style={{ flex: '0 0 auto' }}>
-          <h5 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 18 }}>Legal</h5>
+          <h5 style={colHead}>Legal</h5>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {[['privacy','Privacy Policy'],['terms','Terms of Service']].map(([id, label]) => (
               <span key={id} onClick={() => setPage(id)}
                 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.38)', cursor: 'pointer', transition: 'color 0.2s' }}
-                onMouseEnter={e => e.target.style.color = 'white'}
+                onMouseEnter={e => e.target.style.color = '#00e676'}
                 onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.38)'}
               >{label}</span>
             ))}
           </div>
         </div>
         <div style={{ flex: '0 0 auto' }}>
-          <h5 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 18 }}>Contact</h5>
-          <a href="mailto:hello@atreoxai.com" style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.42)', textDecoration: 'none', display: 'block', marginBottom: 8 }}>hello@atreoxai.com</a>
+          <h5 style={colHead}>Contact</h5>
+          <a href="mailto:hello@atreoxai.com" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.76rem', color: 'rgba(255,255,255,0.5)', textDecoration: 'none', display: 'block', marginBottom: 8 }}>hello@atreoxai.com</a>
           <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.78rem', color: 'rgba(255,255,255,0.25)' }}>Mon–Fri, 9 AM–6 PM UTC</span>
         </div>
       </div>
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 22, paddingBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-        <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.73rem', color: 'rgba(255,255,255,0.22)' }}>© 2026 ATREOX AI. All rights reserved.</span>
-        <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.73rem', color: 'rgba(255,255,255,0.22)' }}>Built for Telegram growth teams worldwide</span>
+      <div style={{ borderTop: '1px solid rgba(0,230,118,0.08)', paddingTop: 22, paddingBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.64rem', letterSpacing: '0.06em', color: 'rgba(255,255,255,0.24)' }}>© 2026 ATREOX AI. All rights reserved.</span>
+        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.64rem', letterSpacing: '0.06em', color: 'rgba(255,255,255,0.24)', display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+          <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#00e676', display: 'inline-block', animation: 'pulse-dot 2s ease-in-out infinite' }} />
+          Built for Telegram growth teams worldwide
+        </span>
       </div>
     </footer>
   );
@@ -317,6 +330,6 @@ Object.assign(window, {
   ChevronRight, ChevronDown, Users, BookOpen, GitBranch, Code2, Cpu,
   Layers, Server, Globe, Brain, Award, Clock, MessageSquare,
   TrendingUp, Sparkles, Network, Workflow, MonitorPlay, X, Menu, Info,
-  Navbar, BlurText, FadeTop, FadeBottom,
+  Wordmark, Navbar, BlurText, FadeTop, FadeBottom,
   SectionBadge, SectionHeading, GlassBtn, FooterBar, BgColorSystem,
 });

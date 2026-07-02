@@ -8,16 +8,19 @@ const {
 } = window;
 
 const DASHBOARD_URL = 'https://app.atreoxai.com';
+const MONO  = "'JetBrains Mono', monospace";
+const SERIF = "'Instrument Serif', serif";
+const GREEN = '#00e676';
 
 /* ─── shared inner-page hero (Functions / Pricing) ─── */
 function PageHero({ badge, title, sub }) {
   return (
-    <section data-bg-palette="blue-violet" style={{ paddingTop: 160, paddingBottom: 80, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+    <section style={{ paddingTop: 170, paddingBottom: 84, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: '1px solid rgba(0,230,118,0.12)' }}>
       <SectionBadge>{badge}</SectionBadge>
       <BlurText text={title} style={{
-        fontFamily: "'Instrument Serif', serif", fontStyle: 'italic',
+        fontFamily: SERIF, fontStyle: 'italic',
         fontSize: 'clamp(2.8rem, 5vw, 4.5rem)', color: 'white',
-        lineHeight: 0.9, letterSpacing: '-2px', marginTop: 20, marginBottom: 20
+        lineHeight: 0.9, letterSpacing: '-2px', marginTop: 22, marginBottom: 20
       }} delay={90} />
       <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.5)', maxWidth: 560, margin: '0 auto', lineHeight: 1.65 }}>
         {sub}
@@ -31,14 +34,16 @@ function PageSection({ children, style }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.15 });
   return (
-    <motion.div ref={ref}
-      className="section-block"
-      initial={{ opacity: 0, y: 40 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.65 }}
-      style={{ padding: '80px 5%', maxWidth: 1280, margin: '0 auto', ...style }}>
-      {children}
-    </motion.div>
+    <div ref={ref}>
+      <motion.div
+        className="section-block"
+        initial={{ opacity: 0, y: 40 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.65 }}
+        style={{ padding: '88px 5%', maxWidth: 1280, margin: '0 auto', ...style }}>
+        {children}
+      </motion.div>
+    </div>
   );
 }
 
@@ -49,17 +54,20 @@ function FunctionCard({ icon: Icon, title, tagline, body, bullets, index, inView
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="liquid-glass glass-card-interactive" style={{ borderRadius: 24, padding: '36px 32px', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column' }}>
-      <div className="feature-icon-wrap" style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(0,230,118,0.1)', border: '1px solid rgba(0,230,118,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 22 }}>
-        <Icon size={24} color="#00e676" />
+      className="panel panel-hover ticks" style={{ padding: '36px 32px', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+        <div style={{ width: 52, height: 52, borderRadius: 5, background: 'rgba(0,230,118,0.08)', border: '1px solid rgba(0,230,118,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Icon size={24} color={GREEN} />
+        </div>
+        <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.66rem', letterSpacing: '0.16em', color: 'rgba(0,230,118,0.4)' }}>{String(index + 1).padStart(2, '0')}</span>
       </div>
-      <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.68rem', color: '#00e676', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8, display: 'block' }}>{tagline}</span>
-      <h3 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.6rem', color: 'white', marginBottom: 14, letterSpacing: '-0.02em' }}>{title}</h3>
+      <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', color: GREEN, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 10, display: 'block' }}>{'// '}{tagline}</span>
+      <h3 style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: '1.6rem', color: 'white', marginBottom: 14, letterSpacing: '-0.02em' }}>{title}</h3>
       <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, marginBottom: 24 }}>{body}</p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 'auto' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 'auto', borderTop: '1px solid rgba(0,230,118,0.1)', paddingTop: 20 }}>
         {bullets.map((b, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-            <Check size={14} color="#00e676" style={{ marginTop: 2, flexShrink: 0 }} />
+            <Check size={14} color={GREEN} style={{ marginTop: 2, flexShrink: 0 }} />
             <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.83rem', color: 'rgba(255,255,255,0.68)', lineHeight: 1.5 }}>{b}</span>
           </div>
         ))}
@@ -111,7 +119,7 @@ function FunctionsPage({ setPage }) {
       />
 
       <PageSection>
-        <div ref={ref} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
+        <div ref={ref} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 22 }}>
           {functions.map((f, i) => (
             <FunctionCard key={f.tagline} {...f} index={i} inView={inView} />
           ))}
@@ -119,22 +127,22 @@ function FunctionsPage({ setPage }) {
       </PageSection>
 
       <PageSection style={{ paddingTop: 0 }}>
-        <motion.div className="liquid-glass" style={{ borderRadius: 24, padding: 'clamp(32px, 5vw, 64px)', textAlign: 'center', border: '1px solid rgba(255,255,255,0.08)' }}>
-          <div className="feature-icon-wrap" style={{ width: 46, height: 46, borderRadius: 12, background: 'rgba(0,230,118,0.1)', border: '1px solid rgba(0,230,118,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-            <Zap size={20} color="#00e676" />
+        <motion.div className="panel ticks" style={{ padding: 'clamp(48px, 7vw, 84px)', textAlign: 'center' }}>
+          <div style={{ width: 46, height: 46, borderRadius: 5, background: 'rgba(0,230,118,0.08)', border: '1px solid rgba(0,230,118,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 22px' }}>
+            <Zap size={20} color={GREEN} />
           </div>
-          <h2 style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)', color: 'white', marginBottom: 14, letterSpacing: '-0.02em' }}>
+          <h2 style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)', color: 'white', marginBottom: 14, letterSpacing: '-0.02em' }}>
             See it running on your channels
           </h2>
-          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.55)', maxWidth: 480, margin: '0 auto 28px', lineHeight: 1.65 }}>
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.55)', maxWidth: 480, margin: '0 auto 30px', lineHeight: 1.65 }}>
             Every function above lives inside the dashboard. Pick a plan or jump straight in.
           </p>
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button className="btn-gradient" onClick={() => setPage('pricing')} style={{ borderRadius: 9999, padding: '14px 30px', border: 'none', color: 'white', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-              See Pricing <ArrowUpRight size={16} />
+            <button className="btn-solid" onClick={() => setPage('pricing')} style={{ padding: '15px 30px', fontSize: '0.8rem' }}>
+              See Pricing <ArrowUpRight size={15} />
             </button>
-            <a href={DASHBOARD_URL} target="_self" className="liquid-glass btn-glass-hover" style={{ borderRadius: 9999, padding: '14px 26px', border: 'none', color: 'white', textDecoration: 'none', fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.9rem', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', background: 'rgba(255,255,255,0.07)' }}>
-              Enter Panel <ArrowUpRight size={15} />
+            <a href={DASHBOARD_URL} target="_self" className="btn-outline" style={{ padding: '14px 26px' }}>
+              Enter Panel <ArrowUpRight size={14} />
             </a>
           </div>
         </motion.div>
@@ -152,29 +160,30 @@ function PricingCard({ tier, index, inView }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: index * 0.1 }}
-      className={tier.featured ? 'liquid-glass-strong glass-card-interactive' : 'liquid-glass glass-card-interactive'}
+      className={'panel panel-hover' + (tier.featured ? ' ticks' : '')}
       style={{
-        borderRadius: 28, padding: '40px 36px', flex: '1 1 320px', position: 'relative',
-        border: tier.featured ? '1px solid rgba(0,230,118,0.35)' : '1px solid rgba(255,255,255,0.08)',
+        padding: '40px 36px', flex: '1 1 320px', position: 'relative',
+        borderColor: tier.featured ? 'rgba(0,230,118,0.45)' : undefined,
+        boxShadow: tier.featured ? '0 0 44px rgba(0,230,118,0.09)' : undefined,
       }}>
       {tier.featured && (
-        <div style={{ position: 'absolute', top: 24, right: 24, background: 'linear-gradient(135deg, #00e676, #00bfa5)', borderRadius: 9999, padding: '4px 14px' }}>
-          <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 700, fontSize: '0.66rem', color: '#001a10', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Most Popular</span>
+        <div style={{ position: 'absolute', top: 24, right: 24, background: GREEN, borderRadius: 3, padding: '5px 12px' }}>
+          <span style={{ fontFamily: MONO, fontWeight: 600, fontSize: '0.58rem', color: '#02150b', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Most Popular</span>
         </div>
       )}
 
-      <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 10, display: 'block' }}>{tier.name}</span>
+      <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.64rem', color: 'rgba(0,230,118,0.7)', letterSpacing: '0.24em', textTransform: 'uppercase', marginBottom: 14, display: 'block' }}>{'// '}{tier.name}</span>
 
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 10 }}>
-        <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '3rem', color: 'white', lineHeight: 1 }}>${tier.price}</span>
-        <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)' }}>/ month</span>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 10 }}>
+        <span style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: '3.2rem', color: GREEN, lineHeight: 1, textShadow: '0 0 28px rgba(0,230,118,0.3)' }}>${tier.price}</span>
+        <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.68rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>/ month</span>
       </div>
-      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginBottom: 28 }}>{tier.blurb}</p>
+      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginBottom: 26 }}>{tier.blurb}</p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 13, marginBottom: 32 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 13, marginBottom: 32, borderTop: '1px solid rgba(0,230,118,0.1)', paddingTop: 24 }}>
         {tier.features.map((f, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-            <Check size={14} color="#00e676" style={{ marginTop: 2, flexShrink: 0 }} />
+            <Check size={14} color={GREEN} style={{ marginTop: 2, flexShrink: 0 }} />
             <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.86rem', color: 'rgba(255,255,255,0.68)', lineHeight: 1.5 }}>{f}</span>
           </div>
         ))}
@@ -188,13 +197,9 @@ function PricingCard({ tier, index, inView }) {
         constraints (api/ files intentionally untouched). Buttons route to the dashboard
         for now, where signup/billing can be finished.
       */}
-      <a href={DASHBOARD_URL} target="_self" className={tier.featured ? 'btn-gradient' : 'liquid-glass btn-glass-hover'} style={{
-        width: '100%', borderRadius: 14, padding: '15px', border: 'none', color: 'white', textDecoration: 'none',
-        fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-        background: tier.featured ? undefined : 'rgba(255,255,255,0.07)',
-      }}>
-        Get Started <ArrowUpRight size={16} />
+      <a href={DASHBOARD_URL} target="_self" className={tier.featured ? 'btn-solid' : 'btn-outline'}
+        style={{ width: '100%', justifyContent: 'center', padding: '16px', fontSize: '0.8rem' }}>
+        Get Started <ArrowUpRight size={15} />
       </a>
     </motion.div>
   );
@@ -240,15 +245,15 @@ function PricingPage({ setPage }) {
       />
 
       <PageSection>
-        <div ref={ref} style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'stretch', justifyContent: 'center', maxWidth: 900, margin: '0 auto' }}>
+        <div ref={ref} style={{ display: 'flex', gap: 22, flexWrap: 'wrap', alignItems: 'stretch', justifyContent: 'center', maxWidth: 900, margin: '0 auto' }}>
           {tiers.map((tier, i) => (
             <PricingCard key={tier.name} tier={tier} index={i} inView={inView} />
           ))}
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: 40 }}>
-          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)' }}>
-            Need more accounts or a custom setup? <a href="mailto:hello@atreoxai.com" style={{ color: '#00e676', textDecoration: 'none' }}>Get in touch</a>.
+        <div style={{ textAlign: 'center', marginTop: 44 }}>
+          <p style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.7rem', letterSpacing: '0.04em', color: 'rgba(255,255,255,0.38)' }}>
+            Need more accounts or a custom setup? <a href="mailto:hello@atreoxai.com" style={{ color: GREEN, textDecoration: 'none' }}>Get in touch</a>.
           </p>
         </div>
       </PageSection>

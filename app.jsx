@@ -12,7 +12,10 @@ const {
 class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { err: null }; }
   static getDerivedStateFromError(e) { return { err: e }; }
-  componentDidCatch(e) { /* swallow — prevents propagation to global error handler */ }
+  componentDidCatch(e) {
+    /* swallow — prevents propagation to global error handler */
+    if (typeof window.__hideSplash === 'function') window.__hideSplash();
+  }
   render() {
     if (this.state.err) return React.createElement('div', {
       style: { color: 'white', padding: 40, fontFamily: 'Barlow, sans-serif' }
@@ -50,6 +53,11 @@ function getInitialPage() {
 
 function App() {
   const [page, setPage] = React.useState(getInitialPage);
+
+  /* App is mounted — dismiss the boot splash (min display time handled there) */
+  React.useEffect(() => {
+    if (typeof window.__hideSplash === 'function') window.__hideSplash();
+  }, []);
 
   React.useEffect(() => {
     const onPop = (e) => {
