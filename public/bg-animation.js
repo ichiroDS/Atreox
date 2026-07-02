@@ -1,15 +1,15 @@
 (function () {
   'use strict';
   var PALETTES = {
-    'blue-violet':  { b1: '#3b4ef7', b2: '#7c3aed', b3: '#4f46e5', op: 0.16 },
-    'teal-violet':  { b1: '#0d9488', b2: '#4f46e5', b3: '#7c3aed', op: 0.15 },
-    'deep-violet':  { b1: '#6d28d9', b2: '#4338ca', b3: '#7c3aed', op: 0.16 },
-    'blue-rose':    { b1: '#1e40af', b2: '#9f1239', b3: '#6d28d9', op: 0.15 },
-    'rose-violet':  { b1: '#9f1239', b2: '#6d28d9', b3: '#1e40af', op: 0.14 },
-    'sky-blue':     { b1: '#0369a1', b2: '#1d4ed8', b3: '#4338ca', op: 0.14 },
-    'indigo':       { b1: '#1e1b4b', b2: '#4c1d95', b3: '#1e3a8a', op: 0.18 },
-    'forest-green': { b1: '#166534', b2: '#0d9488', b3: '#14532d', op: 0.16 },
-    'crimson':      { b1: '#991b1b', b2: '#7c2d12', b3: '#6d28d9', op: 0.15 },
+    'blue-violet':  { b1: '#00e676', b2: '#00bfa5', b3: '#00c853', op: 0.16 },
+    'teal-violet':  { b1: '#00bfa5', b2: '#1de9b6', b3: '#00897b', op: 0.15 },
+    'deep-violet':  { b1: '#00695c', b2: '#00c853', b3: '#1de9b6', op: 0.16 },
+    'blue-rose':    { b1: '#00e676', b2: '#2e7d32', b3: '#00bfa5', op: 0.15 },
+    'rose-violet':  { b1: '#2e7d32', b2: '#00bfa5', b3: '#00e676', op: 0.14 },
+    'sky-blue':     { b1: '#1de9b6', b2: '#00c853', b3: '#00695c', op: 0.14 },
+    'indigo':       { b1: '#00332b', b2: '#00695c', b3: '#004d40', op: 0.18 },
+    'forest-green': { b1: '#166534', b2: '#00bfa5', b3: '#14532d', op: 0.16 },
+    'crimson':      { b1: '#00c853', b2: '#1b5e20', b3: '#00bfa5', op: 0.15 },
   };
   var obs = null, obsTimer = null;
 
@@ -63,6 +63,10 @@
     applyPalette('blue-violet');
     startObserver();
   }
+  // NOTE: palette keys (e.g. 'blue-violet') are historical labels wired to
+  // section data-bg-palette attributes across the JSX files — only the hex
+  // values were recolored to green, renaming the keys would require touching
+  // every section that references them.
 
   window.__bgRefresh = refresh;
   window.__bgApply = applyPalette;

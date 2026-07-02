@@ -7,9 +7,9 @@
   filter: blur(150px); opacity: 0.16;
   transition: background-color 2s ease, opacity 1.6s ease;
 }
-#bg-blob-1 { background-color: #3b4ef7; width: 75vw; height: 75vw; top: -25%; left: -20%; animation: bg-drift-1 20s ease-in-out infinite; }
-#bg-blob-2 { background-color: #7c3aed; width: 65vw; height: 65vw; bottom: -20%; right: -20%; animation: bg-drift-2 25s ease-in-out infinite; }
-#bg-blob-3 { background-color: #4f46e5; opacity: 0.11; width: 50vw; height: 50vw; top: 40%; left: 35%; animation: bg-drift-3 16s ease-in-out infinite; }
+#bg-blob-1 { background-color: #00e676; width: 75vw; height: 75vw; top: -25%; left: -20%; animation: bg-drift-1 20s ease-in-out infinite; }
+#bg-blob-2 { background-color: #00bfa5; width: 65vw; height: 65vw; bottom: -20%; right: -20%; animation: bg-drift-2 25s ease-in-out infinite; }
+#bg-blob-3 { background-color: #00c853; opacity: 0.11; width: 50vw; height: 50vw; top: 40%; left: 35%; animation: bg-drift-3 16s ease-in-out infinite; }
 @keyframes bg-drift-1 { 0%,100%{transform:translate(0,0)} 33%{transform:translate(9%,13%)} 66%{transform:translate(-4%,7%)} }
 @keyframes bg-drift-2 { 0%,100%{transform:translate(0,0)} 33%{transform:translate(-11%,-8%)} 66%{transform:translate(7%,-13%)} }
 @keyframes bg-drift-3 { 0%,100%{transform:translate(-50%,-50%)} 50%{transform:translate(-41%,-57%)} }

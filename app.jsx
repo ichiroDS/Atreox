@@ -1,15 +1,10 @@
 
 const React = window.React;
-const { useState } = React;
 const { AnimatePresence, motion } = window;
 const {
-  getCurrentUser, logoutUser,
-  Navbar, AuthModal, BgColorSystem,
+  Navbar, BgColorSystem,
   HomePage,
-  PricingPage,
-  ContactPage,
-  CheckoutPage, HowItWorksPage, MeetAtreoxPage,
-  SettingsPage,
+  FunctionsPage, PricingPage,
   PrivacyPage, TermsPage,
 } = window;
 
@@ -27,30 +22,18 @@ class ErrorBoundary extends React.Component {
 }
 
 const PATH_TO_PAGE = {
-  '/meet':         'meet',
-  '/how-it-works': 'how-it-works',
-  '/pricing':      'pricing',
-  '/packages':     'pricing',
-  '/courses':      'pricing',
-  '/checkout':     'checkout',
-  '/contact':      'contact',
-  '/settings':     'settings',
-  '/privacy':      'privacy',
-  '/terms':        'terms',
+  '/functions': 'functions',
+  '/pricing':   'pricing',
+  '/privacy':   'privacy',
+  '/terms':     'terms',
 };
 
 const PAGE_TO_PATH = {
-  'home':         '/',
-  'meet':         '/meet',
-  'how-it-works': '/how-it-works',
-  'pricing':      '/pricing',
-  'packages':     '/pricing',
-  'courses':      '/pricing',
-  'checkout':     '/checkout',
-  'contact':      '/contact',
-  'settings':     '/settings',
-  'privacy':      '/privacy',
-  'terms':        '/terms',
+  'home':      '/',
+  'functions': '/functions',
+  'pricing':   '/pricing',
+  'privacy':   '/privacy',
+  'terms':     '/terms',
 };
 
 function getInitialPage() {
@@ -66,10 +49,7 @@ function getInitialPage() {
 }
 
 function App() {
-  const [page, setPage]         = useState(getInitialPage);
-  const [user, setUser]         = useState(() => getCurrentUser());
-  const [showAuth, setShowAuth] = useState(false);
-  const [authMode, setAuthMode] = useState('login');
+  const [page, setPage] = React.useState(getInitialPage);
 
   React.useEffect(() => {
     const onPop = (e) => {
@@ -88,45 +68,20 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const openLogin    = () => { setAuthMode('login');    setShowAuth(true); };
-  const openRegister = () => { setAuthMode('register'); setShowAuth(true); };
-
-  const handleAuthSuccess = (u) => {
-    setUser(u);
-    setShowAuth(false);
-  };
-
-  const handleLogout = () => {
-    logoutUser();
-    setUser(null);
-  };
-
   const renderPage = () => {
     switch (page) {
-      case 'meet':         return <MeetAtreoxPage  setPage={navigate} />;
-      case 'how-it-works': return <HowItWorksPage  setPage={navigate} />;
-      case 'pricing':
-      case 'packages':
-      case 'courses':      return <PricingPage    setPage={navigate} user={user} onLoginClick={openLogin} />;
-      case 'checkout':     return <CheckoutPage   setPage={navigate} user={user} />;
-      case 'contact':      return <ContactPage    setPage={navigate} />;
-      case 'settings':     return <SettingsPage   setPage={navigate} user={user} onLogout={handleLogout} />;
-      case 'privacy':      return <PrivacyPage    setPage={navigate} />;
-      case 'terms':        return <TermsPage      setPage={navigate} />;
-      default:             return <HomePage       setPage={navigate} onLoginClick={openLogin} />;
+      case 'functions': return <FunctionsPage setPage={navigate} />;
+      case 'pricing':   return <PricingPage   setPage={navigate} />;
+      case 'privacy':   return <PrivacyPage   setPage={navigate} />;
+      case 'terms':     return <TermsPage     setPage={navigate} />;
+      default:          return <HomePage      setPage={navigate} />;
     }
   };
 
   return (
     <div style={{ minHeight: '100vh' }}>
       <BgColorSystem page={page} />
-      <Navbar
-        currentPage={page}
-        setPage={navigate}
-        user={user}
-        onLoginClick={openLogin}
-        onLogout={handleLogout}
-      />
+      <Navbar currentPage={page} setPage={navigate} />
 
       <AnimatePresence mode="wait">
         <motion.div
@@ -139,14 +94,6 @@ function App() {
           {renderPage()}
         </motion.div>
       </AnimatePresence>
-
-      {showAuth && (
-        <AuthModal
-          mode={authMode}
-          onClose={() => setShowAuth(false)}
-          onSuccess={handleAuthSuccess}
-        />
-      )}
     </div>
   );
 }

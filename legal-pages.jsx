@@ -47,9 +47,9 @@ function LegalPage({ badge, title, lastUpdated, sections, setPage }) {
         <div className="liquid-glass" style={{ borderRadius: 18, padding: '24px 28px', display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap', marginTop: 20 }}>
           <div style={{ flex: 1 }}>
             <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.88rem', color: 'white', marginBottom: 4 }}>Questions about this policy?</p>
-            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>Contact us at <a href="mailto:dsevcenko006@gmail.com" style={{ color: '#4f8ef7', textDecoration: 'none' }}>dsevcenko006@gmail.com</a></p>
+            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>Contact us at <a href="mailto:dsevcenko006@gmail.com" style={{ color: '#00e676', textDecoration: 'none' }}>dsevcenko006@gmail.com</a></p>
           </div>
-          <GlassBtn onClick={() => setPage('contact')}>Contact Us <ArrowUpRight size={14} /></GlassBtn>
+          <GlassBtn onClick={() => window.location.href = 'mailto:dsevcenko006@gmail.com'}>Contact Us <ArrowUpRight size={14} /></GlassBtn>
         </div>
       </div>
 
