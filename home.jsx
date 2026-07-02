@@ -9,7 +9,7 @@ const {
 } = window;
 
 const MONO  = "'JetBrains Mono', monospace";
-const SERIF = "'Instrument Serif', serif";
+const SERIF = "'Playfair Display', Georgia, serif";
 const GREEN = '#00e676';
 
 /* ── Fake live activity feed data (visual only, no live connection) ── */
@@ -41,7 +41,7 @@ function Hero({ setPage }) {
             {'// '}Neuro-commenting for Telegram<span className="cursor" />
           </motion.p>
           <BlurText text="AI-powered Telegram growth, on autopilot."
-            style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 'clamp(3rem, 6.5vw, 5rem)', color: 'white', lineHeight: 0.95, letterSpacing: '-3px', maxWidth: 620, marginBottom: 28 }}
+            style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(2.7rem, 5.8vw, 4.4rem)', color: 'white', lineHeight: 1.08, letterSpacing: '-0.015em', maxWidth: 640, marginBottom: 28 }}
             delay={110}
           />
           <motion.p initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }} animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.8 }}
@@ -99,7 +99,7 @@ function Hero({ setPage }) {
                 { val: '96', label: 'Channels tracked' },
               ].map(({ val, label }, i) => (
                 <div key={i} style={{ padding: '16px 8px', textAlign: 'center', borderLeft: i > 0 ? '1px solid rgba(0,230,118,0.1)' : 'none' }}>
-                  <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: '1.45rem', color: GREEN, lineHeight: 1, marginBottom: 5, textShadow: '0 0 18px rgba(0,230,118,0.35)' }}>{val}</div>
+                  <div style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '1.45rem', color: GREEN, lineHeight: 1, marginBottom: 5, textShadow: '0 0 18px rgba(0,230,118,0.35)' }}>{val}</div>
                   <div style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.55rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>{label}</div>
                 </div>
               ))}
@@ -129,7 +129,7 @@ function FeatureHeroSection({ setPage }) {
         <motion.div style={{ flex: '1 1 320px' }}
           initial={{ opacity: 0, x: -30 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.7 }}>
           <span className="overline" style={{ display: 'block', marginBottom: 18 }}>{'// '}Capabilities</span>
-          <h2 style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 'clamp(2.4rem, 4.5vw, 3.6rem)', color: 'white', lineHeight: 1.06, letterSpacing: '-0.03em', marginBottom: 22 }}>
+          <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(2.2rem, 4.2vw, 3.2rem)', color: 'white', lineHeight: 1.1, letterSpacing: '-0.01em', marginBottom: 22 }}>
             What ATREOX does
           </h2>
           <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.72, marginBottom: 32 }}>
@@ -172,7 +172,7 @@ function WhyChooseSection() {
       <div style={{ textAlign: 'center', marginBottom: 60 }}>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
           <span className="overline" style={{ display: 'block', marginBottom: 16 }}>{'// '}The difference</span>
-          <h2 style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'white', letterSpacing: '-0.03em', lineHeight: 1.05 }}>
+          <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.9rem, 3.8vw, 2.8rem)', color: 'white', letterSpacing: '-0.01em', lineHeight: 1.1 }}>
             Why ATREOX is different
           </h2>
         </motion.div>
@@ -205,7 +205,7 @@ function CtaBannerSection({ setPage }) {
     <section ref={ref} className="section-block" style={{ padding: '88px 5%', maxWidth: 1280, margin: '0 auto' }}>
       <motion.div initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }}
         className="panel ticks" style={{ padding: 'clamp(64px, 9vw, 110px) 5%', textAlign: 'center' }}>
-        <h2 style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 'clamp(2rem, 4.5vw, 3.4rem)', color: 'white', letterSpacing: '-0.03em', lineHeight: 1.05, marginBottom: 16 }}>
+        <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.9rem, 4.2vw, 3.1rem)', color: 'white', letterSpacing: '-0.01em', lineHeight: 1.1, marginBottom: 16 }}>
           Ready to grow on Telegram?
         </h2>
         <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.55)', maxWidth: 420, margin: '0 auto 36px', lineHeight: 1.65 }}>
@@ -236,7 +236,7 @@ function EducationalCtaSection({ setPage }) {
         style={{ padding: 'clamp(36px, 6vw, 72px) clamp(24px, 5%, 80px)', display: 'flex', gap: 40, alignItems: 'center', flexWrap: 'wrap' }}>
         <div style={{ flex: '1 1 280px', minWidth: 0 }}>
           <span className="overline" style={{ display: 'block', marginBottom: 18 }}>{'// '}How it works</span>
-          <h2 style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', color: 'white', lineHeight: 1.05, letterSpacing: '-0.03em', marginBottom: 14 }}>
+          <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.7rem, 3.3vw, 2.5rem)', color: 'white', lineHeight: 1.1, letterSpacing: '-0.01em', marginBottom: 14 }}>
             New to neuro-commenting?
           </h2>
           <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.68, maxWidth: 480 }}>
@@ -275,7 +275,7 @@ function FAQSection() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}
         style={{ textAlign: 'center', marginBottom: 48 }}>
         <span className="overline" style={{ display: 'block', marginBottom: 16 }}>{'// '}FAQ</span>
-        <h2 style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 'clamp(1.9rem, 3.5vw, 2.6rem)', color: 'white', letterSpacing: '-0.02em', marginBottom: 12 }}>
+        <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.8rem, 3.3vw, 2.4rem)', color: 'white', letterSpacing: '-0.01em', lineHeight: 1.1, marginBottom: 12 }}>
           Frequently Asked Questions
         </h2>
         <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.9rem', color: 'rgba(255,255,255,0.45)' }}>

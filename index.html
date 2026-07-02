@@ -12,7 +12,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Marcellus&family=Barlow:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
   <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
@@ -108,7 +108,8 @@
       --g-40:     rgba(0,230,118,0.40);
       --bg:       #020403;
       --panel:    rgba(4,12,8,0.66);
-      --serif:    'Instrument Serif', serif;
+      --serif:    'Playfair Display', Georgia, serif;
+      --logotype: 'Marcellus', 'Playfair Display', Georgia, serif;
       --sans:     'Barlow', sans-serif;
       --mono:     'JetBrains Mono', ui-monospace, 'Cascadia Mono', monospace;
     }
@@ -299,13 +300,13 @@
     .splash-sweep { transform-origin: 48px 48px; animation: spin 1.5s linear infinite; }
     .splash-core  { transform-origin: 48px 48px; animation: pulse-dot 1.5s ease-in-out infinite; }
     .splash-word {
-      font-family: var(--mono);
-      font-weight: 500;
-      font-size: 0.7rem;
-      letter-spacing: 0.55em;
-      padding-left: 0.55em; /* optically recenters the tracked text */
+      font-family: var(--logotype);
+      font-weight: 400;
+      font-size: 1rem;
+      letter-spacing: 0.42em;
+      padding-left: 0.42em; /* optically recenters the tracked text */
       text-transform: uppercase;
-      color: rgba(0,230,118,0.75);
+      color: rgba(0,230,118,0.85);
       animation: word-pulse 2.2s ease-in-out infinite;
     }
     @keyframes word-pulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }

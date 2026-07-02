@@ -82,24 +82,19 @@ const X             = _icon('X');
 const Menu          = _icon('Menu');
 const Info          = _icon('Info');
 
-/* ── Wordmark: serif italic logotype, the "O" set as a ring+dot glyph ──
-   The ring+dot is the brand mark — it repeats in the splash screen and
-   favicon. Sized against the serif cap height; tuned visually. */
-function Wordmark({ size = '1.3rem', glow = true, color = '#00e676' }) {
+/* ── Wordmark: upright inscriptional-serif logotype, wide balanced tracking ──
+   Marcellus caps in brand green — refined lifestyle-brand lockup, plain
+   well-kerned O. Negative right margin swallows the trailing letter-space. */
+function Wordmark({ size = '1.02rem', glow = true, color = '#00e676' }) {
   return (
-    <span role="img" aria-label="ATREOX" style={{
-      fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontWeight: 400,
-      fontSize: size, color, letterSpacing: '0.1em', lineHeight: 1,
-      display: 'inline-flex', alignItems: 'baseline', userSelect: 'none',
-      textShadow: glow ? '0 0 24px rgba(0,230,118,0.4)' : 'none',
+    <span aria-label="ATREOX" style={{
+      fontFamily: "'Marcellus', 'Playfair Display', Georgia, serif",
+      fontWeight: 400, fontSize: size, color,
+      letterSpacing: '0.32em', marginRight: '-0.32em', lineHeight: 1,
+      display: 'inline-block', userSelect: 'none',
+      textShadow: glow ? '0 0 20px rgba(0,230,118,0.28)' : 'none',
     }}>
-      ATRE
-      <svg width="0.64em" height="0.64em" viewBox="0 0 24 24" fill="none" aria-hidden="true"
-        style={{ margin: '0 0.08em', overflow: 'visible' }}>
-        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.8"/>
-        <circle cx="12" cy="12" r="3.2" fill="currentColor"/>
-      </svg>
-      X
+      ATREOX
     </span>
   );
 }
@@ -111,9 +106,9 @@ function SectionBadge({ children }) {
 function SectionHeading({ children, style }) {
   return (
     <h2 style={{
-      fontFamily: "'Instrument Serif', serif", fontStyle: 'italic',
-      fontSize: 'clamp(2.4rem, 5vw, 4rem)', color: 'white',
-      letterSpacing: '-0.02em', lineHeight: 0.9, ...style
+      fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 500,
+      fontSize: 'clamp(2.2rem, 4.6vw, 3.6rem)', color: 'white',
+      letterSpacing: '-0.01em', lineHeight: 1.08, ...style
     }}>{children}</h2>
   );
 }
@@ -209,8 +204,8 @@ function Navbar({ currentPage, setPage }) {
               borderBottom: '1px solid rgba(0,230,118,0.12)',
               background: 'transparent', textAlign: 'left',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              fontFamily: "'Instrument Serif', serif", fontStyle: 'italic',
-              fontSize: '2.1rem', letterSpacing: '-0.02em',
+              fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 500,
+              fontSize: '1.9rem', letterSpacing: '-0.01em',
               color: currentPage === link.id ? '#00e676' : 'white',
               cursor: 'pointer',
             }}>
@@ -269,7 +264,7 @@ function FooterBar({ setPage }) {
       <div style={{ display: 'flex', gap: 60, flexWrap: 'wrap', marginBottom: 48 }}>
         <div style={{ flex: '1 1 220px' }}>
           <div style={{ cursor: 'pointer', marginBottom: 16 }} onClick={() => setPage('home')}>
-            <Wordmark size="1.1rem" glow={false} />
+            <Wordmark size="0.92rem" glow={false} />
           </div>
           <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.32)', lineHeight: 1.65, maxWidth: 210 }}>
             AI-powered Telegram neuro-commenting. Real accounts, real growth.

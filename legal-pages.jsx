@@ -8,9 +8,9 @@ function LegalPage({ badge, title, lastUpdated, sections, setPage }) {
       <section style={{ paddingTop: 160, paddingBottom: 60, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: '1px solid rgba(0,230,118,0.12)' }}>
         <SectionBadge>{badge}</SectionBadge>
         <BlurText text={title} style={{
-          fontFamily: "'Instrument Serif', serif", fontStyle: 'italic',
-          fontSize: 'clamp(2.4rem, 4.5vw, 4rem)', color: 'white',
-          lineHeight: 0.9, letterSpacing: '-2px', marginTop: 22, marginBottom: 16,
+          fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 500,
+          fontSize: 'clamp(2.2rem, 4.2vw, 3.6rem)', color: 'white',
+          lineHeight: 1.08, letterSpacing: '-0.01em', marginTop: 22, marginBottom: 16,
         }} delay={80} />
         <p style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.66rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)' }}>
           Last updated: {lastUpdated}

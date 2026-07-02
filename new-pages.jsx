@@ -9,7 +9,7 @@ const {
 
 const DASHBOARD_URL = 'https://app.atreoxai.com';
 const MONO  = "'JetBrains Mono', monospace";
-const SERIF = "'Instrument Serif', serif";
+const SERIF = "'Playfair Display', Georgia, serif";
 const GREEN = '#00e676';
 
 /* ─── shared inner-page hero (Functions / Pricing) ─── */
@@ -18,9 +18,9 @@ function PageHero({ badge, title, sub }) {
     <section style={{ paddingTop: 170, paddingBottom: 84, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: '1px solid rgba(0,230,118,0.12)' }}>
       <SectionBadge>{badge}</SectionBadge>
       <BlurText text={title} style={{
-        fontFamily: SERIF, fontStyle: 'italic',
-        fontSize: 'clamp(2.8rem, 5vw, 4.5rem)', color: 'white',
-        lineHeight: 0.9, letterSpacing: '-2px', marginTop: 22, marginBottom: 20
+        fontFamily: SERIF, fontWeight: 500,
+        fontSize: 'clamp(2.5rem, 4.6vw, 4rem)', color: 'white',
+        lineHeight: 1.08, letterSpacing: '-0.015em', marginTop: 22, marginBottom: 20
       }} delay={90} />
       <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.5)', maxWidth: 560, margin: '0 auto', lineHeight: 1.65 }}>
         {sub}
@@ -62,7 +62,7 @@ function FunctionCard({ icon: Icon, title, tagline, body, bullets, index, inView
         <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.66rem', letterSpacing: '0.16em', color: 'rgba(0,230,118,0.4)' }}>{String(index + 1).padStart(2, '0')}</span>
       </div>
       <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', color: GREEN, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 10, display: 'block' }}>{'// '}{tagline}</span>
-      <h3 style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: '1.6rem', color: 'white', marginBottom: 14, letterSpacing: '-0.02em' }}>{title}</h3>
+      <h3 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '1.45rem', color: 'white', marginBottom: 14, letterSpacing: '-0.01em', lineHeight: 1.2 }}>{title}</h3>
       <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, marginBottom: 24 }}>{body}</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 'auto', borderTop: '1px solid rgba(0,230,118,0.1)', paddingTop: 20 }}>
         {bullets.map((b, i) => (
@@ -131,7 +131,7 @@ function FunctionsPage({ setPage }) {
           <div style={{ width: 46, height: 46, borderRadius: 5, background: 'rgba(0,230,118,0.08)', border: '1px solid rgba(0,230,118,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 22px' }}>
             <Zap size={20} color={GREEN} />
           </div>
-          <h2 style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)', color: 'white', marginBottom: 14, letterSpacing: '-0.02em' }}>
+          <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.7rem, 3.3vw, 2.4rem)', color: 'white', marginBottom: 14, letterSpacing: '-0.01em', lineHeight: 1.1 }}>
             See it running on your channels
           </h2>
           <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.55)', maxWidth: 480, margin: '0 auto 30px', lineHeight: 1.65 }}>
@@ -175,7 +175,7 @@ function PricingCard({ tier, index, inView }) {
       <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.64rem', color: 'rgba(0,230,118,0.7)', letterSpacing: '0.24em', textTransform: 'uppercase', marginBottom: 14, display: 'block' }}>{'// '}{tier.name}</span>
 
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 10 }}>
-        <span style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: '3.2rem', color: GREEN, lineHeight: 1, textShadow: '0 0 28px rgba(0,230,118,0.3)' }}>${tier.price}</span>
+        <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '3rem', color: GREEN, lineHeight: 1, textShadow: '0 0 28px rgba(0,230,118,0.3)' }}>${tier.price}</span>
         <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.68rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>/ month</span>
       </div>
       <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginBottom: 26 }}>{tier.blurb}</p>
