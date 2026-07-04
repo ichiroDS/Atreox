@@ -10,7 +10,8 @@ const {
 
 const MONO  = "'JetBrains Mono', monospace";
 const SERIF = "'Playfair Display', Georgia, serif";
-const GREEN = '#00e676';
+const GREEN = window.ACCENT;
+const GREEN_RGB = window.ACCENT_RGB;
 
 /* ── Fake live activity feed data (visual only, no live connection) ── */
 const FEED_ITEMS = [
@@ -43,6 +44,7 @@ function Hero({ setPage }) {
           <BlurText text="AI-powered Telegram growth, on autopilot."
             style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(2.7rem, 5.8vw, 4.4rem)', color: 'white', lineHeight: 1.08, letterSpacing: '-0.015em', maxWidth: 640, marginBottom: 28 }}
             delay={110}
+            glowWords={['Telegram']}
           />
           <motion.p initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }} animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.8 }}
             style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.72)', maxWidth: 520, lineHeight: 1.65, marginBottom: 36 }}>
@@ -68,7 +70,7 @@ function Hero({ setPage }) {
           style={{ flex: '1 1 420px', minWidth: 0 }}>
           <div className="panel ticks" style={{ borderRadius: 6, padding: 0, overflow: 'hidden' }}>
             {/* Terminal header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 20px', borderBottom: '1px solid rgba(0,230,118,0.14)', background: 'rgba(0,230,118,0.04)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 20px', borderBottom: `1px solid rgba(${GREEN_RGB},0.14)`, background: `rgba(${GREEN_RGB},0.04)` }}>
               <div style={{ width: 7, height: 7, borderRadius: '50%', background: GREEN, animation: 'pulse-dot 1.8s ease-in-out infinite', flexShrink: 0 }} />
               <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.66rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'white' }}>Live engine activity</span>
               <span style={{ marginLeft: 'auto', fontFamily: MONO, fontWeight: 400, fontSize: '0.6rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)' }}>preview</span>
@@ -77,7 +79,7 @@ function Hero({ setPage }) {
             {/* Log rows */}
             <div>
               {FEED_ITEMS.map((item, i) => (
-                <div key={i} style={{ padding: '13px 20px', borderBottom: '1px solid rgba(0,230,118,0.08)' }}>
+                <div key={i} style={{ padding: '13px 20px', borderBottom: `1px solid rgba(${GREEN_RGB},0.08)` }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
                     <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.64rem', color: 'rgba(255,255,255,0.28)' }}>{item.time}</span>
                     <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.72rem', color: GREEN }}>{item.channel}</span>
@@ -92,14 +94,14 @@ function Hero({ setPage }) {
             </div>
 
             {/* Stat readout */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', background: 'rgba(0,230,118,0.03)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', background: `rgba(${GREEN_RGB},0.03)` }}>
               {[
                 { val: '42', label: 'Accounts active' },
                 { val: '1,284', label: 'Comments today' },
                 { val: '96', label: 'Channels tracked' },
               ].map(({ val, label }, i) => (
-                <div key={i} style={{ padding: '16px 8px', textAlign: 'center', borderLeft: i > 0 ? '1px solid rgba(0,230,118,0.1)' : 'none' }}>
-                  <div style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '1.45rem', color: GREEN, lineHeight: 1, marginBottom: 5, textShadow: '0 0 18px rgba(0,230,118,0.35)' }}>{val}</div>
+                <div key={i} style={{ padding: '16px 8px', textAlign: 'center', borderLeft: i > 0 ? `1px solid rgba(${GREEN_RGB},0.1)` : 'none' }}>
+                  <div style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '1.45rem', color: GREEN, lineHeight: 1, marginBottom: 5, textShadow: `0 0 18px rgba(${GREEN_RGB},0.35)` }}>{val}</div>
                   <div style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.55rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>{label}</div>
                 </div>
               ))}
@@ -144,7 +146,7 @@ function FeatureHeroSection({ setPage }) {
           initial={{ opacity: 0, x: 30 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.7, delay: 0.1 }}>
           {capabilities.map(({ icon: Icon, title, body }, i) => (
             <div key={i} className="panel panel-hover" style={{ padding: '26px 22px' }}>
-              <div style={{ width: 42, height: 42, borderRadius: 5, background: 'rgba(0,230,118,0.08)', border: '1px solid rgba(0,230,118,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18 }}>
+              <div style={{ width: 42, height: 42, borderRadius: 5, background: `rgba(${GREEN_RGB},0.08)`, border: `1px solid rgba(${GREEN_RGB},0.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18 }}>
                 <Icon size={19} color={GREEN} />
               </div>
               <h4 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.92rem', color: 'white', marginBottom: 8 }}>{title}</h4>
@@ -183,10 +185,10 @@ function WhyChooseSection() {
             initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.55, delay: i * 0.09 }}
             style={{ padding: '30px 26px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
-              <div style={{ width: 46, height: 46, borderRadius: 5, background: 'rgba(0,230,118,0.08)', border: '1px solid rgba(0,230,118,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: 46, height: 46, borderRadius: 5, background: `rgba(${GREEN_RGB},0.08)`, border: `1px solid rgba(${GREEN_RGB},0.22)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Icon size={20} color={GREEN} />
               </div>
-              <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.62rem', letterSpacing: '0.14em', color: 'rgba(0,230,118,0.4)' }}>{String(i + 1).padStart(2, '0')}</span>
+              <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.62rem', letterSpacing: '0.14em', color: `rgba(${GREEN_RGB},0.4)` }}>{String(i + 1).padStart(2, '0')}</span>
             </div>
             <h4 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem', color: 'white', marginBottom: 10 }}>{title}</h4>
             <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.65 }}>{body}</p>
@@ -282,15 +284,15 @@ function FAQSection() {
           Everything you need to know before you start
         </p>
       </motion.div>
-      <div style={{ borderTop: '1px solid rgba(0,230,118,0.14)' }}>
+      <div style={{ borderTop: `1px solid rgba(${GREEN_RGB},0.14)` }}>
         {faqs.map(({ q, a }, i) => (
           <motion.div key={i}
             initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.06 }}
-            style={{ borderBottom: '1px solid rgba(0,230,118,0.14)' }}>
+            style={{ borderBottom: `1px solid rgba(${GREEN_RGB},0.14)` }}>
             <button onClick={() => setOpen(open === i ? null : i)} style={{ width: '100%', padding: '20px 6px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
               <span style={{ display: 'flex', alignItems: 'baseline', gap: 16, textAlign: 'left' }}>
-                <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.62rem', letterSpacing: '0.1em', color: 'rgba(0,230,118,0.45)', flexShrink: 0 }}>{String(i + 1).padStart(2, '0')}</span>
-                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.95rem', color: open === i ? '#00e676' : 'white', lineHeight: 1.4, transition: 'color 0.15s' }}>{q}</span>
+                <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.62rem', letterSpacing: '0.1em', color: `rgba(${GREEN_RGB},0.45)`, flexShrink: 0 }}>{String(i + 1).padStart(2, '0')}</span>
+                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.95rem', color: open === i ? GREEN : 'white', lineHeight: 1.4, transition: 'color 0.15s' }}>{q}</span>
               </span>
               <span style={{
                 fontFamily: MONO, fontWeight: 400, fontSize: '1.05rem', lineHeight: 1, flexShrink: 0,

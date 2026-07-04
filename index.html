@@ -98,16 +98,16 @@
        black chassis · phosphor green · serif display
     ═══════════════════════════════════════════════ */
     :root {
-      --g:        #00e676;
-      --g-bright: #7dffb4;
-      --g-ink:    #02150b;   /* text-on-green */
-      --g-06:     rgba(0,230,118,0.06);
-      --g-10:     rgba(0,230,118,0.10);
-      --g-14:     rgba(0,230,118,0.14);
-      --g-22:     rgba(0,230,118,0.22);
-      --g-40:     rgba(0,230,118,0.40);
+      --g:        #00d9ff;
+      --g-bright: #7de9ff;
+      --g-ink:    #00141c;   /* text-on-accent */
+      --g-06:     rgba(0,217,255,0.06);
+      --g-10:     rgba(0,217,255,0.10);
+      --g-14:     rgba(0,217,255,0.14);
+      --g-22:     rgba(0,217,255,0.22);
+      --g-40:     rgba(0,217,255,0.40);
       --bg:       #020403;
-      --panel:    rgba(4,12,8,0.66);
+      --panel:    rgba(4,10,16,0.66);
       --serif:    'Playfair Display', Georgia, serif;
       --logotype: 'Marcellus', 'Playfair Display', Georgia, serif;
       --sans:     'Barlow', sans-serif;
@@ -130,14 +130,14 @@
 
     ::-webkit-scrollbar { width: 10px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: #0d2818; border: 2px solid var(--bg); }
-    ::-webkit-scrollbar-thumb:hover { background: #16472b; }
+    ::-webkit-scrollbar-thumb { background: #0d1f2e; border: 2px solid var(--bg); }
+    ::-webkit-scrollbar-thumb:hover { background: #1a4a66; }
 
     /* ── Panels: sharp near-black surfaces, hairline green borders ── */
     .panel {
       position: relative;
       background:
-        linear-gradient(180deg, rgba(0,230,118,0.045) 0%, rgba(0,230,118,0.012) 40%, rgba(0,0,0,0.25) 100%),
+        linear-gradient(180deg, rgba(0,217,255,0.045) 0%, rgba(0,217,255,0.012) 40%, rgba(0,0,0,0.25) 100%),
         var(--panel);
       border: 1px solid var(--g-14);
       border-radius: 6px;
@@ -148,7 +148,7 @@
     }
     .panel-hover:hover {
       border-color: var(--g-40);
-      box-shadow: 0 0 0 1px var(--g-10), 0 0 34px rgba(0,230,118,0.08),
+      box-shadow: 0 0 0 1px var(--g-10), 0 0 34px rgba(0,217,255,0.08),
                   0 24px 48px rgba(0,0,0,0.55);
       transform: translateY(-3px);
     }
@@ -190,20 +190,20 @@
     }
     .btn-solid:hover {
       background: var(--g-bright);
-      box-shadow: 0 0 30px rgba(0,230,118,0.45), 0 4px 14px rgba(0,0,0,0.4);
+      box-shadow: 0 0 30px rgba(0,217,255,0.45), 0 4px 14px rgba(0,0,0,0.4);
       transform: translateY(-1px);
     }
     .btn-solid:active { transform: scale(0.97); }
 
     .btn-outline {
       background: var(--g-06);
-      color: #d9ffe9;
+      color: #d9f5ff;
       font-family: var(--mono);
       font-weight: 500;
       font-size: 0.76rem;
       letter-spacing: 0.09em;
       text-transform: uppercase;
-      border: 1px solid rgba(0,230,118,0.32);
+      border: 1px solid rgba(0,217,255,0.32);
       border-radius: 4px;
       padding: 12px 22px;
       display: inline-flex;
@@ -217,7 +217,7 @@
     .btn-outline:hover {
       border-color: var(--g);
       background: var(--g-10);
-      box-shadow: 0 0 22px rgba(0,230,118,0.16);
+      box-shadow: 0 0 22px rgba(0,217,255,0.16);
       transform: translateY(-1px);
     }
     .btn-outline:active { transform: scale(0.97); }
@@ -306,7 +306,7 @@
       letter-spacing: 0.42em;
       padding-left: 0.42em; /* optically recenters the tracked text */
       text-transform: uppercase;
-      color: rgba(0,230,118,0.85);
+      color: rgba(0,217,255,0.85);
       animation: word-pulse 2.2s ease-in-out infinite;
     }
     @keyframes word-pulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
@@ -331,19 +331,19 @@
   <!-- ── Boot splash: ring mark spins while JS/fonts initialize ── -->
   <div id="splash" aria-hidden="true">
     <svg width="96" height="96" viewBox="0 0 96 96" fill="none">
-      <circle cx="48" cy="48" r="44" stroke="rgba(0,230,118,0.16)" stroke-width="1"/>
+      <circle cx="48" cy="48" r="44" stroke="rgba(0,217,255,0.16)" stroke-width="1"/>
       <g class="splash-ticks">
-        <circle cx="48" cy="48" r="34" stroke="#00e676" stroke-width="1.5"
+        <circle cx="48" cy="48" r="34" stroke="#00d9ff" stroke-width="1.5"
                 stroke-dasharray="2 9.32" stroke-linecap="round" opacity="0.9"/>
       </g>
       <g class="splash-sweep">
         <line x1="48" y1="44" x2="48" y2="12" stroke="url(#splash-swp)" stroke-width="1.5"/>
       </g>
-      <circle class="splash-core" cx="48" cy="48" r="5" fill="#00e676"/>
+      <circle class="splash-core" cx="48" cy="48" r="5" fill="#00d9ff"/>
       <defs>
         <linearGradient id="splash-swp" x1="48" y1="44" x2="48" y2="12" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stop-color="#00e676" stop-opacity="0"/>
-          <stop offset="1" stop-color="#00e676" stop-opacity="0.9"/>
+          <stop offset="0" stop-color="#00d9ff" stop-opacity="0"/>
+          <stop offset="1" stop-color="#00d9ff" stop-opacity="0.9"/>
         </linearGradient>
       </defs>
     </svg>

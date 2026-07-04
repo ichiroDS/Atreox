@@ -5,6 +5,10 @@ const { motion, AnimatePresence, useInView } = window.FramerMotion;
 
 const DASHBOARD_URL = 'https://app.atreoxai.com';
 
+/* ── Brand accent — single source of truth, read via window.ACCENT / window.ACCENT_RGB elsewhere ── */
+const ACCENT = '#00d9ff';
+const ACCENT_RGB = '0,217,255';
+
 /* ── Inline icon library ── */
 const _ip = {
   ArrowUpRight: "M7 17L17 7M7 7h10v10",
@@ -85,14 +89,14 @@ const Info          = _icon('Info');
 /* ── Wordmark: upright inscriptional-serif logotype, wide balanced tracking ──
    Marcellus caps in brand green — refined lifestyle-brand lockup, plain
    well-kerned O. Negative right margin swallows the trailing letter-space. */
-function Wordmark({ size = '1.02rem', glow = true, color = '#00e676' }) {
+function Wordmark({ size = '1.02rem', glow = true, color = ACCENT }) {
   return (
     <span aria-label="ATREOX" style={{
       fontFamily: "'Marcellus', 'Playfair Display', Georgia, serif",
       fontWeight: 400, fontSize: size, color,
       letterSpacing: '0.32em', marginRight: '-0.32em', lineHeight: 1,
       display: 'inline-block', userSelect: 'none',
-      textShadow: glow ? '0 0 20px rgba(0,230,118,0.28)' : 'none',
+      textShadow: glow ? `0 0 20px rgba(${ACCENT_RGB},0.28)` : 'none',
     }}>
       ATREOX
     </span>
@@ -156,7 +160,7 @@ function Navbar({ currentPage, setPage }) {
         padding: '0 clamp(16px, 4vw, 40px)', display: 'flex', alignItems: 'center', gap: 16,
         background: scrolled ? 'rgba(2,6,4,0.88)' : 'rgba(2,6,4,0.5)',
         backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-        borderBottom: `1px solid rgba(0,230,118,${scrolled ? 0.18 : 0.09})`,
+        borderBottom: `1px solid rgba(${ACCENT_RGB},${scrolled ? 0.18 : 0.09})`,
         transition: 'background 0.25s ease, border-color 0.25s ease',
       }}>
         {/* Wordmark */}
@@ -189,8 +193,8 @@ function Navbar({ currentPage, setPage }) {
         {/* Mobile hamburger */}
         {isMobile && (
           <button onClick={() => setMenuOpen(o => !o)} aria-label="Menu"
-            style={{ flexShrink: 0, background: 'rgba(0,230,118,0.07)', border: '1px solid rgba(0,230,118,0.22)', borderRadius: 4, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-            {menuOpen ? <X size={17} color="#00e676" /> : <Menu size={17} color="#00e676" />}
+            style={{ flexShrink: 0, background: `rgba(${ACCENT_RGB},0.07)`, border: `1px solid rgba(${ACCENT_RGB},0.22)`, borderRadius: 4, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            {menuOpen ? <X size={17} color={ACCENT} /> : <Menu size={17} color={ACCENT} />}
           </button>
         )}
       </nav>
@@ -201,16 +205,16 @@ function Navbar({ currentPage, setPage }) {
           {links.map((link, i) => (
             <button key={link.id} onClick={() => handleNav(link.id)} style={{
               width: '100%', padding: '20px 4px', border: 'none',
-              borderBottom: '1px solid rgba(0,230,118,0.12)',
+              borderBottom: `1px solid rgba(${ACCENT_RGB},0.12)`,
               background: 'transparent', textAlign: 'left',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 500,
               fontSize: '1.9rem', letterSpacing: '-0.01em',
-              color: currentPage === link.id ? '#00e676' : 'white',
+              color: currentPage === link.id ? ACCENT : 'white',
               cursor: 'pointer',
             }}>
               {link.label}
-              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontStyle: 'normal', fontSize: '0.68rem', letterSpacing: '0.2em', color: 'rgba(0,230,118,0.5)' }}>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontStyle: 'normal', fontSize: '0.68rem', letterSpacing: '0.2em', color: `rgba(${ACCENT_RGB},0.5)` }}>
                 {String(i + 1).padStart(2, '0')}
               </span>
             </button>
@@ -226,20 +230,27 @@ function Navbar({ currentPage, setPage }) {
 }
 
 /* ── BlurText ── */
-function BlurText({ text, style, delay = 120 }) {
+function BlurText({ text, style, delay = 120, glowWords = [] }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 });
   const words = text.split(' ');
+  const glowSet = new Set(glowWords);
   return (
     <span ref={ref} style={{ display: 'block', ...style }}>
-      {words.map((word, i) => (
-        <motion.span key={i}
-          initial={{ filter: 'blur(12px)', opacity: 0, y: 48 }}
-          animate={isInView ? { filter: 'blur(0px)', opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7, delay: i * delay / 1000 }}
-          style={{ display: 'inline-block', marginRight: '0.28em' }}
-        >{word}</motion.span>
-      ))}
+      {words.map((word, i) => {
+        const isGlow = glowSet.has(word.replace(/[.,!?]+$/, ''));
+        return (
+          <motion.span key={i}
+            initial={{ filter: 'blur(12px)', opacity: 0, y: 48 }}
+            animate={isInView ? { filter: 'blur(0px)', opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, delay: i * delay / 1000 }}
+            style={{
+              display: 'inline-block', marginRight: '0.28em',
+              ...(isGlow ? { color: ACCENT, textShadow: `0 0 22px rgba(${ACCENT_RGB},0.4)` } : {}),
+            }}
+          >{word}</motion.span>
+        );
+      })}
     </span>
   );
 }
@@ -258,9 +269,9 @@ function FooterBar({ setPage }) {
     { id: 'functions', label: 'Functions' },
     { id: 'pricing',   label: 'Pricing' },
   ];
-  const colHead = { fontFamily: "'JetBrains Mono', monospace", fontWeight: 500, fontSize: '0.6rem', color: 'rgba(0,230,118,0.55)', letterSpacing: '0.24em', textTransform: 'uppercase', marginBottom: 18 };
+  const colHead = { fontFamily: "'JetBrains Mono', monospace", fontWeight: 500, fontSize: '0.6rem', color: `rgba(${ACCENT_RGB},0.55)`, letterSpacing: '0.24em', textTransform: 'uppercase', marginBottom: 18 };
   return (
-    <footer style={{ borderTop: '1px solid rgba(0,230,118,0.14)', paddingTop: 56, marginTop: 60, position: 'relative' }}>
+    <footer style={{ borderTop: `1px solid rgba(${ACCENT_RGB},0.14)`, paddingTop: 56, marginTop: 60, position: 'relative' }}>
       <div style={{ display: 'flex', gap: 60, flexWrap: 'wrap', marginBottom: 48 }}>
         <div style={{ flex: '1 1 220px' }}>
           <div style={{ cursor: 'pointer', marginBottom: 16 }} onClick={() => setPage('home')}>
@@ -276,7 +287,7 @@ function FooterBar({ setPage }) {
             {navLinks.map(link => (
               <span key={link.id} onClick={() => setPage(link.id)}
                 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.48)', cursor: 'pointer', transition: 'color 0.2s' }}
-                onMouseEnter={e => e.target.style.color = '#00e676'}
+                onMouseEnter={e => e.target.style.color = ACCENT}
                 onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.48)'}
               >{link.label}</span>
             ))}
@@ -288,7 +299,7 @@ function FooterBar({ setPage }) {
             {[['privacy','Privacy Policy'],['terms','Terms of Service']].map(([id, label]) => (
               <span key={id} onClick={() => setPage(id)}
                 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.38)', cursor: 'pointer', transition: 'color 0.2s' }}
-                onMouseEnter={e => e.target.style.color = '#00e676'}
+                onMouseEnter={e => e.target.style.color = ACCENT}
                 onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.38)'}
               >{label}</span>
             ))}
@@ -300,10 +311,10 @@ function FooterBar({ setPage }) {
           <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.78rem', color: 'rgba(255,255,255,0.25)' }}>Mon–Fri, 9 AM–6 PM UTC</span>
         </div>
       </div>
-      <div style={{ borderTop: '1px solid rgba(0,230,118,0.08)', paddingTop: 22, paddingBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+      <div style={{ borderTop: `1px solid rgba(${ACCENT_RGB},0.08)`, paddingTop: 22, paddingBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
         <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.64rem', letterSpacing: '0.06em', color: 'rgba(255,255,255,0.24)' }}>© 2026 ATREOX AI. All rights reserved.</span>
         <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.64rem', letterSpacing: '0.06em', color: 'rgba(255,255,255,0.24)', display: 'inline-flex', alignItems: 'center', gap: 7 }}>
-          <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#00e676', display: 'inline-block', animation: 'pulse-dot 2s ease-in-out infinite' }} />
+          <span style={{ width: 5, height: 5, borderRadius: '50%', background: ACCENT, display: 'inline-block', animation: 'pulse-dot 2s ease-in-out infinite' }} />
           Built for Telegram growth teams worldwide
         </span>
       </div>
@@ -320,6 +331,7 @@ function BgColorSystem({ page }) {
 }
 
 Object.assign(window, {
+  ACCENT, ACCENT_RGB,
   motion, AnimatePresence, useInView,
   ArrowUpRight, Play, Zap, Palette, BarChart3, Shield, Check, Star,
   ChevronRight, ChevronDown, Users, BookOpen, GitBranch, Code2, Cpu,

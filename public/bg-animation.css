@@ -5,12 +5,12 @@
   pointer-events: none; overflow: hidden;
 }
 
-/* Fine green grid, strongest near the top, dissolving toward the edges */
+/* Fine blue grid, strongest near the top, dissolving toward the edges */
 #bg-grid {
   position: absolute; inset: 0;
   background-image:
-    linear-gradient(rgba(0,230,118,0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,230,118,0.05) 1px, transparent 1px);
+    linear-gradient(rgba(0,217,255,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,217,255,0.05) 1px, transparent 1px);
   background-size: 48px 48px;
   -webkit-mask-image: radial-gradient(ellipse 100% 85% at 50% 0%, black 25%, transparent 78%);
           mask-image: radial-gradient(ellipse 100% 85% at 50% 0%, black 25%, transparent 78%);
@@ -21,14 +21,14 @@
   position: absolute;
   width: 70vw; height: 70vw;
   top: -30vw; left: -18vw;
-  background: radial-gradient(circle, rgba(0,230,118,0.13) 0%, transparent 62%);
+  background: radial-gradient(circle, rgba(0,217,255,0.13) 0%, transparent 62%);
   animation: glow-drift 26s ease-in-out infinite alternate;
 }
 #bg-glow-2 {
   position: absolute;
   width: 55vw; height: 55vw;
   bottom: -26vw; right: -16vw;
-  background: radial-gradient(circle, rgba(0,191,165,0.09) 0%, transparent 62%);
+  background: radial-gradient(circle, rgba(0,140,255,0.09) 0%, transparent 62%);
 }
 @keyframes glow-drift {
   from { transform: translate(0, 0); }
@@ -39,8 +39,8 @@
 #bg-scan {
   position: absolute; left: 0; right: 0; top: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent 5%, rgba(0,230,118,0.32) 50%, transparent 95%);
-  box-shadow: 0 0 14px rgba(0,230,118,0.3);
+  background: linear-gradient(90deg, transparent 5%, rgba(0,217,255,0.32) 50%, transparent 95%);
+  box-shadow: 0 0 14px rgba(0,217,255,0.3);
   opacity: 0.5;
   animation: scan-y 11s linear infinite;
 }

@@ -1,11 +1,11 @@
 
 const React = window.React;
-const { SectionBadge, FooterBar, BlurText, GlassBtn, ArrowUpRight } = window;
+const { SectionBadge, FooterBar, BlurText, GlassBtn, ArrowUpRight, ACCENT, ACCENT_RGB } = window;
 
 function LegalPage({ badge, title, lastUpdated, sections, setPage }) {
   return (
     <div>
-      <section style={{ paddingTop: 160, paddingBottom: 60, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: '1px solid rgba(0,230,118,0.12)' }}>
+      <section style={{ paddingTop: 160, paddingBottom: 60, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: `1px solid rgba(${ACCENT_RGB},0.12)` }}>
         <SectionBadge>{badge}</SectionBadge>
         <BlurText text={title} style={{
           fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 500,
@@ -22,7 +22,7 @@ function LegalPage({ badge, title, lastUpdated, sections, setPage }) {
           <div key={i} style={{ marginBottom: 48 }}>
             {heading && (
               <h3 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '1rem', color: 'white', marginBottom: 14, letterSpacing: '-0.01em', display: 'flex', alignItems: 'baseline', gap: 12 }}>
-                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.66rem', letterSpacing: '0.1em', color: 'rgba(0,230,118,0.55)' }}>{String(i + 1).padStart(2, '0')}</span>
+                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.66rem', letterSpacing: '0.1em', color: `rgba(${ACCENT_RGB},0.55)` }}>{String(i + 1).padStart(2, '0')}</span>
                 {heading}
               </h3>
             )}
@@ -40,7 +40,7 @@ function LegalPage({ badge, title, lastUpdated, sections, setPage }) {
               </p>
             )}
             {i < sections.length - 1 && (
-              <div style={{ height: 1, background: 'rgba(0,230,118,0.08)', marginTop: 48 }} />
+              <div style={{ height: 1, background: `rgba(${ACCENT_RGB},0.08)`, marginTop: 48 }} />
             )}
           </div>
         ))}
@@ -48,7 +48,7 @@ function LegalPage({ badge, title, lastUpdated, sections, setPage }) {
         <div className="panel" style={{ padding: '24px 28px', display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap', marginTop: 20 }}>
           <div style={{ flex: 1 }}>
             <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.88rem', color: 'white', marginBottom: 4 }}>Questions about this policy?</p>
-            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>Contact us at <a href="mailto:dsevcenko006@gmail.com" style={{ color: '#00e676', textDecoration: 'none' }}>dsevcenko006@gmail.com</a></p>
+            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>Contact us at <a href="mailto:dsevcenko006@gmail.com" style={{ color: ACCENT, textDecoration: 'none' }}>dsevcenko006@gmail.com</a></p>
           </div>
           <GlassBtn onClick={() => window.location.href = 'mailto:dsevcenko006@gmail.com'}>Contact Us <ArrowUpRight size={14} /></GlassBtn>
         </div>

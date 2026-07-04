@@ -10,12 +10,13 @@ const {
 const DASHBOARD_URL = 'https://app.atreoxai.com';
 const MONO  = "'JetBrains Mono', monospace";
 const SERIF = "'Playfair Display', Georgia, serif";
-const GREEN = '#00e676';
+const GREEN = window.ACCENT;
+const GREEN_RGB = window.ACCENT_RGB;
 
 /* ─── shared inner-page hero (Functions / Pricing) ─── */
 function PageHero({ badge, title, sub }) {
   return (
-    <section style={{ paddingTop: 170, paddingBottom: 84, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: '1px solid rgba(0,230,118,0.12)' }}>
+    <section style={{ paddingTop: 170, paddingBottom: 84, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: `1px solid rgba(${GREEN_RGB},0.12)` }}>
       <SectionBadge>{badge}</SectionBadge>
       <BlurText text={title} style={{
         fontFamily: SERIF, fontWeight: 500,
@@ -56,15 +57,15 @@ function FunctionCard({ icon: Icon, title, tagline, body, bullets, index, inView
       initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: index * 0.1 }}
       className="panel panel-hover ticks" style={{ padding: '36px 32px', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-        <div style={{ width: 52, height: 52, borderRadius: 5, background: 'rgba(0,230,118,0.08)', border: '1px solid rgba(0,230,118,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 52, height: 52, borderRadius: 5, background: `rgba(${GREEN_RGB},0.08)`, border: `1px solid rgba(${GREEN_RGB},0.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Icon size={24} color={GREEN} />
         </div>
-        <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.66rem', letterSpacing: '0.16em', color: 'rgba(0,230,118,0.4)' }}>{String(index + 1).padStart(2, '0')}</span>
+        <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.66rem', letterSpacing: '0.16em', color: `rgba(${GREEN_RGB},0.4)` }}>{String(index + 1).padStart(2, '0')}</span>
       </div>
       <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', color: GREEN, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 10, display: 'block' }}>{'// '}{tagline}</span>
       <h3 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '1.45rem', color: 'white', marginBottom: 14, letterSpacing: '-0.01em', lineHeight: 1.2 }}>{title}</h3>
       <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, marginBottom: 24 }}>{body}</p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 'auto', borderTop: '1px solid rgba(0,230,118,0.1)', paddingTop: 20 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 'auto', borderTop: `1px solid rgba(${GREEN_RGB},0.1)`, paddingTop: 20 }}>
         {bullets.map((b, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
             <Check size={14} color={GREEN} style={{ marginTop: 2, flexShrink: 0 }} />
@@ -128,7 +129,7 @@ function FunctionsPage({ setPage }) {
 
       <PageSection style={{ paddingTop: 0 }}>
         <motion.div className="panel ticks" style={{ padding: 'clamp(48px, 7vw, 84px)', textAlign: 'center' }}>
-          <div style={{ width: 46, height: 46, borderRadius: 5, background: 'rgba(0,230,118,0.08)', border: '1px solid rgba(0,230,118,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 22px' }}>
+          <div style={{ width: 46, height: 46, borderRadius: 5, background: `rgba(${GREEN_RGB},0.08)`, border: `1px solid rgba(${GREEN_RGB},0.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 22px' }}>
             <Zap size={20} color={GREEN} />
           </div>
           <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.7rem, 3.3vw, 2.4rem)', color: 'white', marginBottom: 14, letterSpacing: '-0.01em', lineHeight: 1.1 }}>
@@ -163,24 +164,24 @@ function PricingCard({ tier, index, inView }) {
       className={'panel panel-hover' + (tier.featured ? ' ticks' : '')}
       style={{
         padding: '40px 36px', flex: '1 1 320px', position: 'relative',
-        borderColor: tier.featured ? 'rgba(0,230,118,0.45)' : undefined,
-        boxShadow: tier.featured ? '0 0 44px rgba(0,230,118,0.09)' : undefined,
+        borderColor: tier.featured ? `rgba(${GREEN_RGB},0.45)` : undefined,
+        boxShadow: tier.featured ? `0 0 44px rgba(${GREEN_RGB},0.09)` : undefined,
       }}>
       {tier.featured && (
         <div style={{ position: 'absolute', top: 24, right: 24, background: GREEN, borderRadius: 3, padding: '5px 12px' }}>
-          <span style={{ fontFamily: MONO, fontWeight: 600, fontSize: '0.58rem', color: '#02150b', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Most Popular</span>
+          <span style={{ fontFamily: MONO, fontWeight: 600, fontSize: '0.58rem', color: '#00141c', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Most Popular</span>
         </div>
       )}
 
-      <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.64rem', color: 'rgba(0,230,118,0.7)', letterSpacing: '0.24em', textTransform: 'uppercase', marginBottom: 14, display: 'block' }}>{'// '}{tier.name}</span>
+      <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.64rem', color: `rgba(${GREEN_RGB},0.7)`, letterSpacing: '0.24em', textTransform: 'uppercase', marginBottom: 14, display: 'block' }}>{'// '}{tier.name}</span>
 
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 10 }}>
-        <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '3rem', color: GREEN, lineHeight: 1, textShadow: '0 0 28px rgba(0,230,118,0.3)' }}>${tier.price}</span>
+        <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '3rem', color: GREEN, lineHeight: 1, textShadow: `0 0 28px rgba(${GREEN_RGB},0.3)` }}>${tier.price}</span>
         <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.68rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>/ month</span>
       </div>
       <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginBottom: 26 }}>{tier.blurb}</p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 13, marginBottom: 32, borderTop: '1px solid rgba(0,230,118,0.1)', paddingTop: 24 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 13, marginBottom: 32, borderTop: `1px solid rgba(${GREEN_RGB},0.1)`, paddingTop: 24 }}>
         {tier.features.map((f, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
             <Check size={14} color={GREEN} style={{ marginTop: 2, flexShrink: 0 }} />
