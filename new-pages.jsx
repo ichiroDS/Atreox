@@ -1,6 +1,6 @@
 
 const React = window.React;
-const { useRef } = React;
+const { useRef, useState, useEffect } = React;
 const {
   motion, useInView,
   ArrowUpRight, Check, Users, Globe, Brain, Zap,
@@ -12,6 +12,70 @@ const MONO  = "'JetBrains Mono', monospace";
 const SERIF = "'Playfair Display', Georgia, serif";
 const GREEN = window.ACCENT;
 const GREEN_RGB = window.ACCENT_RGB;
+
+// Mirrors atreox-dashboard's isActiveStatus() (lib/stripe/subscription-store.ts)
+// so "active" means the same thing on both sides of the deep link.
+const CLERK_ACTIVE_STATUSES = new Set(['active', 'trialing']);
+
+// The Clerk script tag in index.html is `defer`, and this file is itself a
+// Babel-transpiled <script type="text/babel"> — neither load order relative
+// to the other is guaranteed, so poll for window.Clerk rather than assume
+// it's already there.
+function waitForClerk(timeoutMs = 8000) {
+  return new Promise((resolve) => {
+    if (window.Clerk) return resolve(window.Clerk);
+    const start = Date.now();
+    const iv = setInterval(() => {
+      if (window.Clerk) { clearInterval(iv); resolve(window.Clerk); }
+      else if (Date.now() - start > timeoutMs) { clearInterval(iv); resolve(null); }
+    }, 50);
+  });
+}
+
+// Resolves to the visitor's real plan state once Clerk hydrates. `loading`
+// stays true (buttons render their signed-out default) until then, so there's
+// one transition at most instead of a flash between guesses.
+function useSubscriptionState() {
+  const [state, setState] = useState({ loading: true, tier: null, active: false });
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const clerk = await waitForClerk();
+        if (!clerk) { if (!cancelled) setState({ loading: false, tier: null, active: false }); return; }
+        await clerk.load();
+        if (cancelled) return;
+        const meta = clerk.user?.publicMetadata || {};
+        setState({
+          loading: false,
+          tier: meta.subscriptionTier ?? null,
+          active: CLERK_ACTIVE_STATUSES.has(meta.subscriptionStatus),
+        });
+      } catch (_) {
+        if (!cancelled) setState({ loading: false, tier: null, active: false });
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  return state;
+}
+
+// Per-card button (label + destination) for the visitor's current plan state.
+function pricingCTA(tierKey, sub) {
+  const getStarted = { label: 'Get Started', href: `${DASHBOARD_URL}/billing?plan=${tierKey}` };
+  if (sub.loading || !sub.active) return getStarted;
+
+  if (sub.tier === tierKey) return { label: 'Enter panel', href: DASHBOARD_URL };
+  if (sub.tier === 'starter' && tierKey === 'full') {
+    return { label: 'Upgrade', href: `${DASHBOARD_URL}/billing?plan=full` };
+  }
+  if (sub.tier === 'full' && tierKey === 'starter') {
+    return { label: 'Downgrade', href: `${DASHBOARD_URL}/billing` };
+  }
+  return getStarted;
+}
 
 /* ─── shared inner-page hero (Functions / Pricing) ─── */
 function PageHero({ badge, title, sub }) {
@@ -157,7 +221,8 @@ function FunctionsPage({ setPage }) {
 /* ══════════════════════════════════════
    PRICING PAGE (subscription tiers)
 ══════════════════════════════════════ */
-function PricingCard({ tier, index, inView }) {
+function PricingCard({ tier, index, inView, sub }) {
+  const cta = pricingCTA(tier.key, sub);
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -189,17 +254,9 @@ function PricingCard({ tier, index, inView }) {
         ))}
       </div>
 
-      {/*
-        TODO(stripe-subscriptions): api/create-checkout-session.js currently only builds
-        one-time `mode: 'payment'` Checkout Sessions for the old course/package model.
-        Wiring these buttons to Stripe needs: recurring Price IDs per tier (env vars) and
-        `mode: 'subscription'` in that endpoint. Left unimplemented this pass — see task
-        constraints (api/ files intentionally untouched). Buttons route to the dashboard
-        for now, where signup/billing can be finished.
-      */}
-      <a href={DASHBOARD_URL} target="_self" className={tier.featured ? 'btn-solid' : 'btn-outline'}
+      <a href={cta.href} target="_self" className={tier.featured ? 'btn-solid' : 'btn-outline'}
         style={{ width: '100%', justifyContent: 'center', padding: '16px', fontSize: '0.8rem' }}>
-        Get Started <ArrowUpRight size={15} />
+        {cta.label} <ArrowUpRight size={15} />
       </a>
     </motion.div>
   );
@@ -208,10 +265,11 @@ function PricingCard({ tier, index, inView }) {
 function PricingPage({ setPage }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.1 });
+  const sub = useSubscriptionState();
 
   const tiers = [
     {
-      name: 'Starter', price: 29, featured: false,
+      key: 'starter', name: 'Starter', price: 29, featured: false,
       blurb: 'For a single project testing the water on a handful of channels.',
       features: [
         'Up to 50 Telegram accounts',
@@ -222,7 +280,7 @@ function PricingPage({ setPage }) {
       ],
     },
     {
-      name: 'Full', price: 69, featured: true,
+      key: 'full', name: 'Full', price: 69, featured: true,
       blurb: 'For teams running multiple campaigns and scaling reach fast.',
       features: [
         'Unlimited Telegram accounts',
@@ -245,7 +303,7 @@ function PricingPage({ setPage }) {
       <PageSection>
         <div ref={ref} style={{ display: 'flex', gap: 22, flexWrap: 'wrap', alignItems: 'stretch', justifyContent: 'center', maxWidth: 900, margin: '0 auto' }}>
           {tiers.map((tier, i) => (
-            <PricingCard key={tier.name} tier={tier} index={i} inView={inView} />
+            <PricingCard key={tier.name} tier={tier} index={i} inView={inView} sub={sub} />
           ))}
         </div>
 
