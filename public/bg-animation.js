@@ -1,10 +1,9 @@
 (function () {
   'use strict';
   /* Technical backdrop: blueprint grid + glows + scanline + grain (pure CSS,
-     see bg-animation.css) plus two interactive layers built here:
+     see bg-animation.css) plus an interactive layer built here:
        #bg-particles  — canvas constellation of drifting data-nodes whose
                         links brighten and bend around the cursor
-       #bg-spotlight  — soft accent glow that trails the mouse
      Keeps the __bgRefresh/__bgApply API that BgColorSystem (shared.jsx)
      calls on page change, so the router integration stays untouched. */
 
@@ -19,7 +18,7 @@
     var wrap = document.createElement('div');
     wrap.id = 'tech-bg';
     wrap.setAttribute('aria-hidden', 'true');
-    ['bg-grid', 'bg-glow-1', 'bg-glow-2', 'bg-spotlight'].forEach(function (id) {
+    ['bg-grid', 'bg-glow-1', 'bg-glow-2'].forEach(function (id) {
       var el = document.createElement('div');
       el.id = id;
       wrap.appendChild(el);
@@ -51,8 +50,6 @@
     var W = 0, H = 0;
     var pts = [];
     var mouse = { x: -9999, y: -9999 };
-    var spot = { x: 0, y: 0 };
-    var spotEl = document.getElementById('bg-spotlight');
     var raf = 0;
 
     function resize() {
@@ -68,8 +65,7 @@
         /* first run, or the window was degenerate (e.g. loaded hidden):
            distribute fresh across the real viewport */
         spawn();
-        spot.x = W / 2; spot.y = H * 0.35;
-        mouse.x = spot.x; mouse.y = spot.y;
+        mouse.x = W / 2; mouse.y = H * 0.35;
       } else {
         /* keep existing nodes on screen after a normal resize */
         for (var i = 0; i < pts.length; i++) {
@@ -160,14 +156,6 @@
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fill();
-      }
-
-      /* spotlight eases toward the cursor */
-      if (spotEl) {
-        spot.x += (mouse.x - spot.x) * 0.06;
-        spot.y += (mouse.y - spot.y) * 0.06;
-        spotEl.style.transform =
-          'translate3d(' + (spot.x - 450) + 'px,' + (spot.y - 450) + 'px,0)';
       }
     }
 
