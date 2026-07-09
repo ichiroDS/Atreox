@@ -175,7 +175,7 @@ function PricingCard({ tier, index, inView }) {
       <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.64rem', color: `rgba(${GREEN_RGB},0.7)`, letterSpacing: '0.24em', textTransform: 'uppercase', marginBottom: 14, display: 'block' }}>{'// '}{tier.name}</span>
 
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 10 }}>
-        <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '3rem', color: GREEN, lineHeight: 1, textShadow: `0 0 28px rgba(${GREEN_RGB},0.3)` }}>${tier.price}</span>
+        <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '3rem', color: GREEN, lineHeight: 1, textShadow: `0 0 28px rgba(${GREEN_RGB},0.3)` }}>€{tier.price}</span>
         <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.68rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>/ month</span>
       </div>
       <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginBottom: 26 }}>{tier.blurb}</p>
@@ -211,11 +211,10 @@ function PricingPage({ setPage }) {
 
   const tiers = [
     {
-      name: 'Starter', price: 99, featured: false,
+      name: 'Starter', price: 29, featured: false,
       blurb: 'For a single project testing the water on a handful of channels.',
       features: [
-        'Up to 5 Telegram accounts',
-        '1,000 AI comments / month',
+        'Up to 50 Telegram accounts',
         'Standard channel discovery with keyword filters',
         '1 persona preset',
         'Anti-ban warmup & health checks',
@@ -223,11 +222,10 @@ function PricingPage({ setPage }) {
       ],
     },
     {
-      name: 'Growth', price: 149, featured: true,
+      name: 'Full', price: 69, featured: true,
       blurb: 'For teams running multiple campaigns and scaling reach fast.',
       features: [
-        'Up to 20 Telegram accounts',
-        '5,000 AI comments / month',
+        'Unlimited Telegram accounts',
         'Advanced discovery with engagement scoring',
         'Unlimited persona presets + custom tone training',
         'Anti-ban warmup automation & proxy rotation',
