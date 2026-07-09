@@ -6,6 +6,7 @@ const {
   ArrowUpRight, Zap, Shield, Globe, Brain,
   BlurText, FooterBar,
   Users,
+  TypeText, tiltHandlers, REDUCED_MOTION,
 } = window;
 
 const MONO  = "'JetBrains Mono', monospace";
@@ -13,13 +14,151 @@ const SERIF = "'Playfair Display', Georgia, serif";
 const GREEN = window.ACCENT;
 const GREEN_RGB = window.ACCENT_RGB;
 
-/* ── Fake live activity feed data (visual only, no live connection) ── */
-const FEED_ITEMS = [
-  { time: '14:32:07', channel: '@CryptoAlphaCalls',  comment: 'this dip is exactly the kind of setup I was waiting for 👀', status: 'posted' },
-  { time: '14:32:41', channel: '@Web3BuildersHub',   comment: 'anyone tried scaling this on L2 yet? curious about gas costs',  status: 'posted' },
-  { time: '14:33:16', channel: '@AITradingSignals',  comment: 'the backtest numbers on this strategy look solid ngl',          status: 'posted' },
-  { time: '14:33:58', channel: '@DeFiDegensChat',    comment: 'been looking for something exactly like this, saving the thread', status: 'queued' },
+/* ── Fake live activity feed pool (visual only, no live connection).
+   Rows cycle through this list with real clock timestamps. ── */
+const FEED_POOL = [
+  { channel: '@CryptoAlphaCalls', comment: 'this dip is exactly the kind of setup I was waiting for 👀' },
+  { channel: '@Web3BuildersHub',  comment: 'anyone tried scaling this on L2 yet? curious about gas costs' },
+  { channel: '@AITradingSignals', comment: 'the backtest numbers on this strategy look solid ngl' },
+  { channel: '@DeFiDegensChat',   comment: 'been looking for something exactly like this, saving the thread' },
+  { channel: '@OnChainDaily',     comment: 'volume profile here looks way healthier than last week' },
+  { channel: '@TechStackWeekly',  comment: 'the API pricing update actually makes this viable now' },
+  { channel: '@AltcoinRadar',     comment: 'accumulation zone looking clean on the 4h chart' },
+  { channel: '@BuildersLounge',   comment: 'shipped something similar last month, happy to compare notes' },
+  { channel: '@SignalFeedPro',    comment: 'risk/reward on this entry is better than most calls here' },
+  { channel: '@NFTAlphaGroup',    comment: 'floor holding surprisingly well despite the market' },
 ];
+
+const fmtTime = ms => new Date(ms).toTimeString().slice(0, 8);
+
+/* ── CountUp: eased count-up on first view, bright tick flash on later updates ── */
+function CountUp({ to, inView, duration = 1500 }) {
+  const [val, setVal] = useState(REDUCED_MOTION ? to : 0);
+  const started = useRef(false);
+  const done = useRef(REDUCED_MOTION);
+  useEffect(() => {
+    if (!inView || started.current || REDUCED_MOTION) return;
+    started.current = true;
+    const target = to;
+    const t0 = performance.now();
+    let raf;
+    const step = t => {
+      const p = Math.min((t - t0) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      setVal(Math.round(target * ease));
+      if (p < 1) raf = requestAnimationFrame(step);
+      else done.current = true;
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [inView]);
+  useEffect(() => { if (done.current) setVal(to); }, [to]);
+  return (
+    <span key={done.current ? to : 'counting'} className={done.current ? 'stat-tick' : undefined}>
+      {val.toLocaleString('en-US')}
+    </span>
+  );
+}
+
+/* ── Stat readout: counts up when visible, "comments today" keeps ticking ── */
+function StatReadout() {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, amount: 0.3 });
+  const [comments, setComments] = useState(1284);
+  useEffect(() => {
+    if (!inView || REDUCED_MOTION) return;
+    const iv = setInterval(() => setComments(c => c + 1 + Math.floor(Math.random() * 3)), 5200);
+    return () => clearInterval(iv);
+  }, [inView]);
+  const stats = [
+    { val: 42, label: 'Accounts active' },
+    { val: comments, label: 'Comments today' },
+    { val: 96, label: 'Channels tracked' },
+  ];
+  return (
+    <div ref={ref} style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', background: `rgba(${GREEN_RGB},0.03)` }}>
+      {stats.map(({ val, label }, i) => (
+        <div key={label} style={{ padding: '16px 8px', textAlign: 'center', borderLeft: i > 0 ? `1px solid rgba(${GREEN_RGB},0.1)` : 'none' }}>
+          <div style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '1.45rem', color: GREEN, lineHeight: 1, marginBottom: 5, textShadow: `0 0 18px rgba(${GREEN_RGB},0.35)` }}>
+            <CountUp to={val} inView={inView} />
+          </div>
+          <div style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.55rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>{label}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── LiveTerminal: the hero's engine-log card, cycling like a real feed ── */
+function LiveTerminal() {
+  const [rows, setRows] = useState(() => {
+    const t = Date.now();
+    return FEED_POOL.slice(0, 4).map((item, i) => ({
+      ...item, uid: i,
+      time: fmtTime(t - (3 - i) * 41000),
+      status: i === 3 ? 'queued' : 'posted',
+    }));
+  });
+  const nextIdx = useRef(4);
+  const nextUid = useRef(4);
+  const flips = useRef([]);
+
+  useEffect(() => {
+    if (REDUCED_MOTION) return;
+    const flip = uid => flips.current.push(setTimeout(() => {
+      setRows(rs => rs.map(r => (r.uid === uid ? { ...r, status: 'posted' } : r)));
+    }, 1900));
+    flip(3); /* the initial queued row resolves too */
+    const iv = setInterval(() => {
+      const item = FEED_POOL[nextIdx.current % FEED_POOL.length];
+      nextIdx.current += 1;
+      const uid = nextUid.current++;
+      setRows(rs => [...rs, { ...item, uid, time: fmtTime(Date.now()), status: 'queued' }].slice(-4));
+      flip(uid);
+    }, 3600);
+    return () => { clearInterval(iv); flips.current.forEach(clearTimeout); };
+  }, []);
+
+  return (
+    <div className="panel ticks" {...tiltHandlers(3.5)}
+      style={{ borderRadius: 6, padding: 0, overflow: 'hidden', transition: 'transform 0.25s ease', willChange: 'transform' }}>
+      {/* Terminal header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 20px', borderBottom: `1px solid rgba(${GREEN_RGB},0.14)`, background: `rgba(${GREEN_RGB},0.04)` }}>
+        <div style={{ width: 7, height: 7, borderRadius: '50%', background: GREEN, animation: 'pulse-dot 1.8s ease-in-out infinite', flexShrink: 0 }} />
+        <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.66rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'white' }}>Live engine activity</span>
+        <span style={{ marginLeft: 'auto', fontFamily: MONO, fontWeight: 400, fontSize: '0.6rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)' }}>preview</span>
+      </div>
+
+      {/* Log rows */}
+      <div>
+        {rows.map(item => (
+          <div key={item.uid} className="feed-row" style={{ padding: '13px 20px', borderBottom: `1px solid rgba(${GREEN_RGB},0.08)` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+              <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.64rem', color: 'rgba(255,255,255,0.28)', flexShrink: 0 }}>{item.time}</span>
+              <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.72rem', color: GREEN, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>{item.channel}</span>
+              <span style={{
+                marginLeft: 'auto', flexShrink: 0, fontFamily: MONO, fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.1em', textTransform: 'uppercase',
+                color: item.status === 'posted' ? GREEN : 'rgba(255,255,255,0.38)',
+                transition: 'color 0.3s ease',
+              }}>[{item.status}]</span>
+            </div>
+            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: 'rgba(255,255,255,0.62)', lineHeight: 1.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>"{item.comment}"</p>
+          </div>
+        ))}
+        {/* Listening row — the engine never sleeps */}
+        <div style={{ display: 'flex', alignItems: 'center', padding: '11px 20px', borderBottom: `1px solid rgba(${GREEN_RGB},0.08)` }}>
+          <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.66rem', letterSpacing: '0.06em', color: `rgba(${GREEN_RGB},0.55)` }}>
+            {'> '}engine listening<span className="dots" />
+          </span>
+          <span className="cursor" style={{ width: 6, height: '0.75em', marginLeft: 8 }} />
+        </div>
+      </div>
+
+      {/* Stat readout */}
+      <StatReadout />
+    </div>
+  );
+}
 
 /* ── Hero ── */
 function Hero({ setPage }) {
@@ -39,7 +178,7 @@ function Hero({ setPage }) {
         <div style={{ flex: '1 1 400px', minWidth: 0 }}>
           <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}
             className="overline" style={{ display: 'block', marginBottom: 22 }}>
-            {'// '}Neuro-commenting for Telegram<span className="cursor" />
+            {'// '}<TypeText text="Neuro-commenting for Telegram" startDelay={1200} /><span className="cursor" />
           </motion.p>
           <BlurText text="AI-powered Telegram growth, on autopilot."
             style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(2.7rem, 5.8vw, 4.4rem)', color: 'white', lineHeight: 1.08, letterSpacing: '-0.015em', maxWidth: 640, marginBottom: 28 }}
@@ -52,7 +191,7 @@ function Hero({ setPage }) {
           </motion.p>
           <motion.div initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }} animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.1 }}
             style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', marginBottom: 30 }}>
-            <a href="https://app.atreoxai.com" target="_self" className="btn-solid" style={{ padding: '15px 28px', fontSize: '0.8rem' }}>
+            <a href="https://app.atreoxai.com" target="_self" className="btn-solid cta-breathe" style={{ padding: '15px 28px', fontSize: '0.8rem' }}>
               Enter panel <ArrowUpRight size={15} />
             </a>
             <button className="btn-outline" onClick={() => setPage('functions')} style={{ padding: '14px 24px' }}>
@@ -68,45 +207,7 @@ function Hero({ setPage }) {
         {/* Right column — engine log terminal */}
         <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, delay: 0.4 }}
           style={{ flex: '1 1 420px', minWidth: 0 }}>
-          <div className="panel ticks" style={{ borderRadius: 6, padding: 0, overflow: 'hidden' }}>
-            {/* Terminal header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 20px', borderBottom: `1px solid rgba(${GREEN_RGB},0.14)`, background: `rgba(${GREEN_RGB},0.04)` }}>
-              <div style={{ width: 7, height: 7, borderRadius: '50%', background: GREEN, animation: 'pulse-dot 1.8s ease-in-out infinite', flexShrink: 0 }} />
-              <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.66rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'white' }}>Live engine activity</span>
-              <span style={{ marginLeft: 'auto', fontFamily: MONO, fontWeight: 400, fontSize: '0.6rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)' }}>preview</span>
-            </div>
-
-            {/* Log rows */}
-            <div>
-              {FEED_ITEMS.map((item, i) => (
-                <div key={i} style={{ padding: '13px 20px', borderBottom: `1px solid rgba(${GREEN_RGB},0.08)` }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
-                    <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.64rem', color: 'rgba(255,255,255,0.28)' }}>{item.time}</span>
-                    <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.72rem', color: GREEN }}>{item.channel}</span>
-                    <span style={{
-                      marginLeft: 'auto', fontFamily: MONO, fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.1em', textTransform: 'uppercase',
-                      color: item.status === 'posted' ? GREEN : 'rgba(255,255,255,0.38)',
-                    }}>[{item.status}]</span>
-                  </div>
-                  <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: 'rgba(255,255,255,0.62)', lineHeight: 1.5 }}>"{item.comment}"</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Stat readout */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', background: `rgba(${GREEN_RGB},0.03)` }}>
-              {[
-                { val: '42', label: 'Accounts active' },
-                { val: '1,284', label: 'Comments today' },
-                { val: '96', label: 'Channels tracked' },
-              ].map(({ val, label }, i) => (
-                <div key={i} style={{ padding: '16px 8px', textAlign: 'center', borderLeft: i > 0 ? `1px solid rgba(${GREEN_RGB},0.1)` : 'none' }}>
-                  <div style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '1.45rem', color: GREEN, lineHeight: 1, marginBottom: 5, textShadow: `0 0 18px rgba(${GREEN_RGB},0.35)` }}>{val}</div>
-                  <div style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.55rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>{label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <LiveTerminal />
         </motion.div>
       </div>
     </section>
@@ -145,7 +246,7 @@ function FeatureHeroSection({ setPage }) {
         <motion.div style={{ flex: '1 1 480px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}
           initial={{ opacity: 0, x: 30 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.7, delay: 0.1 }}>
           {capabilities.map(({ icon: Icon, title, body }, i) => (
-            <div key={i} className="panel panel-hover" style={{ padding: '26px 22px' }}>
+            <div key={i} className="panel panel-hover" style={{ padding: '26px 22px' }} {...tiltHandlers(6, -3)}>
               <div style={{ width: 42, height: 42, borderRadius: 5, background: `rgba(${GREEN_RGB},0.08)`, border: `1px solid rgba(${GREEN_RGB},0.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18 }}>
                 <Icon size={19} color={GREEN} />
               </div>

@@ -35,6 +35,20 @@
   to   { transform: translate(7vw, 5vw); }
 }
 
+/* Interactive constellation canvas — drawn by bg-animation.js */
+#bg-particles {
+  position: absolute; inset: 0;
+}
+
+/* Soft accent spotlight that trails the cursor (JS moves it via transform) */
+#bg-spotlight {
+  position: absolute; top: 0; left: 0;
+  width: 900px; height: 900px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,217,255,0.075) 0%, transparent 60%);
+  will-change: transform;
+}
+
 /* A single hairline sweeping down the viewport — the "radar" pass */
 #bg-scan {
   position: absolute; left: 0; right: 0; top: 0;
@@ -65,4 +79,5 @@
 @media (prefers-reduced-motion: reduce) {
   #bg-scan { animation: none; opacity: 0; }
   #bg-glow-1 { animation: none; }
+  #bg-spotlight { display: none; }
 }

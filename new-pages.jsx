@@ -161,11 +161,10 @@ function PricingCard({ tier, index, inView }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: index * 0.1 }}
-      className={'panel panel-hover' + (tier.featured ? ' ticks' : '')}
+      className={'panel panel-hover' + (tier.featured ? ' ticks featured-pulse' : '')}
       style={{
         padding: '40px 36px', flex: '1 1 320px', position: 'relative',
         borderColor: tier.featured ? `rgba(${GREEN_RGB},0.45)` : undefined,
-        boxShadow: tier.featured ? `0 0 44px rgba(${GREEN_RGB},0.09)` : undefined,
       }}>
       {tier.featured && (
         <div style={{ position: 'absolute', top: 24, right: 24, background: GREEN, borderRadius: 3, padding: '5px 12px' }}>

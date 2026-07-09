@@ -9,6 +9,9 @@ const DASHBOARD_URL = 'https://app.atreoxai.com';
 const ACCENT = '#00d9ff';
 const ACCENT_RGB = '0,217,255';
 
+const REDUCED_MOTION = window.matchMedia &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 /* ── Inline icon library ── */
 const _ip = {
   ArrowUpRight: "M7 17L17 7M7 7h10v10",
@@ -107,6 +110,42 @@ function Wordmark({ size = '1.02rem', glow = true, color = ACCENT }) {
 function SectionBadge({ children }) {
   return <span className="overline">{'// '}{children}</span>;
 }
+
+/* ── TypeText: terminal typewriter reveal, char by char ── */
+function TypeText({ text, speed = 32, startDelay = 400, style }) {
+  const [n, setN] = useState(REDUCED_MOTION ? text.length : 0);
+  useEffect(() => {
+    if (REDUCED_MOTION) return;
+    let iv;
+    const t = setTimeout(() => {
+      iv = setInterval(() => setN(c => {
+        if (c >= text.length) { clearInterval(iv); return c; }
+        return c + 1;
+      }), speed);
+    }, startDelay);
+    return () => { clearTimeout(t); clearInterval(iv); };
+  }, []);
+  return <span style={style}>{text.slice(0, n)}</span>;
+}
+
+/* ── tiltHandlers: 3D perspective tilt following the cursor.
+   Mutates el.style.transform directly (no re-render); `lift` preserves any
+   CSS :hover translateY the element would otherwise get. Safe on elements
+   whose React style has no transform of its own. ── */
+function tiltHandlers(max = 5, lift = 0) {
+  if (REDUCED_MOTION) return {};
+  return {
+    onMouseMove: e => {
+      const el = e.currentTarget;
+      const r = el.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      el.style.transform =
+        `perspective(900px) rotateX(${(-py * max).toFixed(2)}deg) rotateY(${(px * max).toFixed(2)}deg) translateY(${lift}px)`;
+    },
+    onMouseLeave: e => { e.currentTarget.style.transform = ''; },
+  };
+}
 function SectionHeading({ children, style }) {
   return (
     <h2 style={{
@@ -129,6 +168,7 @@ function Navbar({ currentPage, setPage }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [scrolled, setScrolled] = useState(window.scrollY > 8);
+  const progRef = useRef(null);
 
   useEffect(() => {
     const onResize = () => {
@@ -142,6 +182,28 @@ function Navbar({ currentPage, setPage }) {
     return () => {
       window.removeEventListener('resize', onResize);
       window.removeEventListener('scroll', onScroll);
+    };
+  }, []);
+
+  /* scroll-progress hairline — ref-driven so scrolling never re-renders the nav */
+  useEffect(() => {
+    let raf = 0;
+    const upd = () => {
+      raf = 0;
+      const h = document.documentElement;
+      const max = h.scrollHeight - h.clientHeight;
+      if (progRef.current) {
+        progRef.current.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + '%';
+      }
+    };
+    const req = () => { if (!raf) raf = requestAnimationFrame(upd); };
+    window.addEventListener('scroll', req, { passive: true });
+    window.addEventListener('resize', req, { passive: true });
+    upd();
+    return () => {
+      window.removeEventListener('scroll', req);
+      window.removeEventListener('resize', req);
+      if (raf) cancelAnimationFrame(raf);
     };
   }, []);
 
@@ -197,6 +259,14 @@ function Navbar({ currentPage, setPage }) {
             {menuOpen ? <X size={17} color={ACCENT} /> : <Menu size={17} color={ACCENT} />}
           </button>
         )}
+
+        {/* Scroll-progress hairline */}
+        <div ref={progRef} aria-hidden="true" style={{
+          position: 'absolute', left: 0, bottom: -1, height: 1, width: '0%',
+          background: `linear-gradient(90deg, rgba(${ACCENT_RGB},0.85), var(--g-bright))`,
+          boxShadow: `0 0 10px rgba(${ACCENT_RGB},0.55)`,
+          pointerEvents: 'none',
+        }} />
       </nav>
 
       {/* Mobile full-screen menu — editorial serif links with mono indices */}
@@ -241,13 +311,11 @@ function BlurText({ text, style, delay = 120, glowWords = [] }) {
         const isGlow = glowSet.has(word.replace(/[.,!?]+$/, ''));
         return (
           <motion.span key={i}
+            className={isGlow ? 'glow-word' : undefined}
             initial={{ filter: 'blur(12px)', opacity: 0, y: 48 }}
             animate={isInView ? { filter: 'blur(0px)', opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.7, delay: i * delay / 1000 }}
-            style={{
-              display: 'inline-block', marginRight: '0.28em',
-              ...(isGlow ? { color: ACCENT, textShadow: `0 0 22px rgba(${ACCENT_RGB},0.4)` } : {}),
-            }}
+            style={{ display: 'inline-block', marginRight: '0.28em' }}
           >{word}</motion.span>
         );
       })}
@@ -331,7 +399,8 @@ function BgColorSystem({ page }) {
 }
 
 Object.assign(window, {
-  ACCENT, ACCENT_RGB,
+  ACCENT, ACCENT_RGB, REDUCED_MOTION,
+  TypeText, tiltHandlers,
   motion, AnimatePresence, useInView,
   ArrowUpRight, Play, Zap, Palette, BarChart3, Shield, Check, Star,
   ChevronRight, ChevronDown, Users, BookOpen, GitBranch, Code2, Cpu,
