@@ -4,6 +4,7 @@ const { useState, useRef, useEffect } = React;
 const {
   motion, useInView,
   ArrowUpRight, Zap, Shield, Globe, Brain,
+  Network, Sparkles, MessageSquare, Layers,
   BlurText, FooterBar,
   Users,
   TypeText, tiltHandlers, REDUCED_MOTION,
@@ -25,8 +26,8 @@ const FEED_POOL = [
   { channel: '@TechStackWeekly',  comment: 'the API pricing update actually makes this viable now' },
   { channel: '@AltcoinRadar',     comment: 'accumulation zone looking clean on the 4h chart' },
   { channel: '@BuildersLounge',   comment: 'shipped something similar last month, happy to compare notes' },
-  { channel: '@SignalFeedPro',    comment: 'risk/reward on this entry is better than most calls here' },
-  { channel: '@NFTAlphaGroup',    comment: 'floor holding surprisingly well despite the market' },
+  { channel: '@AICreatorsHub',    comment: 'her channel went from dead to 400 new subs in two weeks, wild' },
+  { channel: '@CreatorFunnelLab', comment: 'pinned post + bio link combo is converting way better for me' },
 ];
 
 const fmtTime = ms => new Date(ms).toTimeString().slice(0, 8);
@@ -187,7 +188,7 @@ function Hero({ setPage }) {
           />
           <motion.p initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }} animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.8 }}
             style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.72)', maxWidth: 520, lineHeight: 1.65, marginBottom: 36 }}>
-            ATREOX runs a network of AI accounts that post natural, context-aware comments on relevant crypto and tech channels — driving discovery, clicks, and growth to your project, on autopilot.
+            ATREOX runs a network of AI accounts that post natural, context-aware comments on the channels your audience actually reads — driving discovery, clicks, and growth to whatever you're building.
           </motion.p>
           <motion.div initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }} animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.1 }}
             style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', marginBottom: 30 }}>
@@ -200,7 +201,7 @@ function Hero({ setPage }) {
           </motion.div>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4, duration: 0.7 }}
             style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.66rem', color: 'rgba(255,255,255,0.32)', letterSpacing: '0.08em' }}>
-            Built for: crypto & tech channels · English-language market · 24/7 automation
+            Built for: crypto, AI & tech creators — and anyone growing a Telegram funnel · English-language market · 24/7 automation
           </motion.p>
         </div>
 
@@ -221,7 +222,7 @@ function FeatureHeroSection({ setPage }) {
 
   const capabilities = [
     { icon: Brain,  title: 'Contextual AI comments',    body: 'Every comment is generated to match the channel\'s language, tone, and topic — not a copy-pasted template.' },
-    { icon: Globe,  title: 'Automatic channel discovery', body: 'ATREOX finds and ranks relevant crypto and tech channels for you, so you\'re never guessing where to show up.' },
+    { icon: Globe,  title: 'Automatic channel discovery', body: 'ATREOX finds and ranks the channels where your audience already gathers — whatever your niche — so you\'re never guessing where to show up.' },
     { icon: Shield, title: 'Multi-account management',  body: 'Bulk-import accounts, run anti-ban warmup schedules, and rotate proxies — all from one dashboard.' },
     { icon: Users,  title: 'Persona customization',      body: 'Define tone, vocabulary, and posting behavior per persona so every account feels like a real person.' },
   ];
@@ -260,6 +261,54 @@ function FeatureHeroSection({ setPage }) {
   );
 }
 
+/* ── Section A2: Who it's for — one engine, many funnels. Each visitor type
+   should find their own card and think "this is built for me". ── */
+function AudienceSection() {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, amount: 0.15 });
+  const audiences = [
+    { icon: Network, title: 'Crypto & AI projects',
+      body: 'Grow the channel behind your token or product. Show up in the trading and builder communities where your future holders already talk.' },
+    { icon: Sparkles, title: 'AI influencer & persona operators',
+      body: 'Funnel attention from niche channels straight to your model\'s Telegram — and from there to whichever platform monetizes it.' },
+    { icon: MessageSquare, title: 'Content creators & solo brands',
+      body: 'Turn the channels your audience already reads into a steady discovery source for your work — no ad budget required.' },
+    { icon: Layers, title: 'Agencies & growth marketers',
+      body: 'Run multi-account campaigns for multiple clients from one dashboard, with per-persona tone and full engine visibility.' },
+  ];
+  return (
+    <section ref={ref} className="section-block" style={{ padding: '88px 5%', maxWidth: 1280, margin: '0 auto' }}>
+      <div style={{ textAlign: 'center', marginBottom: 60 }}>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
+          <span className="overline" style={{ display: 'block', marginBottom: 16 }}>{'// '}Who it's for</span>
+          <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.9rem, 3.8vw, 2.8rem)', color: 'white', letterSpacing: '-0.01em', lineHeight: 1.1, marginBottom: 14 }}>
+            Any niche. Any funnel.
+          </h2>
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.5)', maxWidth: 520, margin: '0 auto', lineHeight: 1.65 }}>
+            If your growth depends on Telegram traffic, ATREOX was built for you.
+          </p>
+        </motion.div>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 18 }}>
+        {audiences.map(({ icon: Icon, title, body }, i) => (
+          <motion.div key={i} className="panel panel-hover"
+            initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.55, delay: i * 0.09 }}
+            style={{ padding: '30px 26px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
+              <div style={{ width: 46, height: 46, borderRadius: 5, background: `rgba(${GREEN_RGB},0.08)`, border: `1px solid rgba(${GREEN_RGB},0.22)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon size={20} color={GREEN} />
+              </div>
+              <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.62rem', letterSpacing: '0.14em', color: `rgba(${GREEN_RGB},0.4)` }}>{String(i + 1).padStart(2, '0')}</span>
+            </div>
+            <h4 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem', color: 'white', marginBottom: 10 }}>{title}</h4>
+            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.65 }}>{body}</p>
+          </motion.div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 /* ── Section B: Why ATREOX is different ── */
 function WhyChooseSection() {
   const ref = useRef(null);
@@ -267,7 +316,7 @@ function WhyChooseSection() {
   const cards = [
     { icon: Brain,  title: 'Comments that read the room', body: 'AI-generated replies match each channel\'s language and tone — not generic spam that gets deleted on sight.' },
     { icon: Shield, title: 'Built for account safety',    body: 'Warmup schedules, proxy rotation, and rate-limiting keep your accounts alive and undetected.' },
-    { icon: Globe,  title: 'Finds the right channels',    body: 'Automatic discovery surfaces relevant crypto and tech channels — filtered, ranked, ready to target.' },
+    { icon: Globe,  title: 'Finds the right channels',    body: 'Automatic discovery surfaces the channels your audience already reads — a DeFi community or an AI-creator funnel — filtered, ranked, ready to target.' },
     { icon: Zap,    title: 'Live engine, real logs',      body: 'Watch the commenting engine work in real time from the dashboard — full visibility, full control.' },
   ];
   return (
@@ -365,11 +414,13 @@ function FAQSection() {
     { q: 'How does account safety work?',
       a: 'Every account goes through a gradual warmup schedule before it starts commenting, and traffic is routed through rotating proxies with built-in rate limits. The Account Manager continuously runs health checks and pauses any account that shows risk signals, so you never lose a warmed-up account to a ban.' },
     { q: "What's the setup process?",
-      a: 'Connect your Telegram accounts (or import ones you already have), let the Channel Parser run a discovery pass to find relevant crypto and tech channels, configure a persona and comment style, and launch. Most users are live within an hour.' },
+      a: 'Connect your Telegram accounts (or import ones you already have), let the Channel Parser run a discovery pass to find the channels in your niche, configure a persona and comment style, and launch. Most users are live within an hour.' },
     { q: 'Can I bring my own Telegram accounts?',
       a: "Yes — bulk-import your own accounts via the Account Manager. They'll go through the same warmup and health-check pipeline as any other account before commenting begins." },
     { q: 'Does this only work for crypto and tech channels?',
-      a: "ATREOX is built and tuned for the English-language crypto and tech niches, where it performs best. Channel filters are configurable if you want to point discovery at adjacent niches." },
+      a: "No — ATREOX works in any niche where your audience gathers on Telegram. Crypto and tech are where many of our users started, but the same engine grows AI-creator funnels, content communities, and personal brands. Point discovery at your niche and the comment engine adapts its language and tone to match." },
+    { q: 'Can I use this to drive traffic to a monetization funnel or another platform?',
+      a: "Yes. Your accounts' profiles and pinned posts can point anywhere — your main Telegram channel, a landing page, or the platform where you monetize. ATREOX handles the discovery-and-comments layer; where the traffic lands is entirely up to you." },
     { q: 'Is there a contract, or can I cancel anytime?',
       a: "It's a monthly subscription — no long-term contract. Cancel anytime from the dashboard and you'll keep access through the end of your billing period." },
   ];
@@ -421,6 +472,7 @@ function HomePage({ setPage }) {
     <div>
       <Hero setPage={setPage} />
       <FeatureHeroSection setPage={setPage} />
+      <AudienceSection />
       <WhyChooseSection />
       <CtaBannerSection setPage={setPage} />
       <EducationalCtaSection setPage={setPage} />
