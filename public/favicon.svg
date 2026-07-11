@@ -1,19 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- ATREOX mark: the letter A as a constellation of linked nodes,
-       echoing the site's particle-network backdrop. -->
-  <rect x="1" y="1" width="62" height="62" rx="14" fill="#04080c"/>
-  <rect x="1" y="1" width="62" height="62" rx="14" fill="none" stroke="#00d9ff" stroke-opacity="0.3" stroke-width="1.5"/>
-  <!-- legs -->
-  <path d="M32 14 L15 50 M32 14 L49 50" stroke="#00d9ff" stroke-width="4.5" stroke-linecap="round" fill="none"/>
-  <!-- crossbar -->
-  <path d="M20.7 38 L43.3 38" stroke="#00d9ff" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-  <!-- apex halo + node -->
-  <circle cx="32" cy="14" r="7" fill="#00d9ff" opacity="0.22"/>
-  <circle cx="32" cy="14" r="3.8" fill="#7de9ff"/>
-  <!-- foot nodes -->
-  <circle cx="15" cy="50" r="3" fill="#00d9ff"/>
-  <circle cx="49" cy="50" r="3" fill="#00d9ff"/>
-  <!-- crossbar joints -->
-  <circle cx="20.7" cy="38" r="2.8" fill="#00d9ff" opacity="0.85"/>
-  <circle cx="43.3" cy="38" r="2.8" fill="#00d9ff" opacity="0.85"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- ATREOX mark: inscriptional serif A sliced by a blade swoosh,
+       on the dark rounded chip so it reads on any tab-bar background. -->
+  <defs>
+    <linearGradient id="aFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5ee5ff"/>
+      <stop offset="1" stop-color="#00c8ee"/>
+    </linearGradient>
+    <linearGradient id="bladeFill" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4adcff"/>
+      <stop offset="0.5" stop-color="#d6f9ff"/>
+      <stop offset="1" stop-color="#4adcff"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="0" stdDeviation="9" flood-color="#00d9ff" flood-opacity="0.55"/>
+    </filter>
+    <mask id="slice">
+      <rect width="512" height="512" fill="white"/>
+      <path d="M 18 314 C 170 283, 340 242, 496 216" stroke="black" stroke-width="46" fill="none" stroke-linecap="round"/>
+    </mask>
+  </defs>
+
+  <rect x="6" y="6" width="500" height="500" rx="112" fill="#04080c"/>
+  <rect x="6" y="6" width="500" height="500" rx="112" fill="none" stroke="#00d9ff" stroke-opacity="0.3" stroke-width="10"/>
+
+  <g transform="translate(41,41) scale(0.84)" filter="url(#glow)">
+    <g mask="url(#slice)" fill="url(#aFill)" fill-rule="evenodd">
+      <path d="M 243 104 L 263 104
+               L 394.1 386 L 410 394 L 410 400 L 332 400 L 332 394 L 348.1 386
+               L 328.6 344 L 160.8 344 L 141.8 386
+               L 158 394 L 158 400 L 98 400 L 98 394 L 115.8 386 Z
+               M 243 161 L 316.5 318 L 172.5 318 Z"/>
+    </g>
+    <path fill="url(#bladeFill)" d="M 18 314 C 170 283, 340 242, 496 216 C 344 254, 172 302, 18 314 Z"/>
+  </g>
 </svg>

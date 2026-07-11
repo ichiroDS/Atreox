@@ -89,6 +89,44 @@ const X             = _icon('X');
 const Menu          = _icon('Menu');
 const Info          = _icon('Info');
 
+/* ── LogoMark: the slashed-A brand mark (transparent twin of the favicon).
+   viewBox is cropped to the glyph so it sits tight beside the wordmark. ── */
+function LogoMark({ height = 24 }) {
+  return (
+    <svg viewBox="0 88 512 328" height={height} width={Math.round(height * 512 / 328)}
+      aria-hidden="true" style={{ display: 'block', flexShrink: 0 }}>
+      <defs>
+        <linearGradient id="lm-a" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#5ee5ff"/>
+          <stop offset="1" stopColor="#00c8ee"/>
+        </linearGradient>
+        <linearGradient id="lm-b" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#4adcff"/>
+          <stop offset="0.5" stopColor="#d6f9ff"/>
+          <stop offset="1" stopColor="#4adcff"/>
+        </linearGradient>
+        <filter id="lm-glow" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="0" stdDeviation="9" floodColor="#00d9ff" floodOpacity="0.5"/>
+        </filter>
+        <mask id="lm-slice">
+          <rect width="512" height="512" fill="white"/>
+          <path d="M 18 314 C 170 283, 340 242, 496 216" stroke="black" strokeWidth="46" fill="none" strokeLinecap="round"/>
+        </mask>
+      </defs>
+      <g filter="url(#lm-glow)">
+        <g mask="url(#lm-slice)" fill="url(#lm-a)" fillRule="evenodd">
+          <path d="M 243 104 L 263 104
+                   L 394.1 386 L 410 394 L 410 400 L 332 400 L 332 394 L 348.1 386
+                   L 328.6 344 L 160.8 344 L 141.8 386
+                   L 158 394 L 158 400 L 98 400 L 98 394 L 115.8 386 Z
+                   M 243 161 L 316.5 318 L 172.5 318 Z"/>
+        </g>
+        <path fill="url(#lm-b)" d="M 18 314 C 170 283, 340 242, 496 216 C 344 254, 172 302, 18 314 Z"/>
+      </g>
+    </svg>
+  );
+}
+
 /* ── Wordmark: upright inscriptional-serif logotype, wide balanced tracking ──
    Marcellus caps in brand green — refined lifestyle-brand lockup, plain
    well-kerned O. Negative right margin swallows the trailing letter-space. */
@@ -225,8 +263,9 @@ function Navbar({ currentPage, setPage }) {
         borderBottom: `1px solid rgba(${ACCENT_RGB},${scrolled ? 0.18 : 0.09})`,
         transition: 'background 0.25s ease, border-color 0.25s ease',
       }}>
-        {/* Wordmark */}
-        <div onClick={() => handleNav('home')} style={{ cursor: 'pointer', flex: '1 1 0', minWidth: 0, display: 'flex', alignItems: 'center' }}>
+        {/* Logo mark + wordmark */}
+        <div onClick={() => handleNav('home')} style={{ cursor: 'pointer', flex: '1 1 0', minWidth: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <LogoMark height={22} />
           <Wordmark />
         </div>
 
@@ -406,6 +445,6 @@ Object.assign(window, {
   ChevronRight, ChevronDown, Users, BookOpen, GitBranch, Code2, Cpu,
   Layers, Server, Globe, Brain, Award, Clock, MessageSquare,
   TrendingUp, Sparkles, Network, Workflow, MonitorPlay, X, Menu, Info,
-  Wordmark, Navbar, BlurText, FadeTop, FadeBottom,
+  LogoMark, Wordmark, Navbar, BlurText, FadeTop, FadeBottom,
   SectionBadge, SectionHeading, GlassBtn, FooterBar, BgColorSystem,
 });
