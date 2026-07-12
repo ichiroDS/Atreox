@@ -1,6 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <!-- ATREOX mark: inscriptional serif A sliced by a blade swoosh,
-       on the dark rounded chip so it reads on any tab-bar background. -->
+       on the dark rounded chip so it reads on any tab-bar background.
+       Glyph scaled to 0.96 (up from 0.84) and centered on (256,256) so
+       it fills the circle Google/browsers crop favicons to, with just
+       enough margin for the glow blur not to clip. -->
   <defs>
     <linearGradient id="aFill" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#5ee5ff"/>
@@ -23,7 +26,7 @@
   <rect x="6" y="6" width="500" height="500" rx="112" fill="#04080c"/>
   <rect x="6" y="6" width="500" height="500" rx="112" fill="none" stroke="#00d9ff" stroke-opacity="0.3" stroke-width="10"/>
 
-  <g transform="translate(41,41) scale(0.84)" filter="url(#glow)">
+  <g transform="translate(10.24,10.24) scale(0.96)" filter="url(#glow)">
     <g mask="url(#slice)" fill="url(#aFill)" fill-rule="evenodd">
       <path d="M 243 104 L 263 104
                L 394.1 386 L 410 394 L 410 400 L 332 400 L 332 394 L 348.1 386
