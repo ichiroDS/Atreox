@@ -1,19 +1,38 @@
 
+/* ══════════════════════════════════════════════════════════════════
+   home.jsx
+
+   Answers, in this order: what this is, who it's for, how it runs,
+   what it costs, why trust it. The "how it runs" pipeline is the
+   centre of the page — five stages as a sequence you can step
+   through, each with the panel it corresponds to, not a bullet list.
+══════════════════════════════════════════════════════════════════ */
+
 const React = window.React;
 const { useState, useRef, useEffect } = React;
 const {
   motion, useInView,
-  ArrowUpRight, Zap, Shield, Globe, Brain,
-  Network, Sparkles, MessageSquare, Layers,
-  BlurText, FooterBar,
-  Users,
+  ArrowUpRight, Zap, Shield, Globe, Brain, Check, Clock, Server,
+  Network, Sparkles, MessageSquare, Layers, BookOpen,
+  BlurText, FooterBar, CrossLinks, SectionLockup, Pill,
   TypeText, tiltHandlers, REDUCED_MOTION,
+  MODULES, MODULE_BY_KEY, PIPELINE,
+  FULL_MONTHLY, FULL_YEARLY, YEARLY_SAVING, CHEAPEST_MODULE, eur,
 } = window;
 
 const MONO  = "'JetBrains Mono', monospace";
 const SERIF = "'Playfair Display', Georgia, serif";
 const GREEN = window.ACCENT;
 const GREEN_RGB = window.ACCENT_RGB;
+
+/* ─────────────────────────────────────────────────────────────────
+   POSITIONING LINE — PLACEHOLDER.
+   Final wording is still to be decided. This one is deliberately
+   descriptive and makes no ranking or market-position claim; swap the
+   string below when the real line is settled and nothing else needs
+   to change.
+   ───────────────────────────────────────────────────────────────── */
+const POSITIONING = 'The whole Telegram growth stack — eight modules, one panel.';
 
 /* ── Fake live activity feed pool (visual only, no live connection).
    Rows cycle through this list with real clock timestamps. ── */
@@ -182,21 +201,31 @@ function Hero({ setPage }) {
             {'// '}<TypeText text="Neuro-commenting for Telegram" startDelay={1200} /><span className="cursor" />
           </motion.p>
           <BlurText text="AI-powered Telegram growth, on autopilot."
-            style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(2.7rem, 5.8vw, 4.4rem)', color: 'white', lineHeight: 1.08, letterSpacing: '-0.015em', maxWidth: 640, marginBottom: 28 }}
+            style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(2.7rem, 5.8vw, 4.4rem)', color: 'white', lineHeight: 1.08, letterSpacing: '-0.015em', maxWidth: 640, marginBottom: 20 }}
             delay={110}
             glowWords={['Telegram']}
           />
+          {/* positioning line — see POSITIONING at the top of this file */}
+          <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.66 }}
+            style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.72rem', letterSpacing: '0.12em', color: `rgba(${GREEN_RGB},0.85)`, marginBottom: 24, lineHeight: 1.6 }}>
+            {POSITIONING}
+          </motion.p>
           <motion.p initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }} animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.8 }}
             style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.72)', maxWidth: 520, lineHeight: 1.65, marginBottom: 36 }}>
-            ATREOX runs a network of AI accounts that post natural, context-aware comments on the channels your audience actually reads — driving discovery, clicks, and growth to whatever you're building.
+            ATREOX finds the channels your audience already reads, warms a network of accounts until they
+            behave like real ones, and then comments, answers DMs and reacts from those accounts — around
+            the clock, from one panel you control.
           </motion.p>
           <motion.div initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }} animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.1 }}
             style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', marginBottom: 30 }}>
             <a href="https://app.atreoxai.com" target="_self" className="btn-solid cta-breathe" style={{ padding: '15px 28px', fontSize: '0.8rem' }}>
               Enter panel <ArrowUpRight size={15} />
             </a>
-            <button className="btn-outline" onClick={() => setPage('functions')} style={{ padding: '14px 24px' }}>
-              See How It Works <ArrowUpRight size={14} />
+            <button className="btn-outline" onClick={() => {
+              const el = document.getElementById('how-it-runs');
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }} style={{ padding: '14px 24px' }}>
+              See how it runs <ArrowUpRight size={14} />
             </button>
           </motion.div>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4, duration: 0.7 }}
@@ -215,54 +244,79 @@ function Hero({ setPage }) {
   );
 }
 
-/* ── Section A: What ATREOX does ── */
-function FeatureHeroSection({ setPage }) {
+/* ══════════════════════════════════════
+   1 — WHAT THIS IS
+══════════════════════════════════════ */
+function WhatThisIsSection({ setPage }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, amount: 0.2 });
-
-  const capabilities = [
-    { icon: Brain,  title: 'Contextual AI comments',    body: 'Every comment is generated to match the channel\'s language, tone, and topic — not a copy-pasted template.' },
-    { icon: Globe,  title: 'Automatic channel discovery', body: 'ATREOX finds and ranks the channels where your audience already gathers — whatever your niche — so you\'re never guessing where to show up.' },
-    { icon: Shield, title: 'Multi-account management',  body: 'Bulk-import accounts, run anti-ban warmup schedules, and rotate proxies — all from one dashboard.' },
-    { icon: Users,  title: 'Persona customization',      body: 'Define tone, vocabulary, and posting behavior per persona so every account feels like a real person.' },
-  ];
+  const inView = useInView(ref, { once: true, amount: 0.12 });
 
   return (
     <section ref={ref} className="section-block" style={{ padding: '88px 5%', maxWidth: 1280, margin: '0 auto' }}>
-      <div style={{ display: 'flex', gap: 64, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-        <motion.div style={{ flex: '1 1 320px' }}
-          initial={{ opacity: 0, x: -30 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.7 }}>
-          <span className="overline" style={{ display: 'block', marginBottom: 18 }}>{'// '}Capabilities</span>
-          <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(2.2rem, 4.2vw, 3.2rem)', color: 'white', lineHeight: 1.1, letterSpacing: '-0.01em', marginBottom: 22 }}>
-            What ATREOX does
+      <div style={{ display: 'flex', gap: 56, alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: 44 }}>
+        <motion.div style={{ flex: '1 1 420px', minWidth: 0 }}
+          initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
+          <span className="overline" style={{ display: 'block', marginBottom: 16 }}>{'// '}What this is</span>
+          <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'white', lineHeight: 1.1, letterSpacing: '-0.015em', marginBottom: 20 }}>
+            One panel that runs a network of Telegram accounts
           </h2>
-          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.72, marginBottom: 32 }}>
-            A network of AI-driven Telegram accounts that discover the right channels and leave comments people actually read — driving organic discovery back to your project, day and night.
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.78, maxWidth: 560 }}>
+            ATREOX is a cloud panel, not a program you install. You bring Telegram accounts and proxies;
+            it handles everything they then do — finding targets, building history, writing comments,
+            answering messages, adding reactions — with every setting exposed and every action logged.
+            Take one module or take all of them; they're billed and run separately.
           </p>
-          <button className="btn-solid" onClick={() => setPage('functions')} style={{ padding: '15px 30px', fontSize: '0.8rem' }}>
-            Explore All Functions <ArrowUpRight size={15} />
-          </button>
         </motion.div>
 
-        <motion.div style={{ flex: '1 1 480px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}
-          initial={{ opacity: 0, x: 30 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.7, delay: 0.1 }}>
-          {capabilities.map(({ icon: Icon, title, body }, i) => (
-            <div key={i} className="panel panel-hover" style={{ padding: '26px 22px' }} {...tiltHandlers(6, -3)}>
-              <div style={{ width: 42, height: 42, borderRadius: 5, background: `rgba(${GREEN_RGB},0.08)`, border: `1px solid rgba(${GREEN_RGB},0.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18 }}>
-                <Icon size={19} color={GREEN} />
+        <motion.div style={{ flex: '0 1 300px', minWidth: 240 }}
+          initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.12 }}>
+          <div className="panel" style={{ padding: '24px 24px 22px' }}>
+            {[
+              ['Runs in the browser', 'Nothing to install. The engine runs on our side, not your machine.'],
+              ['Your accounts, your proxies', 'Bring your own. Nothing is rented to you and nothing is shared.'],
+              ['Everything is logged', 'Every comment, reply, reaction and failure, with the reason attached.'],
+              ['Monthly, cancel anytime', 'No contract. Modules are billed one at a time.'],
+            ].map(([t, b], i, arr) => (
+              <div key={t} style={{ display: 'flex', gap: 11, alignItems: 'flex-start', paddingBottom: i === arr.length - 1 ? 0 : 16, marginBottom: i === arr.length - 1 ? 0 : 16, borderBottom: i === arr.length - 1 ? 'none' : `1px solid rgba(${GREEN_RGB},0.09)` }}>
+                <Check size={14} color={GREEN} style={{ marginTop: 3, flexShrink: 0 }} />
+                <div style={{ minWidth: 0 }}>
+                  <span style={{ display: 'block', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.85rem', color: 'white', marginBottom: 3 }}>{t}</span>
+                  <span style={{ display: 'block', fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.45)', lineHeight: 1.6 }}>{b}</span>
+                </div>
               </div>
-              <h4 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.92rem', color: 'white', marginBottom: 8 }}>{title}</h4>
-              <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>{body}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </motion.div>
+      </div>
+
+      {/* the eight, at a glance — every tile is a way into Functions */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 12 }}>
+        {MODULES.map((m, i) => {
+          const Icon = m.icon;
+          return (
+            <motion.button key={m.key} type="button" onClick={() => setPage('functions', 'fn-' + m.key)}
+              initial={{ opacity: 0, y: 14 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.45, delay: 0.2 + i * 0.05 }}
+              className="panel panel-hover"
+              style={{ padding: '18px 18px', textAlign: 'left', background: 'transparent', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <Icon size={17} color={GREEN} />
+              <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.65rem', letterSpacing: '0.13em', textTransform: 'uppercase', color: 'white', lineHeight: 1.35 }}>
+                {m.name}
+              </span>
+              <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.58rem', letterSpacing: '0.09em', color: m.included ? 'rgba(255,255,255,0.3)' : `rgba(${GREEN_RGB},0.65)` }}>
+                {m.included ? 'included' : `${eur(m.price)} / mo`}
+              </span>
+            </motion.button>
+          );
+        })}
       </div>
     </section>
   );
 }
 
-/* ── Section A2: Who it's for — one engine, many funnels. Each visitor type
-   should find their own card and think "this is built for me". ── */
+/* ══════════════════════════════════════
+   2 — WHO IT'S FOR
+══════════════════════════════════════ */
 function AudienceSection() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.15 });
@@ -309,39 +363,399 @@ function AudienceSection() {
   );
 }
 
-/* ── Section B: Why ATREOX is different ── */
-function WhyChooseSection() {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, amount: 0.15 });
-  const cards = [
-    { icon: Brain,  title: 'Comments that read the room', body: 'AI-generated replies match each channel\'s language and tone — not generic spam that gets deleted on sight.' },
-    { icon: Shield, title: 'Built for account safety',    body: 'Warmup schedules, proxy rotation, and rate-limiting keep your accounts alive and undetected.' },
-    { icon: Globe,  title: 'Finds the right channels',    body: 'Automatic discovery surfaces the channels your audience already reads — a DeFi community or an AI-creator funnel — filtered, ranked, ready to target.' },
-    { icon: Zap,    title: 'Live engine, real logs',      body: 'Watch the commenting engine work in real time from the dashboard — full visibility, full control.' },
+/* ══════════════════════════════════════
+   3 — HOW IT RUNS  (the pipeline)
+
+   Five stages, stepped through in place. Each stage shows the panel
+   surface it corresponds to rather than describing it, because the
+   whole argument of this section is that these are five real screens
+   feeding each other, not five bullet points.
+══════════════════════════════════════ */
+
+/* — shared chrome for a stage mock — */
+function MockFrame({ title, right, children }) {
+  return (
+    <div style={{ border: `1px solid rgba(${GREEN_RGB},0.16)`, borderRadius: 5, overflow: 'hidden', background: 'rgba(0,0,0,0.32)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '10px 14px', borderBottom: `1px solid rgba(${GREEN_RGB},0.12)`, background: `rgba(${GREEN_RGB},0.04)` }}>
+        <span style={{ width: 5, height: 5, borderRadius: '50%', background: GREEN, flexShrink: 0, animation: 'pulse-dot 2s ease-in-out infinite' }} />
+        <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.75)' }}>{title}</span>
+        {right && <span style={{ marginLeft: 'auto', fontFamily: MONO, fontWeight: 400, fontSize: '0.55rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)' }}>{right}</span>}
+      </div>
+      <div style={{ padding: '4px 0' }}>{children}</div>
+    </div>
+  );
+}
+
+const mockRow = {
+  display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px',
+  fontFamily: MONO, fontSize: '0.66rem', fontWeight: 400,
+};
+
+function Verdict({ ok, children }) {
+  return (
+    <span style={{
+      flexShrink: 0, fontFamily: MONO, fontWeight: 600, fontSize: '0.53rem',
+      letterSpacing: '0.12em', textTransform: 'uppercase',
+      color: ok ? GREEN : 'rgba(255,255,255,0.3)',
+    }}>{children}</span>
+  );
+}
+
+/* 01 — discovery results */
+function MockFind() {
+  const rows = [
+    ['@CryptoAlphaCalls', '18.4k', '42', true],
+    ['@Web3BuildersHub', '9.1k', '27', true],
+    ['@AltcoinRadar', '31.2k', '3', false],
+    ['@DeadSignalsDaily', '54.8k', '0', false],
+    ['@BuildersLounge', '6.7k', '19', true],
   ];
   return (
+    <MockFrame title="Channel Parser · results" right="scored">
+      {rows.map(([name, members, comments, ok]) => (
+        <div key={name} style={{ ...mockRow, opacity: ok ? 1 : 0.42 }}>
+          <span style={{ color: ok ? GREEN : 'rgba(255,255,255,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: '1 1 auto', minWidth: 0 }}>{name}</span>
+          <span style={{ color: 'rgba(255,255,255,0.35)', flexShrink: 0, width: 46, textAlign: 'right' }}>{members}</span>
+          <span style={{ color: 'rgba(255,255,255,0.35)', flexShrink: 0, width: 62, textAlign: 'right' }}>{comments} cmts</span>
+          <Verdict ok={ok}>{ok ? 'accept' : 'reject'}</Verdict>
+        </div>
+      ))}
+    </MockFrame>
+  );
+}
+
+/* 02 — warmup progress */
+function MockWarm() {
+  const rows = [
+    ['acct_0148', 94, 'reading'],
+    ['acct_0149', 71, 'joined channel'],
+    ['acct_0150', 46, 'reacted'],
+    ['acct_0151', 22, 'resting'],
+  ];
+  return (
+    <MockFrame title="Active Warmup · status" right="window open">
+      {rows.map(([id, pct, act]) => (
+        <div key={id} style={{ padding: '10px 14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 7, fontFamily: MONO, fontSize: '0.64rem' }}>
+            <span style={{ color: 'rgba(255,255,255,0.6)', flexShrink: 0 }}>{id}</span>
+            <span style={{ color: `rgba(${GREEN_RGB},0.7)`, fontSize: '0.58rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{act}</span>
+            <span style={{ marginLeft: 'auto', color: 'rgba(255,255,255,0.3)', flexShrink: 0 }}>{pct}%</span>
+          </div>
+          <div className="mini-bar"><i style={{ width: pct + '%' }} /></div>
+        </div>
+      ))}
+    </MockFrame>
+  );
+}
+
+/* 03 — a post and the comment written for it */
+function MockComment() {
+  return (
+    <MockFrame title="Neurocommenting · live" right="posted">
+      <div style={{ padding: '12px 14px', borderBottom: `1px solid rgba(${GREEN_RGB},0.08)` }}>
+        <span style={{ display: 'block', fontFamily: MONO, fontSize: '0.56rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 7 }}>Post · @Web3BuildersHub</span>
+        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.55 }}>
+          "Gas on the new L2 rollup dropped 60% after the last upgrade. Full benchmark thread below 👇"
+        </p>
+      </div>
+      <div style={{ padding: '12px 14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 7 }}>
+          <span style={{ fontFamily: MONO, fontSize: '0.56rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: `rgba(${GREEN_RGB},0.8)` }}>Comment · acct_0148</span>
+          <span style={{ marginLeft: 'auto' }}><Verdict ok>sent</Verdict></span>
+        </div>
+        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: 'rgba(255,255,255,0.72)', lineHeight: 1.6 }}>
+          "60% is wild — is that holding under load or just off-peak? curious what the p95 looks like"
+        </p>
+      </div>
+    </MockFrame>
+  );
+}
+
+/* 04 — a DM thread */
+function MockDM() {
+  const bubble = (out, text) => (
+    <div style={{ display: 'flex', justifyContent: out ? 'flex-end' : 'flex-start', padding: '5px 14px' }}>
+      <span style={{
+        maxWidth: '82%', padding: '9px 12px', borderRadius: 5,
+        background: out ? `rgba(${GREEN_RGB},0.1)` : 'rgba(255,255,255,0.045)',
+        border: `1px solid ${out ? `rgba(${GREEN_RGB},0.24)` : 'rgba(255,255,255,0.07)'}`,
+        fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem',
+        color: out ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.6)', lineHeight: 1.5,
+      }}>{text}</span>
+    </div>
+  );
+  return (
+    <MockFrame title="NeuroDialogs · thread" right="in session">
+      <div style={{ paddingTop: 6, paddingBottom: 4 }}>
+        {bubble(false, 'saw your comment in the L2 thread — what do you actually build?')}
+        {bubble(true, "mostly tooling around rollup infra. what are you working on?")}
+        {bubble(false, 'trying to pick a chain for a launch, honestly lost')}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px 4px' }}>
+          <span style={{ fontFamily: MONO, fontSize: '0.56rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: `rgba(${GREEN_RGB},0.6)` }}>typing</span>
+          <span className="dots" style={{ color: `rgba(${GREEN_RGB},0.6)`, fontFamily: MONO, fontSize: '0.7rem' }} />
+          <span style={{ marginLeft: 'auto', fontFamily: MONO, fontSize: '0.54rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.26)' }}>reply in 41s</span>
+        </div>
+      </div>
+    </MockFrame>
+  );
+}
+
+/* 05 — reactions arriving */
+function MockReact() {
+  const chips = [['🔥', 24], ['👍', 17], ['🚀', 11], ['❤️', 8]];
+  return (
+    <MockFrame title="Mass Reactions · run" right="human curve">
+      <div style={{ padding: '12px 14px', borderBottom: `1px solid rgba(${GREEN_RGB},0.08)` }}>
+        <span style={{ display: 'block', fontFamily: MONO, fontSize: '0.56rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>Target · @CryptoAlphaCalls · post 4812</span>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {chips.map(([e, n]) => (
+            <span key={e} style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 3,
+              border: `1px solid rgba(${GREEN_RGB},0.24)`, background: `rgba(${GREEN_RGB},0.07)`,
+              fontFamily: MONO, fontSize: '0.66rem', color: 'rgba(255,255,255,0.75)',
+            }}>{e} {n}</span>
+          ))}
+        </div>
+      </div>
+      {[['00:00', '4 accounts reacted'], ['00:11', '7 accounts reacted'], ['00:38', '9 accounts reacted'], ['01:24', 'pool coverage 62% — stop']].map(([t, l]) => (
+        <div key={t} style={mockRow}>
+          <span style={{ color: 'rgba(255,255,255,0.28)', flexShrink: 0 }}>+{t}</span>
+          <span style={{ color: 'rgba(255,255,255,0.55)' }}>{l}</span>
+        </div>
+      ))}
+    </MockFrame>
+  );
+}
+
+const STAGE_MOCKS = { find: MockFind, warm: MockWarm, comment: MockComment, dm: MockDM, react: MockReact };
+
+function PipelineSection({ setPage }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, amount: 0.1 });
+  const [active, setActive] = useState(0);
+  const [pinned, setPinned] = useState(false);
+
+  /* Auto-advance until the visitor takes over — after that it's theirs. */
+  useEffect(() => {
+    if (!inView || pinned || REDUCED_MOTION) return;
+    const iv = setInterval(() => setActive(a => (a + 1) % PIPELINE.length), 5200);
+    return () => clearInterval(iv);
+  }, [inView, pinned]);
+
+  const stage = PIPELINE[active];
+  const Mock = STAGE_MOCKS[stage.key];
+  const pct = ((active + 0.5) / PIPELINE.length) * 100;
+
+  return (
+    <section ref={ref} id="how-it-runs" className="section-block"
+      style={{ padding: '88px 5%', maxWidth: 1280, margin: '0 auto', scrollMarginTop: 72 }}>
+      <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
+        <SectionLockup title="How it runs">
+          Five stages, in order, each one feeding the next. Step through them — every stage is a real
+          surface in the panel, and every stage is a module you can buy on its own.
+        </SectionLockup>
+      </motion.div>
+
+      {/* ── the rail ── */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.1 }}
+        style={{ position: 'relative', marginBottom: 34 }}>
+        {/* track + fill, sitting behind the dots */}
+        <div aria-hidden="true" style={{ position: 'absolute', left: 6, right: 6, top: 6, height: 1, background: `rgba(${GREEN_RGB},0.16)` }} />
+        <div aria-hidden="true" style={{
+          position: 'absolute', left: 6, top: 6, height: 1, width: `calc(${pct}% - 6px)`,
+          background: `linear-gradient(90deg, rgba(${GREEN_RGB},0.5), var(--g-bright))`,
+          boxShadow: `0 0 10px rgba(${GREEN_RGB},0.6)`,
+          transition: 'width 0.45s cubic-bezier(0.16,1,0.3,1)',
+        }} />
+        <div role="tablist" aria-label="Pipeline stages"
+          style={{ position: 'relative', display: 'flex', gap: 16, overflowX: 'auto', paddingBottom: 4 }}>
+          {PIPELINE.map((s, i) => (
+            <button key={s.key} type="button" role="tab" aria-selected={active === i}
+              className="pipe-node"
+              onClick={() => { setActive(i); setPinned(true); }}>
+              <span aria-hidden="true" className="pipe-dot" />
+              <span className="pipe-idx">{String(i + 1).padStart(2, '0')} · {s.label}</span>
+              <span className="pipe-verb">{s.verb}</span>
+            </button>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* ── the active stage ── */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.18 }}
+        className="panel ticks" style={{ padding: 'clamp(24px, 3.4vw, 40px)' }}>
+        <div key={stage.key} className="stage-body"
+          style={{ display: 'flex', gap: 36, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+
+          {/* words */}
+          <div style={{ flex: '1 1 330px', minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+              <Pill dot>{`Stage ${active + 1} of ${PIPELINE.length}`}</Pill>
+              <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.6rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)' }}>{stage.label}</span>
+            </div>
+            <h3 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: 'white', letterSpacing: '-0.01em', lineHeight: 1.15, marginBottom: 14 }}>
+              {stage.verb}
+            </h3>
+            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.98rem', color: `rgba(${GREEN_RGB},0.85)`, lineHeight: 1.6, marginBottom: 14 }}>
+              {stage.line}
+            </p>
+            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.92rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.78, marginBottom: 22, maxWidth: 520 }}>
+              {stage.detail}
+            </p>
+
+            {/* which modules do this — straight into Functions */}
+            <span style={{ display: 'block', fontFamily: MONO, fontWeight: 500, fontSize: '0.56rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>
+              {'// '}Runs on
+            </span>
+            <div style={{ display: 'flex', gap: 9, flexWrap: 'wrap' }}>
+              {stage.modules.map(k => {
+                const m = MODULE_BY_KEY[k];
+                const Icon = m.icon;
+                return (
+                  <button key={k} type="button" onClick={() => setPage('functions', 'fn-' + k)}
+                    className="panel panel-hover"
+                    style={{
+                      padding: '9px 13px', display: 'inline-flex', alignItems: 'center', gap: 9,
+                      background: 'transparent', borderRadius: 4,
+                    }}>
+                    <Icon size={13} color={GREEN} />
+                    <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.6rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'white' }}>{m.name}</span>
+                    <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.56rem', letterSpacing: '0.08em', color: m.included ? 'rgba(255,255,255,0.3)' : `rgba(${GREEN_RGB},0.65)` }}>
+                      {m.included ? 'incl.' : eur(m.price)}
+                    </span>
+                    <ArrowUpRight size={11} color={`rgba(${GREEN_RGB},0.5)`} />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* the panel surface this stage corresponds to */}
+          <div style={{ flex: '1 1 340px', minWidth: 0 }}>
+            <Mock />
+          </div>
+        </div>
+      </motion.div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════
+   4 — WHAT IT COSTS
+══════════════════════════════════════ */
+function PriceTeaserSection({ setPage }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, amount: 0.15 });
+
+  return (
     <section ref={ref} className="section-block" style={{ padding: '88px 5%', maxWidth: 1280, margin: '0 auto' }}>
-      <div style={{ textAlign: 'center', marginBottom: 60 }}>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
-          <span className="overline" style={{ display: 'block', marginBottom: 16 }}>{'// '}The difference</span>
-          <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.9rem, 3.8vw, 2.8rem)', color: 'white', letterSpacing: '-0.01em', lineHeight: 1.1 }}>
-            Why ATREOX is different
-          </h2>
+      <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
+        <SectionLockup title="What it costs">
+          Modules are priced one at a time, so a campaign that only needs discovery and commenting only
+          pays for discovery and commenting. Take all of them and the full licence is cheaper than the sum.
+        </SectionLockup>
+      </motion.div>
+
+      <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', alignItems: 'stretch' }}>
+        <motion.div className="panel" style={{ flex: '1 1 300px', padding: '30px 28px', display: 'flex', flexDirection: 'column' }}
+          initial={{ opacity: 0, y: 26 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.55 }}>
+          <span className="overline" style={{ display: 'block', marginBottom: 18 }}>{'// '}Single module</span>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 12 }}>
+            <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>from</span>
+            <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '2.4rem', color: GREEN, lineHeight: 1 }}>{eur(CHEAPEST_MODULE)}</span>
+            <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.64rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>/ month</span>
+          </div>
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.87rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginBottom: 20 }}>
+            Pick exactly what you'll run. Each module bills monthly and runs on its own.
+          </p>
+          <div style={{ marginTop: 'auto', paddingTop: 16, borderTop: `1px solid rgba(${GREEN_RGB},0.1)` }}>
+            <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.62rem', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.34)' }}>
+              Account Manager + Profile Templates included
+            </span>
+          </div>
+        </motion.div>
+
+        <motion.div className="panel ticks featured-pulse" style={{ flex: '1 1 300px', padding: '30px 28px', borderColor: `rgba(${GREEN_RGB},0.4)`, display: 'flex', flexDirection: 'column' }}
+          initial={{ opacity: 0, y: 26 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.55, delay: 0.09 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 18 }}>
+            <span className="overline">{'// '}Full licence</span>
+            <Pill dot>All six</Pill>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 12 }}>
+            <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '2.6rem', color: GREEN, lineHeight: 1, textShadow: `0 0 28px rgba(${GREEN_RGB},0.3)` }}>{eur(FULL_MONTHLY)}</span>
+            <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.64rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>/ month</span>
+          </div>
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.87rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginBottom: 20 }}>
+            Every module, plus any released while your licence is active. {eur(FULL_YEARLY)} a year saves {eur(YEARLY_SAVING)}.
+          </p>
+          <div style={{ marginTop: 'auto' }}>
+            <button className="btn-solid" onClick={() => setPage('pricing')} style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '0.76rem' }}>
+              Build your licence <ArrowUpRight size={14} />
+            </button>
+          </div>
+        </motion.div>
+
+        <motion.div className="panel" style={{ flex: '1 1 260px', padding: '30px 28px', display: 'flex', flexDirection: 'column' }}
+          initial={{ opacity: 0, y: 26 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.55, delay: 0.18 }}>
+          <span className="overline" style={{ display: 'block', marginBottom: 18 }}>{'// '}What you also need</span>
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.87rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.75, marginBottom: 20 }}>
+            ATREOX doesn't sell accounts or proxies — you bring your own, and what you spend there is
+            up to you. Both guides on how to buy them well are on the Guides page.
+          </p>
+          <div style={{ marginTop: 'auto' }}>
+            <button type="button" className="quiet-link" onClick={() => setPage('guides')}>
+              <BookOpen size={12} /> Read the setup guides <ArrowUpRight size={12} />
+            </button>
+          </div>
         </motion.div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 18 }}>
-        {cards.map(({ icon: Icon, title, body }, i) => (
-          <motion.div key={i} className="panel panel-hover"
-            initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.55, delay: i * 0.09 }}
-            style={{ padding: '30px 26px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
-              <div style={{ width: 46, height: 46, borderRadius: 5, background: `rgba(${GREEN_RGB},0.08)`, border: `1px solid rgba(${GREEN_RGB},0.22)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Icon size={20} color={GREEN} />
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════
+   5 — WHY TRUST IT
+══════════════════════════════════════ */
+function TrustSection({ setPage }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, amount: 0.12 });
+
+  const pillars = [
+    { icon: Shield, title: 'Accounts are treated as the scarce thing',
+      body: 'Warmup before work, one proxy per account, per-account rate budgets, and automatic cooldowns on floodwait and peerflood. An account that trips a limit pauses itself instead of grinding into a ban.' },
+    { icon: Server, title: 'Two different health checks',
+      body: "Telegram's own restricted/scam/fake flags, and a separate capability probe that resolves a public username and reads its history — which is what actually catches an account that's frozen while every flag stays clean." },
+    { icon: Zap, title: 'Nothing runs faster than you set it',
+      body: 'Every module exposes its delays, its hourly and daily caps, and its skip probabilities. Defaults are conservative and every one of them is yours to move.' },
+    { icon: Brain, title: 'Every action is logged with its reason',
+      body: 'Generated, skipped, rate-limited, failed — each with the post, thread or target it belongs to. When something stops, the log says why rather than going quiet.' },
+    { icon: Clock, title: 'Dry runs before real ones',
+      body: 'Mass Reactions can do a full pass and report exactly what it would have done without sending anything. Discovery searches are cancellable mid-run.' },
+    { icon: Globe, title: 'Monthly, no contract',
+      body: "It's a monthly subscription you cancel from the panel, keeping access to the end of the period. Modules are separate line items, so scaling down doesn't mean starting over." },
+  ];
+
+  return (
+    <section ref={ref} className="section-block" style={{ padding: '88px 5%', maxWidth: 1280, margin: '0 auto' }}>
+      <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
+        <SectionLockup title="Why trust it">
+          Automation on Telegram fails in one direction: too fast, too uniform, too visible. Every design
+          decision below exists because of that, and all of it is visible to you while it runs.
+        </SectionLockup>
+      </motion.div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18 }}>
+        {pillars.map(({ icon: Icon, title, body }, i) => (
+          <motion.div key={title} className="panel panel-hover"
+            initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.07 }}
+            style={{ padding: '28px 26px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <div style={{ width: 42, height: 42, borderRadius: 5, background: `rgba(${GREEN_RGB},0.08)`, border: `1px solid rgba(${GREEN_RGB},0.22)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon size={18} color={GREEN} />
               </div>
-              <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.62rem', letterSpacing: '0.14em', color: `rgba(${GREEN_RGB},0.4)` }}>{String(i + 1).padStart(2, '0')}</span>
+              <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.6rem', letterSpacing: '0.14em', color: `rgba(${GREEN_RGB},0.35)` }}>{String(i + 1).padStart(2, '0')}</span>
             </div>
-            <h4 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem', color: 'white', marginBottom: 10 }}>{title}</h4>
-            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.65 }}>{body}</p>
+            <h4 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.94rem', color: 'white', marginBottom: 10, lineHeight: 1.4 }}>{title}</h4>
+            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.7 }}>{body}</p>
           </motion.div>
         ))}
       </div>
@@ -349,80 +763,28 @@ function WhyChooseSection() {
   );
 }
 
-/* ── Section C: CTA Banner ── */
-function CtaBannerSection({ setPage }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, amount: 0.3 });
-  return (
-    <section ref={ref} className="section-block" style={{ padding: '88px 5%', maxWidth: 1280, margin: '0 auto' }}>
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }}
-        className="panel ticks" style={{ padding: 'clamp(64px, 9vw, 110px) 5%', textAlign: 'center' }}>
-        <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.9rem, 4.2vw, 3.1rem)', color: 'white', letterSpacing: '-0.01em', lineHeight: 1.1, marginBottom: 16 }}>
-          Ready to grow on Telegram?
-        </h2>
-        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.55)', maxWidth: 420, margin: '0 auto 36px', lineHeight: 1.65 }}>
-          Pick a plan and start driving traffic from the channels that matter — or explore what the platform can do first.
-        </p>
-        <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="btn-solid" onClick={() => setPage('pricing')} style={{ padding: '15px 32px', fontSize: '0.82rem' }}>
-            See Pricing <ArrowUpRight size={15} />
-          </button>
-          <button className="btn-outline" onClick={() => setPage('functions')} style={{ padding: '14px 28px' }}>
-            Explore Functions <ArrowUpRight size={14} />
-          </button>
-        </div>
-      </motion.div>
-    </section>
-  );
-}
-
-/* ── Section D: How neuro-commenting works ── */
-function EducationalCtaSection({ setPage }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, amount: 0.3 });
-  return (
-    <section ref={ref} className="section-block" style={{ padding: '88px 5%', maxWidth: 1280, margin: '0 auto' }}>
-      <motion.div
-        initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.65 }}
-        className="panel"
-        style={{ padding: 'clamp(36px, 6vw, 72px) clamp(24px, 5%, 80px)', display: 'flex', gap: 40, alignItems: 'center', flexWrap: 'wrap' }}>
-        <div style={{ flex: '1 1 280px', minWidth: 0 }}>
-          <span className="overline" style={{ display: 'block', marginBottom: 18 }}>{'// '}How it works</span>
-          <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.7rem, 3.3vw, 2.5rem)', color: 'white', lineHeight: 1.1, letterSpacing: '-0.01em', marginBottom: 14 }}>
-            New to neuro-commenting?
-          </h2>
-          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.68, maxWidth: 480 }}>
-            See exactly how the discovery, persona, and commenting engine fit together — and what happens under the hood on every account.
-          </p>
-        </div>
-        <div style={{ flexShrink: 0 }}>
-          <button className="btn-solid" onClick={() => setPage('functions')} style={{ padding: '15px 30px', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
-            See How Neuro-Commenting Works <ArrowUpRight size={15} />
-          </button>
-        </div>
-      </motion.div>
-    </section>
-  );
-}
-
-/* ── Section E: FAQ ── */
-function FAQSection() {
+/* ══════════════════════════════════════
+   6 — FAQ
+══════════════════════════════════════ */
+function FAQSection({ setPage }) {
   const ref  = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.15 });
-  const [open, setOpen] = React.useState(null);
+  const [open, setOpen] = useState(null);
   const faqs = [
-    { q: 'How does account safety work?',
-      a: 'Every account goes through a gradual warmup schedule before it starts commenting, and traffic is routed through rotating proxies with built-in rate limits. The Account Manager continuously runs health checks and pauses any account that shows risk signals, so you never lose a warmed-up account to a ban.' },
-    { q: "What's the setup process?",
-      a: 'Connect your Telegram accounts (or import ones you already have), let the Channel Parser run a discovery pass to find the channels in your niche, configure a persona and comment style, and launch. Most users are live within an hour.' },
+    { q: 'What do I need before I can start?',
+      a: 'Telegram accounts and one proxy per account. ATREOX does not sell either — you bring your own, import them through the Account Manager, and the panel takes it from there. Both purchases have their own guide on the Guides page.' },
+    { q: 'How does account safety actually work?',
+      a: 'Accounts warm up before they do anything that earns: scheduled reading, joins and reactions at a pace matched to the account\'s age. Once working, each one runs behind its own proxy inside its own hourly and daily budget, with randomised delays between actions. Floodwait and peerflood put an account into cooldown automatically, and repeated ones stop it rather than retrying into a ban.' },
     { q: 'Can I bring my own Telegram accounts?',
-      a: "Yes — bulk-import your own accounts via the Account Manager. They'll go through the same warmup and health-check pipeline as any other account before commenting begins." },
+      a: 'Yes — that is the only way it works. Import them individually, in bulk up to 100 per request, or by converting tdata folders. Every account then goes through the same health checks and warmup as any other.' },
+    { q: 'Do I have to buy all eight modules?',
+      a: 'No. Each priced module bills separately and runs on its own, so you can run discovery and commenting and nothing else. Account Manager and Profile Templates come with any purchase — they are how accounts get into the system, so they are never sold alone. If you want everything, the full licence costs less than the six added up.' },
     { q: 'Does this only work for crypto and tech channels?',
-      a: "No — ATREOX works in any niche where your audience gathers on Telegram. Crypto and tech are where many of our users started, but the same engine grows AI-creator funnels, content communities, and personal brands. Point discovery at your niche and the comment engine adapts its language and tone to match." },
-    { q: 'Can I use this to drive traffic to a monetization funnel or another platform?',
-      a: "Yes. Your accounts' profiles and pinned posts can point anywhere — your main Telegram channel, a landing page, or the platform where you monetize. ATREOX handles the discovery-and-comments layer; where the traffic lands is entirely up to you." },
+      a: 'No. The parsers search on your keywords in ten languages, and the comment and reply engines work from a prompt you write. Crypto and tech are where many users started; the same pipeline runs an AI-creator funnel or a content community without changing anything but the targets and the persona.' },
+    { q: 'What happens when a guide I need has not been filmed yet?',
+      a: 'Every module has a full write-up on the Functions page listing what it does and every setting it exposes — enough to configure it without a video. If you are stuck, write to us and we will walk you through it while the guide is being recorded.' },
     { q: 'Is there a contract, or can I cancel anytime?',
-      a: "It's a monthly subscription — no long-term contract. Cancel anytime from the dashboard and you'll keep access through the end of your billing period." },
+      a: "It's a monthly subscription with no long-term contract. Cancel from the panel and you keep access through the end of the billing period. Only the full licence is also sold by the year." },
   ];
   return (
     <section ref={ref} className="section-block" style={{ padding: '88px 5%', maxWidth: 860, margin: '0 auto' }}>
@@ -465,18 +827,48 @@ function FAQSection() {
   );
 }
 
+/* ══════════════════════════════════════
+   CTA
+══════════════════════════════════════ */
+function CtaBannerSection({ setPage }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, amount: 0.3 });
+  return (
+    <section ref={ref} className="section-block" style={{ padding: '88px 5%', maxWidth: 1280, margin: '0 auto' }}>
+      <motion.div initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }}
+        className="panel ticks" style={{ padding: 'clamp(64px, 9vw, 110px) 5%', textAlign: 'center' }}>
+        <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.9rem, 4.2vw, 3.1rem)', color: 'white', letterSpacing: '-0.01em', lineHeight: 1.1, marginBottom: 16 }}>
+          Ready to grow on Telegram?
+        </h2>
+        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.55)', maxWidth: 440, margin: '0 auto 36px', lineHeight: 1.65 }}>
+          Pick the modules you'll actually run, or take the whole licence and decide later.
+        </p>
+        <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button className="btn-solid" onClick={() => setPage('pricing')} style={{ padding: '15px 32px', fontSize: '0.82rem' }}>
+            See Pricing <ArrowUpRight size={15} />
+          </button>
+          <button className="btn-outline" onClick={() => setPage('functions')} style={{ padding: '14px 28px' }}>
+            Explore Functions <ArrowUpRight size={14} />
+          </button>
+        </div>
+      </motion.div>
+    </section>
+  );
+}
 
 /* ── Home Page ── */
 function HomePage({ setPage }) {
   return (
     <div>
       <Hero setPage={setPage} />
-      <FeatureHeroSection setPage={setPage} />
+      <WhatThisIsSection setPage={setPage} />
       <AudienceSection />
-      <WhyChooseSection />
+      <PipelineSection setPage={setPage} />
+      <PriceTeaserSection setPage={setPage} />
+      <TrustSection setPage={setPage} />
+      <FAQSection setPage={setPage} />
       <CtaBannerSection setPage={setPage} />
-      <EducationalCtaSection setPage={setPage} />
-      <FAQSection />
+      <CrossLinks current="home" setPage={setPage} />
       <div style={{ padding: '0 5% 60px' }}>
         <FooterBar setPage={setPage} />
       </div>

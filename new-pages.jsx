@@ -1,15 +1,24 @@
 
+/* ══════════════════════════════════════════════════════════════════
+   new-pages.jsx — the Pricing page (the page that closes).
+
+   The module list, the prices and the licence maths all come from
+   catalog.jsx — the same table Functions and Guides read — so a price
+   change lands on all three pages at once.
+══════════════════════════════════════════════════════════════════ */
+
 const React = window.React;
 const { useRef, useState, useEffect } = React;
 const {
   motion, useInView,
-  ArrowUpRight, Check, Users, Globe, Brain, Zap, MessageSquare, Sparkles,
-  SectionBadge, BlurText, FooterBar,
+  ArrowUpRight, Check, BookOpen, Layers,
+  FooterBar, CrossLinks,
+  PageHero, PageSection, SectionLockup, Pill, MONO, SERIF,
+  PRICED_MODULES, MODULE_BY_KEY, INCLUDED_MODULES,
+  FULL_MONTHLY, FULL_YEARLY, YEARLY_SAVING, eur,
 } = window;
 
 const DASHBOARD_URL = 'https://app.atreoxai.com';
-const MONO  = "'JetBrains Mono', monospace";
-const SERIF = "'Playfair Display', Georgia, serif";
 const GREEN = window.ACCENT;
 const GREEN_RGB = window.ACCENT_RGB;
 
@@ -71,213 +80,6 @@ const BILLING_URL = `${DASHBOARD_URL}/billing`;
 function billingCTA(sub, label) {
   if (!sub.loading && sub.active) return { label: 'Manage in panel', href: BILLING_URL };
   return { label, href: BILLING_URL };
-}
-
-/* ─── shared inner-page hero (Functions / Pricing) ─── */
-function PageHero({ badge, title, sub }) {
-  return (
-    <section style={{ paddingTop: 170, paddingBottom: 84, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: `1px solid rgba(${GREEN_RGB},0.12)` }}>
-      <SectionBadge>{badge}</SectionBadge>
-      <BlurText text={title} style={{
-        fontFamily: SERIF, fontWeight: 500,
-        fontSize: 'clamp(2.5rem, 4.6vw, 4rem)', color: 'white',
-        lineHeight: 1.08, letterSpacing: '-0.015em', marginTop: 22, marginBottom: 20
-      }} delay={90} />
-      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.5)', maxWidth: 560, margin: '0 auto', lineHeight: 1.65 }}>
-        {sub}
-      </p>
-    </section>
-  );
-}
-
-/* ─── section wrapper ─── */
-function PageSection({ children, style }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, amount: 0.15 });
-  return (
-    <div ref={ref}>
-      <motion.div
-        className="section-block"
-        initial={{ opacity: 0, y: 40 }}
-        animate={inView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.65 }}
-        style={{ padding: '88px 5%', maxWidth: 1280, margin: '0 auto', ...style }}>
-        {children}
-      </motion.div>
-    </div>
-  );
-}
-
-/* ══════════════════════════════════════
-   FUNCTIONS PAGE
-══════════════════════════════════════ */
-function FunctionCard({ icon: Icon, title, tagline, body, bullets, index, inView }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="panel panel-hover ticks" style={{ padding: '36px 32px', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-        <div style={{ width: 52, height: 52, borderRadius: 5, background: `rgba(${GREEN_RGB},0.08)`, border: `1px solid rgba(${GREEN_RGB},0.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Icon size={24} color={GREEN} />
-        </div>
-        <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.66rem', letterSpacing: '0.16em', color: `rgba(${GREEN_RGB},0.4)` }}>{String(index + 1).padStart(2, '0')}</span>
-      </div>
-      <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', color: GREEN, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 10, display: 'block' }}>{'// '}{tagline}</span>
-      <h3 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '1.45rem', color: 'white', marginBottom: 14, letterSpacing: '-0.01em', lineHeight: 1.2 }}>{title}</h3>
-      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, marginBottom: 24 }}>{body}</p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 'auto', borderTop: `1px solid rgba(${GREEN_RGB},0.1)`, paddingTop: 20 }}>
-        {bullets.map((b, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-            <Check size={14} color={GREEN} style={{ marginTop: 2, flexShrink: 0 }} />
-            <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.83rem', color: 'rgba(255,255,255,0.68)', lineHeight: 1.5 }}>{b}</span>
-          </div>
-        ))}
-      </div>
-    </motion.div>
-  );
-}
-
-function FunctionsPage({ setPage }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, amount: 0.1 });
-
-  const functions = [
-    {
-      icon: Users, tagline: 'Account Manager', title: 'Every account, under control',
-      body: "Import, monitor, and rotate the Telegram accounts that power your campaigns — all from one screen.",
-      bullets: [
-        'Bulk import via CSV or API — bring your own accounts or provisioned ones',
-        'Automated health checks & risk scoring catch problems before they cause bans',
-        'Built-in proxy management & rotation keeps every account isolated and clean',
-      ],
-    },
-    {
-      icon: Globe, tagline: 'Channel Parser', title: 'Discovery that finds the right rooms',
-      body: 'Automatically discover the crypto and tech channels worth commenting in — filtered and ranked so you\'re never guessing.',
-      bullets: [
-        'Keyword, niche, and language filters tuned for crypto & tech',
-        'Subscriber count and engagement-rate thresholds cut out dead channels',
-        'Auto-refreshing watchlists keep discovery running in the background',
-      ],
-    },
-    {
-      icon: Brain, tagline: 'Neurocommenting', title: 'The engine that actually posts',
-      body: 'Comments are generated and assigned in real time, matching tone and context per channel, with full visibility into what the engine is doing.',
-      bullets: [
-        'Persona presets and custom tone training per account or campaign',
-        'Auto-assignment matches accounts to channels based on fit and load',
-        'Live engine control panel with real-time logs — pause, resume, or intervene anytime',
-      ],
-    },
-  ];
-
-  return (
-    <div>
-      <PageHero
-        badge="Functions"
-        title="How ATREOX runs."
-        sub="Three systems working together: accounts that stay safe, discovery that finds the right channels, and an engine that comments like a real person."
-      />
-
-      <PageSection>
-        <div ref={ref} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 22 }}>
-          {functions.map((f, i) => (
-            <FunctionCard key={f.tagline} {...f} index={i} inView={inView} />
-          ))}
-        </div>
-      </PageSection>
-
-      <PageSection style={{ paddingTop: 0 }}>
-        <motion.div className="panel ticks" style={{ padding: 'clamp(48px, 7vw, 84px)', textAlign: 'center' }}>
-          <div style={{ width: 46, height: 46, borderRadius: 5, background: `rgba(${GREEN_RGB},0.08)`, border: `1px solid rgba(${GREEN_RGB},0.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 22px' }}>
-            <Zap size={20} color={GREEN} />
-          </div>
-          <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.7rem, 3.3vw, 2.4rem)', color: 'white', marginBottom: 14, letterSpacing: '-0.01em', lineHeight: 1.1 }}>
-            See it running on your channels
-          </h2>
-          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.55)', maxWidth: 480, margin: '0 auto 30px', lineHeight: 1.65 }}>
-            Every function above lives inside the dashboard. Pick a plan or jump straight in.
-          </p>
-          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button className="btn-solid" onClick={() => setPage('pricing')} style={{ padding: '15px 30px', fontSize: '0.8rem' }}>
-              See Pricing <ArrowUpRight size={15} />
-            </button>
-            <a href={DASHBOARD_URL} target="_self" className="btn-outline" style={{ padding: '14px 26px' }}>
-              Enter Panel <ArrowUpRight size={14} />
-            </a>
-          </div>
-        </motion.div>
-      </PageSection>
-
-      <div style={{ padding: '0 5% 64px' }}><FooterBar setPage={setPage} /></div>
-    </div>
-  );
-}
-
-/* ══════════════════════════════════════
-   PRICING PAGE (modular licence)
-══════════════════════════════════════ */
-
-// Monthly list price per module, heaviest first — the price column then reads
-// as a descending ladder, which is what the "why prices differ" note points at.
-const MODULES = [
-  { key: 'neurocommenting', name: 'Neurocommenting', price: 50, icon: MessageSquare,
-    desc: 'Watches the channels you choose and writes a comment under every new post.' },
-  { key: 'neurodialogs', name: 'NeuroDialogs', price: 45, icon: Brain,
-    desc: 'Answers direct messages and chat replies in context, from your own accounts.' },
-  { key: 'active-warmup', name: 'Active Warmup', price: 30, icon: Zap,
-    desc: 'Runs scheduled activity on your accounts so a new one behaves like a used one.' },
-  { key: 'mass-reactions', name: 'Mass Reactions', price: 30, icon: Sparkles,
-    desc: 'Puts reactions on a post from many accounts at once.' },
-  { key: 'channel-parser', name: 'Channel Parser', price: 20, icon: Globe,
-    desc: 'Finds channels by keyword and exports them as a target list.' },
-  { key: 'group-parser', name: 'Group Parser', price: 20, icon: Users,
-    desc: 'Finds active public groups by keyword and exports them.' },
-];
-
-const MODULE_BY_KEY = Object.fromEntries(MODULES.map(m => [m.key, m]));
-
-const FULL_MONTHLY  = 120;
-const FULL_YEARLY   = 1000;
-const YEARLY_SAVING = FULL_MONTHLY * 12 - FULL_YEARLY;
-
-const eur = n => '€' + n.toLocaleString('en-US');
-
-/* ─── Section lockup: the dashboard's one-name-per-section header —
-   cyan // glyph, serif title, hairline rule out to the edge. ─── */
-function SectionLockup({ title, children }) {
-  return (
-    <div style={{ marginBottom: 34 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-        <span aria-hidden="true" style={{ fontFamily: MONO, fontWeight: 600, fontSize: '1rem', lineHeight: 1, color: GREEN, userSelect: 'none' }}>//</span>
-        <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.6rem, 3vw, 2.1rem)', color: 'white', letterSpacing: '-0.01em', lineHeight: 1 }}>
-          {title}
-        </h2>
-        <div aria-hidden="true" className="section-rule" style={{ flex: '1 1 32px', minWidth: 32 }} />
-      </div>
-      {children && (
-        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.65, maxWidth: 620, marginTop: 14 }}>
-          {children}
-        </p>
-      )}
-    </div>
-  );
-}
-
-/* ─── Sharp-cornered marker pill, same lockup language as the v1.0 chip ─── */
-function Pill({ children, dot }) {
-  return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 6, flexShrink: 0,
-      border: `1px solid rgba(${GREEN_RGB},0.35)`, background: `rgba(${GREEN_RGB},0.08)`,
-      borderRadius: 3, padding: '4px 9px', boxShadow: `0 0 10px rgba(${GREEN_RGB},0.12)`,
-      fontFamily: MONO, fontWeight: 600, fontSize: '0.58rem', lineHeight: 1,
-      letterSpacing: '0.16em', textTransform: 'uppercase', color: GREEN,
-    }}>
-      {dot && <span aria-hidden="true" style={{ width: 4, height: 4, background: GREEN, boxShadow: `0 0 6px rgba(${GREEN_RGB},0.8)` }} />}
-      {children}
-    </span>
-  );
 }
 
 /* ─── one selectable module ─── */
@@ -375,7 +177,7 @@ function LicenceCard({ term, setTerm, sub }) {
     <div className="panel ticks featured-pulse" style={{ padding: '24px 26px', borderColor: `rgba(${GREEN_RGB},0.45)` }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 18 }}>
         <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.64rem', color: `rgba(${GREEN_RGB},0.75)`, letterSpacing: '0.24em', textTransform: 'uppercase' }}>{'// '}Full licence</span>
-        <Pill dot>All six</Pill>
+        <Pill dot>All {PRICED_MODULES.length}</Pill>
       </div>
 
       <TermToggle term={term} setTerm={setTerm} />
@@ -401,7 +203,7 @@ function LicenceCard({ term, setTerm, sub }) {
           as filled rather than composed */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 11, marginTop: 18, borderTop: `1px solid rgba(${GREEN_RGB},0.12)`, paddingTop: 16 }}>
         {[
-          'All six modules, including both parsers',
+          `All ${PRICED_MODULES.length} modules, including both parsers`,
           'Any module released while your licence is active, at no extra cost',
         ].map((f, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
@@ -446,14 +248,14 @@ function SelectionPanel({ keys, total, onClear, sub }) {
         </span>
         <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>/ month</span>
         <span style={{ marginLeft: 'auto', fontFamily: MONO, fontWeight: 400, fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>
-          {n === 0 ? 'none selected' : `${n} of ${MODULES.length}`}
+          {n === 0 ? 'none selected' : `${n} of ${PRICED_MODULES.length}`}
         </span>
       </div>
 
       {/* the comparison, said out loud the moment it starts to matter */}
       {total > 0 && gap > 0 && gap <= 40 && (
         <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: `rgba(${GREEN_RGB},0.85)`, lineHeight: 1.55, marginTop: 12 }}>
-          {eur(gap)} more buys all six, below.
+          {eur(gap)} more buys all {PRICED_MODULES.length}, below.
         </p>
       )}
       {total > 0 && gap <= 0 && (
@@ -473,6 +275,27 @@ function SelectionPanel({ keys, total, onClear, sub }) {
           {cta.label} <ArrowUpRight size={14} />
         </a>
       )}
+    </div>
+  );
+}
+
+/* ─── the two exits from the picker: what a module is, and how to run it ─── */
+function ModuleHelpRail({ setPage }) {
+  return (
+    <div style={{
+      marginTop: 20, padding: '16px 20px', borderRadius: 5,
+      border: `1px solid rgba(${GREEN_RGB},0.12)`, background: `rgba(${GREEN_RGB},0.025)`,
+      display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap',
+    }}>
+      <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.87rem', color: 'rgba(255,255,255,0.5)', flex: '1 1 260px', lineHeight: 1.6 }}>
+        Not sure what one of these actually does, or how much work it is to set up?
+      </span>
+      <button type="button" className="quiet-link" onClick={() => setPage('functions')}>
+        <Layers size={12} /> Read the module docs <ArrowUpRight size={12} />
+      </button>
+      <button type="button" className="quiet-link quiet-link-dim" onClick={() => setPage('guides')}>
+        <BookOpen size={12} /> See the setup guides <ArrowUpRight size={12} />
+      </button>
     </div>
   );
 }
@@ -505,19 +328,22 @@ function PricingPage({ setPage }) {
         </SectionLockup>
 
         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-          <div ref={gridRef} style={{
-            flex: '1 1 520px', display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-            gap: 16, alignContent: 'start',
-          }}>
-            {MODULES.map((m, i) => (
-              <motion.div key={m.key}
-                initial={{ opacity: 0, y: 8 }} animate={gridIn ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.55, delay: i * 0.06 }}
-                style={{ display: 'flex' }}>
-                <ModuleCard mod={m} selected={picked.includes(m.key)} onToggle={() => toggle(m.key)} />
-              </motion.div>
-            ))}
+          <div style={{ flex: '1 1 520px', minWidth: 0 }}>
+            <div ref={gridRef} style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: 16, alignContent: 'start',
+            }}>
+              {PRICED_MODULES.map((m, i) => (
+                <motion.div key={m.key}
+                  initial={{ opacity: 0, y: 8 }} animate={gridIn ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.55, delay: i * 0.06 }}
+                  style={{ display: 'flex' }}>
+                  <ModuleCard mod={m} selected={picked.includes(m.key)} onToggle={() => toggle(m.key)} />
+                </motion.div>
+              ))}
+            </div>
+            <ModuleHelpRail setPage={setPage} />
           </div>
 
           {/* Sticky as a direct flex child: its containing block is then the row,
@@ -556,10 +382,18 @@ function PricingPage({ setPage }) {
 
           <div className="panel" style={{ flex: '1 1 380px', padding: '34px 32px' }}>
             <span className="overline" style={{ display: 'block', marginBottom: 16 }}>{'// '}Included with everything</span>
-            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.9rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.75 }}>
-              Account Manager and Profile Templates come with any purchase, down to a single module. They're how
-              you upload accounts and manage profiles, so they're never sold on their own.
+            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.9rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.75, marginBottom: 16 }}>
+              {INCLUDED_MODULES.map(m => m.name).join(' and ')} come with any purchase, down to a single module.
+              They're how you upload accounts and manage profiles, so they're never sold on their own.
             </p>
+            <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+              {INCLUDED_MODULES.map(m => (
+                <button key={m.key} type="button" className="quiet-link"
+                  onClick={() => setPage('functions', 'fn-' + m.key)}>
+                  {m.name} <ArrowUpRight size={11} />
+                </button>
+              ))}
+            </div>
             <div style={{ borderTop: `1px solid rgba(${GREEN_RGB},0.12)`, marginTop: 22, paddingTop: 20 }}>
               <span className="overline" style={{ display: 'block', marginBottom: 12 }}>{'// '}Annual billing</span>
               <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.9rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.75 }}>
@@ -576,9 +410,11 @@ function PricingPage({ setPage }) {
         </div>
       </PageSection>
 
+      <CrossLinks current="pricing" setPage={setPage} />
+
       <div style={{ padding: '0 5% 64px' }}><FooterBar setPage={setPage} /></div>
     </div>
   );
 }
 
-Object.assign(window, { FunctionsPage, PricingPage });
+Object.assign(window, { PricingPage });

@@ -284,6 +284,102 @@
         rgba(0,217,255,0.32), rgba(0,217,255,0.07) 55%, transparent);
     }
 
+    /* ── Quiet inline link: the cyan mono affordance used to hop between
+       Functions / Guides / Pricing without leaving the card it sits in. ── */
+    .quiet-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: none;
+      border: none;
+      padding: 0;
+      font-family: var(--mono);
+      font-weight: 600;
+      font-size: 0.62rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--g);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.15s ease, opacity 0.15s ease;
+    }
+    .quiet-link:hover { color: var(--g-bright); }
+    .quiet-link-dim { color: rgba(255,255,255,0.34); font-weight: 500; }
+    .quiet-link-dim:hover { color: var(--g); }
+
+    /* ── Pipeline: the "how it runs" sequence on the home page ──
+       The rail fill tracks the active stage; a node lights when it's the
+       one being shown. Kept in CSS so stepping never re-renders the rail. */
+    .pipe-node {
+      position: relative;
+      background: none;
+      border: none;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      text-align: left;
+      flex: 1 1 0;
+      min-width: 128px;
+      cursor: pointer;
+    }
+    .pipe-dot {
+      width: 13px; height: 13px;
+      border: 1px solid var(--g-40);
+      background: var(--bg);
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition: background 0.25s ease, border-color 0.25s ease,
+                  box-shadow 0.25s ease, transform 0.25s ease;
+    }
+    .pipe-node[aria-selected="true"] .pipe-dot {
+      background: var(--g);
+      border-color: var(--g);
+      box-shadow: 0 0 0 4px rgba(0,217,255,0.12), 0 0 18px rgba(0,217,255,0.7);
+      transform: scale(1.15);
+    }
+    .pipe-node[aria-selected="false"]:hover .pipe-dot {
+      border-color: var(--g);
+      box-shadow: 0 0 12px rgba(0,217,255,0.3);
+    }
+    .pipe-verb {
+      font-family: var(--serif);
+      font-weight: 500;
+      font-size: 1.02rem;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      color: rgba(255,255,255,0.42);
+      transition: color 0.25s ease;
+    }
+    .pipe-node[aria-selected="true"] .pipe-verb { color: #fff; }
+    .pipe-node:hover .pipe-verb { color: rgba(255,255,255,0.8); }
+    .pipe-idx {
+      font-family: var(--mono);
+      font-weight: 500;
+      font-size: 0.56rem;
+      letter-spacing: 0.2em;
+      color: rgba(255,255,255,0.24);
+      transition: color 0.25s ease;
+    }
+    .pipe-node[aria-selected="true"] .pipe-idx { color: var(--g); }
+
+    /* stage body swaps in place — a short fade so the sequence reads as
+       one thing changing rather than five things stacked */
+    @keyframes stage-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .stage-body { animation: stage-in 0.34s cubic-bezier(0.16,1,0.3,1) both; }
+
+    /* mini bar used inside the warmup mock */
+    .mini-bar { height: 3px; background: rgba(0,217,255,0.1); border-radius: 2px; overflow: hidden; }
+    .mini-bar > i {
+      display: block; height: 100%;
+      background: linear-gradient(90deg, rgba(0,217,255,0.7), var(--g-bright));
+      box-shadow: 0 0 8px rgba(0,217,255,0.45);
+    }
+
     /* ── Nav links ── */
     .nav-link {
       font-family: var(--mono);
@@ -424,7 +520,7 @@
     @media (prefers-reduced-motion: reduce) {
       .splash-ticks, .splash-sweep, .splash-core, .cursor { animation: none; }
       .glow-word, .cta-breathe, .feed-row, .dots::after,
-      .stat-tick, .featured-pulse { animation: none; }
+      .stat-tick, .featured-pulse, .stage-body { animation: none; }
       .glow-word { text-shadow: 0 0 18px rgba(0,217,255,0.35); }
       .btn-solid::after { display: none; }
     }
@@ -474,7 +570,12 @@
   <div id="root"></div>
   <script src="/public/bg-animation.js"></script>
   <script type="text/babel" src="shared.jsx"></script>
+  <!-- catalog must follow shared.jsx (it reads the icon components off
+       window) and precede every page that renders a module or a guide -->
+  <script type="text/babel" src="catalog.jsx"></script>
   <script type="text/babel" src="home.jsx"></script>
+  <script type="text/babel" src="functions.jsx"></script>
+  <script type="text/babel" src="guides.jsx"></script>
   <script type="text/babel" src="new-pages.jsx"></script>
   <script type="text/babel" src="legal-pages.jsx"></script>
   <script type="text/babel" src="app.jsx"></script>

@@ -249,6 +249,7 @@ function Navbar({ currentPage, setPage }) {
     { id: 'home',      label: 'Home' },
     { id: 'functions', label: 'Functions' },
     { id: 'pricing',   label: 'Pricing' },
+    { id: 'guides',    label: 'Guides' },
   ];
 
   const handleNav = (id) => { setPage(id); setMenuOpen(false); };
@@ -388,6 +389,7 @@ function FooterBar({ setPage }) {
     { id: 'home',      label: 'Home' },
     { id: 'functions', label: 'Functions' },
     { id: 'pricing',   label: 'Pricing' },
+    { id: 'guides',    label: 'Guides' },
   ];
   const colHead = { fontFamily: "'JetBrains Mono', monospace", fontWeight: 500, fontSize: '0.6rem', color: `rgba(${ACCENT_RGB},0.55)`, letterSpacing: '0.24em', textTransform: 'uppercase', marginBottom: 18 };
   return (
@@ -442,6 +444,135 @@ function FooterBar({ setPage }) {
   );
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   Page-level primitives shared by Functions / Guides / Pricing.
+   They used to live in new-pages.jsx; three pages now use them, so
+   they belong next to the Navbar and Footer instead.
+══════════════════════════════════════════════════════════════════ */
+const MONO  = "'JetBrains Mono', monospace";
+const SERIF = "'Playfair Display', Georgia, serif";
+
+/* ─── inner-page hero ─── */
+function PageHero({ badge, title, sub }) {
+  return (
+    <section style={{ paddingTop: 170, paddingBottom: 84, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: `1px solid rgba(${ACCENT_RGB},0.12)` }}>
+      <SectionBadge>{badge}</SectionBadge>
+      <BlurText text={title} style={{
+        fontFamily: SERIF, fontWeight: 500,
+        fontSize: 'clamp(2.5rem, 4.6vw, 4rem)', color: 'white',
+        lineHeight: 1.08, letterSpacing: '-0.015em', marginTop: 22, marginBottom: 20
+      }} delay={90} />
+      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.5)', maxWidth: 600, margin: '0 auto', lineHeight: 1.65 }}>
+        {sub}
+      </p>
+    </section>
+  );
+}
+
+/* ─── section wrapper: rises into view once ─── */
+function PageSection({ children, style, id }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, amount: 0.05 });
+  return (
+    <div ref={ref} id={id} style={id ? { scrollMarginTop: 88 } : undefined}>
+      <motion.div
+        className="section-block"
+        initial={{ opacity: 0, y: 40 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.65 }}
+        style={{ padding: '88px 5%', maxWidth: 1280, margin: '0 auto', ...style }}>
+        {children}
+      </motion.div>
+    </div>
+  );
+}
+
+/* ─── Section lockup: cyan // glyph, serif title, hairline to the edge ─── */
+function SectionLockup({ title, children, style }) {
+  return (
+    <div style={{ marginBottom: 34, ...style }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+        <span aria-hidden="true" style={{ fontFamily: MONO, fontWeight: 600, fontSize: '1rem', lineHeight: 1, color: ACCENT, userSelect: 'none' }}>//</span>
+        <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.6rem, 3vw, 2.1rem)', color: 'white', letterSpacing: '-0.01em', lineHeight: 1 }}>
+          {title}
+        </h2>
+        <div aria-hidden="true" className="section-rule" style={{ flex: '1 1 32px', minWidth: 32 }} />
+      </div>
+      {children && (
+        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.65, maxWidth: 640, marginTop: 14 }}>
+          {children}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/* ─── Sharp-cornered marker pill, same lockup language as the v1.0 chip ─── */
+function Pill({ children, dot, muted }) {
+  const c = muted ? 'rgba(255,255,255,0.42)' : ACCENT;
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 6, flexShrink: 0,
+      border: `1px solid ${muted ? 'rgba(255,255,255,0.18)' : `rgba(${ACCENT_RGB},0.35)`}`,
+      background: muted ? 'rgba(255,255,255,0.04)' : `rgba(${ACCENT_RGB},0.08)`,
+      borderRadius: 3, padding: '4px 9px',
+      boxShadow: muted ? 'none' : `0 0 10px rgba(${ACCENT_RGB},0.12)`,
+      fontFamily: MONO, fontWeight: 600, fontSize: '0.58rem', lineHeight: 1,
+      letterSpacing: '0.16em', textTransform: 'uppercase', color: c,
+    }}>
+      {dot && <span aria-hidden="true" style={{ width: 4, height: 4, background: c, boxShadow: muted ? 'none' : `0 0 6px rgba(${ACCENT_RGB},0.8)` }} />}
+      {children}
+    </span>
+  );
+}
+
+/* ─── CrossLinks: the rail at the foot of every page.
+   Functions sells, Guides teaches, Pricing closes — whichever two the
+   visitor isn't currently on are always one click away, so moving
+   between them never costs a trip back to the navbar. ─── */
+const CROSS_DESTS = {
+  functions: { label: 'Functions', head: 'What each module does',
+    body: 'Eight modules, one section each — the problem it solves, how it runs, and every setting you get.' },
+  guides:    { label: 'Guides',    head: 'How to set it up',
+    body: 'Buying accounts, wiring proxies, and a walkthrough per module — video guides as they are recorded.' },
+  pricing:   { label: 'Pricing',   head: 'What it costs',
+    body: 'Take the modules you need or the whole licence. Account Manager and Profile Templates come with either.' },
+};
+
+function CrossLinks({ current, setPage }) {
+  const dests = Object.keys(CROSS_DESTS).filter(k => k !== current);
+  return (
+    <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 5%' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 18 }}>
+        {dests.map(k => {
+          const d = CROSS_DESTS[k];
+          return (
+            <button key={k} type="button" onClick={() => setPage(k)}
+              className="panel panel-hover ticks"
+              style={{
+                padding: '30px 28px', textAlign: 'left', width: '100%',
+                display: 'flex', flexDirection: 'column', gap: 10, background: 'transparent',
+              }}>
+              <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.6rem', letterSpacing: '0.24em', textTransform: 'uppercase', color: `rgba(${ACCENT_RGB},0.7)` }}>
+                {'// '}{d.label}
+              </span>
+              <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '1.35rem', color: 'white', letterSpacing: '-0.01em', lineHeight: 1.2 }}>
+                {d.head}
+              </span>
+              <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.86rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.65 }}>
+                {d.body}
+              </span>
+              <span style={{ marginTop: 6, display: 'inline-flex', alignItems: 'center', gap: 7, fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: ACCENT }}>
+                Open <ArrowUpRight size={13} />
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 /* ── Background color system ── */
 function BgColorSystem({ page }) {
   useEffect(() => {
@@ -460,4 +591,5 @@ Object.assign(window, {
   TrendingUp, Sparkles, Network, Workflow, MonitorPlay, X, Menu, Info,
   LogoMark, Wordmark, Navbar, BlurText, FadeTop, FadeBottom,
   SectionBadge, SectionHeading, GlassBtn, FooterBar, BgColorSystem,
+  MONO, SERIF, PageHero, PageSection, SectionLockup, Pill, CrossLinks,
 });
