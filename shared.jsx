@@ -263,10 +263,23 @@ function Navbar({ currentPage, setPage }) {
         borderBottom: `1px solid rgba(${ACCENT_RGB},${scrolled ? 0.18 : 0.09})`,
         transition: 'background 0.25s ease, border-color 0.25s ease',
       }}>
-        {/* Logo mark + wordmark */}
-        <div onClick={() => handleNav('home')} style={{ cursor: 'pointer', flex: '1 1 0', minWidth: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <LogoMark height={22} />
-          <Wordmark />
+        {/* Logo mark + wordmark, then the version marker. The marker sits
+            outside the click target on purpose: inside, it would take the
+            pointer cursor and read as part of the home link rather than as a
+            quiet statement of which version this is. */}
+        <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div onClick={() => handleNav('home')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <LogoMark height={22} />
+            <Wordmark />
+          </div>
+          <span style={{
+            fontFamily: "'Marcellus', 'Playfair Display', Georgia, serif",
+            fontWeight: 400, fontSize: '0.7rem', lineHeight: 1,
+            letterSpacing: '0.08em', color: `rgba(${ACCENT_RGB},0.6)`,
+            userSelect: 'none', flexShrink: 0,
+          }}>
+            v1.0
+          </span>
         </div>
 
         {/* Desktop nav */}
