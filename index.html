@@ -275,6 +275,15 @@
       opacity: 0.9;
     }
 
+    /* ── Section header hairline: extends a section title to the block edge.
+       Same rule the dashboard's SectionHeader uses, so a section is named the
+       same way in both places. ── */
+    .section-rule {
+      height: 1px;
+      background: linear-gradient(90deg,
+        rgba(0,217,255,0.32), rgba(0,217,255,0.07) 55%, transparent);
+    }
+
     /* ── Nav links ── */
     .nav-link {
       font-family: var(--mono);

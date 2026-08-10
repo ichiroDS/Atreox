@@ -3,7 +3,7 @@ const React = window.React;
 const { useRef, useState, useEffect } = React;
 const {
   motion, useInView,
-  ArrowUpRight, Check, Users, Globe, Brain, Zap, Layers, MessageSquare,
+  ArrowUpRight, Check, Users, Globe, Brain, Zap, MessageSquare, Sparkles,
   SectionBadge, BlurText, FooterBar,
 } = window;
 
@@ -221,32 +221,68 @@ function FunctionsPage({ setPage }) {
 // Monthly list price per module, heaviest first — the price column then reads
 // as a descending ladder, which is what the "why prices differ" note points at.
 const MODULES = [
-  { key: 'neurocommenting', name: 'Neurocommenting', price: 50,
+  { key: 'neurocommenting', name: 'Neurocommenting', price: 50, icon: MessageSquare,
     desc: 'Watches the channels you choose and writes a comment under every new post.' },
-  { key: 'neurodialogs', name: 'NeuroDialogs', price: 45,
+  { key: 'neurodialogs', name: 'NeuroDialogs', price: 45, icon: Brain,
     desc: 'Answers direct messages and chat replies in context, from your own accounts.' },
-  { key: 'active-warmup', name: 'Active Warmup', price: 30,
+  { key: 'active-warmup', name: 'Active Warmup', price: 30, icon: Zap,
     desc: 'Runs scheduled activity on your accounts so a new one behaves like a used one.' },
-  { key: 'mass-reactions', name: 'Mass Reactions', price: 30,
+  { key: 'mass-reactions', name: 'Mass Reactions', price: 30, icon: Sparkles,
     desc: 'Puts reactions on a post from many accounts at once.' },
-  { key: 'channel-parser', name: 'Channel Parser', price: 20,
+  { key: 'channel-parser', name: 'Channel Parser', price: 20, icon: Globe,
     desc: 'Finds channels by keyword and exports them as a target list.' },
-  { key: 'group-parser', name: 'Group Parser', price: 20,
+  { key: 'group-parser', name: 'Group Parser', price: 20, icon: Users,
     desc: 'Finds active public groups by keyword and exports them.' },
 ];
 
 const MODULE_BY_KEY = Object.fromEntries(MODULES.map(m => [m.key, m]));
 
-const KIT_KEYS      = ['neurocommenting', 'channel-parser', 'active-warmup'];
-const KIT_PRICE     = 100;
 const FULL_MONTHLY  = 120;
 const FULL_YEARLY   = 1000;
 const YEARLY_SAVING = FULL_MONTHLY * 12 - FULL_YEARLY;
 
-const priceRow = { fontFamily: MONO, fontWeight: 400, fontSize: '0.72rem', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.45)' };
+const eur = n => '€' + n.toLocaleString('en-US');
+
+/* ─── Section lockup: the dashboard's one-name-per-section header —
+   cyan // glyph, serif title, hairline rule out to the edge. ─── */
+function SectionLockup({ title, children }) {
+  return (
+    <div style={{ marginBottom: 34 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+        <span aria-hidden="true" style={{ fontFamily: MONO, fontWeight: 600, fontSize: '1rem', lineHeight: 1, color: GREEN, userSelect: 'none' }}>//</span>
+        <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.6rem, 3vw, 2.1rem)', color: 'white', letterSpacing: '-0.01em', lineHeight: 1 }}>
+          {title}
+        </h2>
+        <div aria-hidden="true" className="section-rule" style={{ flex: '1 1 32px', minWidth: 32 }} />
+      </div>
+      {children && (
+        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.65, maxWidth: 620, marginTop: 14 }}>
+          {children}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/* ─── Sharp-cornered marker pill, same lockup language as the v1.0 chip ─── */
+function Pill({ children, dot }) {
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 6, flexShrink: 0,
+      border: `1px solid rgba(${GREEN_RGB},0.35)`, background: `rgba(${GREEN_RGB},0.08)`,
+      borderRadius: 3, padding: '4px 9px', boxShadow: `0 0 10px rgba(${GREEN_RGB},0.12)`,
+      fontFamily: MONO, fontWeight: 600, fontSize: '0.58rem', lineHeight: 1,
+      letterSpacing: '0.16em', textTransform: 'uppercase', color: GREEN,
+    }}>
+      {dot && <span aria-hidden="true" style={{ width: 4, height: 4, background: GREEN, boxShadow: `0 0 6px rgba(${GREEN_RGB},0.8)` }} />}
+      {children}
+    </span>
+  );
+}
 
 /* ─── one selectable module ─── */
 function ModuleCard({ mod, selected, onToggle }) {
+  const Icon = mod.icon;
   return (
     <button
       type="button"
@@ -254,249 +290,253 @@ function ModuleCard({ mod, selected, onToggle }) {
       onClick={onToggle}
       className={'panel panel-hover' + (selected ? ' ticks' : '')}
       style={{
-        padding: '20px 20px 22px', textAlign: 'left', width: '100%',
-        display: 'flex', flexDirection: 'column', gap: 10,
+        padding: '26px 26px 28px', textAlign: 'left', width: '100%', height: '100%',
+        display: 'flex', flexDirection: 'column', gap: 18,
         borderColor: selected ? `rgba(${GREEN_RGB},0.45)` : undefined,
         // backgroundColor, not the shorthand — the shorthand would drop .panel's gradient layer
         backgroundColor: selected ? `rgba(${GREEN_RGB},0.05)` : undefined,
         transition: 'border-color 0.16s ease, background-color 0.16s ease, box-shadow 0.18s ease, transform 0.18s cubic-bezier(0.2,0.9,0.3,1)',
       }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        {/* checkbox — the only state indicator that survives a phone screen */}
+      {/* icon · name · checkbox — the dashboard's module-tile anatomy */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 13 }}>
         <span aria-hidden="true" style={{
-          width: 18, height: 18, borderRadius: 3, flexShrink: 0,
+          width: 34, height: 34, borderRadius: 4, flexShrink: 0,
+          background: `rgba(${GREEN_RGB},0.08)`, border: `1px solid rgba(${GREEN_RGB},${selected ? 0.4 : 0.22})`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          transition: 'border-color 0.16s ease',
+        }}>
+          <Icon size={16} color={GREEN} />
+        </span>
+        <span style={{
+          flex: 1, minWidth: 0, fontFamily: MONO, fontWeight: 500, fontSize: '0.72rem',
+          letterSpacing: '0.14em', textTransform: 'uppercase', color: 'white', lineHeight: 1.3,
+        }}>
+          {mod.name}
+        </span>
+        <span aria-hidden="true" style={{
+          width: 20, height: 20, borderRadius: 3, flexShrink: 0,
           border: `1px solid rgba(${GREEN_RGB},${selected ? 1 : 0.3})`,
           background: selected ? GREEN : 'transparent',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'background 0.16s ease, border-color 0.16s ease',
+          transition: 'background-color 0.16s ease, border-color 0.16s ease',
         }}>
-          {selected && <Check size={12} color="#00141c" style={{ strokeWidth: 3 }} />}
-        </span>
-        <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.95rem', color: 'white', flex: 1, lineHeight: 1.2 }}>
-          {mod.name}
-        </span>
-        <span style={{ display: 'flex', alignItems: 'baseline', gap: 4, flexShrink: 0 }}>
-          <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '1.4rem', color: GREEN, lineHeight: 1 }}>€{mod.price}</span>
-          <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.6rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>/mo</span>
+          {selected && <Check size={13} color="#00141c" style={{ strokeWidth: 3 }} />}
         </span>
       </div>
-      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: 'rgba(255,255,255,0.52)', lineHeight: 1.6, paddingLeft: 30 }}>
+
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 7 }}>
+        <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '2.1rem', color: GREEN, lineHeight: 1 }}>{eur(mod.price)}</span>
+        <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.62rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>/ month</span>
+      </div>
+
+      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.87rem', color: 'rgba(255,255,255,0.52)', lineHeight: 1.7, marginTop: 'auto' }}>
         {mod.desc}
       </p>
     </button>
   );
 }
 
-/* ─── running total ───
-   Sticky as a direct flex child: its containing block is then the row, which is
-   as tall as the module grid, so the panel has room to travel. Wrapping it in
-   a shrink-to-fit box instead would leave it nothing to stick against. */
-function SelectionSummary({ keys, total, sub }) {
-  const chosen = MODULES.filter(m => keys.includes(m.key));
-  const gap = FULL_MONTHLY - total;
-  const cta = billingCTA(sub, `Continue · €${total}/mo`);
-
+/* ─── monthly / annual segmented control, scoped to the licence card ─── */
+function TermToggle({ term, setTerm }) {
+  const opt = (value, label) => {
+    const on = term === value;
+    return (
+      <button
+        key={value} type="button" role="radio" aria-checked={on}
+        onClick={() => setTerm(value)}
+        style={{
+          flex: 1, padding: '9px 10px', border: 'none', borderRadius: 2,
+          background: on ? GREEN : 'transparent',
+          color: on ? '#00141c' : 'rgba(255,255,255,0.55)',
+          fontFamily: MONO, fontWeight: on ? 600 : 500, fontSize: '0.6rem',
+          letterSpacing: '0.16em', textTransform: 'uppercase',
+          transition: 'background-color 0.16s ease, color 0.16s ease',
+        }}>
+        {label}
+      </button>
+    );
+  };
   return (
-    <div className="panel ticks" style={{
-      flex: '1 1 300px', maxWidth: 340, alignSelf: 'flex-start',
-      position: 'sticky', top: 88, padding: '26px 24px',
+    <div role="radiogroup" aria-label="Billing term" style={{
+      display: 'flex', gap: 3, padding: 3, borderRadius: 4,
+      border: `1px solid rgba(${GREEN_RGB},0.2)`, background: 'rgba(0,0,0,0.3)',
     }}>
-      <span className="overline" style={{ display: 'block', marginBottom: 18 }}>{'// '}Your selection</span>
+      {opt('monthly', 'Monthly')}
+      {opt('annual', 'Annual')}
+    </div>
+  );
+}
 
-      {chosen.length === 0 ? (
-        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.86rem', color: 'rgba(255,255,255,0.45)', lineHeight: 1.65 }}>
-          Nothing picked yet. Choose the modules you'll actually run — the total updates as you go.
-        </p>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
-          {chosen.map(m => (
-            <div key={m.key} style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-              <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.87rem', color: 'rgba(255,255,255,0.72)' }}>{m.name}</span>
-              <span style={{ ...priceRow, color: 'rgba(255,255,255,0.55)', flexShrink: 0 }}>€{m.price}</span>
-            </div>
-          ))}
-        </div>
-      )}
+/* ─── the licence, priced against the running total directly above it ─── */
+function LicenceCard({ term, setTerm, sub }) {
+  const annual = term === 'annual';
+  const cta = billingCTA(sub, 'Get the full licence');
+  return (
+    <div className="panel ticks featured-pulse" style={{ padding: '24px 26px', borderColor: `rgba(${GREEN_RGB},0.45)` }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 18 }}>
+        <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.64rem', color: `rgba(${GREEN_RGB},0.75)`, letterSpacing: '0.24em', textTransform: 'uppercase' }}>{'// '}Full licence</span>
+        <Pill dot>All six</Pill>
+      </div>
 
-      <div style={{ borderTop: `1px solid rgba(${GREEN_RGB},0.14)`, marginTop: 22, paddingTop: 18, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
-        <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.64rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)' }}>Total</span>
-        <span style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
-          <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '2.3rem', color: GREEN, lineHeight: 1, textShadow: total ? `0 0 28px rgba(${GREEN_RGB},0.3)` : 'none' }}>€{total}</span>
-          <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.64rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>/ month</span>
+      <TermToggle term={term} setTerm={setTerm} />
+
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 18 }}>
+        <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '2.9rem', color: GREEN, lineHeight: 1, textShadow: `0 0 30px rgba(${GREEN_RGB},0.32)` }}>
+          {eur(annual ? FULL_YEARLY : FULL_MONTHLY)}
+        </span>
+        <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>
+          / {annual ? 'year' : 'month'}
         </span>
       </div>
 
-      {/* The comparison is the point of the page, so the total says it out loud
-          as soon as the selection gets close to the full licence. */}
+      {/* the saving is a number in both states — it's the reason to switch */}
+      <p style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.68rem', letterSpacing: '0.06em', color: `rgba(${GREEN_RGB},0.8)`, marginTop: 10, lineHeight: 1.5 }}>
+        {annual
+          ? `${eur(YEARLY_SAVING)} less than 12 × ${eur(FULL_MONTHLY)}`
+          : `Pay yearly: ${eur(FULL_YEARLY)} — saves ${eur(YEARLY_SAVING)}`}
+      </p>
+
+      {/* two lines, not three — "Account Manager included" is already said in
+          the hero and again below; repeating it here is what makes a card read
+          as filled rather than composed */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 11, marginTop: 18, borderTop: `1px solid rgba(${GREEN_RGB},0.12)`, paddingTop: 16 }}>
+        {[
+          'All six modules, including both parsers',
+          'Any module released while your licence is active, at no extra cost',
+        ].map((f, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+            <Check size={14} color={GREEN} style={{ marginTop: 2, flexShrink: 0 }} />
+            <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.68)', lineHeight: 1.5 }}>{f}</span>
+          </div>
+        ))}
+      </div>
+
+      <a href={cta.href} target="_self" className="btn-solid"
+        style={{ width: '100%', justifyContent: 'center', padding: '15px', fontSize: '0.78rem', marginTop: 20 }}>
+        {cta.label} <ArrowUpRight size={15} />
+      </a>
+    </div>
+  );
+}
+
+/* ─── running total, stacked straight above the licence price ─── */
+function SelectionPanel({ keys, total, onClear, sub }) {
+  const n = keys.length;
+  const gap = FULL_MONTHLY - total;
+  const cta = billingCTA(sub, `Continue · ${eur(total)}/mo`);
+
+  return (
+    <div className="panel" style={{ padding: '22px 26px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
+        <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.64rem', color: `rgba(${GREEN_RGB},0.75)`, letterSpacing: '0.24em', textTransform: 'uppercase' }}>{'// '}Your selection</span>
+        {n > 0 && (
+          <button type="button" onClick={onClear} style={{
+            background: 'none', border: 'none', padding: 0,
+            fontFamily: MONO, fontWeight: 400, fontSize: '0.6rem', letterSpacing: '0.14em',
+            textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)',
+          }}>Clear</button>
+        )}
+      </div>
+
+      {/* count rides the total's baseline rather than taking a line of its own —
+          the rail has to stay short enough to sit beside the licence on one screen */}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+        <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '2.9rem', color: total ? GREEN : 'rgba(255,255,255,0.28)', lineHeight: 1, textShadow: total ? `0 0 28px rgba(${GREEN_RGB},0.28)` : 'none', transition: 'color 0.2s ease' }}>
+          {eur(total)}
+        </span>
+        <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>/ month</span>
+        <span style={{ marginLeft: 'auto', fontFamily: MONO, fontWeight: 400, fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>
+          {n === 0 ? 'none selected' : `${n} of ${MODULES.length}`}
+        </span>
+      </div>
+
+      {/* the comparison, said out loud the moment it starts to matter */}
       {total > 0 && gap > 0 && gap <= 40 && (
-        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: `rgba(${GREEN_RGB},0.85)`, lineHeight: 1.55, marginTop: 14 }}>
-          €{gap} more buys all six modules on the full licence.
+        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: `rgba(${GREEN_RGB},0.85)`, lineHeight: 1.55, marginTop: 12 }}>
+          {eur(gap)} more buys all six, below.
         </p>
       )}
       {total > 0 && gap <= 0 && (
-        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: `rgba(${GREEN_RGB},0.85)`, lineHeight: 1.55, marginTop: 14 }}>
-          The full licence is €{FULL_MONTHLY} — cheaper than this selection, and it includes every module.
+        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: `rgba(${GREEN_RGB},0.85)`, lineHeight: 1.55, marginTop: 12 }}>
+          The full licence costs less than this — and includes every module.
         </p>
       )}
 
       {total === 0 ? (
         <button type="button" disabled className="btn-outline"
-          style={{ width: '100%', justifyContent: 'center', padding: '15px', fontSize: '0.78rem', marginTop: 22, opacity: 0.4, cursor: 'not-allowed' }}>
+          style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '0.76rem', marginTop: 16, opacity: 0.4, cursor: 'not-allowed' }}>
           Select modules
         </button>
       ) : (
-        <a href={cta.href} target="_self" className="btn-solid"
-          style={{ width: '100%', justifyContent: 'center', padding: '16px', fontSize: '0.78rem', marginTop: 22 }}>
+        <a href={cta.href} target="_self" className="btn-outline"
+          style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '0.76rem', marginTop: 16 }}>
           {cta.label} <ArrowUpRight size={14} />
         </a>
       )}
-
-      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.78rem', color: 'rgba(255,255,255,0.34)', lineHeight: 1.6, marginTop: 16 }}>
-        Account Manager and Profile Templates are included with anything you buy. Modules bill monthly.
-      </p>
     </div>
   );
 }
 
-/* ─── the two shortcut offers, side by side ─── */
-function BundleCard({ bundle, index, inView, sub }) {
-  const Icon = bundle.icon;
-  const cta = billingCTA(sub, bundle.cta);
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: index * 0.1 }}
-      className={'panel panel-hover' + (bundle.featured ? ' ticks featured-pulse' : '')}
-      style={{
-        padding: '38px 34px', flex: '1 1 340px', display: 'flex', flexDirection: 'column',
-        borderColor: bundle.featured ? `rgba(${GREEN_RGB},0.45)` : undefined,
-      }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
-        <div style={{ width: 46, height: 46, borderRadius: 5, background: `rgba(${GREEN_RGB},0.08)`, border: `1px solid rgba(${GREEN_RGB},0.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Icon size={20} color={GREEN} />
-        </div>
-        {bundle.featured && (
-          <div style={{ background: GREEN, borderRadius: 3, padding: '5px 12px' }}>
-            <span style={{ fontFamily: MONO, fontWeight: 600, fontSize: '0.58rem', color: '#00141c', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Best value</span>
-          </div>
-        )}
-      </div>
-
-      <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.64rem', color: `rgba(${GREEN_RGB},0.7)`, letterSpacing: '0.24em', textTransform: 'uppercase', marginBottom: 14, display: 'block' }}>{'// '}{bundle.label}</span>
-
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 6 }}>
-        <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '3rem', color: GREEN, lineHeight: 1, textShadow: `0 0 28px rgba(${GREEN_RGB},0.3)` }}>€{bundle.price}</span>
-        <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.68rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>/ month</span>
-      </div>
-      {/* both cards carry a second price line so the two headline numbers sit
-          on the same baseline — that side-by-side read is the whole argument */}
-      <p style={{ ...priceRow, marginBottom: 18, color: bundle.featured ? `rgba(${GREEN_RGB},0.75)` : 'rgba(255,255,255,0.4)' }}>
-        {bundle.second}
-      </p>
-
-      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, marginBottom: 24 }}>{bundle.blurb}</p>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 13, marginBottom: 30, borderTop: `1px solid rgba(${GREEN_RGB},0.1)`, paddingTop: 22 }}>
-        {bundle.features.map((f, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-            <Check size={14} color={GREEN} style={{ marginTop: 2, flexShrink: 0 }} />
-            <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.86rem', color: 'rgba(255,255,255,0.68)', lineHeight: 1.5 }}>{f}</span>
-          </div>
-        ))}
-      </div>
-
-      <a href={cta.href} target="_self" className={bundle.featured ? 'btn-solid' : 'btn-outline'}
-        style={{ width: '100%', justifyContent: 'center', padding: '16px', fontSize: '0.8rem', marginTop: 'auto' }}>
-        {cta.label} <ArrowUpRight size={15} />
-      </a>
-    </motion.div>
-  );
-}
-
 function PricingPage({ setPage }) {
-  const pickRef = useRef(null);
-  const bundleRef = useRef(null);
-  const pickIn = useInView(pickRef, { once: true, amount: 0.1 });
-  const bundleIn = useInView(bundleRef, { once: true, amount: 0.1 });
+  const gridRef = useRef(null);
+  const gridIn = useInView(gridRef, { once: true, amount: 0.05 });
   const sub = useSubscriptionState();
 
   const [picked, setPicked] = useState([]);
+  const [term, setTerm] = useState('monthly');
   const toggle = (key) => setPicked(p => p.includes(key) ? p.filter(k => k !== key) : [...p, key]);
   const total = picked.reduce((sum, k) => sum + MODULE_BY_KEY[k].price, 0);
-
-  const bundles = [
-    {
-      label: '02 — Commenting kit', icon: MessageSquare, price: KIT_PRICE, featured: false,
-      second: 'monthly only', cta: 'Take the kit',
-      blurb: 'The three modules a commenter actually needs — find the channels, warm the accounts, post the comments.',
-      features: [
-        ...KIT_KEYS.map(k => MODULE_BY_KEY[k].name),
-        'Account Manager and Profile Templates included',
-        `One click instead of three — the same €${KIT_PRICE} as picking them yourself`,
-      ],
-    },
-    {
-      label: '03 — Full licence', icon: Layers, price: FULL_MONTHLY, featured: true,
-      second: `or €${FULL_YEARLY.toLocaleString('en-US')} / year — €${YEARLY_SAVING} less than monthly`,
-      cta: 'Get the full licence',
-      blurb: `Every module we sell, for €${FULL_MONTHLY - KIT_PRICE} more than the kit. Nothing to add later.`,
-      features: [
-        'All six modules, including both parsers',
-        'Any module released while your licence is active, at no extra cost',
-        'Account Manager and Profile Templates included',
-        `The only plan sold annually — €${FULL_YEARLY.toLocaleString('en-US')} a year`,
-      ],
-    },
-  ];
 
   return (
     <div>
       <PageHero
         badge="Pricing"
         title="Pay for what you run."
-        sub="ATREOX is modular. Take a single module, take the commenting kit, or take the whole licence — Account Manager and Profile Templates come with all of them."
+        sub="ATREOX is modular. Take the modules you need, or take the whole licence — Account Manager and Profile Templates come with either."
       />
 
-      {/* ── 01 · the picker ── */}
+      {/* One block: the modules on the left, what they add up to and what
+          everything costs on the right. The two prices sit in the same rail so
+          the comparison never needs a scroll. */}
       <PageSection>
-        <div style={{ marginBottom: 36, maxWidth: 620 }}>
-          <SectionBadge>01 — Pick modules</SectionBadge>
-          <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.7rem, 3.2vw, 2.4rem)', color: 'white', letterSpacing: '-0.01em', lineHeight: 1.12, margin: '16px 0 12px' }}>
-            Build your own.
-          </h2>
-          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.65 }}>
-            Every module runs on its own. Select the ones you need and the total updates as you go.
-          </p>
-        </div>
+        <SectionLockup title="Build your licence">
+          Every module runs on its own and bills monthly. Select what you need — the total updates as you go,
+          and the full licence sits beside it for comparison.
+        </SectionLockup>
 
-        <div ref={pickRef} style={{ display: 'flex', gap: 22, flexWrap: 'wrap' }}>
-          <motion.div
-            initial={{ opacity: 0, y: 30 }} animate={pickIn ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}
-            style={{ flex: '1 1 540px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(258px, 1fr))', gap: 14, alignContent: 'start' }}>
-            {MODULES.map(m => (
-              <ModuleCard key={m.key} mod={m} selected={picked.includes(m.key)} onToggle={() => toggle(m.key)} />
+        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+          <div ref={gridRef} style={{
+            flex: '1 1 520px', display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: 16, alignContent: 'start',
+          }}>
+            {MODULES.map((m, i) => (
+              <motion.div key={m.key}
+                initial={{ opacity: 0, y: 8 }} animate={gridIn ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.55, delay: i * 0.06 }}
+                style={{ display: 'flex' }}>
+                <ModuleCard mod={m} selected={picked.includes(m.key)} onToggle={() => toggle(m.key)} />
+              </motion.div>
             ))}
-          </motion.div>
+          </div>
 
-          <SelectionSummary keys={picked} total={total} sub={sub} />
-        </div>
-      </PageSection>
+          {/* Sticky as a direct flex child: its containing block is then the row,
+              which is as tall as the module grid, so the rail has room to travel. */}
+          <div style={{
+            flex: '1 1 330px', maxWidth: 400, alignSelf: 'flex-start',
+            position: 'sticky', top: 80,
+            display: 'flex', flexDirection: 'column', gap: 12,
+          }}>
+            <SelectionPanel keys={picked} total={total} onClear={() => setPicked([])} sub={sub} />
 
-      {/* ── 02 & 03 · the two shortcuts, side by side ── */}
-      <PageSection style={{ paddingTop: 0 }}>
-        <div style={{ textAlign: 'center', marginBottom: 38, maxWidth: 640, margin: '0 auto 38px' }}>
-          <SectionBadge>02 & 03 — Bundles</SectionBadge>
-          <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.7rem, 3.2vw, 2.4rem)', color: 'white', letterSpacing: '-0.01em', lineHeight: 1.12, margin: '16px 0 12px' }}>
-            Or take a shortcut.
-          </h2>
-          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.65 }}>
-            €{KIT_PRICE} gets the three modules a commenter needs. €{FULL_MONTHLY} gets all six — plus everything we release while you're subscribed.
-          </p>
-        </div>
+            <div aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ flex: 1, height: 1, background: `rgba(${GREEN_RGB},0.14)` }} />
+              <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.24em', color: 'rgba(255,255,255,0.3)' }}>OR</span>
+              <span style={{ flex: 1, height: 1, background: `rgba(${GREEN_RGB},0.14)` }} />
+            </div>
 
-        <div ref={bundleRef} style={{ display: 'flex', gap: 22, flexWrap: 'wrap', alignItems: 'stretch', justifyContent: 'center', maxWidth: 900, margin: '0 auto' }}>
-          {bundles.map((b, i) => (
-            <BundleCard key={b.label} bundle={b} index={i} inView={bundleIn} sub={sub} />
-          ))}
+            <LicenceCard term={term} setTerm={setTerm} sub={sub} />
+          </div>
         </div>
       </PageSection>
 
@@ -523,8 +563,7 @@ function PricingPage({ setPage }) {
             <div style={{ borderTop: `1px solid rgba(${GREEN_RGB},0.12)`, marginTop: 22, paddingTop: 20 }}>
               <span className="overline" style={{ display: 'block', marginBottom: 12 }}>{'// '}Annual billing</span>
               <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.9rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.75 }}>
-                Only the full licence is sold by the year, at €{FULL_YEARLY.toLocaleString('en-US')}. Individual
-                modules and the commenting kit are monthly.
+                Only the full licence is sold by the year, at {eur(FULL_YEARLY)}. Individual modules are monthly.
               </p>
             </div>
           </div>
