@@ -494,7 +494,7 @@ function FooterBar({ setPage }) {
         <div style={{ flex: '0 0 auto' }}>
           <h5 style={colHead}>Contact</h5>
           <a href="mailto:hello@atreoxai.com" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.76rem', color: 'rgba(255,255,255,0.5)', textDecoration: 'none', display: 'block', marginBottom: 8 }}>hello@atreoxai.com</a>
-          <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.78rem', color: 'rgba(255,255,255,0.25)' }}>Mon–Fri, 9 AM–6 PM UTC</span>
+          <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.78rem', color: 'rgba(255,255,255,0.25)' }}>Usually answered within a day, weekdays</span>
         </div>
         <div style={{ flex: '0 0 auto' }}>
           <h5 style={colHead}>Follow</h5>
