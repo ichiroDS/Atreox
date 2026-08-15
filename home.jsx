@@ -842,19 +842,24 @@ function CtaBannerSection({ setPage }) {
     <section ref={ref} className="section-block" style={{ padding: '88px 5%', maxWidth: 1280, margin: '0 auto' }}>
       <motion.div initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }}
         className="panel ticks" style={{ padding: 'clamp(64px, 9vw, 110px) 5%', textAlign: 'center' }}>
+        {/* Was "Ready to grow on Telegram?" — a question whose honest answer
+            can be "no", asked at the exact moment you want a decision. It's a
+            statement now, and the buttons name the next action rather than a
+            page. */}
         <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.9rem, 4.2vw, 3.1rem)', color: 'white', letterSpacing: '-0.01em', lineHeight: 1.1, marginBottom: 16 }}>
-          Ready to grow on Telegram?
+          Build your licence in two minutes.
         </h2>
-        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.55)', maxWidth: 440, margin: '0 auto 36px', lineHeight: 1.65 }}>
-          Pick the modules you'll actually run, or take the whole licence and decide later.
+        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.55)', maxWidth: 460, margin: '0 auto 36px', lineHeight: 1.65 }}>
+          Tick the modules you'll actually run and the total adds itself up. Account Manager and
+          Profile Templates are in there free, whatever else you choose.
         </p>
         <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
           <button className="btn-solid" onClick={() => setPage('pricing')} style={{ padding: '15px 32px', fontSize: '0.82rem' }}>
-            See Pricing <ArrowUpRight size={15} />
+            Choose your modules <ArrowUpRight size={15} />
           </button>
-          <button className="btn-outline" onClick={() => setPage('functions')} style={{ padding: '14px 28px' }}>
-            Explore Functions <ArrowUpRight size={14} />
-          </button>
+          <a href={window.withReferral('https://app.atreoxai.com')} target="_self" className="btn-outline" style={{ padding: '14px 28px' }}>
+            Open the panel <ArrowUpRight size={14} />
+          </a>
         </div>
       </motion.div>
     </section>
