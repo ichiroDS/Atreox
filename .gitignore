@@ -1,0 +1,7 @@
+
+# design-sync machine state (see .design-sync/ docs — durable files ARE committed)
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules
