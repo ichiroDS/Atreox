@@ -12,7 +12,7 @@ const React = window.React;
 const { useState, useRef, useEffect } = React;
 const {
   motion, useInView,
-  ArrowUpRight, Zap, Shield, Globe, Brain, Check, Clock, Server, Ban,
+  ArrowUpRight, Zap, Shield, Globe, Brain, Check, Clock, Server, Ban, X,
   Network, Sparkles, MessageSquare, Layers, BookOpen,
   BlurText, FooterBar, CrossLinks, SectionLockup, Pill,
   TypeText, tiltHandlers, REDUCED_MOTION, SOCIAL_LINKS,
@@ -769,6 +769,140 @@ function TrustSection({ setPage }) {
 }
 
 /* ══════════════════════════════════════
+   5.5 — HOW IT COMPARES
+
+   Placed right after Why Trust It on purpose: that section made the
+   trust argument by looking inward (warmup, logging, caps). This one
+   makes the same argument by looking outward — how the same claims
+   read against the shape of tool most people already know. Sits
+   before FAQ, which is where the remaining "but does it also—"
+   questions belong.
+
+   Rows are ATREOX capabilities only, each one checked against the
+   engine the same way every other page in this pass was — nothing
+   here is a feature the panel doesn't actually have.
+
+   Marks for the other three columns describe TYPES of tool, not any
+   named product, and follow one rule throughout: a cross is only used
+   where the category is structurally unable to do the thing (an
+   analytics service is read-only by definition, so it never posts,
+   messages or reacts). Everywhere else that isn't confirmed either
+   way gets a blank dash rather than a guess — see the caption under
+   the table.
+══════════════════════════════════════ */
+const COMPARISON_COLUMNS = ['Bulk-messaging software', 'Analytics services', 'Standalone AI commenters'];
+
+// marks: 'yes' | 'no' | null (null = not confirmed either way, shown as —)
+const COMPARISON_ROWS = [
+  { label: 'Writes a comment for that specific post, not a template',
+    marks: ['no', 'no', 'yes'] },
+  { label: 'Answers DMs in sessions, at a human pace — not instant, not 24/7',
+    marks: [null, 'no', null] },
+  { label: 'Reactions arrive on a human curve, not all at once',
+    marks: [null, 'no', null] },
+  { label: 'Builds an account\'s activity history before putting it to work',
+    marks: [null, 'no', null] },
+  { label: 'Checks account health two ways — platform flags and a real capability probe',
+    marks: [null, 'no', null] },
+  { label: 'Finds channels and groups by keyword, filtered by real recent activity',
+    marks: ['no', 'yes', 'no'] },
+  { label: 'Declines to comment on death, war, serious crime or politics — on by default',
+    marks: [null, 'no', null] },
+];
+
+function CompareMark({ state }) {
+  if (state === 'yes') return <Check size={14} color={GREEN} style={{ display: 'block', margin: '0 auto' }} />;
+  if (state === 'no') return <X size={13} color="rgba(255,255,255,0.22)" style={{ display: 'block', margin: '0 auto' }} />;
+  return (
+    <span aria-label="not confirmed" title="Not something we could confirm either way"
+      style={{ display: 'block', textAlign: 'center', fontFamily: MONO, color: 'rgba(255,255,255,0.24)', fontSize: '0.85rem' }}>
+      –
+    </span>
+  );
+}
+
+function ComparisonSection() {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, amount: 0.1 });
+  return (
+    <section ref={ref} className="section-block" style={{ padding: '88px 5%', maxWidth: 1280, margin: '0 auto' }}>
+      <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
+        <SectionLockup title="How it compares">
+          ATREOX runs the whole pipeline — discovery, warmup, comments, DMs, reactions — from one panel.
+          Here's how that stacks up against the kind of tool most people already have one of.
+        </SectionLockup>
+      </motion.div>
+
+      <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.1 }}
+        className="panel" style={{ padding: 0, overflow: 'hidden' }}>
+        {/* Wide on mobile — scrolls inside its own frame rather than the page. */}
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', minWidth: 640, borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                <th style={{ textAlign: 'left', padding: '18px 22px', fontFamily: MONO, fontWeight: 400, fontSize: '0.6rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)', borderBottom: `1px solid rgba(${GREEN_RGB},0.14)` }}>
+                  What it does
+                </th>
+                <th style={{
+                  padding: '18px 20px', minWidth: 108,
+                  fontFamily: MONO, fontWeight: 600, fontSize: '0.66rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: GREEN,
+                  background: `rgba(${GREEN_RGB},0.06)`,
+                  borderBottom: `1px solid rgba(${GREEN_RGB},0.4)`, borderLeft: `1px solid rgba(${GREEN_RGB},0.3)`, borderRight: `1px solid rgba(${GREEN_RGB},0.3)`,
+                }}>
+                  ATREOX
+                </th>
+                {COMPARISON_COLUMNS.map(col => (
+                  <th key={col} style={{
+                    padding: '18px 16px', minWidth: 128, textAlign: 'center',
+                    fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.42)',
+                    borderBottom: `1px solid rgba(${GREEN_RGB},0.14)`,
+                  }}>
+                    {col}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {COMPARISON_ROWS.map((row, i) => (
+                <tr key={row.label}>
+                  <td style={{
+                    padding: '17px 22px', fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.68)', lineHeight: 1.5,
+                    borderBottom: i === COMPARISON_ROWS.length - 1 ? 'none' : `1px solid rgba(${GREEN_RGB},0.08)`,
+                  }}>
+                    {row.label}
+                  </td>
+                  <td style={{
+                    padding: '17px 20px', textAlign: 'center',
+                    background: `rgba(${GREEN_RGB},0.045)`,
+                    borderLeft: `1px solid rgba(${GREEN_RGB},0.3)`, borderRight: `1px solid rgba(${GREEN_RGB},0.3)`,
+                    borderBottom: i === COMPARISON_ROWS.length - 1 ? `1px solid rgba(${GREEN_RGB},0.3)` : `1px solid rgba(${GREEN_RGB},0.14)`,
+                  }}>
+                    <CompareMark state="yes" />
+                  </td>
+                  {row.marks.map((m, j) => (
+                    <td key={j} style={{
+                      padding: '17px 16px', textAlign: 'center',
+                      borderBottom: i === COMPARISON_ROWS.length - 1 ? 'none' : `1px solid rgba(${GREEN_RGB},0.08)`,
+                    }}>
+                      <CompareMark state={m} />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </motion.div>
+
+      <p style={{ marginTop: 16, fontFamily: MONO, fontWeight: 400, fontSize: '0.62rem', letterSpacing: '0.04em', color: 'rgba(255,255,255,0.28)', lineHeight: 1.7 }}>
+        — means we don't have confirmed information either way for that category, so we're not claiming it. ✕ is only used
+        where the category can't structurally do the thing — an analytics service is read-only, for instance.
+      </p>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════
    6 — FAQ
 ══════════════════════════════════════ */
 function FAQSection({ setPage }) {
@@ -917,6 +1051,7 @@ function HomePage({ setPage }) {
       <PipelineSection setPage={setPage} />
       <PriceTeaserSection setPage={setPage} />
       <TrustSection setPage={setPage} />
+      <ComparisonSection />
       <FAQSection setPage={setPage} />
       <SocialSection />
       <CtaBannerSection setPage={setPage} />
