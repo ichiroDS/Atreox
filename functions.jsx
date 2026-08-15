@@ -13,7 +13,7 @@ const React = window.React;
 const { useRef, useState, useEffect } = React;
 const {
   motion, useInView,
-  ArrowUpRight, Check, ChevronRight, Zap, BookOpen,
+  ArrowUpRight, Check, ChevronRight, Zap, BookOpen, Shield,
   PageHero, PageSection, SectionLockup, Pill, CrossLinks, FooterBar,
   MONO, SERIF, MODULES, GUIDE_BY_MODULE, eur,
 } = window;
@@ -212,6 +212,26 @@ function ModuleSection({ mod, index, setPage }) {
             </div>
           </div>
         </div>
+
+        {/* ── the one limit worth reading before paying ──
+           Only rendered for modules that carry a `guard`. This is the
+           answer to "will this cost me my accounts", so it sits after
+           the settings rather than competing with them. ── */}
+        {mod.guard && (
+          <div className="panel" style={{
+            marginTop: 22, padding: '24px 26px',
+            borderLeft: `2px solid rgba(${GREEN_RGB},0.4)`,
+            display: 'flex', gap: 15, alignItems: 'flex-start',
+          }}>
+            <Shield size={17} color={GREEN} style={{ flexShrink: 0, marginTop: 2 }} />
+            <div style={{ minWidth: 0 }}>
+              <span className="overline" style={{ display: 'block', marginBottom: 10 }}>{'// '}The limit you can't turn off</span>
+              <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.75, maxWidth: 760 }}>
+                {mod.guard}
+              </p>
+            </div>
+          </div>
+        )}
       </motion.section>
     </div>
   );
@@ -233,8 +253,8 @@ function FunctionsPage({ setPage }) {
 
       <PageSection style={{ paddingBottom: 40 }}>
         <SectionLockup title="The modules">
-          In the order the pipeline runs them — find the rooms, prepare the accounts, then comment,
-          answer and amplify. Account Manager and Profile Templates sit under all of it and ship with
+          Listed in the same order you'll find them in the panel, so this page and your sidebar
+          never disagree. Account Manager and Profile Templates sit under all of it and ship with
           any purchase.
         </SectionLockup>
         <ModuleIndex jump={jump} />
