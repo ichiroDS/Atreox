@@ -14,7 +14,7 @@ const {
   ArrowUpRight, Check, BookOpen, Layers,
   FooterBar, CrossLinks,
   PageHero, PageSection, SectionLockup, Pill, MONO, SERIF,
-  PRICED_MODULES, MODULE_BY_KEY, INCLUDED_MODULES,
+  MODULES, PRICED_MODULES, MODULE_BY_KEY, INCLUDED_MODULES,
   FULL_MONTHLY, FULL_YEARLY, YEARLY_SAVING, eur,
 } = window;
 
@@ -78,8 +78,9 @@ function useSubscriptionState() {
 const BILLING_URL = `${DASHBOARD_URL}/billing`;
 
 function billingCTA(sub, label) {
-  if (!sub.loading && sub.active) return { label: 'Manage in panel', href: BILLING_URL };
-  return { label, href: BILLING_URL };
+  const href = window.withReferral(BILLING_URL);
+  if (!sub.loading && sub.active) return { label: 'Manage in panel', href };
+  return { label, href };
 }
 
 /* ─── one selectable module ─── */
@@ -300,6 +301,76 @@ function ModuleHelpRail({ setPage }) {
   );
 }
 
+/* ─── What the price list is, before the price list.
+
+   This used to be a paragraph at the bottom of the page, under the
+   picker, in the same weight as everything else — which is where a fact
+   goes to not be read. "Two of the eight are free with any purchase" is
+   the single most load-bearing thing on this page: it changes what the
+   cheapest possible order actually gets you, so it runs first and at
+   headline size. ─── */
+function CatalogueBanner({ setPage }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, amount: 0.2 });
+  const counts = [
+    { n: MODULES.length, label: 'modules', tone: 'plain' },
+    { n: PRICED_MODULES.length, label: 'you pick and pay for', tone: 'plain' },
+    { n: INCLUDED_MODULES.length, label: 'free with any purchase', tone: 'accent' },
+  ];
+  return (
+    <PageSection style={{ paddingTop: 0, paddingBottom: 0 }}>
+      <motion.div ref={ref} className="panel ticks"
+        initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.6 }}
+        style={{ padding: 'clamp(30px, 4.5vw, 46px) clamp(26px, 4vw, 44px)' }}>
+
+        <div style={{ display: 'flex', gap: 'clamp(24px, 5vw, 60px)', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+          {/* the three numbers, largest thing on the page */}
+          <div style={{ display: 'flex', gap: 'clamp(22px, 4vw, 46px)', flexWrap: 'wrap', flex: '0 1 auto' }}>
+            {counts.map(({ n, label, tone }) => (
+              <div key={label} style={{ minWidth: 96 }}>
+                <div style={{
+                  fontFamily: SERIF, fontWeight: 500, lineHeight: 1,
+                  fontSize: 'clamp(2.6rem, 6vw, 4rem)',
+                  color: tone === 'accent' ? GREEN : 'white',
+                  textShadow: tone === 'accent' ? `0 0 32px rgba(${GREEN_RGB},0.3)` : 'none',
+                }}>{n}</div>
+                <div style={{
+                  marginTop: 10, maxWidth: 150,
+                  fontFamily: MONO, fontWeight: 400, fontSize: '0.63rem',
+                  letterSpacing: '0.14em', textTransform: 'uppercase', lineHeight: 1.6,
+                  color: tone === 'accent' ? `rgba(${GREEN_RGB},0.85)` : 'rgba(255,255,255,0.4)',
+                }}>{label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* which two, by name, clickable — "free" is worth nothing until
+              you know what you're getting */}
+          <div style={{ flex: '1 1 300px', minWidth: 260 }}>
+            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: 'clamp(0.95rem, 1.5vw, 1.05rem)', color: 'rgba(255,255,255,0.7)', lineHeight: 1.7 }}>
+              <strong style={{ fontWeight: 600, color: 'white' }}>
+                {INCLUDED_MODULES.map(m => m.name).join(' and ')}
+              </strong>{' '}
+              are included with every order, down to a single module. They're how accounts get
+              into the system and how they get a face — so they're never sold separately, and
+              never charged for.
+            </p>
+            <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 18 }}>
+              {INCLUDED_MODULES.map(m => (
+                <button key={m.key} type="button" className="quiet-link"
+                  onClick={() => setPage('functions', 'fn-' + m.key)}>
+                  What {m.name} does <ArrowUpRight size={11} />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </PageSection>
+  );
+}
+
 function PricingPage({ setPage }) {
   const gridRef = useRef(null);
   const gridIn = useInView(gridRef, { once: true, amount: 0.05 });
@@ -315,16 +386,18 @@ function PricingPage({ setPage }) {
       <PageHero
         badge="Pricing"
         title="Pay for what you run."
-        sub="ATREOX is modular. Take the modules you need, or take the whole licence — Account Manager and Profile Templates come with either."
+        sub="ATREOX is modular. Take the modules you need, or take the whole licence — two of the eight are free either way."
       />
+
+      <CatalogueBanner setPage={setPage} />
 
       {/* One block: the modules on the left, what they add up to and what
           everything costs on the right. The two prices sit in the same rail so
           the comparison never needs a scroll. */}
       <PageSection>
         <SectionLockup title="Build your licence">
-          Every module runs on its own and bills monthly. Select what you need — the total updates as you go,
-          and the full licence sits beside it for comparison.
+          The six you pay for, in the order they appear in the panel. Select what you need — the total
+          updates as you go, and the full licence sits beside it for comparison.
         </SectionLockup>
 
         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
@@ -380,26 +453,19 @@ function PricingPage({ setPage }) {
             </p>
           </div>
 
+          {/* "Included with everything" used to live here and now opens the
+              page instead. What's left is the billing mechanics, which is
+              genuinely a footnote. */}
           <div className="panel" style={{ flex: '1 1 380px', padding: '34px 32px' }}>
-            <span className="overline" style={{ display: 'block', marginBottom: 16 }}>{'// '}Included with everything</span>
+            <span className="overline" style={{ display: 'block', marginBottom: 16 }}>{'// '}How billing works</span>
             <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.9rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.75, marginBottom: 16 }}>
-              {INCLUDED_MODULES.map(m => m.name).join(' and ')} come with any purchase, down to a single module.
-              They're how you upload accounts and manage profiles, so they're never sold on their own.
+              Every module is its own monthly line item. Add one and it starts; drop one and the rest
+              keep running. Cancel from the panel and you keep access to the end of the period.
             </p>
-            <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-              {INCLUDED_MODULES.map(m => (
-                <button key={m.key} type="button" className="quiet-link"
-                  onClick={() => setPage('functions', 'fn-' + m.key)}>
-                  {m.name} <ArrowUpRight size={11} />
-                </button>
-              ))}
-            </div>
-            <div style={{ borderTop: `1px solid rgba(${GREEN_RGB},0.12)`, marginTop: 22, paddingTop: 20 }}>
-              <span className="overline" style={{ display: 'block', marginBottom: 12 }}>{'// '}Annual billing</span>
-              <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.9rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.75 }}>
-                Only the full licence is sold by the year, at {eur(FULL_YEARLY)}. Individual modules are monthly.
-              </p>
-            </div>
+            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.9rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.75 }}>
+              Only the full licence is also sold by the year, at {eur(FULL_YEARLY)} — and it covers any
+              module released while it's active, at no extra cost.
+            </p>
           </div>
         </div>
 
