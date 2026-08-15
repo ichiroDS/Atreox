@@ -218,7 +218,7 @@ function Hero({ setPage }) {
           </motion.p>
           <motion.div initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }} animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.1 }}
             style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', marginBottom: 30 }}>
-            <a href="https://app.atreoxai.com" target="_self" className="btn-solid cta-breathe" style={{ padding: '15px 28px', fontSize: '0.8rem' }}>
+            <a href={window.withReferral('https://app.atreoxai.com')} target="_self" className="btn-solid cta-breathe" style={{ padding: '15px 28px', fontSize: '0.8rem' }}>
               Enter panel <ArrowUpRight size={15} />
             </a>
             <button className="btn-outline" onClick={() => {
@@ -720,27 +720,32 @@ function TrustSection({ setPage }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.12 });
 
+  /* Automation leads. It's what people are actually buying, and the old
+     version of this list never once said the thing runs by itself.
+     Dry run moved out to the Mass Reactions section on Functions, where
+     it's a real feature rather than a top-six reason to trust anything. */
   const pillars = [
-    { icon: Shield, title: 'Accounts are treated as the scarce thing',
-      body: 'Warmup before work, one proxy per account, per-account rate budgets, and automatic cooldowns on floodwait and peerflood. An account that trips a limit pauses itself instead of grinding into a ban.' },
-    { icon: Server, title: 'Two different health checks',
-      body: "Telegram's own restricted/scam/fake flags, and a separate capability probe that resolves a public username and reads its history — which is what actually catches an account that's frozen while every flag stays clean." },
-    { icon: Zap, title: 'Nothing runs faster than you set it',
-      body: 'Every module exposes its delays, its hourly and daily caps, and its skip probabilities. Defaults are conservative and every one of them is yours to move.' },
-    { icon: Brain, title: 'Every action is logged with its reason',
-      body: 'Generated, skipped, rate-limited, failed — each with the post, thread or target it belongs to. When something stops, the log says why rather than going quiet.' },
-    { icon: Clock, title: 'Dry runs before real ones',
-      body: 'Mass Reactions can do a full pass and report exactly what it would have done without sending anything. Discovery searches are cancellable mid-run.' },
-    { icon: Globe, title: 'Monthly, no contract',
-      body: "It's a monthly subscription you cancel from the panel, keeping access to the end of the period. Modules are separate line items, so scaling down doesn't mean starting over." },
+    { icon: Clock, title: 'You set it up once',
+      body: 'About fifteen minutes: load accounts, pick channels, write a persona. Then press Start. It keeps running without you — no daily babysitting, no queue to top up.' },
+    { icon: Shield, title: 'Accounts come first, always',
+      body: 'Warmup before work. One proxy each. Its own rate budget. Hit a floodwait and the account pauses itself instead of grinding into a ban.' },
+    { icon: Server, title: 'Two health checks, not one',
+      body: "Telegram's own flags, plus a probe that resolves a real username and reads its history. That second one catches accounts that are frozen while every flag still looks clean." },
+    { icon: Zap, title: 'Nothing moves faster than you allow',
+      body: 'Delays, hourly caps, daily caps, skip chances — all visible, all yours. Defaults are deliberately slow.' },
+    { icon: Brain, title: 'Every action says why',
+      body: 'Posted, skipped, rate-limited, failed — each tied to the post or thread it came from. When something stops, the log tells you. It never just goes quiet.' },
+    { icon: Globe, title: 'Month to month',
+      body: 'Cancel in the panel, keep access to the end of the period. Modules bill separately, so scaling down is dropping a line item, not starting over.' },
   ];
 
   return (
     <section ref={ref} className="section-block" style={{ padding: '88px 5%', maxWidth: 1280, margin: '0 auto' }}>
       <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
         <SectionLockup title="Why trust it">
-          Automation on Telegram fails in one direction: too fast, too uniform, too visible. Every design
-          decision below exists because of that, and all of it is visible to you while it runs.
+          It runs on its own — and Telegram automation fails in exactly one direction when it does:
+          too fast, too uniform, too visible. Everything below exists because of that, and you can
+          watch all of it while it works.
         </SectionLockup>
       </motion.div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18 }}>
