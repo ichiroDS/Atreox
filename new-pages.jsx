@@ -319,7 +319,10 @@ function CatalogueBanner({ setPage }) {
   ];
   return (
     <PageSection style={{ paddingTop: 0, paddingBottom: 0 }}>
-      <motion.div ref={ref} className="panel ticks"
+      {/* ref goes on a plain element — the FramerMotion shim's components
+          don't forward refs (see index.html) */}
+      <div ref={ref}>
+      <motion.div className="panel ticks"
         initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6 }}
         style={{ padding: 'clamp(30px, 4.5vw, 46px) clamp(26px, 4vw, 44px)' }}>
@@ -367,6 +370,7 @@ function CatalogueBanner({ setPage }) {
           </div>
         </div>
       </motion.div>
+      </div>
     </PageSection>
   );
 }

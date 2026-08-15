@@ -26,6 +26,11 @@
   <!-- Babel standalone emits cross-origin errors for eval'd JSX; suppress only those -->
   <script>window.onerror=function(m,src){return typeof src==='string'&&(src.indexOf('blob:')>-1||src.indexOf('eval')>-1);};</script>
 
+  <!-- Referral capture: ?ref=CODE -> localStorage (90d), strips the param.
+       Plain JS, runs before the Babel/React app scripts so window.withReferral
+       exists by the time any CTA renders. See /public/referral.js. -->
+  <script src="/public/referral.js"></script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Marcellus&family=Barlow:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -107,10 +112,14 @@
       };
     }
 
+    /* MotEl is a plain function component, NOT a forwardRef — putting a
+       `ref` on any of these silently does nothing and logs a React
+       warning. Attach refs (useInView etc.) to a plain wrapper element
+       instead; that's the convention throughout the .jsx files. */
     const motion = {
       div: makeMotion('div'), p: makeMotion('p'), span: makeMotion('span'),
       h1: makeMotion('h1'), h2: makeMotion('h2'), section: makeMotion('section'),
-      button: makeMotion('button'),
+      button: makeMotion('button'), a: makeMotion('a'),
     };
 
     function AnimatePresence({ children }) { return children; }
@@ -306,6 +315,29 @@
     .quiet-link:hover { color: var(--g-bright); }
     .quiet-link-dim { color: rgba(255,255,255,0.34); font-weight: 500; }
     .quiet-link-dim:hover { color: var(--g); }
+
+    /* ── Social links (Telegram / YouTube) ──
+       Navbar + footer treatment. The navbar version is a bare glyph that
+       sits at nav-link weight until hovered, so it never competes with
+       "Enter panel" beside it. */
+    .social-dot {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 30px; height: 30px; border-radius: 4px;
+      color: rgba(255,255,255,0.42);
+      border: 1px solid transparent;
+      transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+    }
+    .social-dot:hover {
+      color: var(--g-bright);
+      background: var(--g-06);
+      border-color: var(--g-22);
+    }
+    .social-dot:focus-visible {
+      outline: none; color: var(--g-bright);
+      border-color: var(--g-40);
+    }
+    .footer-social { transition: color 0.2s ease; }
+    .footer-social:hover { color: var(--g); }
 
     /* ── Pipeline: the "how it runs" sequence on the home page ──
        The rail fill tracks the active stage; a node lights when it's the

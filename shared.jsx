@@ -58,6 +58,57 @@ function _icon(name, filled) {
   };
 }
 
+/* ── Brand glyphs ──────────────────────────────────────────────────
+   Kept out of _ip/_icon on purpose: those are 1.75-weight stroked
+   outlines on a shared 24px grid, and a logo drawn that way stops
+   looking like the logo. These are solid single-path marks with no
+   stroke, so they read correctly at 16px in the navbar. ─────────── */
+function _brandIcon(d) {
+  return function BrandIcon({ size = 16, color = 'currentColor', style, title, ...rest }) {
+    return React.createElement('svg', {
+      width: size, height: size, viewBox: '0 0 24 24',
+      fill: color, stroke: 'none', role: title ? 'img' : 'presentation',
+      'aria-hidden': title ? undefined : 'true',
+      style: { display: 'inline-block', flexShrink: 0, ...style }, ...rest,
+    }, title ? React.createElement('title', null, title) : null,
+       React.createElement('path', { d }));
+  };
+}
+
+const TelegramIcon = _brandIcon(
+  "M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212-.07-.062-.174-.041-.249-.024-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"
+);
+
+const YouTubeIcon = _brandIcon(
+  "M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
+);
+
+/* The two places to follow ATREOX. One list, used by the navbar, the
+   footer and the home block, so a changed URL is changed once. */
+const SOCIAL_LINKS = [
+  { key: 'telegram', label: 'Telegram', icon: TelegramIcon,
+    href: 'https://t.me/+YfEU_fmwGJlmOGZi',
+    blurb: 'Release notes, new modules, and answers to questions people actually ask.' },
+  { key: 'youtube', label: 'YouTube', icon: YouTubeIcon,
+    href: 'https://www.youtube.com/@atreoxai',
+    blurb: 'Walkthroughs of the panel — setup, module by module, start to finish.' },
+];
+
+/* Icon row. `compact` is the navbar/footer treatment; the home block
+   builds its own cards from SOCIAL_LINKS instead. */
+function SocialLinks({ size = 16, gap = 6 }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap }}>
+      {SOCIAL_LINKS.map(({ key, label, icon: Icon, href }) => (
+        <a key={key} href={href} target="_blank" rel="noopener noreferrer"
+          aria-label={label} title={label} className="social-dot">
+          <Icon size={size} />
+        </a>
+      ))}
+    </div>
+  );
+}
+
 const ArrowUpRight  = _icon('ArrowUpRight');
 const Play          = _icon('Play', true);
 const Zap           = _icon('Zap');
@@ -298,8 +349,10 @@ function Navbar({ currentPage, setPage }) {
 
         {/* Desktop CTA */}
         {!isMobile && (
-          <div style={{ flex: '1 1 0', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-            <a href={DASHBOARD_URL} target="_self" className="btn-solid" style={{ padding: '10px 20px', fontSize: '0.7rem' }}>
+          <div style={{ flex: '1 1 0', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 14 }}>
+            <SocialLinks size={16} />
+            <span aria-hidden="true" style={{ width: 1, height: 18, background: `rgba(${ACCENT_RGB},0.16)` }} />
+            <a href={window.withReferral(DASHBOARD_URL)} target="_self" className="btn-solid" style={{ padding: '10px 20px', fontSize: '0.7rem' }}>
               Enter panel <ArrowUpRight size={13} />
             </a>
           </div>
@@ -343,7 +396,18 @@ function Navbar({ currentPage, setPage }) {
             </button>
           ))}
           <div style={{ flex: 1 }} />
-          <a href={DASHBOARD_URL} target="_self" className="btn-solid" style={{ width: '100%', justifyContent: 'center', padding: '17px', fontSize: '0.82rem' }}>
+          {/* Named rather than icon-only here: a 20px glyph in a full-screen
+              menu reads as decoration, and there's room for the word. */}
+          <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+            {SOCIAL_LINKS.map(({ key, label, icon: Icon, href }) => (
+              <a key={key} href={href} target="_blank" rel="noopener noreferrer"
+                className="btn-outline"
+                style={{ flex: 1, justifyContent: 'center', padding: '13px', fontSize: '0.72rem', gap: 8 }}>
+                <Icon size={15} /> {label}
+              </a>
+            ))}
+          </div>
+          <a href={window.withReferral(DASHBOARD_URL)} target="_self" className="btn-solid" style={{ width: '100%', justifyContent: 'center', padding: '17px', fontSize: '0.82rem' }}>
             Enter panel <ArrowUpRight size={15} />
           </a>
         </div>
@@ -431,6 +495,18 @@ function FooterBar({ setPage }) {
           <h5 style={colHead}>Contact</h5>
           <a href="mailto:hello@atreoxai.com" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.76rem', color: 'rgba(255,255,255,0.5)', textDecoration: 'none', display: 'block', marginBottom: 8 }}>hello@atreoxai.com</a>
           <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.78rem', color: 'rgba(255,255,255,0.25)' }}>Mon–Fri, 9 AM–6 PM UTC</span>
+        </div>
+        <div style={{ flex: '0 0 auto' }}>
+          <h5 style={colHead}>Follow</h5>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {SOCIAL_LINKS.map(({ key, label, icon: Icon, href }) => (
+              <a key={key} href={href} target="_blank" rel="noopener noreferrer"
+                className="footer-social"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 9, fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.48)', textDecoration: 'none' }}>
+                <Icon size={15} /> {label}
+              </a>
+            ))}
+          </div>
         </div>
       </div>
       <div style={{ borderTop: `1px solid rgba(${ACCENT_RGB},0.08)`, paddingTop: 22, paddingBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
@@ -592,4 +668,5 @@ Object.assign(window, {
   LogoMark, Wordmark, Navbar, BlurText, FadeTop, FadeBottom,
   SectionBadge, SectionHeading, GlassBtn, FooterBar, BgColorSystem,
   MONO, SERIF, PageHero, PageSection, SectionLockup, Pill, CrossLinks,
+  TelegramIcon, YouTubeIcon, SOCIAL_LINKS, SocialLinks,
 });

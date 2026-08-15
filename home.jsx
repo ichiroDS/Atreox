@@ -15,7 +15,7 @@ const {
   ArrowUpRight, Zap, Shield, Globe, Brain, Check, Clock, Server,
   Network, Sparkles, MessageSquare, Layers, BookOpen,
   BlurText, FooterBar, CrossLinks, SectionLockup, Pill,
-  TypeText, tiltHandlers, REDUCED_MOTION,
+  TypeText, tiltHandlers, REDUCED_MOTION, SOCIAL_LINKS,
   MODULES, MODULE_BY_KEY, PIPELINE,
   FULL_MONTHLY, FULL_YEARLY, YEARLY_SAVING, CHEAPEST_MODULE, eur,
 } = window;
@@ -833,6 +833,47 @@ function FAQSection({ setPage }) {
 }
 
 /* ══════════════════════════════════════
+   6.5 — FOLLOW
+   The channel and the videos, given room rather than left as two
+   glyphs in the navbar. Sits after the FAQ: someone still reading by
+   here wants more of this, and it's the cheapest thing to say yes to.
+══════════════════════════════════════ */
+function SocialSection() {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, amount: 0.2 });
+  return (
+    <section ref={ref} className="section-block" style={{ padding: '20px 5% 88px', maxWidth: 1280, margin: '0 auto' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18 }}>
+        {SOCIAL_LINKS.map(({ key, label, icon: Icon, href, blurb }, i) => (
+          <motion.a key={key} href={href} target="_blank" rel="noopener noreferrer"
+            className="panel panel-hover"
+            initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: i * 0.08 }}
+            style={{ padding: '30px 28px', display: 'flex', gap: 18, alignItems: 'flex-start', textDecoration: 'none' }}>
+            <span aria-hidden="true" style={{
+              width: 46, height: 46, borderRadius: 5, flexShrink: 0,
+              background: `rgba(${GREEN_RGB},0.08)`, border: `1px solid rgba(${GREEN_RGB},0.22)`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Icon size={21} color={GREEN} />
+            </span>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 9 }}>
+                <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '1rem', color: 'white' }}>{label}</span>
+                <ArrowUpRight size={14} color={`rgba(${GREEN_RGB},0.6)`} />
+              </span>
+              <span style={{ display: 'block', fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.87rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.65 }}>
+                {blurb}
+              </span>
+            </span>
+          </motion.a>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════
    CTA
 ══════════════════════════════════════ */
 function CtaBannerSection({ setPage }) {
@@ -877,6 +918,7 @@ function HomePage({ setPage }) {
       <PriceTeaserSection setPage={setPage} />
       <TrustSection setPage={setPage} />
       <FAQSection setPage={setPage} />
+      <SocialSection />
       <CtaBannerSection setPage={setPage} />
       <CrossLinks current="home" setPage={setPage} />
       <div style={{ padding: '0 5% 60px' }}>
