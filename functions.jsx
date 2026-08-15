@@ -350,9 +350,13 @@ function ModuleSection({ mod, index, setPage }) {
                   <span style={{ display: 'block', fontFamily: MONO, fontWeight: 500, fontSize: '0.6rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'white' }}>
                     Setup guide
                   </span>
-                  <span style={{ display: 'block', marginTop: 4, fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.78rem', color: 'rgba(255,255,255,0.42)' }}>
-                    {guide.video ? 'Watch the walkthrough' : 'Not filmed yet — see what it covers'}
-                  </span>
+                  {/* No caption at all when the video isn't filmed yet — the
+                      button itself still opens the guide's write-up. */}
+                  {guide.video && (
+                    <span style={{ display: 'block', marginTop: 4, fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.78rem', color: 'rgba(255,255,255,0.42)' }}>
+                      Watch the walkthrough
+                    </span>
+                  )}
                 </span>
                 <ArrowUpRight size={13} color={`rgba(${GREEN_RGB},0.6)`} />
               </button>
