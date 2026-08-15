@@ -203,6 +203,7 @@ const MODULES = [
     price: 30,
     icon: Sparkles,
     guide: 'mass-reactions',
+    demo: 'arrival-curve',
     desc: 'Reacts from a pool of your accounts — to posts, or to the comments under them.',
     tagline: 'The first hour decides',
     problem:
@@ -236,6 +237,7 @@ const MODULES = [
     price: 20,
     icon: Globe,
     guide: 'channel-parser',
+    demo: 'parser-funnel',
     desc: 'Finds channels by keyword and exports them as a target list.',
     tagline: 'Where your audience already is',
     problem:

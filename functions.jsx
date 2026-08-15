@@ -10,7 +10,7 @@
 ══════════════════════════════════════════════════════════════════ */
 
 const React = window.React;
-const { useRef, useState, useEffect } = React;
+const { useRef, useState, useEffect, useMemo } = React;
 const {
   motion, useInView,
   ArrowUpRight, Check, ChevronRight, Zap, BookOpen, Shield,
@@ -84,6 +84,189 @@ function PracticeStep({ n, title, body, last }) {
     </div>
   );
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   In-card demos.
+
+   Only two modules get one, and only because a paragraph genuinely
+   loses to a picture there: "reactions arrive on a human curve" and
+   "this filter rejects most of what you find" are both claims you
+   either see or take on faith.
+
+   Everything here is SIMULATED and says so in the card. Nothing on
+   this page is allowed to look like a live feed from someone's
+   account — an invented number that reads as real is a lie whether or
+   not it's labelled in the source.
+══════════════════════════════════════════════════════════════════ */
+
+/* Deterministic RNG so a demo looks the same on every render and every
+   visitor's screen — a shape that reshuffles on each paint reads as a
+   live feed, which is the one thing these must never do. */
+function _lcg(seed) {
+  let s = seed >>> 0;
+  return () => {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
+}
+
+const DEMO_LABEL = 'Example — simulated';
+
+function DemoFrame({ title, note, children, controls }) {
+  return (
+    <div className="panel" style={{ padding: '26px 28px 28px', marginTop: 22 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 6 }}>
+        <span className="overline">{'// '}{title}</span>
+        {/* the "this isn't real data" marker, at the top where it's read
+            before the picture rather than under it as a disclaimer */}
+        <span style={{
+          fontFamily: MONO, fontWeight: 500, fontSize: '0.54rem', letterSpacing: '0.18em',
+          textTransform: 'uppercase', color: 'rgba(255,255,255,0.75)',
+          background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: 3, padding: '4px 8px', lineHeight: 1,
+        }}>{DEMO_LABEL}</span>
+        <span style={{ marginLeft: 'auto' }}>{controls}</span>
+      </div>
+      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.38)', lineHeight: 1.6, marginBottom: 22, maxWidth: 640 }}>
+        {note}
+      </p>
+      {children}
+    </div>
+  );
+}
+
+function DemoToggle({ options, value, onChange }) {
+  return (
+    <div role="group" style={{ display: 'flex', gap: 3, padding: 3, borderRadius: 4, border: `1px solid rgba(${GREEN_RGB},0.2)`, background: 'rgba(0,0,0,0.3)' }}>
+      {options.map(([val, label]) => {
+        const on = value === val;
+        return (
+          <button key={val} type="button" onClick={() => onChange(val)} aria-pressed={on}
+            style={{
+              padding: '7px 13px', borderRadius: 3, border: 'none', cursor: 'pointer',
+              fontFamily: MONO, fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.14em',
+              textTransform: 'uppercase', transition: 'background 0.18s ease, color 0.18s ease',
+              background: on ? GREEN : 'transparent',
+              color: on ? '#00141c' : 'rgba(255,255,255,0.5)',
+            }}>{label}</button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ─── Mass Reactions: what the arrival curve actually does ───
+   Mirrors the engine's own _arrival_offsets(): 'human' draws from an
+   exponential with mean = window/4 and folds overshoot back inside the
+   window instead of clamping it (a clamp piles every long draw onto the
+   final second); 'uniform' is flat. Same maths, 24 accounts, one hour. */
+function ArrivalCurveDemo() {
+  const [curve, setCurve] = useState('human');
+  const WINDOW_MIN = 60;
+  const COUNT = 24;
+
+  const points = useMemo(() => {
+    const rnd = _lcg(20260816);
+    const windowSec = WINDOW_MIN * 60;
+    const mean = windowSec / 4;
+    const out = [];
+    for (let i = 0; i < COUNT; i++) {
+      const base = 30 + rnd() * 60;            // first_delay 30–90s
+      let spread;
+      if (curve === 'uniform') {
+        spread = rnd() * windowSec;
+      } else {
+        spread = -mean * Math.log(1 - rnd());  // exponential
+        if (spread > windowSec) spread = windowSec - (spread % windowSec);
+      }
+      out.push({ t: Math.min(base + spread, windowSec) / windowSec, j: rnd() });
+    }
+    return out.sort((a, b) => a.t - b.t);
+  }, [curve]);
+
+  return (
+    <DemoFrame
+      title="Arrival curve"
+      note="Twenty-four accounts reacting to one post across an hour, run through the same maths the engine uses. Human clusters early and thins out, the way a real post's reactions actually land. Uniform is the evenly-spaced metronome most tools ship."
+      controls={<DemoToggle options={[['human', 'Human'], ['uniform', 'Uniform']]} value={curve} onChange={setCurve} />}
+    >
+      <div style={{ position: 'relative', height: 92, borderRadius: 4, background: 'rgba(0,0,0,0.28)', border: `1px solid rgba(${GREEN_RGB},0.12)`, overflow: 'hidden' }}>
+        {[0, 0.25, 0.5, 0.75, 1].map(f => (
+          <span key={f} aria-hidden="true" style={{ position: 'absolute', left: `${f * 100}%`, top: 0, bottom: 0, width: 1, background: `rgba(${GREEN_RGB},0.09)` }} />
+        ))}
+        {points.map((p, i) => (
+          <span key={i} aria-hidden="true" style={{
+            position: 'absolute',
+            left: `calc(${p.t * 100}% - 4px)`,
+            top: 12 + p.j * 60,
+            width: 8, height: 8, borderRadius: '50%',
+            background: GREEN, boxShadow: `0 0 10px rgba(${GREEN_RGB},0.55)`,
+            transition: 'left 0.55s cubic-bezier(0.16,1,0.3,1), top 0.55s cubic-bezier(0.16,1,0.3,1)',
+          }} />
+        ))}
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 9 }}>
+        {['post published', '15 min', '30 min', '45 min', '1 hour'].map(l => (
+          <span key={l} style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.56rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)' }}>{l}</span>
+        ))}
+      </div>
+    </DemoFrame>
+  );
+}
+
+/* ─── Channel Parser: what the comments-closed filter costs ───
+   The numbers are the engine's own measured run (19 real candidates,
+   14 with no linked discussion group), not an illustrative invention —
+   see the discovery.py docstring. */
+function ParserFunnelDemo() {
+  const [filterOn, setFilterOn] = useState(true);
+  const TOTAL = 19;
+  const NO_DISCUSSION = 14;
+  const kept = filterOn ? TOTAL - NO_DISCUSSION : TOTAL;
+
+  const rows = [
+    { label: 'Found by search', n: TOTAL, tone: 'dim' },
+    { label: filterOn ? 'Dropped — no discussion group' : 'Kept, but you cannot comment in them', n: NO_DISCUSSION, tone: filterOn ? 'reject' : 'warn' },
+    { label: 'Left to work with', n: kept, tone: 'accent' },
+  ];
+  const colour = { dim: 'rgba(255,255,255,0.45)', reject: 'rgba(255,120,120,0.85)', warn: 'rgba(255,190,90,0.9)', accent: GREEN };
+
+  return (
+    <DemoFrame
+      title="What the comments-closed filter costs"
+      note="One real measured search: nineteen channels matched the keywords, and fourteen of them had no linked discussion group — nowhere to leave a comment at all. It is the harshest filter in the pipeline, which is exactly why it has a switch."
+      controls={<DemoToggle options={[['on', 'Filter on'], ['off', 'Filter off']].map(([v, l]) => [v === 'on', l])} value={filterOn} onChange={setFilterOn} />}
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {rows.map(({ label, n, tone }) => (
+          <div key={label}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, marginBottom: 6 }}>
+              <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>{label}</span>
+              <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.8rem', color: colour[tone] }}>{n}</span>
+            </div>
+            <div style={{ height: 7, borderRadius: 4, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+              <div style={{
+                height: '100%', width: `${(n / TOTAL) * 100}%`, borderRadius: 4,
+                background: colour[tone], opacity: tone === 'dim' ? 0.35 : 0.8,
+                transition: 'width 0.5s cubic-bezier(0.16,1,0.3,1)',
+              }} />
+            </div>
+          </div>
+        ))}
+      </div>
+      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.83rem', color: 'rgba(255,255,255,0.45)', lineHeight: 1.65, marginTop: 18 }}>
+        {filterOn
+          ? 'On, you get a short list you can actually use. Every rejection is tallied by cause, so you can see what the filter cost you rather than guess.'
+          : 'Off, the list is nearly four times longer — and most of it is channels where no comment can ever be posted. Useful for surveying a niche, not for feeding the commenting engine.'}
+      </p>
+    </DemoFrame>
+  );
+}
+
+const DEMOS = {
+  'arrival-curve': ArrivalCurveDemo,
+  'parser-funnel': ParserFunnelDemo,
+};
 
 /* ─── One module, in full ─── */
 function ModuleSection({ mod, index, setPage }) {
@@ -212,6 +395,9 @@ function ModuleSection({ mod, index, setPage }) {
             </div>
           </div>
         </div>
+
+        {/* ── the demo, for the two modules that earn one ── */}
+        {mod.demo && DEMOS[mod.demo] && React.createElement(DEMOS[mod.demo])}
 
         {/* ── the one limit worth reading before paying ──
            Only rendered for modules that carry a `guard`. This is the
