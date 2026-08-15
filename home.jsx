@@ -776,6 +776,8 @@ function FAQSection({ setPage }) {
   const inView = useInView(ref, { once: true, amount: 0.15 });
   const [open, setOpen] = useState(null);
   const faqs = [
+    { q: 'Is it really automated?',
+      a: "Yes. Setting it up takes about fifteen minutes — load your accounts, choose the channels, write the persona. After that you press Start in Neurocommenting and it goes: it watches for new posts, writes a comment under each one, waits out its own delays and keeps itself inside its rate limits. You don't feed it anything. You come back to read the log and collect the traffic." },
     { q: 'What do I need before I can start?',
       a: 'Telegram accounts and one proxy per account. ATREOX does not sell either — you bring your own, import them through the Account Manager, and the panel takes it from there. Both purchases have their own guide on the Guides page.' },
     { q: 'How does account safety actually work?',
@@ -786,8 +788,6 @@ function FAQSection({ setPage }) {
       a: 'No. Each priced module bills separately and runs on its own, so you can run discovery and commenting and nothing else. Account Manager and Profile Templates come with any purchase — they are how accounts get into the system, so they are never sold alone. If you want everything, the full licence costs less than the six added up.' },
     { q: 'Does this only work for crypto and tech channels?',
       a: 'No. The parsers search on your keywords in ten languages, and the comment and reply engines work from a prompt you write. Crypto and tech are where many users started; the same pipeline runs an AI-creator funnel or a content community without changing anything but the targets and the persona.' },
-    { q: 'What happens when a guide I need has not been filmed yet?',
-      a: 'Every module has a full write-up on the Functions page listing what it does and every setting it exposes — enough to configure it without a video. If you are stuck, write to us and we will walk you through it while the guide is being recorded.' },
     { q: 'Is there a contract, or can I cancel anytime?',
       a: "It's a monthly subscription with no long-term contract. Cancel from the panel and you keep access through the end of the billing period. Only the full licence is also sold by the year." },
   ];
