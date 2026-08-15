@@ -12,7 +12,7 @@ const React = window.React;
 const { useState, useRef, useEffect } = React;
 const {
   motion, useInView,
-  ArrowUpRight, Zap, Shield, Globe, Brain, Check, Clock, Server,
+  ArrowUpRight, Zap, Shield, Globe, Brain, Check, Clock, Server, Ban,
   Network, Sparkles, MessageSquare, Layers, BookOpen,
   BlurText, FooterBar, CrossLinks, SectionLockup, Pill,
   TypeText, tiltHandlers, REDUCED_MOTION, SOCIAL_LINKS,
@@ -731,8 +731,8 @@ function TrustSection({ setPage }) {
       body: 'Warmup before work. One proxy each. Its own rate budget. Hit a floodwait and the account pauses itself instead of grinding into a ban.' },
     { icon: Server, title: 'Two health checks, not one',
       body: "Telegram's own flags, plus a probe that resolves a real username and reads its history. That second one catches accounts that are frozen while every flag still looks clean." },
-    { icon: Zap, title: 'Nothing moves faster than you allow',
-      body: 'Delays, hourly caps, daily caps, skip chances — all visible, all yours. Defaults are deliberately slow.' },
+    { icon: Ban, title: 'Some topics it won\'t touch',
+      body: "Death, war, violent crime, disasters, partisan politics — posts like that get skipped, not commented on. On by default for every persona. Turning it off is a choice you'd have to make on purpose." },
     { icon: Brain, title: 'Every action says why',
       body: 'Posted, skipped, rate-limited, failed — each tied to the post or thread it came from. When something stops, the log tells you. It never just goes quiet.' },
     { icon: Globe, title: 'Month to month',
