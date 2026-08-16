@@ -45,4 +45,4 @@ Allow: /
 User-agent: Meta-ExternalAgent
 Allow: /
 
-Sitemap: https://atreoxai.com/sitemap.xml
+Sitemap: https://www.atreoxai.com/sitemap.xml

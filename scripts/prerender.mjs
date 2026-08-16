@@ -35,7 +35,12 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const ORIGIN = 'https://atreoxai.com';
+/* The host that answers 200. Vercel has www as the project's primary
+   domain, so the apex 307s to it — and a canonical, an og:url or a
+   sitemap entry pointing at a redirect is a worse signal than one
+   pointing at the page. If the apex is ever made primary instead, this
+   line is the only thing that has to change. */
+const ORIGIN = 'https://www.atreoxai.com';
 const OG_FALLBACK = ORIGIN + '/public/apple-touch-icon.png';
 
 const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8');
