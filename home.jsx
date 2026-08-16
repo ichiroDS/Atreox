@@ -15,7 +15,7 @@ const {
   ArrowUpRight, Zap, Shield, Globe, Brain, Check, Clock, Server, Ban, X,
   Network, Sparkles, MessageSquare, Layers, BookOpen,
   BlurText, FooterBar, CrossLinks, SectionLockup, Pill,
-  TypeText, tiltHandlers, REDUCED_MOTION, SOCIAL_LINKS,
+  TypeText, REDUCED_MOTION, SOCIAL_LINKS,
   MODULES, MODULE_BY_KEY, PIPELINE,
   FULL_MONTHLY, FULL_YEARLY, YEARLY_SAVING, CHEAPEST_MODULE, eur,
 } = window;
@@ -34,148 +34,473 @@ const GREEN_RGB = window.ACCENT_RGB;
    ───────────────────────────────────────────────────────────────── */
 const POSITIONING = 'The whole Telegram growth stack — eight modules, one panel.';
 
-/* ── Fake live activity feed pool (visual only, no live connection).
-   Rows cycle through this list with real clock timestamps. ── */
-const FEED_POOL = [
-  { channel: '@CryptoAlphaCalls', comment: 'this dip is exactly the kind of setup I was waiting for 👀' },
-  { channel: '@Web3BuildersHub',  comment: 'anyone tried scaling this on L2 yet? curious about gas costs' },
-  { channel: '@AITradingSignals', comment: 'the backtest numbers on this strategy look solid ngl' },
-  { channel: '@DeFiDegensChat',   comment: 'been looking for something exactly like this, saving the thread' },
-  { channel: '@OnChainDaily',     comment: 'volume profile here looks way healthier than last week' },
-  { channel: '@TechStackWeekly',  comment: 'the API pricing update actually makes this viable now' },
-  { channel: '@AltcoinRadar',     comment: 'accumulation zone looking clean on the 4h chart' },
-  { channel: '@BuildersLounge',   comment: 'shipped something similar last month, happy to compare notes' },
-  { channel: '@AICreatorsHub',    comment: 'her channel went from dead to 400 new subs in two weeks, wild' },
-  { channel: '@CreatorFunnelLab', comment: 'pinned post + bio link combo is converting way better for me' },
+/* ══════════════════════════════════════════════════════════════════
+   THE ENGINE GRID — the hero's right-hand card.
+
+   Five modules, each running its own small demo of the thing it
+   actually does. The pipeline walks through them on its own until the
+   visitor takes it over: hovering a tile replays that module, clicking
+   pins it. Only the focused tile animates, so five demos cost one
+   timer and the eye always has one place to be.
+
+   Everything in here is invented and says so — the card carries the
+   same "Example — simulated" marker the Functions demos use, and the
+   numbers are deliberately the size of a single run rather than a
+   plausible account total. Nothing is shown that the engine does not
+   do: parse, warm, comment, react, reply.
+══════════════════════════════════════════════════════════════════ */
+
+const DEMO_LABEL = 'Example — simulated';  /* same marker the Functions demos carry */
+const DWELL = 4600;                        /* ms a stage holds before the pipeline moves on */
+
+const SHOWCASE = [
+  { key: 'channel-parser',  status: 'scanning',
+    line: 'Finds the channels your audience already reads.' },
+  { key: 'active-warmup',   status: 'warming',
+    line: 'Builds a history on an account before it ever posts.' },
+  { key: 'neurocommenting', status: 'writing', wide: true,
+    line: 'Writes a comment against each new post, not a template.' },
+  { key: 'mass-reactions',  status: 'reacting',
+    line: 'Reactions arrive on a human curve, not all at once.' },
+  { key: 'neurodialogs',    status: 'replying',
+    line: 'Answers a DM from the thread so far, not the last line.' },
 ];
 
-const fmtTime = ms => new Date(ms).toTimeString().slice(0, 8);
+const cellLabel = { fontFamily: MONO, fontWeight: 500, fontSize: '0.5rem', letterSpacing: '0.14em', textTransform: 'uppercase' };
+const cellText  = { fontFamily: MONO, fontWeight: 400, fontSize: '0.58rem' };
 
-/* ── CountUp: eased count-up on first view, bright tick flash on later updates ── */
-function CountUp({ to, inView, duration = 1500 }) {
-  const [val, setVal] = useState(REDUCED_MOTION ? to : 0);
-  const started = useRef(false);
-  const done = useRef(REDUCED_MOTION);
+/* On-screen test for the card, deliberately optimistic: it starts true
+   and only ever goes false once an observer has actually reported the
+   card as off-screen. useInView starts at false, which is right for a
+   section further down the page and wrong here — anywhere the observer
+   never fires, that would leave the first screen sitting dead. */
+function useOnScreen(ref) {
+  const [on, setOn] = useState(true);
   useEffect(() => {
-    if (!inView || started.current || REDUCED_MOTION) return;
-    started.current = true;
-    const target = to;
-    const t0 = performance.now();
-    let raf;
-    const step = t => {
-      const p = Math.min((t - t0) / duration, 1);
-      const ease = 1 - Math.pow(1 - p, 3);
-      setVal(Math.round(target * ease));
-      if (p < 1) raf = requestAnimationFrame(step);
-      else done.current = true;
-    };
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
-  }, [inView]);
-  useEffect(() => { if (done.current) setVal(to); }, [to]);
+    try {
+      const el = ref.current;
+      if (!el || !window.IntersectionObserver) return;
+      const obs = new IntersectionObserver(([e]) => {
+        try { setOn(e.isIntersecting); } catch (_) {}
+      }, { threshold: 0.05 });
+      obs.observe(el);
+      return () => { try { obs.disconnect(); } catch (_) {} };
+    } catch (_) {}
+  }, []);
+  return on;
+}
+
+/* Drives one tile's loop. A tile only runs a timer while it is the
+   focused one; the rest park on their last frame, which is why
+   re-focusing a tile replays it from the top. */
+function useStep(active, period, cycle) {
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    if (!active || REDUCED_MOTION) return;
+    setStep(0);
+    const iv = setInterval(() => setStep(s => (s + 1) % cycle), period);
+    return () => clearInterval(iv);
+  }, [active, period, cycle]);
+  return active && !REDUCED_MOTION ? step : cycle - 1;
+}
+
+/* ── 01 · Channel Parser: candidates land, then get judged ── */
+function ParserBody({ active, compact }) {
+  const step = useStep(active, 620, 9);
+  const rows = [
+    ['@CryptoAlphaCalls', '18.4k', true],
+    ['@DeadSignalsDaily', '54.8k', false],
+    ['@Web3BuildersHub', '9.1k', true],
+  ];
   return (
-    <span key={done.current ? to : 'counting'} className={done.current ? 'stat-tick' : undefined}>
-      {val.toLocaleString('en-US')}
-    </span>
+    <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: compact ? 3 : 5, height: '100%' }}>
+      {active && !REDUCED_MOTION && (
+        <span aria-hidden="true" className="eg-scan" style={{
+          position: 'absolute', left: -12, right: -12, height: 1,
+          background: `linear-gradient(90deg, transparent, rgba(${GREEN_RGB},0.7), transparent)`,
+        }} />
+      )}
+      {rows.map(([name, members, ok], i) => {
+        const shown = step >= i;
+        const judged = step >= i + 2;
+        return (
+          <div key={name} style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            opacity: shown ? 1 : 0, transform: shown ? 'none' : 'translateY(5px)',
+            transition: 'opacity 0.35s ease, transform 0.35s ease',
+          }}>
+            <span style={{
+              ...cellText, flex: '1 1 auto', minWidth: 0,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              color: judged ? (ok ? GREEN : 'rgba(255,255,255,0.26)') : 'rgba(255,255,255,0.55)',
+              transition: 'color 0.35s ease',
+            }}>{name}</span>
+            {!compact && <span style={{ ...cellText, color: 'rgba(255,255,255,0.28)', flexShrink: 0 }}>{members}</span>}
+            <span style={{
+              ...cellLabel, fontWeight: 600, flexShrink: 0,
+              color: ok ? GREEN : 'rgba(255,255,255,0.3)',
+              opacity: judged ? 1 : 0, transition: 'opacity 0.3s ease',
+            }}>{ok ? 'keep' : 'drop'}</span>
+          </div>
+        );
+      })}
+      <span style={{ ...cellLabel, marginTop: 'auto', color: `rgba(${GREEN_RGB},0.58)` }}>
+        {step >= 5 ? '5 kept of 19 found' : 'evaluating'}
+      </span>
+    </div>
   );
 }
 
-/* ── Stat readout: counts up when visible, "comments today" keeps ticking ── */
-function StatReadout() {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, amount: 0.3 });
-  const [comments, setComments] = useState(1284);
-  useEffect(() => {
-    if (!inView || REDUCED_MOTION) return;
-    const iv = setInterval(() => setComments(c => c + 1 + Math.floor(Math.random() * 3)), 5200);
-    return () => clearInterval(iv);
-  }, [inView]);
-  const stats = [
-    { val: 42, label: 'Accounts active' },
-    { val: comments, label: 'Comments today' },
-    { val: 96, label: 'Channels tracked' },
-  ];
+/* ── 02 · Active Warmup: accounts filling their day's activity ── */
+function WarmupBody({ active, compact }) {
+  const step = useStep(active, 520, 10);
+  const acts = ['reading', 'joined', 'reacted', 'resting'];
+  const rows = [['acct_0148', 94], ['acct_0149', 71], ['acct_0150', 46]];
+  const grow = Math.min(1, (step + 1) / 6);
   return (
-    <div ref={ref} style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', background: `rgba(${GREEN_RGB},0.03)` }}>
-      {stats.map(({ val, label }, i) => (
-        <div key={label} style={{ padding: '16px 8px', textAlign: 'center', borderLeft: i > 0 ? `1px solid rgba(${GREEN_RGB},0.1)` : 'none' }}>
-          <div style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '1.45rem', color: GREEN, lineHeight: 1, marginBottom: 5, textShadow: `0 0 18px rgba(${GREEN_RGB},0.35)` }}>
-            <CountUp to={val} inView={inView} />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? 6 : 8, height: '100%', justifyContent: 'center' }}>
+      {rows.map(([id, target], i) => (
+        <div key={id}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+            <span style={{ ...cellText, color: 'rgba(255,255,255,0.48)', flexShrink: 0 }}>{id}</span>
+            <span style={{
+              ...cellLabel, marginLeft: 'auto', minWidth: 0,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              color: `rgba(${GREEN_RGB},0.7)`,
+            }}>{acts[(step + i) % acts.length]}</span>
           </div>
-          <div style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.55rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>{label}</div>
+          <div className="mini-bar">
+            <i style={{ width: Math.round(target * grow) + '%', transition: 'width 0.55s cubic-bezier(0.16,1,0.3,1)' }} />
+          </div>
         </div>
       ))}
     </div>
   );
 }
 
-/* ── LiveTerminal: the hero's engine-log card, cycling like a real feed ── */
-function LiveTerminal() {
-  const [rows, setRows] = useState(() => {
-    const t = Date.now();
-    return FEED_POOL.slice(0, 4).map((item, i) => ({
-      ...item, uid: i,
-      time: fmtTime(t - (3 - i) * 41000),
-      status: i === 3 ? 'queued' : 'posted',
-    }));
-  });
-  const nextIdx = useRef(4);
-  const nextUid = useRef(4);
-  const flips = useRef([]);
+/* ── 03 · Neurocommenting: a post, and the comment written for it ── */
+const COMMENT_DEMOS = [
+  { channel: '@Web3BuildersHub',
+    post: 'Gas on the new L2 dropped 60% after the upgrade 👇',
+    reply: '60% is wild — does that hold under load, or off-peak?' },
+  { channel: '@AITradingSignals',
+    post: 'Backtest for the momentum model held through the chop.',
+    reply: 'what window is that on? curious how it does in a flat month' },
+];
 
+function CommentBody({ active, compact }) {
+  const [pair, setPair] = useState(0);
+  const [typed, setTyped] = useState(0);
+  const demo = COMMENT_DEMOS[pair % COMMENT_DEMOS.length];
+  const full = demo.reply.length;
+
+  /* One interval types the reply, holds it, then hands over to the next
+     post — the pause is what makes it read as writing rather than a loop. */
   useEffect(() => {
-    if (REDUCED_MOTION) return;
-    const flip = uid => flips.current.push(setTimeout(() => {
-      setRows(rs => rs.map(r => (r.uid === uid ? { ...r, status: 'posted' } : r)));
-    }, 1900));
-    flip(3); /* the initial queued row resolves too */
+    if (!active || REDUCED_MOTION) return;
+    setTyped(0);
+    let t = 0;
     const iv = setInterval(() => {
-      const item = FEED_POOL[nextIdx.current % FEED_POOL.length];
-      nextIdx.current += 1;
-      const uid = nextUid.current++;
-      setRows(rs => [...rs, { ...item, uid, time: fmtTime(Date.now()), status: 'queued' }].slice(-4));
-      flip(uid);
-    }, 3600);
-    return () => { clearInterval(iv); flips.current.forEach(clearTimeout); };
-  }, []);
+      t += 1;
+      if (t <= full) setTyped(t);
+      else if (t > full + 30) { t = 0; setPair(p => p + 1); }
+    }, 34);
+    return () => clearInterval(iv);
+  }, [active, pair, full]);
+
+  const live = active && !REDUCED_MOTION;
+  const text = live ? demo.reply.slice(0, typed) : demo.reply;
+  const done = text.length >= full;
+  /* Reserved height, so the tile does not breathe as the reply types
+     itself out — but a floor and a ceiling rather than a fixed height,
+     so a width this was not sized for wraps to a second line instead of
+     losing the bottom half of the sentence. */
+  const body = {
+    fontFamily: 'Barlow, sans-serif', fontWeight: 300,
+    fontSize: compact ? '0.7rem' : '0.76rem', lineHeight: 1.45,
+    minHeight: compact ? 34 : 20, maxHeight: compact ? 34 : 40, overflow: 'hidden',
+  };
 
   return (
-    <div className="panel ticks" {...tiltHandlers(3.5)}
-      style={{ borderRadius: 6, padding: 0, overflow: 'hidden', transition: 'transform 0.25s ease', willChange: 'transform' }}>
-      {/* Terminal header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 20px', borderBottom: `1px solid rgba(${GREEN_RGB},0.14)`, background: `rgba(${GREEN_RGB},0.04)` }}>
-        <div style={{ width: 7, height: 7, borderRadius: '50%', background: GREEN, animation: 'pulse-dot 1.8s ease-in-out infinite', flexShrink: 0 }} />
-        <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.66rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'white' }}>Live engine activity</span>
-        <span style={{ marginLeft: 'auto', fontFamily: MONO, fontWeight: 400, fontSize: '0.6rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)' }}>preview</span>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? 7 : 9, height: '100%' }}>
+      <div>
+        <span style={{ ...cellLabel, display: 'block', marginBottom: 3, color: 'rgba(255,255,255,0.3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          Post · {demo.channel}
+        </span>
+        <p style={{ ...body, color: 'rgba(255,255,255,0.48)' }}>{demo.post}</p>
+      </div>
+      <div style={{ borderTop: `1px solid rgba(${GREEN_RGB},0.1)`, paddingTop: compact ? 7 : 9 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+          <span style={{ ...cellLabel, color: `rgba(${GREEN_RGB},0.75)`, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            Comment · acct_0148
+          </span>
+          <span style={{
+            ...cellLabel, marginLeft: 'auto', fontWeight: 600, flexShrink: 0,
+            color: done ? GREEN : 'rgba(255,255,255,0.28)', transition: 'color 0.3s ease',
+          }}>{done ? 'sent' : 'writing'}</span>
+        </div>
+        <p style={{ ...body, color: 'rgba(255,255,255,0.78)' }}>
+          {text}
+          {live && !done && <span className="cursor" style={{ width: 5, height: '0.72em', marginLeft: 3 }} />}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ── 04 · Mass Reactions: the arrival curve, in miniature ──
+   Positions are clustered early and thinned out after, the shape the
+   engine's own human curve produces — see the Functions page demo. */
+const REACT_ARRIVALS = [0.05, 0.08, 0.12, 0.16, 0.21, 0.27, 0.34, 0.42, 0.52, 0.64, 0.78, 0.93];
+
+function ReactBody({ active, compact }) {
+  const step = useStep(active, 360, 15);
+  const chips = compact ? [['🔥', 24], ['👍', 17]] : [['🔥', 24], ['👍', 17], ['🚀', 11]];
+  const arrived = Math.min(REACT_ARRIVALS.length, step + 1);
+  const share = arrived / REACT_ARRIVALS.length;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? 7 : 9, height: '100%' }}>
+      <div style={{ display: 'flex', gap: 5 }}>
+        {chips.map(([emoji, n]) => (
+          <span key={emoji} style={{
+            display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 6px', borderRadius: 3,
+            border: `1px solid rgba(${GREEN_RGB},0.22)`, background: `rgba(${GREEN_RGB},0.06)`,
+            fontFamily: MONO, fontWeight: 500, fontSize: '0.55rem', lineHeight: 1, color: 'rgba(255,255,255,0.72)',
+          }}>
+            <span style={{ fontSize: '0.68rem' }}>{emoji}</span>{Math.max(1, Math.round(n * share))}
+          </span>
+        ))}
+      </div>
+      <div style={{
+        position: 'relative', height: compact ? 18 : 22, borderRadius: 3,
+        background: 'rgba(0,0,0,0.3)', border: `1px solid rgba(${GREEN_RGB},0.1)`,
+      }}>
+        {REACT_ARRIVALS.map((x, i) => (
+          <span key={i} aria-hidden="true" style={{
+            position: 'absolute', top: '50%', left: `calc(${x * 100}% - 2.5px)`,
+            width: 5, height: 5, borderRadius: '50%', background: GREEN,
+            boxShadow: `0 0 8px rgba(${GREEN_RGB},0.7)`,
+            opacity: i < arrived ? 1 : 0,
+            transform: i < arrived ? 'translateY(-50%) scale(1)' : 'translateY(-50%) scale(0)',
+            transition: 'transform 0.4s cubic-bezier(0.16,1,0.3,1), opacity 0.4s ease',
+          }} />
+        ))}
+      </div>
+      <span style={{ ...cellLabel, marginTop: 'auto', color: 'rgba(255,255,255,0.34)' }}>
+        {arrived} accounts · first hour
+      </span>
+    </div>
+  );
+}
+
+/* ── 05 · NeuroDialogs: a reply, written while you watch ── */
+function DialogBody({ active, compact }) {
+  const step = useStep(active, 700, 8);
+  const incoming = compact ? 'what do you build?' : 'saw your comment — what do you actually build?';
+  const outgoing = compact ? 'rollup tooling. you?' : 'mostly tooling around rollup infra. you?';
+  const typing = step >= 2 && step < 4;
+  const replied = step >= 4;
+
+  const bubble = (out, text, on) => (
+    <div style={{ display: 'flex', justifyContent: out ? 'flex-end' : 'flex-start' }}>
+      <span style={{
+        maxWidth: '94%', padding: '5px 8px', borderRadius: 4,
+        background: out ? `rgba(${GREEN_RGB},0.1)` : 'rgba(255,255,255,0.05)',
+        border: `1px solid ${out ? `rgba(${GREEN_RGB},0.24)` : 'rgba(255,255,255,0.08)'}`,
+        fontFamily: 'Barlow, sans-serif', fontWeight: 300,
+        fontSize: compact ? '0.66rem' : '0.72rem', lineHeight: 1.4,
+        color: out ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.55)',
+        opacity: on ? 1 : 0, transform: on ? 'none' : 'translateY(5px)',
+        transition: 'opacity 0.35s ease, transform 0.35s ease',
+      }}>{text}</span>
+    </div>
+  );
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 5, height: '100%', justifyContent: 'center' }}>
+      {bubble(false, incoming, true)}
+      {/* the typing row holds its height whether or not it is showing,
+          so the thread never jumps as the reply lands */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', height: 12 }}>
+        <span className={typing ? 'dots' : undefined} style={{
+          ...cellLabel, color: `rgba(${GREEN_RGB},0.6)`,
+          opacity: typing ? 1 : 0, transition: 'opacity 0.25s ease',
+        }}>typing</span>
+      </div>
+      {bubble(true, outgoing, replied)}
+    </div>
+  );
+}
+
+const SHOWCASE_BODIES = {
+  'channel-parser': ParserBody,
+  'active-warmup': WarmupBody,
+  'neurocommenting': CommentBody,
+  'mass-reactions': ReactBody,
+  'neurodialogs': DialogBody,
+};
+
+/* ── The card itself ── */
+function EngineGrid({ setPage, compact }) {
+  const ref = useRef(null);
+  const onScreen = useOnScreen(ref);
+  const [idx, setIdx] = useState(0);
+  const [hover, setHover] = useState(null);
+  const [pinned, setPinned] = useState(false);
+
+  const focus = hover === null ? idx : hover;
+  const auto = onScreen && !pinned && hover === null && !REDUCED_MOTION;
+
+  useEffect(() => {
+    if (!auto) return;
+    const iv = setInterval(() => setIdx(i => (i + 1) % SHOWCASE.length), DWELL);
+    return () => clearInterval(iv);
+  }, [auto]);
+
+  /* Clicking the tile that is already pinned hands the pipeline back. */
+  const pick = i => {
+    if (pinned && idx === i) { setPinned(false); return; }
+    setIdx(i);
+    setPinned(true);
+  };
+
+  const current = SHOWCASE[focus];
+  const currentMod = MODULE_BY_KEY[current.key];
+  const CurrentIcon = currentMod.icon;
+
+  return (
+    <div ref={ref} className="panel ticks" style={{ borderRadius: 6, padding: 0, overflow: 'hidden' }}>
+
+      {/* header — the simulated marker sits here, read before the picture */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 10, padding: '13px 16px', flexWrap: 'wrap',
+        borderBottom: `1px solid rgba(${GREEN_RGB},0.14)`, background: `rgba(${GREEN_RGB},0.04)`,
+      }}>
+        <span aria-hidden="true" style={{
+          width: 7, height: 7, borderRadius: '50%', background: GREEN, flexShrink: 0,
+          animation: REDUCED_MOTION ? 'none' : 'pulse-dot 1.8s ease-in-out infinite',
+        }} />
+        <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.64rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'white' }}>
+          Inside the panel
+        </span>
+        <span style={{
+          marginLeft: 'auto', fontFamily: MONO, fontWeight: 500, fontSize: '0.52rem',
+          letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.75)',
+          background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: 3, padding: '4px 7px', lineHeight: 1, whiteSpace: 'nowrap',
+        }}>{DEMO_LABEL}</span>
       </div>
 
-      {/* Log rows */}
-      <div>
-        {rows.map(item => (
-          <div key={item.uid} className="feed-row" style={{ padding: '13px 20px', borderBottom: `1px solid rgba(${GREEN_RGB},0.08)` }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-              <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.64rem', color: 'rgba(255,255,255,0.28)', flexShrink: 0 }}>{item.time}</span>
-              <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.72rem', color: GREEN, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>{item.channel}</span>
-              <span style={{
-                marginLeft: 'auto', flexShrink: 0, fontFamily: MONO, fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.1em', textTransform: 'uppercase',
-                color: item.status === 'posted' ? GREEN : 'rgba(255,255,255,0.38)',
-                transition: 'color 0.3s ease',
-              }}>[{item.status}]</span>
-            </div>
-            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: 'rgba(255,255,255,0.62)', lineHeight: 1.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>"{item.comment}"</p>
+      {/* the five modules */}
+      <div role="group" aria-label="Module demos — simulated"
+        style={{
+          display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+          gap: compact ? 8 : 10, padding: compact ? '12px 12px' : '14px 16px',
+        }}>
+        {SHOWCASE.map((s, i) => {
+          const mod = MODULE_BY_KEY[s.key];
+          const Icon = mod.icon;
+          const Body = SHOWCASE_BODIES[s.key];
+          const on = onScreen && focus === i;
+          const isPinned = pinned && idx === i;
+          return (
+            <button key={s.key} type="button" className="eg-cell"
+              onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}
+              onFocus={() => setHover(i)} onBlur={() => setHover(null)}
+              onClick={() => pick(i)}
+              aria-pressed={isPinned}
+              aria-label={`${mod.name} — simulated example`}
+              style={{
+                gridColumn: s.wide ? 'span 2' : 'span 1',
+                /* one height for the four small tiles, so the grid reads as a
+                   grid rather than as four cards that happened to land near
+                   each other — the tallest of them sets it */
+                minHeight: s.wide ? (compact ? 152 : 140) : (compact ? 116 : 138),
+                position: 'relative', overflow: 'hidden', textAlign: 'left',
+                display: 'flex', flexDirection: 'column',
+                padding: compact ? '9px 10px' : '10px 12px', borderRadius: 5,
+                border: `1px solid rgba(${GREEN_RGB},${on ? 0.42 : 0.12})`,
+                background: on
+                  ? `linear-gradient(180deg, rgba(${GREEN_RGB},0.075), rgba(0,0,0,0.3))`
+                  : 'rgba(0,0,0,0.26)',
+                boxShadow: on ? `0 0 26px rgba(${GREEN_RGB},0.12)` : 'none',
+                opacity: on ? 1 : 0.6,
+                transition: 'border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease',
+              }}>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: compact ? 7 : 9 }}>
+                {!compact && (
+                  <span style={{ ...cellLabel, flexShrink: 0, color: on ? `rgba(${GREEN_RGB},0.8)` : 'rgba(255,255,255,0.22)' }}>
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                )}
+                <Icon size={12} color={on ? GREEN : `rgba(${GREEN_RGB},0.5)`} />
+                <span style={{
+                  ...cellLabel, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  color: on ? 'white' : 'rgba(255,255,255,0.5)',
+                }}>{mod.name}</span>
+                {!compact && (
+                  <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
+                    <span aria-hidden="true" style={{
+                      width: 4, height: 4, borderRadius: '50%',
+                      background: on ? GREEN : 'rgba(255,255,255,0.18)',
+                      animation: on && !REDUCED_MOTION ? 'pulse-dot 1.8s ease-in-out infinite' : 'none',
+                    }} />
+                    <span style={{ ...cellLabel, fontSize: '0.46rem', color: on ? `rgba(${GREEN_RGB},0.7)` : 'rgba(255,255,255,0.2)' }}>
+                      {s.status}
+                    </span>
+                  </span>
+                )}
+              </div>
+
+              <div style={{ flex: 1, minWidth: 0, minHeight: 0 }}>
+                <Body active={on} compact={compact} />
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* what you are looking at, and the way into it */}
+      <div style={{
+        borderTop: `1px solid rgba(${GREEN_RGB},0.12)`, background: `rgba(${GREEN_RGB},0.03)`,
+        padding: compact ? '13px 12px 12px' : '14px 16px 13px',
+        display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap',
+      }}>
+        <div style={{ flex: '1 1 210px', minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
+            <CurrentIcon size={13} color={GREEN} />
+            <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.6rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'white' }}>
+              {currentMod.name}
+            </span>
+            {pinned && (
+              <span style={{ ...cellLabel, fontSize: '0.46rem', color: `rgba(${GREEN_RGB},0.6)` }}>pinned</span>
+            )}
           </div>
-        ))}
-        {/* Listening row — the engine never sleeps */}
-        <div style={{ display: 'flex', alignItems: 'center', padding: '11px 20px', borderBottom: `1px solid rgba(${GREEN_RGB},0.08)` }}>
-          <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.66rem', letterSpacing: '0.06em', color: `rgba(${GREEN_RGB},0.55)` }}>
-            {'> '}engine listening<span className="dots" />
+          <p style={{
+            fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem',
+            lineHeight: 1.5, color: 'rgba(255,255,255,0.5)', minHeight: compact ? 48 : 36,
+          }}>{current.line}</p>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 7, marginLeft: 'auto' }}>
+          <button type="button" className="quiet-link" onClick={() => setPage('functions', 'fn-' + current.key)}>
+            Open module <ArrowUpRight size={11} />
+          </button>
+          <span style={{ ...cellLabel, fontSize: '0.46rem', color: 'rgba(255,255,255,0.26)', textAlign: 'right' }}>
+            {compact ? 'Tap a module to replay it' : 'Hover to replay · click to pin'}
           </span>
-          <span className="cursor" style={{ width: 6, height: '0.75em', marginLeft: 8 }} />
         </div>
       </div>
 
-      {/* Stat readout */}
-      <StatReadout />
+      {/* dwell bar — shows the pipeline is running itself, and stops when you take over */}
+      <div aria-hidden="true" style={{ height: 2, background: `rgba(${GREEN_RGB},0.08)` }}>
+        {auto && (
+          <div key={idx} className="eg-dwell" style={{
+            height: '100%', background: `linear-gradient(90deg, rgba(${GREEN_RGB},0.5), var(--g-bright))`,
+            animationDuration: DWELL + 'ms',
+          }} />
+        )}
+      </div>
     </div>
   );
 }
@@ -234,10 +559,10 @@ function Hero({ setPage }) {
           </motion.p>
         </div>
 
-        {/* Right column — engine log terminal */}
+        {/* Right column — the five modules, each running its own demo */}
         <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, delay: 0.4 }}
           style={{ flex: '1 1 420px', minWidth: 0 }}>
-          <LiveTerminal />
+          <EngineGrid setPage={setPage} compact={isMobile} />
         </motion.div>
       </div>
     </section>

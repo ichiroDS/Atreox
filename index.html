@@ -475,16 +475,24 @@
     }
     .cta-breathe { animation: cta-breathe 3s ease-in-out infinite; }
 
-    /* ── Live terminal feed: new log rows slide in and flash ── */
-    @keyframes feed-in {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
+    /* ── Hero engine grid: five module demos in one card ──
+       The tile's own lit/dim states are inline (they follow which module
+       has focus); what lives here is the chrome that CSS does better —
+       the focus ring, the parser's scan sweep, and the bar that shows
+       how long the pipeline will hold this stage before moving on. ── */
+    .eg-cell { -webkit-tap-highlight-color: transparent; }
+    .eg-cell:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+
+    @keyframes eg-scan {
+      0%   { top: -8%;  opacity: 0; }
+      15%  { opacity: 0.9; }
+      85%  { opacity: 0.9; }
+      100% { top: 104%; opacity: 0; }
     }
-    @keyframes feed-flash {
-      from { background-color: rgba(0,217,255,0.09); }
-      to   { background-color: transparent; }
-    }
-    .feed-row { animation: feed-in 0.5s cubic-bezier(0.16,1,0.3,1) both, feed-flash 1.4s ease-out both; }
+    .eg-scan { animation: eg-scan 2.6s cubic-bezier(0.4,0,0.6,1) infinite; }
+
+    @keyframes eg-dwell { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    .eg-dwell { transform-origin: left center; animation-name: eg-dwell; animation-timing-function: linear; animation-fill-mode: forwards; }
 
     /* ── Terminal "listening…" animated ellipsis ── */
     @keyframes dots {
@@ -494,12 +502,6 @@
       75%  { content: '...'; }
     }
     .dots::after { content: ''; animation: dots 1.6s steps(1) infinite; }
-
-    /* ── Stat number tick: brief bright flash when a live value updates ── */
-    @keyframes stat-tick {
-      from { color: var(--g-bright); text-shadow: 0 0 26px rgba(0,217,255,0.65); }
-    }
-    .stat-tick { animation: stat-tick 0.9s ease-out; }
 
     /* ── Featured pricing card: slow pulsing halo ── */
     @keyframes featured-pulse {
@@ -551,8 +553,9 @@
 
     @media (prefers-reduced-motion: reduce) {
       .splash-ticks, .splash-sweep, .splash-core, .cursor { animation: none; }
-      .glow-word, .cta-breathe, .feed-row, .dots::after,
-      .stat-tick, .featured-pulse, .stage-body { animation: none; }
+      .glow-word, .cta-breathe, .dots::after,
+      .eg-scan, .eg-dwell,
+      .featured-pulse, .stage-body { animation: none; }
       .glow-word { text-shadow: 0 0 18px rgba(0,217,255,0.35); }
       .btn-solid::after { display: none; }
     }
