@@ -1,3 +1,4 @@
+node_modules/
 
 # design-sync machine state (see .design-sync/ docs — durable files ARE committed)
 .ds-sync/

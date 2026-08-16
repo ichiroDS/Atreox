@@ -365,6 +365,14 @@ const PIPELINE = [
    Each guide is a page of its own on the Guides reader: the index
    lists them, clicking one opens it with the chapter list beside it.
 
+   `slug`    the internal id. It is what the old `#guide-<slug>` deep
+             links used, so it must not be renamed — scripts/prerender.mjs
+             keeps redirecting those anchors by it.
+   `url`     the last segment of the guide's own page, /guides/<url>.
+             THIS IS A PUBLIC, INDEXED ADDRESS: changing one costs the
+             page its ranking and breaks every link pointing at it. The
+             two prep guides are the ones strangers arrive on from
+             search, so their wording is deliberate.
    `short`   one line for the index card — keep it to a few words.
    `intro`   the reader's opening paragraph. Module guides fall back to
              their module's own write-up in catalog, so only the two
@@ -374,11 +382,17 @@ const PIPELINE = [
              (null for the prep guides, about things you buy elsewhere).
    `video`   a URL once one is recorded; the reader adds a Watch button
              when it is there and says nothing at all when it is not.
+
+   Every field below is read at build time by scripts/prerender.mjs,
+   which writes one static HTML page per guide. This table stays the
+   only place the text lives; nothing here is copied into those files
+   by hand.
 ─────────────────────────────────────────────────────────────────── */
 const GUIDES = [
   /* ── Before you start ── */
   {
     slug: 'buying-accounts',
+    url: 'buying-telegram-accounts',
     group: 'setup',
     title: 'Buying Telegram accounts',
     short: 'What to buy, what to avoid',
@@ -396,6 +410,7 @@ const GUIDES = [
   },
   {
     slug: 'proxies',
+    url: 'proxies-for-telegram-accounts',
     group: 'setup',
     title: 'Choosing and connecting proxies',
     short: 'One per account, done right',
@@ -415,6 +430,7 @@ const GUIDES = [
   /* ── Module guides ── */
   {
     slug: 'account-manager',
+    url: 'account-manager',
     group: 'module',
     short: 'Import, check, keep alive',
     title: 'Account Manager',
@@ -429,6 +445,7 @@ const GUIDES = [
   },
   {
     slug: 'profile-templates',
+    url: 'profile-templates',
     group: 'module',
     short: 'One face across a batch',
     title: 'Profile Templates',
@@ -443,6 +460,7 @@ const GUIDES = [
   },
   {
     slug: 'active-warmup',
+    url: 'active-warmup',
     group: 'module',
     short: 'History before it earns',
     title: 'Active Warmup',
@@ -457,6 +475,7 @@ const GUIDES = [
   },
   {
     slug: 'channel-parser',
+    url: 'channel-parser',
     group: 'module',
     short: 'Build the target list',
     title: 'Channel Parser',
@@ -471,6 +490,7 @@ const GUIDES = [
   },
   {
     slug: 'group-parser',
+    url: 'group-parser',
     group: 'module',
     short: 'Rooms worth walking into',
     title: 'Group Parser',
@@ -485,6 +505,7 @@ const GUIDES = [
   },
   {
     slug: 'neurocommenting',
+    url: 'neurocommenting',
     group: 'module',
     short: 'Empty list to live comments',
     title: 'Neurocommenting',
@@ -499,6 +520,7 @@ const GUIDES = [
   },
   {
     slug: 'neurodialogs',
+    url: 'neurodialogs',
     group: 'module',
     short: 'DMs at a human pace',
     title: 'NeuroDialogs',
@@ -513,6 +535,7 @@ const GUIDES = [
   },
   {
     slug: 'mass-reactions',
+    url: 'mass-reactions',
     group: 'module',
     short: 'A pass that lands right',
     title: 'Mass Reactions',
@@ -528,13 +551,34 @@ const GUIDES = [
 ];
 
 const GUIDE_BY_SLUG = Object.fromEntries(GUIDES.map(g => [g.slug, g]));
+const GUIDE_BY_URL  = Object.fromEntries(GUIDES.map(g => [g.url, g]));
 const GUIDE_BY_MODULE = Object.fromEntries(
   GUIDES.filter(g => g.module).map(g => [g.module, g])
 );
+
+/* The one place a guide's address is spelled. Everything that links to
+   a guide — the index tiles, the reader's rail, Functions, the router,
+   the sitemap — goes through here, so the routes and the prerendered
+   files can never point at each other wrongly. Takes a guide or a slug. */
+const guideHref = g => {
+  const guide = typeof g === 'string' ? GUIDE_BY_SLUG[g] : g;
+  return guide ? '/guides/' + guide.url : '/guides';
+};
+
+/* Reverse of the above, for the router: a pathname back to a guide.
+   Unknown last segments return null, which the page treats as the index. */
+const guideFromPath = pathname => {
+  const m = /^\/guides\/([^/?#]+)\/?$/.exec(pathname || '');
+  if (!m) return null;
+  let seg = m[1];
+  try { seg = decodeURIComponent(seg); } catch (_) {}
+  return GUIDE_BY_URL[seg] || null;
+};
 
 Object.assign(window, {
   MODULES, MODULE_BY_KEY, PRICED_MODULES, INCLUDED_MODULES,
   FULL_MONTHLY, FULL_YEARLY, YEARLY_SAVING, CHEAPEST_MODULE, eur,
   PIPELINE,
-  GUIDES, GUIDE_BY_SLUG, GUIDE_BY_MODULE,
+  GUIDES, GUIDE_BY_SLUG, GUIDE_BY_URL, GUIDE_BY_MODULE,
+  guideHref, guideFromPath,
 });

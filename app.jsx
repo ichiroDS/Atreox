@@ -6,6 +6,7 @@ const {
   HomePage,
   FunctionsPage, PricingPage, GuidesPage,
   PrivacyPage, TermsPage,
+  guideHref, guideFromPath,
 } = window;
 
 /* ── Error Boundary ── */
@@ -56,6 +57,24 @@ function scrollToAnchor(id) {
   requestAnimationFrame(() => requestAnimationFrame(attempt));
 }
 
+/* Each guide has its own path, /guides/<url>, served as a prerendered
+   file. Everything under /guides/ is still the Guides page — the page
+   reads the last segment itself to decide which guide is open. */
+function pageFromPath(pathname) {
+  if (pathname === '/guides' || pathname.indexOf('/guides/') === 0) return 'guides';
+  return PATH_TO_PAGE[pathname] || 'home';
+}
+
+/* Where a navigation lands, as a URL. A guide is a real address rather
+   than an anchor on /guides, so `guide-<slug>` — the shape Functions
+   and the old deep links use — resolves to that address here. */
+function pathFor(page, anchor) {
+  if (anchor && anchor.indexOf('guide-') === 0) {
+    return guideHref(anchor.slice(6));
+  }
+  return (PAGE_TO_PATH[page] || '/') + (anchor ? '#' + anchor : '');
+}
+
 function getInitialPage() {
   /* Redirect legacy ?p= URLs to clean paths */
   const params = new URLSearchParams(location.search);
@@ -65,7 +84,7 @@ function getInitialPage() {
     history.replaceState({ page: legacy || 'home' }, '', path);
     return legacy || 'home';
   }
-  return PATH_TO_PAGE[location.pathname] || 'home';
+  return pageFromPath(location.pathname);
 }
 
 function App() {
@@ -73,6 +92,11 @@ function App() {
 
   /* App is mounted — dismiss the boot splash (min display time handled there) */
   React.useEffect(() => {
+    /* The prerendered guide this page shipped with has done its job the
+       moment React has something to put in its place. */
+    const pre = document.getElementById('prerendered');
+    if (pre && pre.parentNode) pre.parentNode.removeChild(pre);
+
     if (typeof window.__hideSplash === 'function') window.__hideSplash();
     /* honour a deep link like /functions#fn-neurodialogs on first load */
     if (location.hash.length > 1) scrollToAnchor(location.hash.slice(1));
@@ -80,7 +104,7 @@ function App() {
 
   React.useEffect(() => {
     const onPop = (e) => {
-      const p = e.state?.page || PATH_TO_PAGE[location.pathname] || 'home';
+      const p = e.state?.page || pageFromPath(location.pathname);
       setPage(p);
       const anchor = e.state?.anchor || (location.hash.length > 1 ? location.hash.slice(1) : null);
       if (anchor) scrollToAnchor(anchor);
@@ -91,14 +115,23 @@ function App() {
   }, []);
 
   /* `anchor` lets one page hand off to a specific section of another —
-     Functions → a guide card, Guides → a module write-up, the home
-     pipeline → either. It's part of the URL so the landing spot survives
-     a copied link and the back button. */
+     Functions → a guide, Guides → a module write-up, the home pipeline
+     → either. It's part of the URL so the landing spot survives a
+     copied link and the back button.
+
+     A `guide-<slug>` anchor is the exception: guides are pages now, so
+     it resolves to /guides/<url> and there is nothing to scroll to. */
   const navigate = (p, anchor) => {
-    const path = (PAGE_TO_PATH[p] || '/') + (anchor ? '#' + anchor : '');
+    const isGuide = !!anchor && anchor.indexOf('guide-') === 0;
+    const path = pathFor(p, anchor);
     setPage(p);
-    history.pushState({ page: p, anchor: anchor || null }, '', path);
-    if (anchor) scrollToAnchor(anchor);
+    history.pushState({ page: p, anchor: isGuide ? null : (anchor || null) }, '', path);
+    /* pushState fires nothing on its own, and a page that reads the URL
+       for its own sub-state (Guides does) has no other way to notice a
+       navigation that doesn't remount it — nav "Guides" while already
+       inside a guide, for one. */
+    try { window.dispatchEvent(new Event('atreox:navigate')); } catch (_) {}
+    if (anchor && !isGuide) scrollToAnchor(anchor);
     else window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

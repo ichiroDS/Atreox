@@ -2,7 +2,13 @@
   "name": "atreox-ai",
   "version": "1.0.0",
   "engines": { "node": ">=18" },
+  "scripts": {
+    "build": "node scripts/prerender.mjs"
+  },
   "dependencies": {
     "stripe": "^16.0.0"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2"
   }
 }

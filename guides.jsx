@@ -17,6 +17,12 @@
    The page says nothing about which guides have been filmed. A video
    URL in the catalog adds a Watch button; no URL simply means no
    button, and the written guide is the guide either way.
+
+   EVERY link into a guide is a real <a href="/guides/<url>">, and every
+   one of those addresses is a file scripts/prerender.mjs writes from
+   this same catalog at build time. The clicks are intercepted so the
+   reader still swaps in place, but nothing here depends on that: middle
+   click, copy-link and a crawler that runs no JS all land on the page.
 ══════════════════════════════════════════════════════════════════ */
 
 const React = window.React;
@@ -26,6 +32,7 @@ const {
   ArrowUpRight, Check, Play, BookOpen, ChevronRight, Shield, Zap, X,
   PageHero, PageSection, SectionLockup, Pill, CrossLinks, FooterBar,
   MONO, SERIF, GUIDES, MODULE_BY_KEY, eur, REDUCED_MOTION,
+  guideHref, guideFromPath, GUIDE_BY_SLUG,
 } = window;
 
 const GREEN = window.ACCENT;
@@ -33,11 +40,24 @@ const GREEN_RGB = window.ACCENT_RGB;
 const CONTACT = 'hello@atreoxai.com';
 const DASHBOARD_URL = 'https://app.atreoxai.com';
 
-const slugFromHash = () => {
+/* Which guide the current URL is asking for. The path is the answer;
+   the hash is only still read because a link from before guides had
+   their own pages may reach the app after the redirect in index.html
+   has already run (an in-page navigation, say). */
+const slugFromLocation = () => {
+  const byPath = guideFromPath(window.location.pathname);
+  if (byPath) return byPath.slug;
   const h = window.location.hash;
-  if (h && h.indexOf('#guide-') === 0) return h.slice(7);
+  if (h && h.indexOf('#guide-') === 0 && GUIDE_BY_SLUG[h.slice(7)]) return h.slice(7);
   return null;
 };
+
+/* A left click with no modifier is ours to handle; anything else —
+   middle click, ctrl/cmd, shift, a right-click menu — is the browser's,
+   and the href is a real address, so letting it through is correct. */
+const plainClick = e =>
+  !e.defaultPrevented && e.button === 0 &&
+  !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
 
 /* ══════════════════════════════════════════════════════════════════
    THE INDEX
@@ -53,11 +73,13 @@ function GuideTile({ guide, index, inView, onOpen }) {
       initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5, delay: Math.min(index, 7) * 0.06 }}
       className="float-wrap" style={{ animationDelay: (index % 4) * 0.7 + 's' }}>
-      <button type="button" onClick={() => onOpen(guide.slug)}
+      <a href={guideHref(guide)}
+        onClick={e => { if (plainClick(e)) { e.preventDefault(); onOpen(guide.slug); } }}
         className="panel panel-hover ticks guide-tile"
         style={{
           width: '100%', textAlign: 'left', padding: '24px 22px 20px',
           display: 'flex', flexDirection: 'column', gap: 14, background: 'transparent',
+          textDecoration: 'none', color: 'inherit', cursor: 'pointer',
         }}>
         <span aria-hidden="true" className="guide-tile-chip" style={{
           width: 44, height: 44, borderRadius: 6,
@@ -88,7 +110,7 @@ function GuideTile({ guide, index, inView, onOpen }) {
           )}
           <ArrowUpRight size={15} color={GREEN} style={{ marginLeft: 'auto' }} />
         </span>
-      </button>
+      </a>
     </motion.div>
   );
 }
@@ -196,7 +218,8 @@ function ReaderNav({ slug, onOpen, compact }) {
     const mod = g.module ? MODULE_BY_KEY[g.module] : null;
     const Icon = mod ? mod.icon : BookOpen;
     return (
-      <button key={g.slug} type="button" onClick={() => onOpen(g.slug)}
+      <a key={g.slug} href={guideHref(g)}
+        onClick={e => { if (plainClick(e)) { e.preventDefault(); onOpen(g.slug); } }}
         aria-current={on ? 'page' : undefined}
         className="guide-nav-item"
         style={{
@@ -205,6 +228,7 @@ function ReaderNav({ slug, onOpen, compact }) {
           border: `1px solid ${on ? `rgba(${GREEN_RGB},0.4)` : 'transparent'}`,
           background: on ? `rgba(${GREEN_RGB},0.1)` : 'transparent',
           whiteSpace: compact ? 'nowrap' : 'normal',
+          textDecoration: 'none', cursor: 'pointer',
         }}>
         <Icon size={14} color={on ? GREEN : 'rgba(255,255,255,0.4)'} />
         <span style={{
@@ -212,7 +236,7 @@ function ReaderNav({ slug, onOpen, compact }) {
           fontSize: '0.9rem', lineHeight: 1.35, color: on ? 'white' : 'rgba(255,255,255,0.6)',
         }}>{g.title}</span>
         {on && <Check size={14} color={GREEN} />}
-      </button>
+      </a>
     );
   };
 
@@ -327,10 +351,11 @@ function GuideReader({ slug, onOpen, onClose, setPage }) {
     <div style={{ paddingTop: 128 }}>
       <div style={{ maxWidth: 1340, margin: '0 auto', padding: '0 5%' }}>
 
-        <button type="button" onClick={onClose} className="quiet-link quiet-link-dim" style={{ marginBottom: 26 }}>
+        <a href="/guides" onClick={e => { if (plainClick(e)) { e.preventDefault(); onClose(); } }}
+          className="quiet-link quiet-link-dim" style={{ marginBottom: 26 }}>
           <span aria-hidden="true" style={{ transform: 'rotate(180deg)', display: 'inline-flex' }}><ChevronRight size={12} /></span>
           All guides
-        </button>
+        </a>
 
         <div style={{ display: 'flex', gap: 30, alignItems: 'flex-start', flexWrap: compact ? 'wrap' : 'nowrap' }}>
 
@@ -440,26 +465,29 @@ function GuideReader({ slug, onOpen, onClose, setPage }) {
    THE PAGE
 ══════════════════════════════════════════════════════════════════ */
 function GuidesPage({ setPage }) {
-  const [slug, setSlug] = useState(slugFromHash);
+  const [slug, setSlug] = useState(slugFromLocation);
 
-  /* The open guide is part of the URL, so a link into one from
-     Functions lands on it and the back button leaves it again. */
+  /* The open guide IS the URL — /guides/<url> is a page of its own that
+     the server can serve on its own. Which one is showing is therefore
+     read back off the address, both when the browser moves through
+     history and when the app navigates here without remounting us. */
   useEffect(() => {
-    const onPop = () => setSlug(slugFromHash());
-    window.addEventListener('popstate', onPop);
-    return () => window.removeEventListener('popstate', onPop);
+    const sync = () => setSlug(slugFromLocation());
+    window.addEventListener('popstate', sync);
+    window.addEventListener('atreox:navigate', sync);
+    return () => {
+      window.removeEventListener('popstate', sync);
+      window.removeEventListener('atreox:navigate', sync);
+    };
   }, []);
 
-  const open = s => {
-    setSlug(s);
-    try { window.history.pushState({ page: 'guides', anchor: 'guide-' + s }, '', '/guides#guide-' + s); } catch (_) {}
+  const go = (next, path) => {
+    setSlug(next);
+    try { window.history.pushState({ page: 'guides', anchor: null }, '', path); } catch (_) {}
     window.scrollTo({ top: 0, behavior: REDUCED_MOTION ? 'auto' : 'smooth' });
   };
-  const close = () => {
-    setSlug(null);
-    try { window.history.pushState({ page: 'guides', anchor: null }, '', '/guides'); } catch (_) {}
-    window.scrollTo({ top: 0, behavior: REDUCED_MOTION ? 'auto' : 'smooth' });
-  };
+  const open = s => go(s, guideHref(s));
+  const close = () => go(null, '/guides');
 
   return (
     <div>

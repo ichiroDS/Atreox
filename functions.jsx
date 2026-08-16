@@ -342,9 +342,17 @@ function ModuleSection({ mod, index, setPage }) {
             </button>
 
             {guide && (
-              <button type="button" onClick={() => setPage('guides', 'guide-' + guide.slug)}
+              /* a real address — the guide is its own page, so this is a
+                 link a crawler follows and a reader can copy, with the
+                 click intercepted only to keep the transition in-app */
+              <a href={window.guideHref(guide)}
+                onClick={e => {
+                  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                  e.preventDefault();
+                  setPage('guides', 'guide-' + guide.slug);
+                }}
                 className="panel panel-hover"
-                style={{ padding: '16px 20px', textAlign: 'left', background: 'transparent', width: '100%', display: 'flex', alignItems: 'center', gap: 12 }}>
+                style={{ padding: '16px 20px', textAlign: 'left', background: 'transparent', width: '100%', display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
                 <BookOpen size={16} color={GREEN} style={{ flexShrink: 0 }} />
                 <span style={{ flex: 1, minWidth: 0 }}>
                   <span style={{ display: 'block', fontFamily: MONO, fontWeight: 500, fontSize: '0.6rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'white' }}>
@@ -355,7 +363,7 @@ function ModuleSection({ mod, index, setPage }) {
                   </span>
                 </span>
                 <ArrowUpRight size={13} color={`rgba(${GREEN_RGB},0.6)`} />
-              </button>
+              </a>
             )}
           </div>
         </div>
