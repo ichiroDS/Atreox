@@ -362,14 +362,18 @@ const PIPELINE = [
 ];
 
 /* ── Guides ───────────────────────────────────────────────────────
-   `video: null` means it has not been filmed yet. The Guides page is
-   built around that being the normal case — an unfilmed guide renders
-   as an honest, non-clickable "not filmed yet" card, and turns into a
-   real link the moment a URL is dropped in here. Nothing else has to
-   change when one gets recorded.
+   Each guide is a page of its own on the Guides reader: the index
+   lists them, clicking one opens it with the chapter list beside it.
 
-   `module` links a guide back to its Functions section (null for the
-   two prep guides, which are about things you buy elsewhere).
+   `short`   one line for the index card — keep it to a few words.
+   `intro`   the reader's opening paragraph. Module guides fall back to
+             their module's own write-up in catalog, so only the two
+             prep guides (which have no module) carry one here.
+   `covers`  the chapters, in order.
+   `module`  links the guide to its Functions section and its price
+             (null for the prep guides, about things you buy elsewhere).
+   `video`   a URL once one is recorded; the reader adds a Watch button
+             when it is there and says nothing at all when it is not.
 ─────────────────────────────────────────────────────────────────── */
 const GUIDES = [
   /* ── Before you start ── */
@@ -377,8 +381,11 @@ const GUIDES = [
     slug: 'buying-accounts',
     group: 'setup',
     title: 'Buying Telegram accounts',
+    short: 'What to buy, what to avoid',
     summary:
       'What to buy, where, and how to tell a usable account from one that will die in a week — before you spend anything.',
+    intro:
+      'Accounts are the one thing ATREOX does not sell you, and the one thing that decides whether everything downstream works. A cheap batch that dies in its first week costs more than a good batch that runs for months, and the difference is visible before you pay if you know what to look for.',
     covers: [
       'Session strings, tdata folders and API credentials — what each one is and which you actually need',
       'Age, country and format: what changes the survival rate and what is just price',
@@ -391,8 +398,11 @@ const GUIDES = [
     slug: 'proxies',
     group: 'setup',
     title: 'Choosing and connecting proxies',
+    short: 'One per account, done right',
     summary:
       'One proxy per account, and why nearly every account loss starts with getting this wrong.',
+    intro:
+      'One account, one proxy — no exceptions. Two accounts behind the same address look like two accounts behind the same address, and Telegram treats them that way. This is the cheapest mistake to avoid and the most expensive one to make.',
     covers: [
       'Residential, mobile and datacentre — what each survives and what each costs',
       'Paste formats the importer accepts, and bulk-assigning across a batch',
@@ -406,6 +416,7 @@ const GUIDES = [
   {
     slug: 'account-manager',
     group: 'module',
+    short: 'Import, check, keep alive',
     title: 'Account Manager',
     summary: 'Getting accounts into ATREOX and keeping them alive once they are.',
     covers: [
@@ -419,6 +430,7 @@ const GUIDES = [
   {
     slug: 'profile-templates',
     group: 'module',
+    short: 'One face across a batch',
     title: 'Profile Templates',
     summary: 'Building a template and applying it across a batch without tripping profile limits.',
     covers: [
@@ -432,6 +444,7 @@ const GUIDES = [
   {
     slug: 'active-warmup',
     group: 'module',
+    short: 'History before it earns',
     title: 'Active Warmup',
     summary: 'Setting up a warmup plan matched to how old your accounts actually are.',
     covers: [
@@ -445,6 +458,7 @@ const GUIDES = [
   {
     slug: 'channel-parser',
     group: 'module',
+    short: 'Build the target list',
     title: 'Channel Parser',
     summary: 'Building a target list that is worth commenting into.',
     covers: [
@@ -458,6 +472,7 @@ const GUIDES = [
   {
     slug: 'group-parser',
     group: 'module',
+    short: 'Rooms worth walking into',
     title: 'Group Parser',
     summary: 'Finding groups that are actually alive, and that you can actually post in.',
     covers: [
@@ -471,6 +486,7 @@ const GUIDES = [
   {
     slug: 'neurocommenting',
     group: 'module',
+    short: 'Empty list to live comments',
     title: 'Neurocommenting',
     summary: 'From an empty channel list to comments going out, and what to change when they read wrong.',
     covers: [
@@ -484,6 +500,7 @@ const GUIDES = [
   {
     slug: 'neurodialogs',
     group: 'module',
+    short: 'DMs at a human pace',
     title: 'NeuroDialogs',
     summary: 'Setting up DM answering that converts without reading as an instant-reply bot.',
     covers: [
@@ -497,6 +514,7 @@ const GUIDES = [
   {
     slug: 'mass-reactions',
     group: 'module',
+    short: 'A pass that lands right',
     title: 'Mass Reactions',
     summary: 'Running a reaction pass that arrives like an audience instead of a switch being flipped.',
     covers: [
@@ -509,7 +527,6 @@ const GUIDES = [
   },
 ];
 
-const GUIDES_READY = GUIDES.filter(g => g.video).length;
 const GUIDE_BY_SLUG = Object.fromEntries(GUIDES.map(g => [g.slug, g]));
 const GUIDE_BY_MODULE = Object.fromEntries(
   GUIDES.filter(g => g.module).map(g => [g.module, g])
@@ -519,5 +536,5 @@ Object.assign(window, {
   MODULES, MODULE_BY_KEY, PRICED_MODULES, INCLUDED_MODULES,
   FULL_MONTHLY, FULL_YEARLY, YEARLY_SAVING, CHEAPEST_MODULE, eur,
   PIPELINE,
-  GUIDES, GUIDES_READY, GUIDE_BY_SLUG, GUIDE_BY_MODULE,
+  GUIDES, GUIDE_BY_SLUG, GUIDE_BY_MODULE,
 });

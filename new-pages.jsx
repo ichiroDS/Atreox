@@ -434,7 +434,7 @@ function PricingPage({ setPage }) {
 
             <div aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <span style={{ flex: 1, height: 1, background: `rgba(${GREEN_RGB},0.14)` }} />
-              <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.24em', color: 'rgba(255,255,255,0.3)' }}>OR</span>
+              <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', letterSpacing: '0.24em', color: 'rgba(255,255,255,0.45)' }}>OR</span>
               <span style={{ flex: 1, height: 1, background: `rgba(${GREEN_RGB},0.14)` }} />
             </div>
 

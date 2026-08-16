@@ -2,232 +2,472 @@
 /* ══════════════════════════════════════════════════════════════════
    guides.jsx — the page that teaches.
 
-   Most of these videos don't exist yet, and the page is built around
-   that being the normal state rather than an error state. A guide with
-   no `video` in catalog.jsx renders as a complete card that says so —
-   title, summary, and what it will cover — with no clickable affordance
-   pretending to be a link. Drop a URL into the catalog entry and the
-   same card becomes a real one. Nothing here needs editing when a guide
-   gets recorded.
+   Two views, one page. The index is a wall of floating cards, one per
+   guide, carrying a name and a handful of words — enough to choose
+   from, never enough to read instead of opening. Clicking one opens
+   the reader: every guide in a rail down the left, the chosen one in
+   the middle, and the module it belongs to (with its price and the way
+   into the panel) held in a rail on the right.
+
+   The reader builds its body from catalog.jsx — a module guide is the
+   module's own write-up, laid out as a lesson — so a guide is never
+   emptier than the Functions page it teaches. Screens and video drop
+   into the same sections later without the layout changing.
+
+   The page says nothing about which guides have been filmed. A video
+   URL in the catalog adds a Watch button; no URL simply means no
+   button, and the written guide is the guide either way.
 ══════════════════════════════════════════════════════════════════ */
 
 const React = window.React;
-const { useRef } = React;
+const { useRef, useState, useEffect } = React;
 const {
   motion, useInView,
-  ArrowUpRight, Check, Clock, Play, BookOpen,
+  ArrowUpRight, Check, Play, BookOpen, ChevronRight, Shield, Zap, X,
   PageHero, PageSection, SectionLockup, Pill, CrossLinks, FooterBar,
-  MONO, SERIF, GUIDES, GUIDES_READY, MODULE_BY_KEY,
+  MONO, SERIF, GUIDES, MODULE_BY_KEY, eur, REDUCED_MOTION,
 } = window;
 
 const GREEN = window.ACCENT;
 const GREEN_RGB = window.ACCENT_RGB;
 const CONTACT = 'hello@atreoxai.com';
+const DASHBOARD_URL = 'https://app.atreoxai.com';
 
-/* ─── Publication counter: honest, and it moves on its own as videos
-   land, because it counts the catalog rather than a hardcoded number. ─── */
-function PublishedMeter() {
-  const total = GUIDES.length;
-  const pct = Math.round((GUIDES_READY / total) * 100);
-  return (
-    <div className="panel" style={{ padding: '22px 26px', display: 'flex', gap: 22, alignItems: 'center', flexWrap: 'wrap' }}>
-      <div style={{ flex: '1 1 260px', minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 9, marginBottom: 12 }}>
-          <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '1.8rem', color: GUIDES_READY ? GREEN : 'rgba(255,255,255,0.35)', lineHeight: 1 }}>
-            {GUIDES_READY}
-          </span>
-          <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.66rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>
-            of {total} recorded
-          </span>
-        </div>
-        <div aria-hidden="true" style={{ height: 3, background: `rgba(${GREEN_RGB},0.1)`, borderRadius: 2, overflow: 'hidden' }}>
-          <div style={{
-            width: pct + '%', height: '100%',
-            background: `linear-gradient(90deg, rgba(${GREEN_RGB},0.8), var(--g-bright))`,
-            boxShadow: `0 0 12px rgba(${GREEN_RGB},0.5)`,
-            transition: 'width 0.6s ease',
-          }} />
-        </div>
-      </div>
-      <p style={{ flex: '1 1 300px', fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.87rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.7 }}>
-        We're filming these one at a time. Every guide is listed below with what it will cover, whether
-        it exists yet or not — {' '}
-        <a href={`mailto:${CONTACT}?subject=Guide%20request`} style={{ color: GREEN, textDecoration: 'none' }}>
-          tell us which one you need first
-        </a> and it moves up the list.
-      </p>
-    </div>
-  );
-}
+const slugFromHash = () => {
+  const h = window.location.hash;
+  if (h && h.indexOf('#guide-') === 0) return h.slice(7);
+  return null;
+};
 
-/* ─── One guide.
-   Two states, one layout. The card body is never itself a link — the
-   actions live in the footer, so an unrecorded guide simply has no
-   "watch" action rather than a link that goes nowhere. A recorded one
-   gets the hover lift and the corner ticks; an unrecorded one stays
-   dashed and quiet, and the difference is legible before the click. ─── */
-function GuideCard({ guide, index, inView, setPage }) {
-  const ready = Boolean(guide.video);
+/* ══════════════════════════════════════════════════════════════════
+   THE INDEX
+══════════════════════════════════════════════════════════════════ */
+
+/* One guide, as little as it can say and still be chosen from: the
+   module's own icon, its name, four or five words, and what it costs. */
+function GuideTile({ guide, index, inView, onOpen }) {
   const mod = guide.module ? MODULE_BY_KEY[guide.module] : null;
   const Icon = mod ? mod.icon : BookOpen;
-
   return (
     <motion.div
-      initial={{ opacity: 0, y: 26 }} animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay: Math.min(index, 6) * 0.06 }}
-      id={'guide-' + guide.slug}
-      className={'panel' + (ready ? ' panel-hover ticks' : '')}
-      style={{
-        padding: '26px 26px 24px', scrollMarginTop: 88,
-        display: 'flex', flexDirection: 'column',
-        borderColor: ready ? undefined : 'rgba(255,255,255,0.08)',
-        borderStyle: ready ? 'solid' : 'dashed',
-        background: ready ? undefined : 'rgba(255,255,255,0.012)',
-      }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-        <span aria-hidden="true" style={{
-          width: 36, height: 36, borderRadius: 4, flexShrink: 0,
-          background: ready ? `rgba(${GREEN_RGB},0.08)` : 'rgba(255,255,255,0.035)',
-          border: `1px solid ${ready ? `rgba(${GREEN_RGB},0.26)` : 'rgba(255,255,255,0.1)'}`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
+      initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.5, delay: Math.min(index, 7) * 0.06 }}
+      className="float-wrap" style={{ animationDelay: (index % 4) * 0.7 + 's' }}>
+      <button type="button" onClick={() => onOpen(guide.slug)}
+        className="panel panel-hover ticks guide-tile"
+        style={{
+          width: '100%', textAlign: 'left', padding: '24px 22px 20px',
+          display: 'flex', flexDirection: 'column', gap: 14, background: 'transparent',
         }}>
-          <Icon size={16} color={ready ? GREEN : 'rgba(255,255,255,0.35)'} />
+        <span aria-hidden="true" className="guide-tile-chip" style={{
+          width: 44, height: 44, borderRadius: 6,
+          background: `rgba(${GREEN_RGB},0.09)`, border: `1px solid rgba(${GREEN_RGB},0.26)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: `0 0 22px rgba(${GREEN_RGB},0.12)`,
+        }}>
+          <Icon size={20} color={GREEN} />
         </span>
-        <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.6rem', letterSpacing: '0.16em', color: ready ? `rgba(${GREEN_RGB},0.4)` : 'rgba(255,255,255,0.2)' }}>
-          {String(index + 1).padStart(2, '0')}
-        </span>
-        <span style={{ marginLeft: 'auto' }}>
-          {ready
-            ? <Pill dot>Watch</Pill>
-            : <Pill muted>Not filmed yet</Pill>}
-        </span>
-      </div>
 
-      <h3 style={{
-        fontFamily: SERIF, fontWeight: 500, fontSize: '1.3rem',
-        color: ready ? 'white' : 'rgba(255,255,255,0.72)',
-        letterSpacing: '-0.01em', lineHeight: 1.22, marginBottom: 11,
-      }}>
-        {guide.title}
-      </h3>
-
-      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.86rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginBottom: 20 }}>
-        {guide.summary}
-      </p>
-
-      {/* what it covers — the part that has to be useful even with no video */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
-        {guide.covers.map((c, i) => (
-          <div key={i} style={{ display: 'flex', gap: 9, alignItems: 'flex-start' }}>
-            <Check size={13} color={ready ? GREEN : 'rgba(255,255,255,0.28)'} style={{ marginTop: 3, flexShrink: 0 }} />
-            <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.6 }}>{c}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* footer: the actions. An unfilmed guide gets no "watch" action at
-          all — just the status, and the module doc that stands in for it. */}
-      <div style={{
-        marginTop: 'auto', paddingTop: 16,
-        borderTop: `1px solid ${ready ? `rgba(${GREEN_RGB},0.14)` : 'rgba(255,255,255,0.07)'}`,
-        display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'space-between',
-      }}>
-        {ready ? (
-          <a href={guide.video} target="_blank" rel="noopener noreferrer" className="quiet-link">
-            <Play size={11} /> Watch the guide <ArrowUpRight size={12} />
-          </a>
-        ) : (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.34)' }}>
-            <Clock size={11} color="rgba(255,255,255,0.34)" /> Coming soon
+        <span style={{ display: 'block' }}>
+          <span style={{ display: 'block', fontFamily: SERIF, fontWeight: 500, fontSize: '1.22rem', color: 'white', lineHeight: 1.25, letterSpacing: '-0.01em', marginBottom: 7 }}>
+            {guide.title}
           </span>
-        )}
+          <span style={{ display: 'block', fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>
+            {guide.short}
+          </span>
+        </span>
 
-        {mod && (
-          <button type="button" className="quiet-link quiet-link-dim"
-            onClick={() => setPage('functions', 'fn-' + mod.key)}>
-            What it does <ArrowUpRight size={11} />
-          </button>
-        )}
-      </div>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 'auto', paddingTop: 4 }}>
+          <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.42)' }}>
+            {guide.covers.length} chapters
+          </span>
+          {mod && (
+            <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: mod.included ? 'rgba(255,255,255,0.42)' : `rgba(${GREEN_RGB},0.8)` }}>
+              · {mod.included ? 'included' : eur(mod.price) + '/mo'}
+            </span>
+          )}
+          <ArrowUpRight size={15} color={GREEN} style={{ marginLeft: 'auto' }} />
+        </span>
+      </button>
     </motion.div>
   );
 }
 
-/* ─── a titled run of cards ─── */
-function GuideGroup({ title, blurb, guides, offset, setPage }) {
+function GuideWall({ guides, offset, onOpen, fill }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.03 });
   return (
-    <>
-      <SectionLockup title={title}>{blurb}</SectionLockup>
-      <div ref={ref} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))', gap: 18 }}>
-        {guides.map((g, i) => (
-          <GuideCard key={g.slug} guide={g} index={offset + i} inView={inView} setPage={setPage} />
-        ))}
-      </div>
-    </>
+    /* auto-fill for the pair at the top, so two cards stay card-sized
+       instead of stretching to half the page and reading as banners */
+    <div ref={ref} style={{ display: 'grid', gridTemplateColumns: `repeat(${fill ? 'auto-fill' : 'auto-fit'}, minmax(250px, 1fr))`, gap: 18 }}>
+      {guides.map((g, i) => (
+        <GuideTile key={g.slug} guide={g} index={offset + i} inView={inView} onOpen={onOpen} />
+      ))}
+    </div>
   );
 }
 
-function GuidesPage({ setPage }) {
-  const setup   = GUIDES.filter(g => g.group === 'setup');
+function GuideIndex({ onOpen }) {
+  const setup = GUIDES.filter(g => g.group === 'setup');
   const modules = GUIDES.filter(g => g.group === 'module');
-
   return (
     <div>
       <PageHero
         badge="Guides"
         title="Learn it once, then run it."
-        sub="Every guide ATREOX will ship, listed with what it covers — including the ones still being recorded. Nothing here is a dead link: if a video isn't filmed yet, the card says so."
+        sub="Two things to get right before you start, and one guide per module. Open any of them — each one walks the panel end to end."
       />
 
-      <PageSection style={{ paddingBottom: 34 }}>
-        <PublishedMeter />
-      </PageSection>
-
-      <PageSection style={{ paddingTop: 0, paddingBottom: 40 }}>
-        <GuideGroup
-          title="Before you start"
-          blurb="The two things you buy elsewhere and bring with you. Get these wrong and no module setting will save the batch."
-          guides={setup} offset={0} setPage={setPage} />
+      <PageSection style={{ paddingBottom: 30 }}>
+        <SectionLockup title="Before you start">
+          The two things you buy elsewhere and bring with you.
+        </SectionLockup>
+        <GuideWall guides={setup} offset={0} onOpen={onOpen} fill />
       </PageSection>
 
       <PageSection style={{ paddingTop: 0 }}>
-        <GuideGroup
-          title="Module guides"
-          blurb="One per module, in the order the pipeline runs them. Each walks the panel end to end — what to fill in, what to leave alone, and what the numbers mean once it's running."
-          guides={modules} offset={setup.length} setPage={setPage} />
+        <SectionLockup title="Module guides">
+          One per module, in the order the pipeline runs them.
+        </SectionLockup>
+        <GuideWall guides={modules} offset={setup.length} onOpen={onOpen} />
       </PageSection>
+    </div>
+  );
+}
 
-      {/* ── what to do while a guide is missing ── */}
-      <PageSection style={{ paddingTop: 0 }}>
-        <div className="panel ticks" style={{ padding: 'clamp(36px, 6vw, 64px) clamp(24px, 5%, 72px)', display: 'flex', gap: 36, alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ flex: '1 1 320px', minWidth: 0 }}>
-            <span className="overline" style={{ display: 'block', marginBottom: 16 }}>{'// '}In the meantime</span>
-            <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.6rem, 3.1vw, 2.2rem)', color: 'white', lineHeight: 1.14, letterSpacing: '-0.01em', marginBottom: 14 }}>
-              A missing video isn't a missing answer
-            </h2>
-            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.93rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, maxWidth: 540 }}>
-              Every module's page on Functions lists what it does and every setting it exposes — enough
-              to configure it without a walkthrough. If you get stuck on a module whose guide isn't up
-              yet, write to us and we'll walk you through it directly.
-            </p>
+/* ══════════════════════════════════════════════════════════════════
+   THE READER
+══════════════════════════════════════════════════════════════════ */
+
+function ReaderHeading({ children, n }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 40, marginBottom: 16 }}>
+      {n && (
+        <span aria-hidden="true" style={{
+          width: 24, height: 24, borderRadius: 3, flexShrink: 0,
+          border: `1px solid rgba(${GREEN_RGB},0.32)`, background: `rgba(${GREEN_RGB},0.07)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontFamily: MONO, fontWeight: 600, fontSize: '0.58rem', color: GREEN, lineHeight: 1,
+        }}>{n}</span>
+      )}
+      <h2 style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.72rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'white' }}>
+        {children}
+      </h2>
+      <span aria-hidden="true" className="section-rule" style={{ flex: '1 1 24px', minWidth: 24 }} />
+    </div>
+  );
+}
+
+const readerProse = {
+  fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem',
+  color: 'rgba(255,255,255,0.72)', lineHeight: 1.8,
+};
+
+/* A numbered step with the rail that makes a list read as a sequence. */
+function ReaderStep({ n, title, body, last }) {
+  return (
+    <div style={{ display: 'flex', gap: 16, paddingBottom: last ? 0 : 20 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+        <span style={{
+          width: 28, height: 28, borderRadius: 3, flexShrink: 0,
+          border: `1px solid rgba(${GREEN_RGB},0.34)`, background: `rgba(${GREEN_RGB},0.07)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontFamily: MONO, fontWeight: 600, fontSize: '0.62rem', color: GREEN, lineHeight: 1,
+        }}>{String(n).padStart(2, '0')}</span>
+        {!last && <span aria-hidden="true" style={{ flex: 1, width: 1, marginTop: 6, background: `linear-gradient(180deg, rgba(${GREEN_RGB},0.3), rgba(${GREEN_RGB},0.05))` }} />}
+      </div>
+      <div style={{ minWidth: 0, paddingTop: 4 }}>
+        <h3 style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.72rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'white', marginBottom: 8 }}>{title}</h3>
+        <p style={{ ...readerProse, fontSize: '0.94rem', lineHeight: 1.75, color: 'rgba(255,255,255,0.66)' }}>{body}</p>
+      </div>
+    </div>
+  );
+}
+
+/* The rail on the left: every guide, always, so moving between them
+   never costs a trip back to the index. */
+function ReaderNav({ slug, onOpen, compact }) {
+  const groups = [
+    ['Before you start', GUIDES.filter(g => g.group === 'setup')],
+    ['Module guides', GUIDES.filter(g => g.group === 'module')],
+  ];
+  const item = g => {
+    const on = g.slug === slug;
+    const mod = g.module ? MODULE_BY_KEY[g.module] : null;
+    const Icon = mod ? mod.icon : BookOpen;
+    return (
+      <button key={g.slug} type="button" onClick={() => onOpen(g.slug)}
+        aria-current={on ? 'page' : undefined}
+        className="guide-nav-item"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 10, width: compact ? 'auto' : '100%',
+          flexShrink: 0, textAlign: 'left', padding: '10px 12px', borderRadius: 4,
+          border: `1px solid ${on ? `rgba(${GREEN_RGB},0.4)` : 'transparent'}`,
+          background: on ? `rgba(${GREEN_RGB},0.1)` : 'transparent',
+          whiteSpace: compact ? 'nowrap' : 'normal',
+        }}>
+        <Icon size={14} color={on ? GREEN : 'rgba(255,255,255,0.4)'} />
+        <span style={{
+          flex: 1, minWidth: 0, fontFamily: 'Barlow, sans-serif', fontWeight: on ? 500 : 300,
+          fontSize: '0.9rem', lineHeight: 1.35, color: on ? 'white' : 'rgba(255,255,255,0.6)',
+        }}>{g.title}</span>
+        {on && <Check size={14} color={GREEN} />}
+      </button>
+    );
+  };
+
+  if (compact) {
+    return (
+      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 6, marginBottom: 8 }}>
+        {GUIDES.map(item)}
+      </div>
+    );
+  }
+  return (
+    <nav className="panel" style={{ padding: 12, position: 'sticky', top: 92 }}>
+      {groups.map(([title, list], gi) => (
+        <div key={title} style={{ marginBottom: gi === 0 ? 14 : 0 }}>
+          <span style={{ display: 'block', padding: '6px 12px 10px', fontFamily: MONO, fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: `rgba(${GREEN_RGB},0.6)` }}>
+            {title}
+          </span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>{list.map(item)}</div>
+        </div>
+      ))}
+    </nav>
+  );
+}
+
+/* The rail on the right: what this guide is teaching you to run, what
+   it costs, and the button that starts it. */
+function ReaderRail({ guide, mod, setPage, compact }) {
+  const Icon = mod ? mod.icon : Shield;
+  return (
+    <aside className="panel ticks" style={{ padding: '24px 22px', position: compact ? 'static' : 'sticky', top: 92 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
+        <span aria-hidden="true" style={{
+          width: 40, height: 40, borderRadius: 5, flexShrink: 0,
+          background: `rgba(${GREEN_RGB},0.09)`, border: `1px solid rgba(${GREEN_RGB},0.26)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <Icon size={18} color={GREEN} />
+        </span>
+        <span style={{ minWidth: 0 }}>
+          <span style={{ display: 'block', fontFamily: MONO, fontWeight: 500, fontSize: '0.6rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: `rgba(${GREEN_RGB},0.7)`, marginBottom: 4 }}>
+            {mod ? 'Module' : 'Preparation'}
+          </span>
+          <span style={{ display: 'block', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.98rem', color: 'white', lineHeight: 1.25 }}>
+            {mod ? mod.name : 'Before you start'}
+          </span>
+        </span>
+      </div>
+
+      {mod && (
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, paddingBottom: 18, marginBottom: 18, borderBottom: `1px solid rgba(${GREEN_RGB},0.14)` }}>
+          <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '2rem', color: mod.included ? 'white' : GREEN, lineHeight: 1, textShadow: mod.included ? 'none' : `0 0 26px rgba(${GREEN_RGB},0.3)` }}>
+            {mod.included ? 'Free' : eur(mod.price)}
+          </span>
+          <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.66rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)' }}>
+            {mod.included ? 'with any module' : '/ month'}
+          </span>
+        </div>
+      )}
+
+      <span style={{ display: 'block', fontFamily: MONO, fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', marginBottom: 14 }}>
+        {'// '}Start in three steps
+      </span>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 22 }}>
+        {[
+          'Load your accounts and proxies',
+          mod ? `Switch on ${mod.name}` : 'Import them through Account Manager',
+          'Watch the log and adjust',
+        ].map((t, i) => (
+          <div key={i} style={{ display: 'flex', gap: 11, alignItems: 'flex-start' }}>
+            <span aria-hidden="true" style={{
+              width: 20, height: 20, borderRadius: '50%', flexShrink: 0, marginTop: 1,
+              border: `1px solid rgba(${GREEN_RGB},0.32)`, background: `rgba(${GREEN_RGB},0.08)`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: MONO, fontWeight: 600, fontSize: '0.55rem', color: GREEN, lineHeight: 1,
+            }}>{i + 1}</span>
+            <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.66)', lineHeight: 1.5 }}>{t}</span>
           </div>
-          {/* no flexShrink:0 here — at 375px the pair has to be allowed to
-              shrink and wrap, or it sets the page's scroll width */}
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <button className="btn-solid" onClick={() => setPage('functions')} style={{ padding: '15px 28px', fontSize: '0.78rem' }}>
-              Read the module docs <ArrowUpRight size={14} />
-            </button>
-            <a href={`mailto:${CONTACT}?subject=Setup%20help`} className="btn-outline" style={{ padding: '14px 24px' }}>
-              Ask us directly <ArrowUpRight size={13} />
-            </a>
+        ))}
+      </div>
+
+      <a href={window.withReferral(DASHBOARD_URL)} target="_self" className="btn-solid"
+        style={{ width: '100%', justifyContent: 'center', padding: '14px 20px', fontSize: '0.76rem', marginBottom: 10 }}>
+        Start working <ArrowUpRight size={14} />
+      </a>
+      {mod ? (
+        <button type="button" className="btn-outline" onClick={() => setPage('functions', 'fn-' + mod.key)}
+          style={{ width: '100%', justifyContent: 'center', padding: '13px 20px', fontSize: '0.74rem' }}>
+          What it does <ArrowUpRight size={13} />
+        </button>
+      ) : (
+        <a href={`mailto:${CONTACT}?subject=Setup%20help`} className="btn-outline"
+          style={{ width: '100%', justifyContent: 'center', padding: '13px 20px', fontSize: '0.74rem' }}>
+          Ask us directly <ArrowUpRight size={13} />
+        </a>
+      )}
+    </aside>
+  );
+}
+
+function GuideReader({ slug, onOpen, onClose, setPage }) {
+  const guide = GUIDES.find(g => g.slug === slug) || GUIDES[0];
+  const mod = guide.module ? MODULE_BY_KEY[guide.module] : null;
+  const [compact, setCompact] = useState(window.innerWidth < 1040);
+
+  useEffect(() => {
+    const onResize = () => setCompact(window.innerWidth < 1040);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  return (
+    <div style={{ paddingTop: 128 }}>
+      <div style={{ maxWidth: 1340, margin: '0 auto', padding: '0 5%' }}>
+
+        <button type="button" onClick={onClose} className="quiet-link quiet-link-dim" style={{ marginBottom: 26 }}>
+          <span aria-hidden="true" style={{ transform: 'rotate(180deg)', display: 'inline-flex' }}><ChevronRight size={12} /></span>
+          All guides
+        </button>
+
+        <div style={{ display: 'flex', gap: 30, alignItems: 'flex-start', flexWrap: compact ? 'wrap' : 'nowrap' }}>
+
+          {/* left rail */}
+          <div style={{ flex: compact ? '1 1 100%' : '0 0 250px', minWidth: 0, width: compact ? '100%' : undefined }}>
+            <ReaderNav slug={guide.slug} onOpen={onOpen} compact={compact} />
+          </div>
+
+          {/* the guide */}
+          {/* the id is what a link from Functions lands on; the margin
+              leaves the way back out of the guide above the fold */}
+          <article id={'guide-' + guide.slug} style={{ flex: '1 1 420px', minWidth: 0, scrollMarginTop: 150 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18, flexWrap: 'wrap' }}>
+              <Pill dot>{mod ? mod.tagline : 'Preparation'}</Pill>
+              {guide.video && (
+                <a href={guide.video} target="_blank" rel="noopener noreferrer" className="quiet-link">
+                  <Play size={11} /> Watch the video <ArrowUpRight size={12} />
+                </a>
+              )}
+            </div>
+
+            <h1 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(2rem, 4vw, 2.9rem)', color: 'white', letterSpacing: '-0.015em', lineHeight: 1.1, marginBottom: 18 }}>
+              {guide.title}
+            </h1>
+            <p style={{ ...readerProse, fontSize: '1.05rem', color: 'rgba(255,255,255,0.78)', marginBottom: 6 }}>
+              {guide.summary}
+            </p>
+
+            {/* chapters — the map of the page, and the slots screens land in */}
+            <ReaderHeading>In this guide</ReaderHeading>
+            <div className="panel" style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {guide.covers.map((c, i) => (
+                <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                  <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', color: `rgba(${GREEN_RGB},0.6)`, marginTop: 4, flexShrink: 0 }}>
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>{c}</span>
+                </div>
+              ))}
+            </div>
+
+            {guide.intro && (
+              <>
+                <ReaderHeading>Why it matters</ReaderHeading>
+                <p style={readerProse}>{guide.intro}</p>
+              </>
+            )}
+
+            {mod && (
+              <>
+                <ReaderHeading>Why it matters</ReaderHeading>
+                <p style={readerProse}>{mod.problem}</p>
+
+                <ReaderHeading>What the module does</ReaderHeading>
+                <p style={readerProse}>{mod.does}</p>
+
+                <ReaderHeading>Step by step</ReaderHeading>
+                <div>
+                  {mod.steps.map(([t, b], i) => (
+                    <ReaderStep key={t} n={i + 1} title={t} body={b} last={i === mod.steps.length - 1} />
+                  ))}
+                </div>
+
+                <ReaderHeading>What you can change</ReaderHeading>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 12 }}>
+                  {mod.config.map(([t, b]) => (
+                    <div key={t} className="panel" style={{ padding: '16px 18px' }}>
+                      <span style={{ display: 'block', fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', letterSpacing: '0.13em', textTransform: 'uppercase', color: GREEN, marginBottom: 8 }}>{t}</span>
+                      <span style={{ display: 'block', fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.62)', lineHeight: 1.65 }}>{b}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {mod.guard && (
+                  <>
+                    <ReaderHeading>Read this before you turn it up</ReaderHeading>
+                    <div className="panel" style={{ padding: '20px 22px', display: 'flex', gap: 14, alignItems: 'flex-start', borderColor: `rgba(${GREEN_RGB},0.3)` }}>
+                      <Shield size={17} color={GREEN} style={{ marginTop: 3, flexShrink: 0 }} />
+                      <p style={{ ...readerProse, fontSize: '0.94rem', lineHeight: 1.75, margin: 0 }}>{mod.guard}</p>
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+
+            <div style={{ marginTop: 44, paddingTop: 22, borderTop: `1px solid rgba(${GREEN_RGB},0.14)`, display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'center' }}>
+              <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.92rem', color: 'rgba(255,255,255,0.55)' }}>
+                Something here not clear enough?
+              </span>
+              <a href={`mailto:${CONTACT}?subject=Guide%3A%20${encodeURIComponent(guide.title)}`} className="quiet-link">
+                Tell us and we'll fix it <ArrowUpRight size={12} />
+              </a>
+            </div>
+          </article>
+
+          {/* right rail */}
+          <div style={{ flex: compact ? '1 1 100%' : '0 0 270px', minWidth: 0, width: compact ? '100%' : undefined }}>
+            <ReaderRail guide={guide} mod={mod} setPage={setPage} compact={compact} />
           </div>
         </div>
-      </PageSection>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   THE PAGE
+══════════════════════════════════════════════════════════════════ */
+function GuidesPage({ setPage }) {
+  const [slug, setSlug] = useState(slugFromHash);
+
+  /* The open guide is part of the URL, so a link into one from
+     Functions lands on it and the back button leaves it again. */
+  useEffect(() => {
+    const onPop = () => setSlug(slugFromHash());
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
+  const open = s => {
+    setSlug(s);
+    try { window.history.pushState({ page: 'guides', anchor: 'guide-' + s }, '', '/guides#guide-' + s); } catch (_) {}
+    window.scrollTo({ top: 0, behavior: REDUCED_MOTION ? 'auto' : 'smooth' });
+  };
+  const close = () => {
+    setSlug(null);
+    try { window.history.pushState({ page: 'guides', anchor: null }, '', '/guides'); } catch (_) {}
+    window.scrollTo({ top: 0, behavior: REDUCED_MOTION ? 'auto' : 'smooth' });
+  };
+
+  return (
+    <div>
+      {slug
+        ? <GuideReader slug={slug} onOpen={open} onClose={close} setPage={setPage} />
+        : <GuideIndex onOpen={open} />}
 
       <CrossLinks current="guides" setPage={setPage} />
-
       <div style={{ padding: '0 5% 64px' }}><FooterBar setPage={setPage} /></div>
     </div>
   );

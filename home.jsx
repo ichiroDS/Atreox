@@ -51,23 +51,47 @@ const POSITIONING = 'The whole Telegram growth stack — eight modules, one pane
 ══════════════════════════════════════════════════════════════════ */
 
 const DEMO_LABEL = 'Example — simulated';  /* same marker the Functions demos carry */
-const DWELL = 4600;                        /* ms a stage holds before the pipeline moves on */
+const DWELL = 3900;                        /* ms a stage holds before the pipeline moves on */
 
 const SHOWCASE = [
+  /* Order is editorial: the two the visitor is here for first, then the
+     six that keep them running. The first two take a double-width tile
+     because a written comment and a written reply are the only two
+     demos on the card that are sentences. */
+  { key: 'neurocommenting', status: 'writing',  wide: true,
+    line: 'Writes a comment against each new post, not a template.' },
+  { key: 'neurodialogs',    status: 'replying', wide: true,
+    line: 'Answers a DM from the thread so far, not the last line.' },
   { key: 'channel-parser',  status: 'scanning',
     line: 'Finds the channels your audience already reads.' },
+  { key: 'group-parser',    status: 'probing',
+    line: 'Finds rooms with a real conversation in them.' },
+  { key: 'account-manager', status: 'checking',
+    line: 'Two health checks catch the account that only looks alive.' },
   { key: 'active-warmup',   status: 'warming',
     line: 'Builds a history on an account before it ever posts.' },
-  { key: 'neurocommenting', status: 'writing', wide: true,
-    line: 'Writes a comment against each new post, not a template.' },
   { key: 'mass-reactions',  status: 'reacting',
     line: 'Reactions arrive on a human curve, not all at once.' },
-  { key: 'neurodialogs',    status: 'replying',
-    line: 'Answers a DM from the thread so far, not the last line.' },
+  { key: 'profile-templates', status: 'applying',
+    line: 'One face and one bio, rolled across a whole batch.' },
 ];
 
-const cellLabel = { fontFamily: MONO, fontWeight: 500, fontSize: '0.5rem', letterSpacing: '0.14em', textTransform: 'uppercase' };
-const cellText  = { fontFamily: MONO, fontWeight: 400, fontSize: '0.58rem' };
+/* Type scale for the tiles. Kept in one place because the whole card
+   lives or dies on these being legible — everything here is a step up
+   from the mono captions used elsewhere on the page, not down. */
+const lbl = c => ({
+  fontFamily: MONO, fontWeight: 500, fontSize: c ? '0.54rem' : '0.58rem',
+  letterSpacing: '0.13em', textTransform: 'uppercase',
+});
+const txt = c => ({ fontFamily: MONO, fontWeight: 400, fontSize: c ? '0.62rem' : '0.68rem' });
+const prose = c => ({
+  fontFamily: 'Barlow, sans-serif', fontWeight: 300,
+  fontSize: c ? '0.72rem' : '0.82rem', lineHeight: 1.45,
+});
+
+const DIM = 'rgba(255,255,255,0.5)';
+const MID = 'rgba(255,255,255,0.72)';
+const WARN = 'rgba(255,196,92,0.9)';
 
 /* On-screen test for the card, deliberately optimistic: it starts true
    and only ever goes false once an observer has actually reported the
@@ -104,95 +128,48 @@ function useStep(active, period, cycle) {
   return active && !REDUCED_MOTION ? step : cycle - 1;
 }
 
-/* ── 01 · Channel Parser: candidates land, then get judged ── */
-function ParserBody({ active, compact }) {
-  const step = useStep(active, 620, 9);
-  const rows = [
-    ['@CryptoAlphaCalls', '18.4k', true],
-    ['@DeadSignalsDaily', '54.8k', false],
-    ['@Web3BuildersHub', '9.1k', true],
-  ];
+/* A row that fades up as the demo reaches it — the shared movement of
+   every list tile on the card. */
+function Row({ shown, children, gap }) {
   return (
-    <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: compact ? 3 : 5, height: '100%' }}>
-      {active && !REDUCED_MOTION && (
-        <span aria-hidden="true" className="eg-scan" style={{
-          position: 'absolute', left: -12, right: -12, height: 1,
-          background: `linear-gradient(90deg, transparent, rgba(${GREEN_RGB},0.7), transparent)`,
-        }} />
-      )}
-      {rows.map(([name, members, ok], i) => {
-        const shown = step >= i;
-        const judged = step >= i + 2;
-        return (
-          <div key={name} style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            opacity: shown ? 1 : 0, transform: shown ? 'none' : 'translateY(5px)',
-            transition: 'opacity 0.35s ease, transform 0.35s ease',
-          }}>
-            <span style={{
-              ...cellText, flex: '1 1 auto', minWidth: 0,
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-              color: judged ? (ok ? GREEN : 'rgba(255,255,255,0.26)') : 'rgba(255,255,255,0.55)',
-              transition: 'color 0.35s ease',
-            }}>{name}</span>
-            {!compact && <span style={{ ...cellText, color: 'rgba(255,255,255,0.28)', flexShrink: 0 }}>{members}</span>}
-            <span style={{
-              ...cellLabel, fontWeight: 600, flexShrink: 0,
-              color: ok ? GREEN : 'rgba(255,255,255,0.3)',
-              opacity: judged ? 1 : 0, transition: 'opacity 0.3s ease',
-            }}>{ok ? 'keep' : 'drop'}</span>
-          </div>
-        );
-      })}
-      <span style={{ ...cellLabel, marginTop: 'auto', color: `rgba(${GREEN_RGB},0.58)` }}>
-        {step >= 5 ? '5 kept of 19 found' : 'evaluating'}
-      </span>
-    </div>
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: gap || 7,
+      opacity: shown ? 1 : 0, transform: shown ? 'none' : 'translateY(5px)',
+      transition: 'opacity 0.35s ease, transform 0.35s ease',
+    }}>{children}</div>
   );
 }
 
-/* ── 02 · Active Warmup: accounts filling their day's activity ── */
-function WarmupBody({ active, compact }) {
-  const step = useStep(active, 520, 10);
-  const acts = ['reading', 'joined', 'reacted', 'resting'];
-  const rows = [['acct_0148', 94], ['acct_0149', 71], ['acct_0150', 46]];
-  const grow = Math.min(1, (step + 1) / 6);
+function ScanLine({ on }) {
+  if (!on || REDUCED_MOTION) return null;
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? 6 : 8, height: '100%', justifyContent: 'center' }}>
-      {rows.map(([id, target], i) => (
-        <div key={id}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-            <span style={{ ...cellText, color: 'rgba(255,255,255,0.48)', flexShrink: 0 }}>{id}</span>
-            <span style={{
-              ...cellLabel, marginLeft: 'auto', minWidth: 0,
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-              color: `rgba(${GREEN_RGB},0.7)`,
-            }}>{acts[(step + i) % acts.length]}</span>
-          </div>
-          <div className="mini-bar">
-            <i style={{ width: Math.round(target * grow) + '%', transition: 'width 0.55s cubic-bezier(0.16,1,0.3,1)' }} />
-          </div>
-        </div>
-      ))}
-    </div>
+    <span aria-hidden="true" className="eg-scan" style={{
+      position: 'absolute', left: -14, right: -14, height: 1,
+      background: `linear-gradient(90deg, transparent, rgba(${GREEN_RGB},0.8), transparent)`,
+    }} />
   );
 }
 
-/* ── 03 · Neurocommenting: a post, and the comment written for it ── */
+/* ── Neurocommenting: a post, and the comment written for it ── */
 const COMMENT_DEMOS = [
   { channel: '@Web3BuildersHub',
     post: 'Gas on the new L2 dropped 60% after the upgrade 👇',
-    reply: '60% is wild — does that hold under load, or off-peak?' },
+    postSm: 'Gas on the new L2 dropped 60% 👇',
+    reply: '60% is wild — does it hold under load?',
+    replySm: '60% is wild — under load too?' },
   { channel: '@AITradingSignals',
-    post: 'Backtest for the momentum model held through the chop.',
-    reply: 'what window is that on? curious how it does in a flat month' },
+    post: 'Backtest for the momentum model held up.',
+    postSm: 'Backtest held through the chop.',
+    reply: 'what window is that on? flat months too?',
+    replySm: 'what window is that on?' },
 ];
 
 function CommentBody({ active, compact }) {
   const [pair, setPair] = useState(0);
   const [typed, setTyped] = useState(0);
   const demo = COMMENT_DEMOS[pair % COMMENT_DEMOS.length];
-  const full = demo.reply.length;
+  const reply = compact ? demo.replySm : demo.reply;
+  const full = reply.length;
 
   /* One interval types the reply, holds it, then hands over to the next
      post — the pause is what makes it read as writing rather than a loop. */
@@ -209,37 +186,32 @@ function CommentBody({ active, compact }) {
   }, [active, pair, full]);
 
   const live = active && !REDUCED_MOTION;
-  const text = live ? demo.reply.slice(0, typed) : demo.reply;
+  const text = live ? reply.slice(0, typed) : reply;
   const done = text.length >= full;
   /* Reserved height, so the tile does not breathe as the reply types
-     itself out — but a floor and a ceiling rather than a fixed height,
-     so a width this was not sized for wraps to a second line instead of
-     losing the bottom half of the sentence. */
-  const body = {
-    fontFamily: 'Barlow, sans-serif', fontWeight: 300,
-    fontSize: compact ? '0.7rem' : '0.76rem', lineHeight: 1.45,
-    minHeight: compact ? 34 : 20, maxHeight: compact ? 34 : 40, overflow: 'hidden',
-  };
+     itself out — a floor and a ceiling rather than a fixed height, so a
+     width this was not sized for wraps instead of losing the sentence. */
+  const line = { ...prose(compact), minHeight: compact ? 34 : 24, maxHeight: compact ? 34 : 48, overflow: 'hidden' };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? 7 : 9, height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? 8 : 11, height: '100%' }}>
       <div>
-        <span style={{ ...cellLabel, display: 'block', marginBottom: 3, color: 'rgba(255,255,255,0.3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <span style={{ ...lbl(compact), display: 'block', marginBottom: 4, color: DIM, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           Post · {demo.channel}
         </span>
-        <p style={{ ...body, color: 'rgba(255,255,255,0.48)' }}>{demo.post}</p>
+        <p style={{ ...line, color: MID }}>{compact ? demo.postSm : demo.post}</p>
       </div>
-      <div style={{ borderTop: `1px solid rgba(${GREEN_RGB},0.1)`, paddingTop: compact ? 7 : 9 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-          <span style={{ ...cellLabel, color: `rgba(${GREEN_RGB},0.75)`, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      <div style={{ borderTop: `1px solid rgba(${GREEN_RGB},0.14)`, paddingTop: compact ? 8 : 11 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <span style={{ ...lbl(compact), color: `rgba(${GREEN_RGB},0.85)`, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             Comment · acct_0148
           </span>
           <span style={{
-            ...cellLabel, marginLeft: 'auto', fontWeight: 600, flexShrink: 0,
-            color: done ? GREEN : 'rgba(255,255,255,0.28)', transition: 'color 0.3s ease',
+            ...lbl(compact), marginLeft: 'auto', fontWeight: 600, flexShrink: 0,
+            color: done ? GREEN : 'rgba(255,255,255,0.4)', transition: 'color 0.3s ease',
           }}>{done ? 'sent' : 'writing'}</span>
         </div>
-        <p style={{ ...body, color: 'rgba(255,255,255,0.78)' }}>
+        <p style={{ ...line, color: 'rgba(255,255,255,0.94)' }}>
           {text}
           {live && !done && <span className="cursor" style={{ width: 5, height: '0.72em', marginLeft: 3 }} />}
         </p>
@@ -248,68 +220,22 @@ function CommentBody({ active, compact }) {
   );
 }
 
-/* ── 04 · Mass Reactions: the arrival curve, in miniature ──
-   Positions are clustered early and thinned out after, the shape the
-   engine's own human curve produces — see the Functions page demo. */
-const REACT_ARRIVALS = [0.05, 0.08, 0.12, 0.16, 0.21, 0.27, 0.34, 0.42, 0.52, 0.64, 0.78, 0.93];
-
-function ReactBody({ active, compact }) {
-  const step = useStep(active, 360, 15);
-  const chips = compact ? [['🔥', 24], ['👍', 17]] : [['🔥', 24], ['👍', 17], ['🚀', 11]];
-  const arrived = Math.min(REACT_ARRIVALS.length, step + 1);
-  const share = arrived / REACT_ARRIVALS.length;
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? 7 : 9, height: '100%' }}>
-      <div style={{ display: 'flex', gap: 5 }}>
-        {chips.map(([emoji, n]) => (
-          <span key={emoji} style={{
-            display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 6px', borderRadius: 3,
-            border: `1px solid rgba(${GREEN_RGB},0.22)`, background: `rgba(${GREEN_RGB},0.06)`,
-            fontFamily: MONO, fontWeight: 500, fontSize: '0.55rem', lineHeight: 1, color: 'rgba(255,255,255,0.72)',
-          }}>
-            <span style={{ fontSize: '0.68rem' }}>{emoji}</span>{Math.max(1, Math.round(n * share))}
-          </span>
-        ))}
-      </div>
-      <div style={{
-        position: 'relative', height: compact ? 18 : 22, borderRadius: 3,
-        background: 'rgba(0,0,0,0.3)', border: `1px solid rgba(${GREEN_RGB},0.1)`,
-      }}>
-        {REACT_ARRIVALS.map((x, i) => (
-          <span key={i} aria-hidden="true" style={{
-            position: 'absolute', top: '50%', left: `calc(${x * 100}% - 2.5px)`,
-            width: 5, height: 5, borderRadius: '50%', background: GREEN,
-            boxShadow: `0 0 8px rgba(${GREEN_RGB},0.7)`,
-            opacity: i < arrived ? 1 : 0,
-            transform: i < arrived ? 'translateY(-50%) scale(1)' : 'translateY(-50%) scale(0)',
-            transition: 'transform 0.4s cubic-bezier(0.16,1,0.3,1), opacity 0.4s ease',
-          }} />
-        ))}
-      </div>
-      <span style={{ ...cellLabel, marginTop: 'auto', color: 'rgba(255,255,255,0.34)' }}>
-        {arrived} accounts · first hour
-      </span>
-    </div>
-  );
-}
-
-/* ── 05 · NeuroDialogs: a reply, written while you watch ── */
+/* ── NeuroDialogs: a reply, written while you watch ── */
 function DialogBody({ active, compact }) {
   const step = useStep(active, 700, 8);
-  const incoming = compact ? 'what do you build?' : 'saw your comment — what do you actually build?';
-  const outgoing = compact ? 'rollup tooling. you?' : 'mostly tooling around rollup infra. you?';
+  const incoming = compact ? 'what do you actually build?' : 'saw your comment in the L2 thread — what do you actually build?';
+  const outgoing = compact ? 'mostly rollup tooling. you?' : 'mostly tooling around rollup infra. what are you working on?';
   const typing = step >= 2 && step < 4;
   const replied = step >= 4;
 
   const bubble = (out, text, on) => (
     <div style={{ display: 'flex', justifyContent: out ? 'flex-end' : 'flex-start' }}>
       <span style={{
-        maxWidth: '94%', padding: '5px 8px', borderRadius: 4,
-        background: out ? `rgba(${GREEN_RGB},0.1)` : 'rgba(255,255,255,0.05)',
-        border: `1px solid ${out ? `rgba(${GREEN_RGB},0.24)` : 'rgba(255,255,255,0.08)'}`,
-        fontFamily: 'Barlow, sans-serif', fontWeight: 300,
-        fontSize: compact ? '0.66rem' : '0.72rem', lineHeight: 1.4,
-        color: out ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.55)',
+        maxWidth: '92%', padding: compact ? '6px 9px' : '8px 11px', borderRadius: 5,
+        background: out ? `rgba(${GREEN_RGB},0.13)` : 'rgba(255,255,255,0.06)',
+        border: `1px solid ${out ? `rgba(${GREEN_RGB},0.3)` : 'rgba(255,255,255,0.1)'}`,
+        ...prose(compact),
+        color: out ? 'rgba(255,255,255,0.94)' : MID,
         opacity: on ? 1 : 0, transform: on ? 'none' : 'translateY(5px)',
         transition: 'opacity 0.35s ease, transform 0.35s ease',
       }}>{text}</span>
@@ -317,13 +243,13 @@ function DialogBody({ active, compact }) {
   );
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 5, height: '100%', justifyContent: 'center' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, height: '100%', justifyContent: 'center' }}>
       {bubble(false, incoming, true)}
       {/* the typing row holds its height whether or not it is showing,
           so the thread never jumps as the reply lands */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', height: 12 }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', height: 14 }}>
         <span className={typing ? 'dots' : undefined} style={{
-          ...cellLabel, color: `rgba(${GREEN_RGB},0.6)`,
+          ...lbl(compact), color: `rgba(${GREEN_RGB},0.75)`,
           opacity: typing ? 1 : 0, transition: 'opacity 0.25s ease',
         }}>typing</span>
       </div>
@@ -332,12 +258,230 @@ function DialogBody({ active, compact }) {
   );
 }
 
+/* ── Channel Parser: candidates land, then get judged ── */
+function ParserBody({ active, compact }) {
+  const step = useStep(active, 620, 9);
+  const rows = [
+    ['@CryptoAlphaCalls', true],
+    ['@DeadSignalsDaily', false],
+    ['@Web3BuildersHub', true],
+  ];
+  return (
+    <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: compact ? 4 : 6, height: '100%' }}>
+      <ScanLine on={active} />
+      {rows.map(([name, ok], i) => {
+        const judged = step >= i + 2;
+        return (
+          <Row key={name} shown={step >= i}>
+            <span style={{
+              ...txt(compact), flex: '1 1 auto', minWidth: 0,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              color: judged ? (ok ? GREEN : 'rgba(255,255,255,0.34)') : MID,
+              transition: 'color 0.35s ease',
+            }}>{name}</span>
+            <span style={{
+              ...lbl(compact), fontWeight: 600, flexShrink: 0,
+              color: ok ? GREEN : 'rgba(255,120,120,0.75)',
+              opacity: judged ? 1 : 0, transition: 'opacity 0.3s ease',
+            }}>{ok ? 'keep' : 'drop'}</span>
+          </Row>
+        );
+      })}
+      <span style={{ ...lbl(compact), marginTop: 'auto', color: `rgba(${GREEN_RGB},0.7)` }}>
+        {step >= 5 ? '5 kept of 19' : 'evaluating'}
+      </span>
+    </div>
+  );
+}
+
+/* ── Group Parser: the metric that separates a room from a number ── */
+function GroupParserBody({ active, compact }) {
+  const step = useStep(active, 600, 9);
+  const rows = [
+    ['@BuildersLounge', 84, true],
+    ['@AlphaChatRoom', 6, false],
+    ['@AICreatorsTalk', 61, true],
+  ];
+  const grow = Math.min(1, (step + 1) / 5);
+  return (
+    <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: compact ? 4 : 6, height: '100%' }}>
+      <ScanLine on={active} />
+      {rows.map(([name, senders, ok], i) => {
+        const judged = step >= i + 2;
+        return (
+          <Row key={name} shown={step >= i}>
+            <span style={{
+              ...txt(compact), flex: '1 1 auto', minWidth: 0,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              color: judged ? (ok ? GREEN : 'rgba(255,255,255,0.34)') : MID,
+              transition: 'color 0.35s ease',
+            }}>{name}</span>
+            <span style={{ ...txt(compact), flexShrink: 0, color: ok ? MID : 'rgba(255,255,255,0.34)' }}>
+              {Math.round(senders * grow)}
+            </span>
+          </Row>
+        );
+      })}
+      <span style={{ ...lbl(compact), marginTop: 'auto', color: `rgba(${GREEN_RGB},0.7)` }}>
+        unique senders · 7d
+      </span>
+    </div>
+  );
+}
+
+/* ── Account Manager: the second check is the one that finds things ── */
+function AccountsBody({ active, compact }) {
+  const step = useStep(active, 640, 9);
+  const rows = [
+    ['acct_0148', 'active', GREEN],
+    ['acct_0151', 'floodwait', WARN],
+    ['acct_0152', 'active', GREEN],
+  ];
+  return (
+    <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: compact ? 4 : 6, height: '100%' }}>
+      <ScanLine on={active} />
+      {rows.map(([id, state, colour], i) => {
+        const done = step >= i + 2;
+        return (
+          <Row key={id} shown={step >= i}>
+            <span style={{ ...txt(compact), color: MID, flexShrink: 0 }}>{id}</span>
+            <span style={{
+              ...lbl(compact), marginLeft: 'auto', flexShrink: 0,
+              color: done ? colour : 'rgba(255,255,255,0.34)', transition: 'color 0.35s ease',
+            }}>{done ? state : 'checking'}</span>
+          </Row>
+        );
+      })}
+      <span style={{ ...lbl(compact), marginTop: 'auto', color: `rgba(${GREEN_RGB},0.7)` }}>
+        flags + capability probe
+      </span>
+    </div>
+  );
+}
+
+/* ── Active Warmup: accounts filling their day's activity ── */
+function WarmupBody({ active, compact }) {
+  const step = useStep(active, 520, 10);
+  const acts = ['reading', 'joined', 'reacted', 'resting'];
+  const rows = [['acct_0148', 94], ['acct_0149', 71], ['acct_0150', 46]];
+  const grow = Math.min(1, (step + 1) / 6);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? 6 : 7, height: '100%', justifyContent: 'center' }}>
+      {rows.map(([id, target], i) => (
+        <div key={id}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+            <span style={{ ...txt(compact), color: MID, flexShrink: 0 }}>{id}</span>
+            <span style={{
+              ...lbl(compact), marginLeft: 'auto', minWidth: 0,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              color: `rgba(${GREEN_RGB},0.85)`,
+            }}>{acts[(step + i) % acts.length]}</span>
+          </div>
+          <div className="mini-bar">
+            <i style={{ width: Math.round(target * grow) + '%', transition: 'width 0.55s cubic-bezier(0.16,1,0.3,1)' }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── Mass Reactions: the arrival curve, in miniature ──
+   Positions are clustered early and thinned out after, the shape the
+   engine's own human curve produces — see the Functions page demo. */
+const REACT_ARRIVALS = [0.05, 0.08, 0.12, 0.16, 0.21, 0.27, 0.34, 0.42, 0.52, 0.64, 0.78, 0.93];
+
+function ReactBody({ active, compact }) {
+  const step = useStep(active, 360, 15);
+  const chips = [['🔥', 24], ['👍', 17], ['🚀', 11]];
+  const arrived = Math.min(REACT_ARRIVALS.length, step + 1);
+  const share = arrived / REACT_ARRIVALS.length;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? 8 : 10, height: '100%' }}>
+      <div style={{ display: 'flex', gap: 5 }}>
+        {chips.map(([emoji, n]) => (
+          <span key={emoji} style={{
+            display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 7px', borderRadius: 3,
+            border: `1px solid rgba(${GREEN_RGB},0.26)`, background: `rgba(${GREEN_RGB},0.08)`,
+            fontFamily: MONO, fontWeight: 500, fontSize: compact ? '0.58rem' : '0.62rem',
+            lineHeight: 1, color: 'rgba(255,255,255,0.88)',
+          }}>
+            <span style={{ fontSize: compact ? '0.68rem' : '0.74rem' }}>{emoji}</span>{Math.max(1, Math.round(n * share))}
+          </span>
+        ))}
+      </div>
+      <div style={{
+        position: 'relative', height: compact ? 20 : 24, borderRadius: 3,
+        background: 'rgba(0,0,0,0.45)', border: `1px solid rgba(${GREEN_RGB},0.14)`,
+      }}>
+        {REACT_ARRIVALS.map((x, i) => (
+          <span key={i} aria-hidden="true" style={{
+            position: 'absolute', top: '50%', left: `calc(${x * 100}% - 2.5px)`,
+            width: 5, height: 5, borderRadius: '50%', background: GREEN,
+            boxShadow: `0 0 9px rgba(${GREEN_RGB},0.85)`,
+            opacity: i < arrived ? 1 : 0,
+            transform: i < arrived ? 'translateY(-50%) scale(1)' : 'translateY(-50%) scale(0)',
+            transition: 'transform 0.4s cubic-bezier(0.16,1,0.3,1), opacity 0.4s ease',
+          }} />
+        ))}
+      </div>
+      <span style={{ ...lbl(compact), marginTop: 'auto', color: `rgba(${GREEN_RGB},0.7)` }}>
+        {arrived} accounts · first hour
+      </span>
+    </div>
+  );
+}
+
+/* ── Profile Templates: one face, rolled across a batch ── */
+function TemplatesBody({ active, compact }) {
+  const step = useStep(active, 620, 8);
+  const people = [['MK', 'Mia K.'], ['DR', 'Dan R.'], ['AS', 'Ana S.']];
+  const done = Math.min(people.length, Math.max(0, step));
+  const size = compact ? 26 : 30;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? 9 : 11, height: '100%' }}>
+      <div style={{ display: 'flex', gap: 7 }}>
+        {people.map(([initials], i) => {
+          const on = i < done;
+          return (
+            <span key={initials} aria-hidden="true" style={{
+              width: size, height: size, borderRadius: '50%', flexShrink: 0,
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: MONO, fontWeight: 600, fontSize: compact ? '0.54rem' : '0.58rem',
+              border: `1px solid rgba(${GREEN_RGB},${on ? 0.55 : 0.16})`,
+              background: on ? `rgba(${GREEN_RGB},0.14)` : 'rgba(255,255,255,0.03)',
+              color: on ? GREEN : 'rgba(255,255,255,0.2)',
+              boxShadow: on ? `0 0 14px rgba(${GREEN_RGB},0.25)` : 'none',
+              transform: on ? 'scale(1)' : 'scale(0.86)',
+              transition: 'all 0.4s cubic-bezier(0.16,1,0.3,1)',
+            }}>{initials}</span>
+          );
+        })}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {people.slice(0, 1).map(([initials, name], i) => (
+          <Row key={initials} shown={i < done}>
+            <span style={{ ...txt(compact), color: MID, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
+            <span style={{ ...lbl(compact), marginLeft: 'auto', color: `rgba(${GREEN_RGB},0.85)`, flexShrink: 0 }}>set</span>
+          </Row>
+        ))}
+      </div>
+      <span style={{ ...lbl(compact), marginTop: 'auto', color: `rgba(${GREEN_RGB},0.7)` }}>
+        {done} of 12 applied
+      </span>
+    </div>
+  );
+}
+
 const SHOWCASE_BODIES = {
-  'channel-parser': ParserBody,
-  'active-warmup': WarmupBody,
   'neurocommenting': CommentBody,
-  'mass-reactions': ReactBody,
   'neurodialogs': DialogBody,
+  'channel-parser': ParserBody,
+  'group-parser': GroupParserBody,
+  'account-manager': AccountsBody,
+  'active-warmup': WarmupBody,
+  'mass-reactions': ReactBody,
+  'profile-templates': TemplatesBody,
 };
 
 /* ── The card itself ── */
@@ -369,33 +513,48 @@ function EngineGrid({ setPage, compact }) {
   const CurrentIcon = currentMod.icon;
 
   return (
-    <div ref={ref} className="panel ticks" style={{ borderRadius: 6, padding: 0, overflow: 'hidden' }}>
+    <div ref={ref} className="ticks" style={{
+      position: 'relative', borderRadius: 7, overflow: 'hidden',
+      border: `1px solid rgba(${GREEN_RGB},0.26)`,
+      background: 'linear-gradient(180deg, rgba(3,12,18,0.94) 0%, rgba(0,2,4,0.96) 100%)',
+      boxShadow: `0 40px 90px rgba(0,0,0,0.6), 0 0 0 1px rgba(${GREEN_RGB},0.05), 0 0 70px rgba(${GREEN_RGB},0.07)`,
+    }}>
+      {/* hairline sheen along the top edge — the thing that stops a dark
+          rectangle from reading as a flat placeholder */}
+      <span aria-hidden="true" style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: 1,
+        background: `linear-gradient(90deg, transparent, rgba(${GREEN_RGB},0.55), transparent)`,
+      }} />
 
       {/* header — the simulated marker sits here, read before the picture */}
       <div style={{
-        display: 'flex', alignItems: 'center', gap: 10, padding: '13px 16px', flexWrap: 'wrap',
-        borderBottom: `1px solid rgba(${GREEN_RGB},0.14)`, background: `rgba(${GREEN_RGB},0.04)`,
+        display: 'flex', alignItems: 'center', gap: 10, padding: compact ? '13px 14px' : '15px 18px', flexWrap: 'wrap',
+        borderBottom: `1px solid rgba(${GREEN_RGB},0.16)`, background: `rgba(${GREEN_RGB},0.045)`,
       }}>
         <span aria-hidden="true" style={{
           width: 7, height: 7, borderRadius: '50%', background: GREEN, flexShrink: 0,
+          boxShadow: `0 0 10px rgba(${GREEN_RGB},0.9)`,
           animation: REDUCED_MOTION ? 'none' : 'pulse-dot 1.8s ease-in-out infinite',
         }} />
-        <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.64rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'white' }}>
+        <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: compact ? '0.62rem' : '0.68rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'white' }}>
           Inside the panel
         </span>
+        <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: compact ? '0.56rem' : '0.6rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: `rgba(${GREEN_RGB},0.75)` }}>
+          · 8 modules
+        </span>
         <span style={{
-          marginLeft: 'auto', fontFamily: MONO, fontWeight: 500, fontSize: '0.52rem',
-          letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.75)',
-          background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.2)',
-          borderRadius: 3, padding: '4px 7px', lineHeight: 1, whiteSpace: 'nowrap',
+          marginLeft: 'auto', fontFamily: MONO, fontWeight: 500, fontSize: '0.54rem',
+          letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.85)',
+          background: 'rgba(255,255,255,0.11)', border: '1px solid rgba(255,255,255,0.24)',
+          borderRadius: 3, padding: '4px 8px', lineHeight: 1, whiteSpace: 'nowrap',
         }}>{DEMO_LABEL}</span>
       </div>
 
-      {/* the five modules */}
+      {/* the eight modules */}
       <div role="group" aria-label="Module demos — simulated"
         style={{
-          display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-          gap: compact ? 8 : 10, padding: compact ? '12px 12px' : '14px 16px',
+          display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))',
+          gap: compact ? 8 : 10, padding: compact ? 12 : 16,
         }}>
         {SHOWCASE.map((s, i) => {
           const mod = MODULE_BY_KEY[s.key];
@@ -411,46 +570,44 @@ function EngineGrid({ setPage, compact }) {
               aria-pressed={isPinned}
               aria-label={`${mod.name} — simulated example`}
               style={{
-                gridColumn: s.wide ? 'span 2' : 'span 1',
-                /* one height for the four small tiles, so the grid reads as a
-                   grid rather than as four cards that happened to land near
-                   each other — the tallest of them sets it */
-                minHeight: s.wide ? (compact ? 152 : 140) : (compact ? 116 : 138),
+                /* six columns: the two sentence tiles take half a row each,
+                   the six data tiles take a third. On a phone everything
+                   halves, which keeps it two-up instead of a tall stack. */
+                gridColumn: compact ? 'span 3' : (s.wide ? 'span 3' : 'span 2'),
+                minHeight: compact ? (s.wide ? 136 : 116) : (s.wide ? 150 : 140),
                 position: 'relative', overflow: 'hidden', textAlign: 'left',
                 display: 'flex', flexDirection: 'column',
-                padding: compact ? '9px 10px' : '10px 12px', borderRadius: 5,
-                border: `1px solid rgba(${GREEN_RGB},${on ? 0.42 : 0.12})`,
+                padding: compact ? '10px 11px' : '12px 14px', borderRadius: 5,
+                border: `1px solid rgba(${GREEN_RGB},${on ? 0.5 : 0.14})`,
                 background: on
-                  ? `linear-gradient(180deg, rgba(${GREEN_RGB},0.075), rgba(0,0,0,0.3))`
-                  : 'rgba(0,0,0,0.26)',
-                boxShadow: on ? `0 0 26px rgba(${GREEN_RGB},0.12)` : 'none',
-                opacity: on ? 1 : 0.6,
+                  ? `linear-gradient(180deg, rgba(${GREEN_RGB},0.1), rgba(0,0,0,0.5))`
+                  : 'rgba(0,0,0,0.45)',
+                boxShadow: on ? `0 0 30px rgba(${GREEN_RGB},0.16), inset 0 1px 0 rgba(${GREEN_RGB},0.18)` : 'none',
+                opacity: on ? 1 : 0.82,
                 transition: 'border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease',
               }}>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: compact ? 7 : 9 }}>
-                {!compact && (
-                  <span style={{ ...cellLabel, flexShrink: 0, color: on ? `rgba(${GREEN_RGB},0.8)` : 'rgba(255,255,255,0.22)' }}>
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                )}
-                <Icon size={12} color={on ? GREEN : `rgba(${GREEN_RGB},0.5)`} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: compact ? 9 : 11 }}>
+                <Icon size={compact ? 13 : 14} color={on ? GREEN : `rgba(${GREEN_RGB},0.7)`} />
                 <span style={{
-                  ...cellLabel, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                  color: on ? 'white' : 'rgba(255,255,255,0.5)',
+                  ...lbl(compact), minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  color: on ? 'white' : 'rgba(255,255,255,0.74)',
                 }}>{mod.name}</span>
-                {!compact && (
-                  <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
-                    <span aria-hidden="true" style={{
-                      width: 4, height: 4, borderRadius: '50%',
-                      background: on ? GREEN : 'rgba(255,255,255,0.18)',
-                      animation: on && !REDUCED_MOTION ? 'pulse-dot 1.8s ease-in-out infinite' : 'none',
-                    }} />
-                    <span style={{ ...cellLabel, fontSize: '0.46rem', color: on ? `rgba(${GREEN_RGB},0.7)` : 'rgba(255,255,255,0.2)' }}>
+                {/* the state word only fits beside the name on the two
+                    double-width tiles; the six others keep the pulse on
+                    its own and say what they are doing in their caption */}
+                <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
+                  <span aria-hidden="true" style={{
+                    width: 4, height: 4, borderRadius: '50%',
+                    background: on ? GREEN : 'rgba(255,255,255,0.3)',
+                    animation: on && !REDUCED_MOTION ? 'pulse-dot 1.8s ease-in-out infinite' : 'none',
+                  }} />
+                  {s.wide && !compact && (
+                    <span style={{ ...lbl(compact), fontSize: '0.52rem', color: on ? `rgba(${GREEN_RGB},0.85)` : 'rgba(255,255,255,0.4)' }}>
                       {s.status}
                     </span>
-                  </span>
-                )}
+                  )}
+                </span>
               </div>
 
               <div style={{ flex: 1, minWidth: 0, minHeight: 0 }}>
@@ -463,37 +620,38 @@ function EngineGrid({ setPage, compact }) {
 
       {/* what you are looking at, and the way into it */}
       <div style={{
-        borderTop: `1px solid rgba(${GREEN_RGB},0.12)`, background: `rgba(${GREEN_RGB},0.03)`,
-        padding: compact ? '13px 12px 12px' : '14px 16px 13px',
-        display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap',
+        borderTop: `1px solid rgba(${GREEN_RGB},0.16)`, background: `rgba(${GREEN_RGB},0.04)`,
+        padding: compact ? '14px 14px 13px' : '16px 18px 15px',
+        display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap',
       }}>
-        <div style={{ flex: '1 1 210px', minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
-            <CurrentIcon size={13} color={GREEN} />
-            <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.6rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'white' }}>
+        <div style={{ flex: '1 1 230px', minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 6 }}>
+            <CurrentIcon size={14} color={GREEN} />
+            <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.64rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'white' }}>
               {currentMod.name}
             </span>
-            {pinned && (
-              <span style={{ ...cellLabel, fontSize: '0.46rem', color: `rgba(${GREEN_RGB},0.6)` }}>pinned</span>
-            )}
+            <span style={{ ...lbl(compact), fontSize: '0.52rem', color: currentMod.included ? 'rgba(255,255,255,0.42)' : `rgba(${GREEN_RGB},0.8)` }}>
+              {currentMod.included ? 'included' : `${eur(currentMod.price)}/mo`}
+            </span>
+            {pinned && <span style={{ ...lbl(compact), fontSize: '0.5rem', color: 'rgba(255,255,255,0.42)' }}>pinned</span>}
           </div>
           <p style={{
-            fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem',
-            lineHeight: 1.5, color: 'rgba(255,255,255,0.5)', minHeight: compact ? 48 : 36,
+            fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.86rem',
+            lineHeight: 1.5, color: 'rgba(255,255,255,0.62)', minHeight: compact ? 52 : 26,
           }}>{current.line}</p>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 7, marginLeft: 'auto' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, marginLeft: 'auto' }}>
           <button type="button" className="quiet-link" onClick={() => setPage('functions', 'fn-' + current.key)}>
-            Open module <ArrowUpRight size={11} />
+            Open module <ArrowUpRight size={12} />
           </button>
-          <span style={{ ...cellLabel, fontSize: '0.46rem', color: 'rgba(255,255,255,0.26)', textAlign: 'right' }}>
+          <span style={{ ...lbl(compact), fontSize: '0.5rem', color: 'rgba(255,255,255,0.38)', textAlign: 'right' }}>
             {compact ? 'Tap a module to replay it' : 'Hover to replay · click to pin'}
           </span>
         </div>
       </div>
 
       {/* dwell bar — shows the pipeline is running itself, and stops when you take over */}
-      <div aria-hidden="true" style={{ height: 2, background: `rgba(${GREEN_RGB},0.08)` }}>
+      <div aria-hidden="true" style={{ height: 2, background: `rgba(${GREEN_RGB},0.1)` }}>
         {auto && (
           <div key={idx} className="eg-dwell" style={{
             height: '100%', background: `linear-gradient(90deg, rgba(${GREEN_RGB},0.5), var(--g-bright))`,
@@ -517,13 +675,17 @@ function Hero({ setPage }) {
 
   return (
     <section style={{ position: 'relative', overflow: 'hidden', minHeight: 860 }}>
-      <div style={{ position: 'relative', zIndex: 10, maxWidth: 1280, margin: '0 auto', padding: isMobile ? '110px 5% 40px' : '160px 5% 80px', display: 'flex', gap: isMobile ? 32 : 64, alignItems: 'center', flexWrap: 'wrap' }}>
+      {/* The hero runs wider than the 1280 the rest of the page sits in —
+          the card needs the room for eight modules, and widening the whole
+          block rather than just the card keeps the pair centred on the same
+          axis instead of pushing the copy off to one side. */}
+      <div style={{ position: 'relative', zIndex: 10, maxWidth: 1460, margin: '0 auto', padding: isMobile ? '110px 5% 40px' : '142px 4% 76px', display: 'flex', gap: isMobile ? 32 : 60, alignItems: 'center', flexWrap: 'wrap' }}>
 
         {/* Left column */}
-        <div style={{ flex: '1 1 400px', minWidth: 0 }}>
+        <div style={{ flex: '1 1 430px', minWidth: 0 }}>
           <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}
             className="overline" style={{ display: 'block', marginBottom: 22 }}>
-            {'// '}<TypeText text="Neuro-commenting for Telegram" startDelay={1200} /><span className="cursor" />
+            {'// '}<TypeText text="The ultimate Telegram growth engine" startDelay={1200} /><span className="cursor" />
           </motion.p>
           <BlurText text="AI-powered Telegram growth, on autopilot."
             style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(2.7rem, 5.8vw, 4.4rem)', color: 'white', lineHeight: 1.08, letterSpacing: '-0.015em', maxWidth: 640, marginBottom: 20 }}
@@ -554,14 +716,14 @@ function Hero({ setPage }) {
             </button>
           </motion.div>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4, duration: 0.7 }}
-            style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.66rem', color: 'rgba(255,255,255,0.32)', letterSpacing: '0.08em' }}>
+            style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.7rem', color: 'rgba(255,255,255,0.46)', letterSpacing: '0.08em', lineHeight: 1.7 }}>
             Built for: crypto, AI & tech creators — and anyone growing a Telegram funnel · English-language market · 24/7 automation
           </motion.p>
         </div>
 
-        {/* Right column — the five modules, each running its own demo */}
+        {/* Right column — the eight modules, each running its own demo */}
         <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, delay: 0.4 }}
-          style={{ flex: '1 1 420px', minWidth: 0 }}>
+          style={{ flex: '1 1 560px', minWidth: 0 }}>
           <EngineGrid setPage={setPage} compact={isMobile} />
         </motion.div>
       </div>
@@ -606,7 +768,7 @@ function WhatThisIsSection({ setPage }) {
                 <Check size={14} color={GREEN} style={{ marginTop: 3, flexShrink: 0 }} />
                 <div style={{ minWidth: 0 }}>
                   <span style={{ display: 'block', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.85rem', color: 'white', marginBottom: 3 }}>{t}</span>
-                  <span style={{ display: 'block', fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.45)', lineHeight: 1.6 }}>{b}</span>
+                  <span style={{ display: 'block', fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.6 }}>{b}</span>
                 </div>
               </div>
             ))}
@@ -703,8 +865,8 @@ function MockFrame({ title, right, children }) {
     <div style={{ border: `1px solid rgba(${GREEN_RGB},0.16)`, borderRadius: 5, overflow: 'hidden', background: 'rgba(0,0,0,0.32)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '10px 14px', borderBottom: `1px solid rgba(${GREEN_RGB},0.12)`, background: `rgba(${GREEN_RGB},0.04)` }}>
         <span style={{ width: 5, height: 5, borderRadius: '50%', background: GREEN, flexShrink: 0, animation: 'pulse-dot 2s ease-in-out infinite' }} />
-        <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.75)' }}>{title}</span>
-        {right && <span style={{ marginLeft: 'auto', fontFamily: MONO, fontWeight: 400, fontSize: '0.55rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)' }}>{right}</span>}
+        <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.85)' }}>{title}</span>
+        {right && <span style={{ marginLeft: 'auto', fontFamily: MONO, fontWeight: 400, fontSize: '0.6rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)' }}>{right}</span>}
       </div>
       <div style={{ padding: '4px 0' }}>{children}</div>
     </div>
@@ -713,15 +875,15 @@ function MockFrame({ title, right, children }) {
 
 const mockRow = {
   display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px',
-  fontFamily: MONO, fontSize: '0.66rem', fontWeight: 400,
+  fontFamily: MONO, fontSize: '0.7rem', fontWeight: 400,
 };
 
 function Verdict({ ok, children }) {
   return (
     <span style={{
-      flexShrink: 0, fontFamily: MONO, fontWeight: 600, fontSize: '0.53rem',
+      flexShrink: 0, fontFamily: MONO, fontWeight: 600, fontSize: '0.57rem',
       letterSpacing: '0.12em', textTransform: 'uppercase',
-      color: ok ? GREEN : 'rgba(255,255,255,0.3)',
+      color: ok ? GREEN : 'rgba(255,255,255,0.45)',
     }}>{children}</span>
   );
 }
@@ -778,7 +940,7 @@ function MockComment() {
   return (
     <MockFrame title="Neurocommenting · live" right="posted">
       <div style={{ padding: '12px 14px', borderBottom: `1px solid rgba(${GREEN_RGB},0.08)` }}>
-        <span style={{ display: 'block', fontFamily: MONO, fontSize: '0.56rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 7 }}>Post · @Web3BuildersHub</span>
+        <span style={{ display: 'block', fontFamily: MONO, fontSize: '0.6rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', marginBottom: 7 }}>Post · @Web3BuildersHub</span>
         <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.55 }}>
           "Gas on the new L2 rollup dropped 60% after the last upgrade. Full benchmark thread below 👇"
         </p>
@@ -818,7 +980,7 @@ function MockDM() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px 4px' }}>
           <span style={{ fontFamily: MONO, fontSize: '0.56rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: `rgba(${GREEN_RGB},0.6)` }}>typing</span>
           <span className="dots" style={{ color: `rgba(${GREEN_RGB},0.6)`, fontFamily: MONO, fontSize: '0.7rem' }} />
-          <span style={{ marginLeft: 'auto', fontFamily: MONO, fontSize: '0.54rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.26)' }}>reply in 41s</span>
+          <span style={{ marginLeft: 'auto', fontFamily: MONO, fontSize: '0.58rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.42)' }}>reply in 41s</span>
         </div>
       </div>
     </MockFrame>
@@ -831,7 +993,7 @@ function MockReact() {
   return (
     <MockFrame title="Mass Reactions · run" right="human curve">
       <div style={{ padding: '12px 14px', borderBottom: `1px solid rgba(${GREEN_RGB},0.08)` }}>
-        <span style={{ display: 'block', fontFamily: MONO, fontSize: '0.56rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>Target · @CryptoAlphaCalls · post 4812</span>
+        <span style={{ display: 'block', fontFamily: MONO, fontSize: '0.6rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', marginBottom: 8 }}>Target · @CryptoAlphaCalls · post 4812</span>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {chips.map(([e, n]) => (
             <span key={e} style={{
@@ -929,7 +1091,7 @@ function PipelineSection({ setPage }) {
             </p>
 
             {/* which modules do this — straight into Functions */}
-            <span style={{ display: 'block', fontFamily: MONO, fontWeight: 500, fontSize: '0.56rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>
+            <span style={{ display: 'block', fontFamily: MONO, fontWeight: 500, fontSize: '0.6rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', marginBottom: 12 }}>
               {'// '}Runs on
             </span>
             <div style={{ display: 'flex', gap: 9, flexWrap: 'wrap' }}>
@@ -1085,7 +1247,7 @@ function TrustSection({ setPage }) {
               <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.6rem', letterSpacing: '0.14em', color: `rgba(${GREEN_RGB},0.35)` }}>{String(i + 1).padStart(2, '0')}</span>
             </div>
             <h4 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.94rem', color: 'white', marginBottom: 10, lineHeight: 1.4 }}>{title}</h4>
-            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.7 }}>{body}</p>
+            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.62)', lineHeight: 1.7 }}>{body}</p>
           </motion.div>
         ))}
       </div>
@@ -1108,40 +1270,63 @@ function TrustSection({ setPage }) {
    here is a feature the panel doesn't actually have.
 
    Marks for the other three columns describe TYPES of tool, not any
-   named product, and follow one rule throughout: a cross is only used
-   where the category is structurally unable to do the thing (an
-   analytics service is read-only by definition, so it never posts,
-   messages or reacts). Everywhere else that isn't confirmed either
-   way gets a blank dash rather than a guess — see the caption under
-   the table.
+   named product. See the note on COMPARISON_ROWS for the rule they
+   follow and where it is now surfaced to the reader.
 ══════════════════════════════════════ */
-const COMPARISON_COLUMNS = ['Bulk-messaging software', 'Analytics services', 'Standalone AI commenters'];
+const COMPARISON_COLUMNS = ['Bulk senders', 'Analytics tools', 'AI commenters'];
 
-// marks: 'yes' | 'no' | null (null = not confirmed either way, shown as —)
+/* Rows are short on purpose: a comparison table is scanned, not read,
+   and the full sentence for every one of these lives on Functions.
+
+   marks: 'yes' | 'no' | null.
+   The rule behind them has not changed — a cross is only used where the
+   category structurally cannot do the thing (an analytics service is
+   read-only, so it never posts, messages or reacts), and anything we
+   could not confirm either way is left as an amber dash rather than
+   guessed at. The dash carries that as a tooltip instead of the
+   footnote that used to sit under the table. */
 const COMPARISON_ROWS = [
-  { label: 'Writes a comment for that specific post, not a template',
-    marks: ['no', 'no', 'yes'] },
-  { label: 'Answers DMs in sessions, at a human pace — not instant, not 24/7',
-    marks: [null, 'no', null] },
-  { label: 'Reactions arrive on a human curve, not all at once',
-    marks: [null, 'no', null] },
-  { label: 'Builds an account\'s activity history before putting it to work',
-    marks: [null, 'no', null] },
-  { label: 'Checks account health two ways — platform flags and a real capability probe',
-    marks: [null, 'no', null] },
-  { label: 'Finds channels and groups by keyword, filtered by real recent activity',
-    marks: ['no', 'yes', 'no'] },
-  { label: 'Declines to comment on death, war, serious crime or politics — on by default',
-    marks: [null, 'no', null] },
+  { label: 'AI comments written per post',      marks: ['no', 'no', 'yes'] },
+  { label: 'DM replies at a human pace',        marks: [null, 'no', null] },
+  { label: 'Reactions on a human curve',        marks: [null, 'no', null] },
+  { label: 'Account warmup before work',        marks: [null, 'no', null] },
+  { label: 'Two-way account health checks',     marks: [null, 'no', null] },
+  { label: 'Channel & group discovery',         marks: ['no', 'yes', 'no'] },
+  { label: 'Sensitive-topic filter, on by default', marks: [null, 'no', null] },
+  { label: 'Every module in one panel',         marks: ['no', 'no', 'no'] },
 ];
 
-function CompareMark({ state }) {
-  if (state === 'yes') return <Check size={14} color={GREEN} style={{ display: 'block', margin: '0 auto' }} />;
-  if (state === 'no') return <X size={13} color="rgba(255,255,255,0.22)" style={{ display: 'block', margin: '0 auto' }} />;
+/* Traffic-light marks rather than accent-coloured ones: yes / no /
+   unconfirmed have to be told apart at a glance, and three shades of
+   the brand cyan cannot do that. The green is pulled cool and the amber
+   pulled down so neither fights the palette around them. */
+const MARK_TONE = {
+  yes:  { ring: 'rgba(62,224,164,0.45)', fill: 'rgba(62,224,164,0.13)', ink: 'rgb(62,224,164)',    glow: '0 0 14px rgba(62,224,164,0.25)' },
+  no:   { ring: 'rgba(255,96,96,0.34)',  fill: 'rgba(255,96,96,0.10)',  ink: 'rgba(255,122,122,0.9)', glow: 'none' },
+  null: { ring: 'rgba(226,178,80,0.3)',  fill: 'rgba(226,178,80,0.08)', ink: 'rgba(226,186,104,0.85)', glow: 'none' },
+};
+
+/* One badge, three states. Sized so the column reads as a row of marks
+   at a glance rather than three different glyph weights. */
+function CompareMark({ state, big }) {
+  const tone = MARK_TONE[state === null ? 'null' : state];
+  const d = big ? 30 : 26;
+  const title = state === 'yes' ? 'Yes'
+    : state === 'no' ? 'No — the category cannot structurally do this'
+    : 'Not something we could confirm either way';
   return (
-    <span aria-label="not confirmed" title="Not something we could confirm either way"
-      style={{ display: 'block', textAlign: 'center', fontFamily: MONO, color: 'rgba(255,255,255,0.24)', fontSize: '0.85rem' }}>
-      –
+    <span title={title} style={{
+      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+      width: d, height: d, borderRadius: '50%',
+      border: `1px solid ${tone.ring}`, background: tone.fill, boxShadow: tone.glow,
+    }}>
+      {state === 'yes' && <Check size={big ? 15 : 13} color={tone.ink} />}
+      {state === 'no' && <X size={big ? 13 : 12} color={tone.ink} />}
+      {state === null && <span aria-hidden="true" style={{ width: big ? 11 : 9, height: 1.5, background: tone.ink, borderRadius: 1 }} />}
+      <span style={{
+        position: 'absolute', width: 1, height: 1, overflow: 'hidden',
+        clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap',
+      }}>{title}</span>
     </span>
   );
 }
@@ -1153,8 +1338,8 @@ function ComparisonSection() {
     <section ref={ref} className="section-block" style={{ padding: '88px 5%', maxWidth: 1280, margin: '0 auto' }}>
       <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
         <SectionLockup title="How it compares">
-          ATREOX runs the whole pipeline — discovery, warmup, comments, DMs, reactions — from one panel.
-          Here's how that stacks up against the kind of tool most people already have one of.
+          ATREOX runs the whole pipeline from one panel. Here's how that stacks up against the kind of
+          tool most people already have one of.
         </SectionLockup>
       </motion.div>
 
@@ -1162,25 +1347,29 @@ function ComparisonSection() {
         className="panel" style={{ padding: 0, overflow: 'hidden' }}>
         {/* Wide on mobile — scrolls inside its own frame rather than the page. */}
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', minWidth: 640, borderCollapse: 'collapse' }}>
+          <table style={{ width: '100%', minWidth: 660, borderCollapse: 'collapse' }}>
             <thead>
               <tr>
-                <th style={{ textAlign: 'left', padding: '18px 22px', fontFamily: MONO, fontWeight: 400, fontSize: '0.6rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)', borderBottom: `1px solid rgba(${GREEN_RGB},0.14)` }}>
-                  What it does
+                <th style={{ textAlign: 'left', padding: '20px 24px', fontFamily: MONO, fontWeight: 500, fontSize: '0.64rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', borderBottom: `1px solid rgba(${GREEN_RGB},0.16)` }}>
+                  Feature
                 </th>
                 <th style={{
-                  padding: '18px 20px', minWidth: 108,
-                  fontFamily: MONO, fontWeight: 600, fontSize: '0.66rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: GREEN,
-                  background: `rgba(${GREEN_RGB},0.06)`,
-                  borderBottom: `1px solid rgba(${GREEN_RGB},0.4)`, borderLeft: `1px solid rgba(${GREEN_RGB},0.3)`, borderRight: `1px solid rgba(${GREEN_RGB},0.3)`,
+                  padding: '16px 20px', minWidth: 124,
+                  background: `rgba(${GREEN_RGB},0.07)`,
+                  borderBottom: `1px solid rgba(${GREEN_RGB},0.45)`, borderLeft: `1px solid rgba(${GREEN_RGB},0.32)`, borderRight: `1px solid rgba(${GREEN_RGB},0.32)`,
                 }}>
-                  ATREOX
+                  <span style={{ display: 'block', fontFamily: MONO, fontWeight: 600, fontSize: '0.78rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: GREEN, textShadow: `0 0 20px rgba(${GREEN_RGB},0.4)` }}>
+                    ATREOX
+                  </span>
+                  <span style={{ display: 'block', marginTop: 5, fontFamily: MONO, fontWeight: 400, fontSize: '0.54rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)' }}>
+                    All eight modules
+                  </span>
                 </th>
                 {COMPARISON_COLUMNS.map(col => (
                   <th key={col} style={{
-                    padding: '18px 16px', minWidth: 128, textAlign: 'center',
-                    fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.42)',
-                    borderBottom: `1px solid rgba(${GREEN_RGB},0.14)`,
+                    padding: '20px 16px', minWidth: 130, textAlign: 'center',
+                    fontFamily: MONO, fontWeight: 500, fontSize: '0.68rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.58)',
+                    borderBottom: `1px solid rgba(${GREEN_RGB},0.16)`,
                   }}>
                     {col}
                   </th>
@@ -1188,41 +1377,39 @@ function ComparisonSection() {
               </tr>
             </thead>
             <tbody>
-              {COMPARISON_ROWS.map((row, i) => (
-                <tr key={row.label}>
-                  <td style={{
-                    padding: '17px 22px', fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.68)', lineHeight: 1.5,
-                    borderBottom: i === COMPARISON_ROWS.length - 1 ? 'none' : `1px solid rgba(${GREEN_RGB},0.08)`,
-                  }}>
-                    {row.label}
-                  </td>
-                  <td style={{
-                    padding: '17px 20px', textAlign: 'center',
-                    background: `rgba(${GREEN_RGB},0.045)`,
-                    borderLeft: `1px solid rgba(${GREEN_RGB},0.3)`, borderRight: `1px solid rgba(${GREEN_RGB},0.3)`,
-                    borderBottom: i === COMPARISON_ROWS.length - 1 ? `1px solid rgba(${GREEN_RGB},0.3)` : `1px solid rgba(${GREEN_RGB},0.14)`,
-                  }}>
-                    <CompareMark state="yes" />
-                  </td>
-                  {row.marks.map((m, j) => (
-                    <td key={j} style={{
-                      padding: '17px 16px', textAlign: 'center',
-                      borderBottom: i === COMPARISON_ROWS.length - 1 ? 'none' : `1px solid rgba(${GREEN_RGB},0.08)`,
+              {COMPARISON_ROWS.map((row, i) => {
+                const last = i === COMPARISON_ROWS.length - 1;
+                return (
+                  <tr key={row.label} className="cmp-row">
+                    <td style={{
+                      padding: '15px 24px', fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.95rem', color: 'rgba(255,255,255,0.88)', lineHeight: 1.4,
+                      borderBottom: last ? 'none' : `1px solid rgba(${GREEN_RGB},0.09)`,
                     }}>
-                      <CompareMark state={m} />
+                      {row.label}
                     </td>
-                  ))}
-                </tr>
-              ))}
+                    <td style={{
+                      padding: '15px 20px', textAlign: 'center',
+                      background: `rgba(${GREEN_RGB},0.055)`,
+                      borderLeft: `1px solid rgba(${GREEN_RGB},0.32)`, borderRight: `1px solid rgba(${GREEN_RGB},0.32)`,
+                      borderBottom: last ? `1px solid rgba(${GREEN_RGB},0.32)` : `1px solid rgba(${GREEN_RGB},0.16)`,
+                    }}>
+                      <CompareMark state="yes" big />
+                    </td>
+                    {row.marks.map((m, j) => (
+                      <td key={j} style={{
+                        padding: '15px 16px', textAlign: 'center',
+                        borderBottom: last ? 'none' : `1px solid rgba(${GREEN_RGB},0.09)`,
+                      }}>
+                        <CompareMark state={m} />
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </motion.div>
-
-      <p style={{ marginTop: 16, fontFamily: MONO, fontWeight: 400, fontSize: '0.62rem', letterSpacing: '0.04em', color: 'rgba(255,255,255,0.28)', lineHeight: 1.7 }}>
-        — means we don't have confirmed information either way for that category, so we're not claiming it. ✕ is only used
-        where the category can't structurally do the thing — an analytics service is read-only, for instance.
-      </p>
     </section>
   );
 }
@@ -1292,16 +1479,17 @@ function FAQSection({ setPage }) {
 }
 
 /* ══════════════════════════════════════
-   6.5 — FOLLOW
+   3.5 — FOLLOW
    The channel and the videos, given room rather than left as two
-   glyphs in the navbar. Sits after the FAQ: someone still reading by
-   here wants more of this, and it's the cheapest thing to say yes to.
+   glyphs in the navbar. Sits between the pipeline and the price: the
+   visitor has just seen how it runs, and following is the cheapest
+   yes on the page to say before being asked for money.
 ══════════════════════════════════════ */
 function SocialSection() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.2 });
   return (
-    <section ref={ref} className="section-block" style={{ padding: '20px 5% 88px', maxWidth: 1280, margin: '0 auto' }}>
+    <section ref={ref} className="section-block" style={{ padding: '20px 5% 60px', maxWidth: 1280, margin: '0 auto' }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18 }}>
         {SOCIAL_LINKS.map(({ key, label, icon: Icon, href, blurb }, i) => (
           <motion.a key={key} href={href} target="_blank" rel="noopener noreferrer"
@@ -1374,11 +1562,11 @@ function HomePage({ setPage }) {
       <WhatThisIsSection setPage={setPage} />
       <AudienceSection />
       <PipelineSection setPage={setPage} />
+      <SocialSection />
       <PriceTeaserSection setPage={setPage} />
       <TrustSection setPage={setPage} />
       <ComparisonSection />
       <FAQSection setPage={setPage} />
-      <SocialSection />
       <CtaBannerSection setPage={setPage} />
       <CrossLinks current="home" setPage={setPage} />
       <div style={{ padding: '0 5% 60px' }}>

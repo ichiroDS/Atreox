@@ -494,6 +494,40 @@
     @keyframes eg-dwell { from { transform: scaleX(0); } to { transform: scaleX(1); } }
     .eg-dwell { transform-origin: left center; animation-name: eg-dwell; animation-timing-function: linear; animation-fill-mode: forwards; }
 
+    /* ── Comparison table: the row under the cursor lifts out of the
+       stack, so a wide row of marks stays attached to its label. ── */
+    .cmp-row { transition: background 0.16s ease; }
+    .cmp-row:hover { background: rgba(0,217,255,0.035); }
+
+    /* ── Guides: the tiles drift.
+       The float lives on a wrapper and the hover lift on the card
+       inside it — one element cannot carry both, since a running
+       animation owns `transform` outright. ── */
+    @keyframes guide-float {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-7px); }
+    }
+    .float-wrap {
+      animation: guide-float 6.5s ease-in-out infinite;
+      display: flex;
+    }
+    .float-wrap:hover { animation-play-state: paused; }
+    .guide-tile { min-height: 100%; }
+    .guide-tile .guide-tile-chip { transition: transform 0.25s cubic-bezier(0.2,0.9,0.3,1), box-shadow 0.25s ease; }
+    .guide-tile:hover .guide-tile-chip {
+      transform: scale(1.08) rotate(-3deg);
+      box-shadow: 0 0 32px rgba(0,217,255,0.28);
+    }
+
+    /* guide reader: the rail of every other guide */
+    .guide-nav-item {
+      background: none;
+      cursor: pointer;
+      transition: background 0.16s ease, border-color 0.16s ease;
+    }
+    .guide-nav-item:hover { background: rgba(0,217,255,0.07); }
+    .guide-nav-item:focus-visible { outline: 1px solid var(--g); outline-offset: 1px; }
+
     /* ── Terminal "listening…" animated ellipsis ── */
     @keyframes dots {
       0%   { content: ''; }
@@ -554,7 +588,7 @@
     @media (prefers-reduced-motion: reduce) {
       .splash-ticks, .splash-sweep, .splash-core, .cursor { animation: none; }
       .glow-word, .cta-breathe, .dots::after,
-      .eg-scan, .eg-dwell,
+      .eg-scan, .eg-dwell, .float-wrap,
       .featured-pulse, .stage-body { animation: none; }
       .glow-word { text-shadow: 0 0 18px rgba(0,217,255,0.35); }
       .btn-solid::after { display: none; }

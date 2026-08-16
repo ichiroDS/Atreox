@@ -465,7 +465,7 @@ function FooterBar({ setPage }) {
           <div style={{ cursor: 'pointer', marginBottom: 16 }} onClick={() => setPage('home')}>
             <Wordmark size="0.92rem" glow={false} />
           </div>
-          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.32)', lineHeight: 1.65, maxWidth: 210 }}>
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: 'rgba(255,255,255,0.45)', lineHeight: 1.65, maxWidth: 210 }}>
             AI-powered Telegram neuro-commenting. Real accounts, real growth.
           </p>
         </div>
@@ -474,9 +474,9 @@ function FooterBar({ setPage }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {navLinks.map(link => (
               <span key={link.id} onClick={() => setPage(link.id)}
-                style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.48)', cursor: 'pointer', transition: 'color 0.2s' }}
+                style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', transition: 'color 0.2s' }}
                 onMouseEnter={e => e.target.style.color = ACCENT}
-                onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.48)'}
+                onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.6)'}
               >{link.label}</span>
             ))}
           </div>
@@ -486,17 +486,18 @@ function FooterBar({ setPage }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {[['privacy','Privacy Policy'],['terms','Terms of Service']].map(([id, label]) => (
               <span key={id} onClick={() => setPage(id)}
-                style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.38)', cursor: 'pointer', transition: 'color 0.2s' }}
+                style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.52)', cursor: 'pointer', transition: 'color 0.2s' }}
                 onMouseEnter={e => e.target.style.color = ACCENT}
-                onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.38)'}
+                onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.52)'}
               >{label}</span>
             ))}
           </div>
         </div>
         <div style={{ flex: '0 0 auto' }}>
           <h5 style={colHead}>Contact</h5>
-          <a href="mailto:hello@atreoxai.com" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.76rem', color: 'rgba(255,255,255,0.5)', textDecoration: 'none', display: 'block', marginBottom: 8 }}>hello@atreoxai.com</a>
-          <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.78rem', color: 'rgba(255,255,255,0.25)' }}>Usually answered within a day, weekdays</span>
+          <a href="mailto:hello@atreoxai.com" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.8rem', color: 'rgba(255,255,255,0.62)', textDecoration: 'none', display: 'block', marginBottom: 10 }}>hello@atreoxai.com</a>
+          <span style={{ display: 'block', fontFamily: "'JetBrains Mono', monospace", fontWeight: 500, fontSize: '0.68rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: `rgba(${ACCENT_RGB},0.7)`, marginBottom: 5 }}>Mon–Fri · 08:00–20:00 CET</span>
+          <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>Weekend messages are answered Monday</span>
         </div>
         <div style={{ flex: '0 0 auto' }}>
           <h5 style={colHead}>Follow</h5>
@@ -504,7 +505,7 @@ function FooterBar({ setPage }) {
             {SOCIAL_LINKS.map(({ key, label, icon: Icon, href }) => (
               <a key={key} href={href} target="_blank" rel="noopener noreferrer"
                 className="footer-social"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 9, fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.48)', textDecoration: 'none' }}>
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 9, fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.6)', textDecoration: 'none' }}>
                 <Icon size={15} /> {label}
               </a>
             ))}
@@ -512,8 +513,8 @@ function FooterBar({ setPage }) {
         </div>
       </div>
       <div style={{ borderTop: `1px solid rgba(${ACCENT_RGB},0.08)`, paddingTop: 22, paddingBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.64rem', letterSpacing: '0.06em', color: 'rgba(255,255,255,0.24)' }}>© 2026 ATREOX AI. All rights reserved.</span>
-        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.64rem', letterSpacing: '0.06em', color: 'rgba(255,255,255,0.24)', display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.68rem', letterSpacing: '0.06em', color: 'rgba(255,255,255,0.4)' }}>© 2026 ATREOX AI. All rights reserved.</span>
+        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.68rem', letterSpacing: '0.06em', color: 'rgba(255,255,255,0.4)', display: 'inline-flex', alignItems: 'center', gap: 7 }}>
           <span style={{ width: 5, height: 5, borderRadius: '50%', background: ACCENT, display: 'inline-block', animation: 'pulse-dot 2s ease-in-out infinite' }} />
           Built for Telegram growth teams worldwide
         </span>
@@ -540,7 +541,7 @@ function PageHero({ badge, title, sub }) {
         fontSize: 'clamp(2.5rem, 4.6vw, 4rem)', color: 'white',
         lineHeight: 1.08, letterSpacing: '-0.015em', marginTop: 22, marginBottom: 20
       }} delay={90} />
-      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.5)', maxWidth: 600, margin: '0 auto', lineHeight: 1.65 }}>
+      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1.02rem', color: 'rgba(255,255,255,0.66)', maxWidth: 640, margin: '0 auto', lineHeight: 1.7 }}>
         {sub}
       </p>
     </section>
@@ -577,7 +578,7 @@ function SectionLockup({ title, children, style }) {
         <div aria-hidden="true" className="section-rule" style={{ flex: '1 1 32px', minWidth: 32 }} />
       </div>
       {children && (
-        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.65, maxWidth: 640, marginTop: 14 }}>
+        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.97rem', color: 'rgba(255,255,255,0.64)', lineHeight: 1.7, maxWidth: 660, marginTop: 14 }}>
           {children}
         </p>
       )}

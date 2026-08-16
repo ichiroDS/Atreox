@@ -79,7 +79,7 @@ function PracticeStep({ n, title, body, last }) {
       </div>
       <div style={{ minWidth: 0, paddingTop: 3 }}>
         <h4 style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.68rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'white', marginBottom: 7 }}>{title}</h4>
-        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.87rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7 }}>{body}</p>
+        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.9rem', color: 'rgba(255,255,255,0.66)', lineHeight: 1.7 }}>{body}</p>
       </div>
     </div>
   );
@@ -127,7 +127,7 @@ function DemoFrame({ title, note, children, controls }) {
         }}>{DEMO_LABEL}</span>
         <span style={{ marginLeft: 'auto' }}>{controls}</span>
       </div>
-      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.38)', lineHeight: 1.6, marginBottom: 22, maxWidth: 640 }}>
+      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.86rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, marginBottom: 22, maxWidth: 640 }}>
         {note}
       </p>
       {children}
@@ -207,7 +207,7 @@ function ArrivalCurveDemo() {
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 9 }}>
         {['post published', '15 min', '30 min', '45 min', '1 hour'].map(l => (
-          <span key={l} style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.56rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)' }}>{l}</span>
+          <span key={l} style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.6rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)' }}>{l}</span>
         ))}
       </div>
     </DemoFrame>
@@ -350,13 +350,9 @@ function ModuleSection({ mod, index, setPage }) {
                   <span style={{ display: 'block', fontFamily: MONO, fontWeight: 500, fontSize: '0.6rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'white' }}>
                     Setup guide
                   </span>
-                  {/* No caption at all when the video isn't filmed yet — the
-                      button itself still opens the guide's write-up. */}
-                  {guide.video && (
-                    <span style={{ display: 'block', marginTop: 4, fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.78rem', color: 'rgba(255,255,255,0.42)' }}>
-                      Watch the walkthrough
-                    </span>
-                  )}
+                  <span style={{ display: 'block', marginTop: 4, fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)' }}>
+                    {guide.video ? 'Watch the walkthrough' : 'Read it end to end'}
+                  </span>
                 </span>
                 <ArrowUpRight size={13} color={`rgba(${GREEN_RGB},0.6)`} />
               </button>
