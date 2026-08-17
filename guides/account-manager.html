@@ -4,11 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#020403">
-  <!-- ── Head, from <title> down to the twitter:image below ──
-       scripts/prerender.mjs replaces this whole block, verbatim, on each
-       of the ten /guides/<url> pages it writes, so a guide carries its
-       own title, description, canonical and cards. Keep the block
-       contiguous and keep the marker comments where they are. -->
+  <!-- ── Page identity: everything between the two HEAD:META markers ──
+       scripts/prerender.mjs replaces this whole block on each of the ten
+       /guides/... pages it writes, so a guide carries its own title,
+       description, canonical and social cards rather than the site's.
+       Keep the block contiguous and keep the markers where they are.
+       (No tag names spelled out in here — a comment that contains one
+       is a comment something eventually parses by mistake.) -->
   <!-- HEAD:META -->
   <title>Account Manager — ATREOX guide</title>
   <meta name="description" content="Getting accounts into ATREOX and keeping them alive once they are.">
