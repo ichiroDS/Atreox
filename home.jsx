@@ -1521,6 +1521,51 @@ function SocialSection() {
 }
 
 /* ══════════════════════════════════════
+   Referral
+   Late on purpose. The page spends its length making the case for
+   buying; someone still deciding does not care that they could earn
+   on a referral, and saying so early competes with the decision.
+   Down here it reaches the people who have already read the whole
+   thing — and it is the only mention outside the footer, which is
+   where this used to live and where nobody reached it.
+══════════════════════════════════════ */
+function ReferralSection({ setPage }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, amount: 0.2 });
+  return (
+    <section ref={ref} className="section-block" style={{ padding: '0 5% 88px', maxWidth: 1280, margin: '0 auto' }}>
+      <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}
+        className="panel ticks" style={{
+          padding: 'clamp(28px, 4vw, 40px) clamp(24px, 4vw, 40px)',
+          display: 'flex', gap: 'clamp(24px, 4vw, 48px)', alignItems: 'center', flexWrap: 'wrap',
+        }}>
+        <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'baseline', gap: 10 }}>
+          <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(2.6rem, 6vw, 3.6rem)', color: GREEN, lineHeight: 1, textShadow: `0 0 30px rgba(${GREEN_RGB},0.28)` }}>
+            25%
+          </span>
+          <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.64rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.42)' }}>
+            recurring
+          </span>
+        </div>
+
+        <div style={{ flex: '1 1 320px', minWidth: 0 }}>
+          <span className="overline" style={{ display: 'block', marginBottom: 10 }}>{'// '}Referral programme</span>
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.62)', lineHeight: 1.7, maxWidth: 520 }}>
+            Share your link and earn 25% of whatever a customer you referred pays, for as long as they
+            stay subscribed. Your link is in Settings inside the panel.
+          </p>
+        </div>
+
+        <button type="button" className="btn-outline" onClick={() => setPage('referral')}
+          style={{ flex: '0 0 auto', padding: '14px 26px' }}>
+          How it works <ArrowUpRight size={14} />
+        </button>
+      </motion.div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════
    CTA
 ══════════════════════════════════════ */
 function CtaBannerSection({ setPage }) {
@@ -1567,6 +1612,7 @@ function HomePage({ setPage }) {
       <TrustSection setPage={setPage} />
       <ComparisonSection />
       <FAQSection setPage={setPage} />
+      <ReferralSection setPage={setPage} />
       <CtaBannerSection setPage={setPage} />
       <CrossLinks current="home" setPage={setPage} />
       <div style={{ padding: '0 5% 60px' }}>
