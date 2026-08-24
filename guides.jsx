@@ -30,7 +30,7 @@ const React = window.React;
 const { useRef, useState, useEffect } = React;
 const {
   motion, useInView,
-  ArrowUpRight, Check, Play, BookOpen, ChevronRight, Shield, Zap, X,
+  ArrowUpRight, Play, BookOpen, ChevronRight, Shield, Zap, X,
   PageHero, PageSection, SectionLockup, Pill, CrossLinks, FooterBar,
   MONO, SERIF, GUIDES, MODULE_BY_KEY, eur, REDUCED_MOTION,
   guideHref, guideFromPath, GUIDE_BY_SLUG,
@@ -203,14 +203,17 @@ function ReaderHeading({ children, n }) {
   );
 }
 
-/* Two widths, because a reading page needs two. READER_MAX is how wide
-   the guide itself gets now that nothing sits to its right — screens,
-   tables and the checklist all use it. COLUMN is how wide a paragraph
-   is allowed to get inside that, which is a smaller number for the
-   oldest reason in typesetting: past roughly 80 characters the eye
-   loses the start of the next line. */
-const READER_MAX = 1100;
+/* One width, not two. This used to be a pair — a wide column for
+   screens and tables, a narrower cap for prose inside it — and on a
+   1920 screen that showed: figures ran to 1001px while paragraphs
+   stopped at 790, leaving a 211px ragged strip down the right of every
+   section. The cap is the one that has to stay (without it a line runs
+   114-121 characters, well past what the eye tracks back from), so the
+   column comes down to meet it instead and everything shares an edge.
+   Below ~1250px viewport the column is narrower than this anyway and
+   the number never comes into play. */
 const COLUMN = 790;   /* pairs with --gcol in index.html */
+const READER_MAX = COLUMN;
 
 const readerProse = {
   fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1.2rem',
@@ -454,56 +457,87 @@ function ReaderBlocks({ blocks, onOpen }) {
 }
 
 /* The rail on the left: every guide, always, so moving between them
-   never costs a trip back to the index. */
+   never costs a trip back to the index.
+
+   Two shapes. Wide: the full list, sticky, always open — there is a
+   column for it and nothing is covered up. Narrow: the same list, but
+   collapsed behind the name of the guide you're on, because a phone
+   has no spare column and the alternative (a horizontal strip of ten
+   names) meant scrolling a list sideways every time you wanted a
+   different guide, above text you were trying to read. Closed it is
+   one thumb-sized row; open it pushes the article down instead of
+   covering it, and choosing collapses it again. */
 function ReaderNav({ slug, onOpen, compact }) {
+  const [open, setOpen] = useState(false);
   const groups = [
     ['Before you start', GUIDES.filter(g => g.group === 'setup')],
     ['Module guides', GUIDES.filter(g => g.group === 'module')],
   ];
+
+  /* Active is marked exactly one way — a tinted row with a hairline
+     border — and that one way is shared with the chapter list on the
+     right, which wears it through .g-toc a[aria-current]. No tick on
+     one side and not the other. */
   const item = g => {
     const on = g.slug === slug;
     const mod = g.module ? MODULE_BY_KEY[g.module] : null;
     const Icon = mod ? mod.icon : BookOpen;
     return (
       <a key={g.slug} href={guideHref(g)}
-        onClick={e => { if (plainClick(e)) { e.preventDefault(); onOpen(g.slug); } }}
+        onClick={e => { if (plainClick(e)) { e.preventDefault(); setOpen(false); onOpen(g.slug); } }}
         aria-current={on ? 'page' : undefined}
         className="guide-nav-item"
         style={{
-          display: 'flex', alignItems: 'center', gap: 10, width: compact ? 'auto' : '100%',
-          flexShrink: 0, textAlign: 'left', padding: '10px 12px', borderRadius: 4,
+          display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+          flexShrink: 0, textAlign: 'left', padding: compact ? '13px 12px' : '10px 12px',
+          borderRadius: 4,
           border: `1px solid ${on ? `rgba(${GREEN_RGB},0.4)` : 'transparent'}`,
           background: on ? `rgba(${GREEN_RGB},0.1)` : 'transparent',
-          whiteSpace: compact ? 'nowrap' : 'normal',
           textDecoration: 'none', cursor: 'pointer',
         }}>
         <Icon size={14} color={on ? GREEN : 'rgba(255,255,255,0.4)'} />
         <span style={{
           flex: 1, minWidth: 0, fontFamily: 'Barlow, sans-serif', fontWeight: on ? 500 : 300,
-          fontSize: '0.9rem', lineHeight: 1.35, color: on ? 'white' : 'rgba(255,255,255,0.6)',
+          fontSize: compact ? '0.95rem' : '0.9rem', lineHeight: 1.35,
+          color: on ? 'var(--g-bright)' : 'rgba(255,255,255,0.6)',
         }}>{g.title}</span>
-        {on && <Check size={14} color={GREEN} />}
       </a>
     );
   };
 
+  const list = groups.map(([title, guides], gi) => (
+    <div key={title} style={{ marginBottom: gi === 0 ? 14 : 0 }}>
+      <span style={{ display: 'block', padding: '6px 12px 10px', fontFamily: MONO, fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: `rgba(${GREEN_RGB},0.6)` }}>
+        {title}
+      </span>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>{guides.map(item)}</div>
+    </div>
+  ));
+
   if (compact) {
+    const current = GUIDES.find(g => g.slug === slug) || GUIDES[0];
+    const mod = current.module ? MODULE_BY_KEY[current.module] : null;
+    const Icon = mod ? mod.icon : BookOpen;
     return (
-      <div style={{ flex: '1 1 100%', width: '100%', display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 6, marginBottom: 8 }}>
-        {GUIDES.map(item)}
-      </div>
+      <nav style={{ flex: '1 1 100%', width: '100%', marginBottom: 14 }}>
+        <button type="button" onClick={() => setOpen(o => !o)}
+          aria-expanded={open} className="panel guide-picker">
+          <Icon size={16} color={GREEN} style={{ flexShrink: 0 }} />
+          <span className="guide-picker-label">
+            <span className="guide-picker-kicker">{'// '}Guide</span>
+            <span className="guide-picker-name">{current.title}</span>
+          </span>
+          <span aria-hidden="true" className={'guide-picker-chevron' + (open ? ' is-open' : '')}>
+            <ChevronRight size={15} />
+          </span>
+        </button>
+        {open && <div className="panel" style={{ marginTop: 8, padding: 12 }}>{list}</div>}
+      </nav>
     );
   }
   return (
     <nav className="panel" style={{ flex: '0 0 250px', minWidth: 0, padding: 12, position: 'sticky', top: 92 }}>
-      {groups.map(([title, list], gi) => (
-        <div key={title} style={{ marginBottom: gi === 0 ? 14 : 0 }}>
-          <span style={{ display: 'block', padding: '6px 12px 10px', fontFamily: MONO, fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: `rgba(${GREEN_RGB},0.6)` }}>
-            {title}
-          </span>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>{list.map(item)}</div>
-        </div>
-      ))}
+      {list}
     </nav>
   );
 }
@@ -616,7 +650,7 @@ function GuideReader({ slug, onOpen, onClose }) {
                 </div>
               )
             ) : (
-              <div className="panel" style={{ maxWidth: COLUMN + 40, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div className="panel" style={{ maxWidth: COLUMN, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {guide.covers.map((c, i) => (
                   <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                     <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', color: `rgba(${GREEN_RGB},0.6)`, marginTop: 4, flexShrink: 0 }}>
@@ -670,7 +704,7 @@ function GuideReader({ slug, onOpen, onClose }) {
                 {mod.guard && (
                   <>
                     <ReaderHeading>Read this before you turn it up</ReaderHeading>
-                    <div className="panel" style={{ maxWidth: COLUMN + 75, padding: '20px 22px', display: 'flex', gap: 14, alignItems: 'flex-start', borderColor: `rgba(${GREEN_RGB},0.3)` }}>
+                    <div className="panel" style={{ maxWidth: COLUMN, padding: '20px 22px', display: 'flex', gap: 14, alignItems: 'flex-start', borderColor: `rgba(${GREEN_RGB},0.3)` }}>
                       <Shield size={17} color={GREEN} style={{ marginTop: 3, flexShrink: 0 }} />
                       <p style={{ ...readerProse, fontSize: '0.94rem', lineHeight: 1.75, margin: 0 }}>{mod.guard}</p>
                     </div>

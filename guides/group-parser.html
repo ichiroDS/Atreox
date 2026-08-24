@@ -566,6 +566,37 @@
     .guide-nav-item:hover { background: rgba(0,217,255,0.07); }
     .guide-nav-item:focus-visible { outline: 1px solid var(--g); outline-offset: 1px; }
 
+    /* The narrow-screen guide picker: the list collapsed down to the
+       one name that matters, sized as a thumb target rather than a
+       row of text. Opening it pushes the article down; it never
+       covers what you were reading. */
+    .guide-picker {
+      display: flex; align-items: center; gap: 12px;
+      width: 100%; padding: 13px 14px; border-radius: 6px;
+      background: rgba(0,217,255,0.04); text-align: left;
+      transition: border-color 0.16s ease, background 0.16s ease;
+    }
+    .guide-picker:hover, .guide-picker[aria-expanded="true"] {
+      border-color: var(--g-40); background: rgba(0,217,255,0.07);
+    }
+    .guide-picker:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+    .guide-picker-label { flex: 1; min-width: 0; display: block; }
+    .guide-picker-kicker {
+      display: block; font-family: var(--mono); font-weight: 500; font-size: 0.54rem;
+      letter-spacing: 0.2em; text-transform: uppercase; color: rgba(0,217,255,0.7);
+      margin-bottom: 3px;
+    }
+    .guide-picker-name {
+      display: block; font-family: var(--sans); font-weight: 500; font-size: 1rem;
+      line-height: 1.25; color: #fff;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .guide-picker-chevron {
+      display: inline-flex; flex-shrink: 0; color: var(--g);
+      transform: rotate(90deg); transition: transform 0.18s ease;
+    }
+    .guide-picker-chevron.is-open { transform: rotate(-90deg); }
+
     /* ══ Guide body ══════════════════════════════════════════════
        The blocks a written guide is built from. One stylesheet, two
        renderers: the React reader and scripts/prerender.mjs both emit
@@ -617,7 +648,7 @@
 
     /* the paragraph the whole guide turns on */
     .g-callout {
-      max-width: 800px; margin: 0 0 20px; padding: 22px 26px;
+      max-width: var(--gcol); margin: 0 0 20px; padding: 22px 26px;
       border: 1px solid var(--g-22); border-left: 2px solid var(--g);
       border-radius: 6px;
       background: linear-gradient(180deg, rgba(0,217,255,0.06), rgba(0,217,255,0.015));
@@ -625,7 +656,7 @@
     .g-callout .g-p { color: #fff; }
 
     /* a protocol, as the sequence it is */
-    .g-steps { list-style: none; margin: 0 0 20px; padding: 0; max-width: 780px; counter-reset: g-step; }
+    .g-steps { list-style: none; margin: 0 0 20px; padding: 0; max-width: var(--gcol); counter-reset: g-step; }
     .g-steps li { position: relative; counter-increment: g-step; padding: 0 0 18px 46px; }
     .g-steps li::before {
       content: counter(g-step, decimal-leading-zero);
@@ -849,10 +880,26 @@
 
     /* the last word, said quietly */
     .g-note {
-      max-width: 760px; margin: 28px 0 0; padding-left: 16px;
+      max-width: var(--gcol); margin: 28px 0 0; padding-left: 16px;
       border-left: 1px solid var(--g-14);
       font-family: var(--sans); font-weight: 300; font-size: 0.88rem;
       line-height: 1.75; color: rgba(255,255,255,0.44);
+    }
+
+    /* Every tinted block in the guide body carries desktop padding that
+       a phone cannot afford: at 375px the article is ~330px wide, so
+       26px a side spends a sixth of the line on empty inset. Pulled in
+       to 14px, which buys back roughly two words per line without the
+       text touching the border. */
+    @media (max-width: 640px) {
+      .g-callout { padding: 18px 14px; }
+      .g-card    { padding: 16px 14px; }
+      .g-option  { padding: 15px 14px; }
+      .g-plate   { padding: 15px 14px; }
+      .g-list    { padding: 16px 14px; }
+      .g-stat    { padding: 22px 14px; }
+      .g-tablewrap .g-table tr { padding: 2px 14px; }
+      .g-note { padding-left: 12px; }
     }
 
     /* ── Terminal "listening…" animated ellipsis ── */
