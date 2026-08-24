@@ -1598,14 +1598,208 @@ const GUIDES = [
     group: 'module',
     short: 'Build the target list',
     title: 'Channel Parser',
-    summary: 'Building a target list that is worth commenting into.',
-    covers: [
-      'Keywords and AI-suggested endings for widening a niche',
-      'Filters that matter: member range, language, comments on the last post',
-      'Similar-channel search, and promoting results into the commenting pool',
-    ],
+    summary: 'Finding channels worth commenting into — the two search modes, the filters that decide what survives, and what the score means.',
+    seoTitle: 'Channel Parser: every control on the ATREOX channel search',
+    seoDescription:
+      'Keyword and similar-channel search, the member/language/comment filters, the score, and how results reach the commenting list. Taken from the engine and the panel.',
     module: 'channel-parser',
     video: null,
+    body: [
+      {
+        id: 'what-it-is',
+        title: 'What this page is',
+        blocks: [
+          ['p', "Channel Parser searches Telegram for channels you could comment into, checks each candidate against your filters, scores the survivors and lists them. It is a research tool: nothing it finds starts being commented on until you put it in the Neurocommenting channel list yourself."],
+          ['p', "It shares its page with Group Parser. A pair of tabs at the top switches between them — Channel parser and Group parser — and each has its own form, its own results and its own history."],
+          ['callout', [
+            "Searching uses your own accounts, and it uses them heavily: every candidate channel costs several Telegram requests to inspect. An account running a search is reserved and cannot be in the commenting pool at the same time. Run searches when the accounts can spare the calls, not alongside a full commenting run.",
+          ]],
+        ],
+      },
+      {
+        id: 'map',
+        title: 'Map of the page',
+        blocks: [
+          ['map', [
+            { name: 'Parser tabs', holds: 'Channel parser · Group parser. The top-level switch between two different tools sharing one address.' },
+            { name: 'Search control', holds: 'The run state, the Search button, and Cancel run while one is going.' },
+            { name: 'Mode tabs', holds: 'Keyword search · Similar channels. Two ways of producing candidates, sharing every filter below.' },
+            { name: 'The form', holds: 'Keywords and optional endings, accounts, members range, languages, minimum comments on the last post, and how many results to stop at.' },
+            { name: 'Progress', holds: 'While a run is going: which chunk it is on, and a live log of what each account is deciding.' },
+            { name: 'Results', holds: 'Four tabs — All, Pending, Promoted, Rejected — with Copy Links and Clear above them.' },
+          ]],
+        ],
+      },
+      {
+        id: 'keyword-search',
+        title: 'Keyword search',
+        blocks: [
+          ['p', "You give it words; it searches Telegram for each one and inspects what comes back. The endings field is a multiplier on that: every keyword is combined with every ending, so five keywords and four endings is twenty searches."],
+          ['controls', [
+            {
+              id: 'ctl-cp-keywords', name: 'Keywords', where: 'Keyword search', kind: 'field', value: 'crypto, trading',
+              rows: [
+                ['What it does', 'The words searched for. Typed one at a time or pasted as a list.'],
+                ['Limit', 'Up to 300. Duplicates are dropped case-insensitively as you add them.'],
+                ['How they are sent', 'In batches of ten. That is a hard limit on the search request itself, not a throttle, so a long list is split into chunks and the chunks run one after another.'],
+                ['What one keyword really costs', 'More than one search. Telegram’s own search returns only about ten results for a query however many you ask for, so each keyword is also re-queried as several deterministic rewrites of itself to get past that ceiling.'],
+              ],
+            },
+            {
+              id: 'ctl-cp-endings', name: 'Endings (optional)', where: 'Keyword search', kind: 'field', value: 'signals, news',
+              rows: [
+                ['What it does', 'Words appended to each keyword to make the combinations actually searched — crypto plus signals is searched as the single phrase crypto signals.'],
+                ['Why', 'Topic plus ending is how Telegram channels are actually named. Searching the bare topic finds far less than searching the names people give channels about it.'],
+                ['Generate', 'A button asks the model for a set of endings in a language you pick, up to thirty at a time. It only fills the field — nothing is searched until you press Search.'],
+                ['The multiplication', 'Combinations are keywords times endings. The form shows the count and a time estimate before you commit, and asks for confirmation on a long one.'],
+              ],
+            },
+            {
+              id: 'ctl-cp-accounts', name: 'Accounts', where: 'The form', kind: 'button', tone: 'plain', value: 'Use all accounts',
+              rows: [
+                ['What it does', 'Chooses which accounts do the searching. Either all healthy ones, or a selection.'],
+                ['How they are used', 'The keyword list is split across up to a few accounts at once, each working its own share.'],
+                ['Reserved while running', 'An account in a running search cannot be added to the commenting pool until the task finishes.'],
+                ['Pacing', 'Every single Telegram request is paced and counted against that account’s budget, including the ones spent inspecting a candidate. There is also a per-task ceiling, so one long keyword list cannot spend an account’s whole hourly allowance by itself.'],
+              ],
+            },
+            {
+              id: 'ctl-cp-max-results', name: 'Max results', where: 'The form', kind: 'button', tone: 'plain', value: '500',
+              rows: [
+                ['What it does', 'Stops the run once this many channels have been accepted.'],
+                ['Default', '500. Unlimited is offered, and is capped at 5000 by the engine regardless.'],
+                ['Custom values', 'Anything from 1 to 5000.'],
+              ],
+            },
+          ]],
+          ['p', "A run can be cancelled while it goes. Cancelling stops the chunks that have not started; everything already found stays."],
+        ],
+      },
+      {
+        id: 'similar',
+        title: 'Similar channels',
+        blocks: [
+          ['p', "The other mode. Instead of words you give it channels, and it asks Telegram what is similar to them. Every filter below applies the same way."],
+          ['controls', [
+            {
+              id: 'ctl-cp-sources', name: 'Source channels', where: 'Similar channels', kind: 'field', value: '@somechannel',
+              rows: [
+                ['What it does', 'The channels to find neighbours of. One per line, as @username, a t.me link or a bare name.'],
+                ['What is refused', 'Private invite links. They name no public channel, so there is nothing to ask about.'],
+                ['When this beats keywords', 'When you already know two or three channels your audience reads. It skips the guessing about names entirely.'],
+              ],
+            },
+            {
+              id: 'ctl-cp-depth', name: 'Depth', where: 'Similar channels', kind: 'select', value: '1',
+              rows: [
+                ['Depth 1', 'Direct recommendations for each source channel only.'],
+                ['Depth 2', 'Also searches channels similar to what depth 1 found. More results, longer runtime, more Telegram calls.'],
+                ['What bounds depth 2', 'Only the highest-scoring thirty of the accepted depth-1 channels are recursed into. Without that cap a fifty-source run could turn into hundreds of extra requests.'],
+                ['Pacing', 'Depth 2 is paced more slowly than depth 1, because it stacks a second wave of requests onto the same account session inside one run.'],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'filters',
+        title: 'The filters',
+        blocks: [
+          ['p', "Every candidate goes through the same pipeline in the same order, and the first failure ends it. Three of the steps are yours to set; three are not."],
+          ['controls', [
+            {
+              id: 'ctl-cp-members', name: 'Members range', where: 'The form', kind: 'field', value: '5 000 — 10 000 000',
+              rows: [
+                ['What it does', 'Rejects a channel whose member count is outside the range.'],
+                ['Default', 'From 5,000, with no meaningful upper limit.'],
+                ['Accepted range', 'The floor cannot go below 500 and the ceiling not above 10,000,000.'],
+                ['Which way to move it', 'Down. A smaller channel is a lot easier to be visible in than a large one, and the default floor already excludes most of them.'],
+              ],
+            },
+            {
+              id: 'ctl-cp-languages', name: 'Languages', where: 'The form', kind: 'badge', tone: 'plain', value: 'English',
+              rows: [
+                ['What it does', 'Rejects a channel whose detected language is not among the ones ticked.'],
+                ['The ten offered', 'English, Russian, Ukrainian, German, Spanish, French, Portuguese, Italian, Polish, Turkish.'],
+                ['How the language is decided', 'From the text of the last three posts, run through automatic detection.'],
+                ['A channel it cannot read', 'Comes back as unknown, which never matches anything ticked, so a channel of images with no captions is rejected here.'],
+                ['At least one', 'The form refuses to search with none selected.'],
+              ],
+            },
+            {
+              id: 'ctl-cp-min-comments', name: 'Min comments on last post', where: 'The form', kind: 'field', value: '5',
+              rows: [
+                ['What it does', 'Rejects a channel whose most recent post has fewer comments than this.'],
+                ['Default', '5.'],
+                ['Only the last post', 'One post is checked, not an average — one lookup instead of five. A channel that was busy last month and quiet this week fails here, which is the intent.'],
+                ['Why it is the filter that matters', 'A comment nobody will see is worth nothing. This is the number that decides whether a channel is a place to be read.'],
+              ],
+            },
+          ]],
+          ['p', "Three more checks run that the form does not show, and they reject more than the ones it does:"],
+          ['table', {
+            head: ['Check', 'What it rejects'],
+            rows: [
+              ['Public channel', 'Anything without a public username. There is nothing to point an account at otherwise.'],
+              ['Comments open', 'Any channel with no linked discussion group. Measured on real candidates, this one alone rejects around three quarters of them — by far the most destructive step in the pipeline, and the reason a search that found plenty returns little.'],
+              ['Posts per week', 'A channel with fewer than five posts in the last seven days. Not adjustable from the panel.'],
+            ],
+          }],
+        ],
+      },
+      {
+        id: 'results',
+        title: 'Reading the results',
+        blocks: [
+          ['p', "One row per surviving channel: username, title, members, language, comments on the last post, and a score. The score bands are coloured the same way in both parsers, so a 72 never reads as good on one and neutral on the other."],
+          ['controls', [
+            {
+              id: 'ctl-cp-score', name: 'Score', where: 'Results', kind: 'tile', tone: 'ok', value: '72',
+              rows: [
+                ['What it is', 'A number from 0 to 100 built from four things, with comment activity weighted hardest.'],
+                ['How it is built', 'Up to 40 points for size, on a logarithmic scale — 5,000 members is worth about 30, and past roughly half a million it stops paying. Up to 40 for comments on the last post, reaching full marks at ten comments. Up to 10 for posting frequency. Ten more for matching a language you asked for.'],
+                ['What that means in practice', 'A modest channel with a busy comment section outscores a huge one nobody talks in. That is deliberate.'],
+                ['Colour bands', 'Under 30 reads as poor, 30 to 60 as middling, above 60 as good.'],
+              ],
+            },
+            {
+              id: 'ctl-cp-copy', name: 'Copy Links', where: 'Results', kind: 'button', tone: 'plain', value: 'Copy Links',
+              rows: [
+                ['What it does', 'Copies the links of the rows on the current page to the clipboard, one per line.'],
+                ['What it is for', 'Pasting straight into the Add channel(s) box on the Neurocommenting page, which accepts exactly this format.'],
+                ['The current page only', 'Not the whole result set. Page through and copy each page.'],
+              ],
+            },
+            {
+              id: 'ctl-cp-clear', name: 'Clear', where: 'Results', kind: 'button', tone: 'bad', value: 'Clear',
+              rows: [
+                ['What it does', 'Deletes the stored results.'],
+                ['What comes back', 'A later search can surface the same channels again — nothing here records that you have already seen and dismissed one.'],
+              ],
+            },
+          ]],
+          ['callout', [
+            "The four result tabs read as a workflow that is not there. All, Pending, Promoted and Rejected are real statuses the engine keeps, and promoting a channel would add it to the monitored list in one step while rejecting it would stop it resurfacing on a re-scan — but this table offers no way to do either. Every row stays Pending forever, and the only route into the commenting list is Copy Links and a paste into the Neurocommenting page, which does not change the row's status. The Group Parser tab beside it does have the two buttons.",
+          ]],
+        ],
+      },
+      {
+        id: 'first-run',
+        title: 'First run',
+        blocks: [
+          ['steps', [
+            "Start with three or four keywords and no endings. It costs little and tells you whether the filters are anywhere near right before you spend a long run on them.",
+            "Leave the members range alone at first; lower the floor rather than raising the ceiling if too little comes back.",
+            "Set Min comments on last post to what you actually need. Five is the default and it is not a low bar — a channel that clears it has a live comment section.",
+            "Read the run rather than waiting for it. The live log names each candidate and why it was rejected, and it is usually obvious within a minute which filter is doing the damage.",
+            "Once the filters look right, add endings and re-run. That is where the volume comes from.",
+            "Copy the links of the rows worth having and paste them into Add channel(s) on the Neurocommenting page.",
+          ]],
+          ['note', "Very little coming back is the normal first experience, and it is usually not the keywords. Roughly three quarters of real candidates are rejected for having no comment section at all, before any filter you set is even reached.",
+          ],
+        ],
+      },
+    ],
   },
   {
     slug: 'group-parser',
