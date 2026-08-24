@@ -375,9 +375,25 @@ const PIPELINE = [
              search, so their wording is deliberate.
    `short`   one line for the index card — keep it to a few words.
    `intro`   the reader's opening paragraph. Module guides fall back to
-             their module's own write-up in catalog, so only the two
-             prep guides (which have no module) carry one here.
-   `covers`  the chapters, in order.
+             their module's own write-up in catalog, so only a prep
+             guide with no `body` of its own carries one here.
+   `covers`  the chapters, in order — the placeholder a guide lists
+             until it has a `body`, which supersedes it.
+   `body`    THE GUIDE ITSELF, once it is written: sections, each with
+             an `id` (its anchor, and a public one — the chapter list
+             links to it), a `title` and a list of blocks. A block is
+             [kind, value]; the kinds are p, callout, steps, card,
+             figure, plates, table, checklist and note, and both
+             renderers — ReaderBlocks in guides.jsx and renderBlocks in
+             scripts/prerender.mjs — must know every one of them. The
+             prerenderer throws on a kind it does not, which is how a
+             half-added block kind fails the deploy instead of quietly
+             vanishing from the crawled page.
+   `seoTitle`, `seoDescription`
+             what a search result says, when the one-line `summary`
+             under the heading is no longer the whole story. Optional;
+             without them the head is built from title and summary as
+             it always was. The page's own <h1> is `title` regardless.
    `module`  links the guide to its Functions section and its price
              (null for the prep guides, about things you buy elsewhere).
    `video`   a URL once one is recorded; the reader adds a Watch button
@@ -398,15 +414,131 @@ const GUIDES = [
     short: 'What to buy, what to avoid',
     summary:
       'What to buy, where, and how to tell a usable account from one that will die in a week — before you spend anything.',
-    intro:
-      'Accounts are the one thing ATREOX does not sell you, and the one thing that decides whether everything downstream works. A cheap batch that dies in its first week costs more than a good batch that runs for months, and the difference is visible before you pay if you know what to look for.',
-    covers: [
-      'Session strings, tdata folders and API credentials — what each one is and which you actually need',
-      'Age, country and format: what changes the survival rate and what is just price',
-      'The checks to run on a fresh batch before it touches a module',
-    ],
+    seoTitle: 'Buying Telegram accounts: TData, GEO and testing sellers',
+    seoDescription:
+      'Test sellers before you scale: TData format, GEO matched to your proxies, rest time, no spamblock, and the checks that catch a dead account on import.',
     module: null,
     video: null,
+    body: [
+      {
+        id: 'hidden-mechanics',
+        title: 'The Hidden Mechanics of Telegram Accounts',
+        blocks: [
+          ['p', "The foundation of everything in ATREOX is your accounts. They are your workforce, but here is the hard truth that beginners often miss: the biggest problem causing bans or limits is usually the accounts themselves. When you open a marketplace, you see millions of accounts and thousands of sellers. It is incredibly easy to spend a significant amount of money on a batch, watch them all get blocked immediately after their first neuro-commenting session, and assume either the software is broken or you did something terribly wrong. In reality, you just need to understand how to buy, verify, and test accounts properly."],
+          ['callout', [
+            "A common trap is assuming that two accounts with the exact same description from different sellers will yield the same results. They won't. Behind the scenes, Telegram evaluates an account based on over 100 hidden parameters to determine its trust score and lifespan. This includes the device ID used during registration, the specific version of the Telegram client, the quality of the phone number pool, and countless other microscopic details. The autoregers who create these accounts bake these parameters in from day one. Our team has analyzed massive volumes of accounts, and we've concluded that learning how to vet these hidden parameters by testing sellers is the most critical skill for anyone starting in Telegram traffic.",
+            "This directly ties into pricing. You cannot expect a $0.20 account to perform identically to a $0.90 account, even if both meet our recommended basic characteristics. Cheaper accounts almost always mean those hidden registration parameters are of lower quality. This doesn't mean you should blindly buy the most expensive accounts on the market. It simply means that cheaper accounts carry a higher risk of bans and require far more meticulous testing and a slower warmup process.",
+          ]],
+        ],
+      },
+      {
+        id: 'testing-sellers',
+        title: 'Testing Sellers and Avoiding Instant Bans',
+        blocks: [
+          ['p', "Instead of buying 100 accounts from a single unknown seller right away, you need to run a testing protocol."],
+          ['steps', [
+            "Buy about 20 accounts each from a few different sellers that offer roughly the same parameters.",
+            "Let them rest for three days without doing anything heavy.",
+            "Apply your profile templates.",
+            "Then, put them into the Active Warmup module on very conservative settings up to day five.",
+            "Finally, run them through just one single neuro-commenting session.",
+          ]],
+          ['p', "The difference in survival rates between the sellers will usually be massive, instantly showing you who provides the actual quality you can scale with."],
+          ['card', {
+            kicker: 'A faster, lighter test',
+            blocks: [
+              ['p', "If you want a faster, lighter approach to testing a new seller, buy just 5 accounts. Import them into ATREOX and immediately run the account checks."],
+              ['figure', {
+                src: '/public/screenshots/buying-telegram-accounts/02.png',
+                w: 1919, h: 956,
+                alt: 'ATREOX Account Manager running health and capability checks on imported Telegram accounts',
+                caption: 'Health check and capability check in the Account Manager',
+              }],
+              ['p', "Running a health check and capability check will update their status in the dashboard, ensuring you haven't bought accounts that are already heavily limited from the start."],
+            ],
+          }],
+          ['p', "You might wonder how an account can be banned immediately upon import if marketplaces have built-in checkers that verify validity right before purchase. The reality is that the marketplace checker only confirms the account is alive at that exact moment on their native IP. But the moment that account hits the new IP of your proxy inside the ATREOX dashboard, Telegram runs a minimal stress test. If the account's hidden trust score is too low, it will be banned instantly upon that IP change. When you see this happen, take it as a clear signal that the account couldn't even survive the most basic environmental shift, and you should abandon that seller entirely."],
+        ],
+      },
+      {
+        id: 'evaluating-sellers',
+        title: 'Evaluating Marketplace Sellers',
+        blocks: [
+          ['p', "When evaluating sellers on LZT Market, you will notice that almost everyone has a perfect 100% rating."],
+          ['figure', {
+            src: '/public/screenshots/buying-telegram-accounts/03.png',
+            w: 816, h: 197,
+            alt: 'LZT Market seller ratings all showing 100 percent',
+            caption: 'Every seller shows 100% — the rating alone tells you nothing',
+          }],
+          ['p', "You must remember that these positive reviews are generated automatically if the buyer does not explicitly write a bad one. Therefore, a 100% rating is largely an illusion."],
+          ['p', "You must manually open each seller's profile and look exclusively for the presence of negative reviews."],
+          ['plates', [
+            { tone: 'bad', label: 'Avoid', text: "If a seller has 7 or more negative reviews, that is a massive red flag and you should avoid them." },
+            { tone: 'ok', label: 'Acceptable', text: "A count of 0 to 1 negative reviews is generally acceptable." },
+          ]],
+        ],
+      },
+      {
+        id: 'marketplaces-and-geos',
+        title: 'Marketplaces, Formats, and GEOs',
+        blocks: [
+          ['p', "When buying accounts, ATREOX requires the TData format. TData is the local session data Telegram Desktop stores on a computer—a folder containing everything needed to log in without a phone number or SMS code. It ensures zero friction, no re-verification, and higher trust from Telegram."],
+          ['p', "When it comes to selecting a GEO for your accounts, the golden rule is that the account GEO must strictly match the GEO of the proxies you bought or plan to buy. USA accounts are not always the best option. In fact, at the time of writing this guide, the ATREOX team predominantly uses Indonesian accounts paired with Indonesian proxies, which also happen to be significantly cheaper and highly effective compared to American equivalents."],
+          ['p', "If your primary marketplace is ever down, you need untested backups. Established English-facing marketplaces include:"],
+          ['table', {
+            head: ['Marketplace', 'What it is known for'],
+            rows: [
+              ['AccsMarket', 'the most recognized bulk-TData market'],
+              ['BuyAccs', 'cited for lower burn rates'],
+              ['Accs Trading', 'TData + Session, crypto payments'],
+            ],
+          }],
+        ],
+      },
+      {
+        id: 'the-checklist',
+        title: 'The Expanded Account Checklist',
+        blocks: [
+          ['p', "Before scaling your operations, run every new batch and seller against this expanded checklist to ensure your marketplace filters are set correctly."],
+          ['figure', {
+            src: '/public/screenshots/buying-telegram-accounts/01.png',
+            w: 814, h: 889,
+            alt: 'Telegram account marketplace filters for TData, GEO and rest time',
+            caption: 'Marketplace filters set to the parameters from the checklist',
+          }],
+          ['checklist', [
+            {
+              tone: 'ok',
+              title: 'The "Must-Have" Parameters',
+              items: [
+                ['Format & Ownership:', 'TData format exclusively, with "Not sold before" checked, and no account password set.'],
+                ['GEO Match:', 'The account origin country must perfectly match your proxy location.'],
+                ['Rest Time:', '14 to 30 days of rest time after registration is highly recommended for beginners. 7 days is the absolute minimum, reserved only for experienced users who know how to manage aggressive warmups.'],
+                ['Clean Record:', 'Absolutely no spamblock. A spam-blocked account cannot comment and is dead weight.'],
+              ],
+            },
+            {
+              tone: 'bad',
+              title: 'The "Red Flags" to Avoid',
+              items: [
+                ['Instant IP Death:', "If a seller's accounts get banned immediately during the initial ATREOX health check due to the IP change, abandon that seller."],
+                ['0-Day / Fresh Accounts:', 'No rest time equals an instant ban.'],
+                ['"Sold Before" or Password-Protected:', 'Someone else holds the keys to the session or can recover it.'],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'future-tools',
+        title: 'Future Tools and Final Expectations',
+        blocks: [
+          ['p', "In the future, the ability to register accounts directly inside ATREOX will be introduced as a separate Telegram Autoregistrar module. Until then, our team insists that you conduct your own research and develop a solid understanding of which accounts are worth buying and which are not. Without this foundational knowledge, an autoregistrar will not help you anyway. If you decide to purchase a third-party autoregistrar for mass registration in the meantime, we cannot provide any recommendations for those tools. You do so entirely at your own risk."],
+          ['note', "Finally, please keep in mind that these are general recommendations from the ATREOX team. There are no people in this world who drive Telegram traffic without constantly losing accounts. The goal of this guide is not to promise a magical zero-ban workflow, but to help you minimize those losses. By following these steps, you can reduce your ban rate so effectively that losing a few accounts out of a batch of 100 becomes completely unnoticeable to your overall operation."],
+        ],
+      },
+    ],
   },
   {
     slug: 'proxies',

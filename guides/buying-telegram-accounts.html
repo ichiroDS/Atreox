@@ -12,20 +12,20 @@
        (No tag names spelled out in here — a comment that contains one
        is a comment something eventually parses by mistake.) -->
   <!-- HEAD:META -->
-  <title>Buying Telegram accounts — ATREOX guide</title>
-  <meta name="description" content="What to buy, where, and how to tell a usable account from one that will die in a week — before you spend anything.">
+  <title>Buying Telegram accounts: TData, GEO and testing sellers — ATREOX</title>
+  <meta name="description" content="Test sellers before you scale: TData format, GEO matched to your proxies, rest time, no spamblock, and the checks that catch a dead account on import.">
   <link rel="canonical" href="https://www.atreoxai.com/guides/buying-telegram-accounts">
 
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://www.atreoxai.com/guides/buying-telegram-accounts">
   <meta property="og:site_name" content="ATREOX">
-  <meta property="og:title" content="Buying Telegram accounts — ATREOX guide">
-  <meta property="og:description" content="What to buy, where, and how to tell a usable account from one that will die in a week — before you spend anything.">
+  <meta property="og:title" content="Buying Telegram accounts: TData, GEO and testing sellers — ATREOX">
+  <meta property="og:description" content="Test sellers before you scale: TData format, GEO matched to your proxies, rest time, no spamblock, and the checks that catch a dead account on import.">
   <meta property="og:image" content="https://www.atreoxai.com/public/og/buying-telegram-accounts.png">
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Buying Telegram accounts — ATREOX guide">
-  <meta name="twitter:description" content="What to buy, where, and how to tell a usable account from one that will die in a week — before you spend anything.">
+  <meta name="twitter:title" content="Buying Telegram accounts: TData, GEO and testing sellers — ATREOX">
+  <meta name="twitter:description" content="Test sellers before you scale: TData format, GEO matched to your proxies, rest time, no spamblock, and the checks that catch a dead account on import.">
   <meta name="twitter:image" content="https://www.atreoxai.com/public/og/buying-telegram-accounts.png">
   <!-- /HEAD:META -->
 
@@ -180,6 +180,13 @@
       --logotype: 'Marcellus', 'Playfair Display', Georgia, serif;
       --sans:     'Barlow', sans-serif;
       --mono:     'JetBrains Mono', ui-monospace, 'Cascadia Mono', monospace;
+
+      /* guide body: the measure a paragraph may reach, and the two
+         verdict colours the checklist and the review plates read in.
+         --gcol pairs with COLUMN in guides.jsx. */
+      --gcol:     660px;
+      --ok:       #3fd68c;
+      --bad:      #ff6161;
     }
 
     html { scroll-behavior: smooth; background: var(--bg); }
@@ -559,6 +566,179 @@
     .guide-nav-item:hover { background: rgba(0,217,255,0.07); }
     .guide-nav-item:focus-visible { outline: 1px solid var(--g); outline-offset: 1px; }
 
+    /* ══ Guide body ══════════════════════════════════════════════
+       The blocks a written guide is built from. One stylesheet, two
+       renderers: the React reader and scripts/prerender.mjs both emit
+       these exact class names, so the page a crawler downloads and the
+       page a reader ends up looking at are the same page — no second
+       set of styles to keep in step.
+
+       --gcol is the measure a paragraph is allowed to reach. The guide
+       column itself is wider (READER_MAX in guides.jsx) and the screens,
+       tables and checklists use all of it; sentences do not, because
+       past roughly 80 characters the eye loses the next line's start. */
+    .g-p {
+      font-family: var(--sans); font-weight: 300; font-size: 1.05rem;
+      line-height: 1.8; color: rgba(255,255,255,0.72);
+      max-width: var(--gcol); margin: 0 0 17px;
+    }
+    .g-p:last-child { margin-bottom: 0; }
+    .g-p b, .g-p strong { font-weight: 500; color: rgba(255,255,255,0.92); }
+
+    /* the chapter list, which is also the way into the chapters */
+    .g-toc { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr)); gap: 1px; }
+    .g-toc a {
+      display: flex; gap: 11px; align-items: baseline;
+      padding: 9px 11px; border-radius: 4px; text-decoration: none;
+      transition: background 0.16s ease;
+    }
+    .g-toc a:hover { background: rgba(0,217,255,0.07); }
+    .g-toc a:focus-visible { outline: 1px solid var(--g); outline-offset: 1px; }
+    .g-toc-t {
+      font-family: var(--sans); font-weight: 300; font-size: 0.95rem;
+      line-height: 1.5; color: rgba(255,255,255,0.7);
+      transition: color 0.16s ease;
+    }
+    .g-toc a:hover .g-toc-t { color: #fff; }
+    .g-toc-n {
+      font-family: var(--mono); font-weight: 500; font-size: 0.62rem;
+      color: rgba(0,217,255,0.6); flex-shrink: 0;
+    }
+
+    /* the paragraph the whole guide turns on */
+    .g-callout {
+      max-width: 800px; margin: 0 0 20px; padding: 22px 26px;
+      border: 1px solid var(--g-22); border-left: 2px solid var(--g);
+      border-radius: 6px;
+      background: linear-gradient(180deg, rgba(0,217,255,0.06), rgba(0,217,255,0.015));
+    }
+    .g-callout .g-p { color: rgba(255,255,255,0.84); }
+
+    /* a protocol, as the sequence it is */
+    .g-steps { list-style: none; margin: 0 0 20px; padding: 0; max-width: 780px; counter-reset: g-step; }
+    .g-steps li { position: relative; counter-increment: g-step; padding: 0 0 18px 46px; }
+    .g-steps li::before {
+      content: counter(g-step, decimal-leading-zero);
+      position: absolute; left: 0; top: 0;
+      width: 28px; height: 28px; box-sizing: border-box;
+      border: 1px solid rgba(0,217,255,0.34); background: rgba(0,217,255,0.07);
+      border-radius: 3px; display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-weight: 600; font-size: 0.62rem; color: var(--g);
+    }
+    .g-steps li::after {
+      content: ''; position: absolute; left: 14px; top: 34px; bottom: 2px; width: 1px;
+      background: linear-gradient(180deg, rgba(0,217,255,0.3), rgba(0,217,255,0.05));
+    }
+    .g-steps li:last-child { padding-bottom: 0; }
+    .g-steps li:last-child::after { display: none; }
+    .g-steps .g-p { margin: 0; padding-top: 4px; }
+
+    /* a card holding an alternative to whatever precedes it */
+    .g-card {
+      margin: 0 0 20px; padding: 20px 22px;
+      border: 1px dashed var(--g-22); border-radius: 6px;
+      background: rgba(0,217,255,0.02);
+    }
+    .g-card > :last-child { margin-bottom: 0; }
+    .g-kicker {
+      display: block; font-family: var(--mono); font-weight: 500; font-size: 0.6rem;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--g); margin: 0 0 13px;
+    }
+
+    /* screens. width/height sit on the img so the column never jumps */
+    .g-fig { margin: 22px 0; }
+    .g-fig img {
+      display: block; width: 100%; height: auto;
+      border: 1px solid var(--g-14); border-radius: 6px; background: #05090d;
+    }
+    .g-fig figcaption {
+      margin-top: 11px; font-family: var(--mono); font-weight: 400; font-size: 0.62rem;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      color: rgba(255,255,255,0.4); line-height: 1.7;
+    }
+
+    /* two verdicts, read at a glance */
+    .g-plates { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(258px, 100%), 1fr)); gap: 14px; margin: 0 0 20px; }
+    .g-plate { padding: 18px 20px; border-radius: 6px; border: 1px solid; }
+    .g-plate .g-p { margin: 0; max-width: none; font-size: 0.93rem; line-height: 1.7; color: rgba(255,255,255,0.76); }
+    .g-plate-label {
+      display: flex; align-items: center; gap: 9px;
+      font-family: var(--mono); font-weight: 600; font-size: 0.72rem;
+      letter-spacing: 0.14em; text-transform: uppercase; margin: 0 0 11px;
+    }
+    .g-plate-label::before { content: ''; width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .g-ok { border-color: rgba(63,214,140,0.32); background: rgba(63,214,140,0.055); }
+    .g-ok .g-plate-label, .g-ok .g-list-h { color: var(--ok); }
+    .g-ok .g-plate-label::before, .g-ok .g-list-h::before { background: var(--ok); box-shadow: 0 0 12px rgba(63,214,140,0.6); }
+    .g-bad { border-color: rgba(255,97,97,0.32); background: rgba(255,97,97,0.055); }
+    .g-bad .g-plate-label, .g-bad .g-list-h { color: var(--bad); }
+    .g-bad .g-plate-label::before, .g-bad .g-list-h::before { background: var(--bad); box-shadow: 0 0 12px rgba(255,97,97,0.55); }
+
+    /* a table that scrolls itself rather than the page */
+    .g-tablewrap { margin: 0 0 20px; overflow-x: auto; }
+    .g-table { width: 100%; border-collapse: collapse; font-family: var(--sans); }
+    .g-table th {
+      text-align: left; padding: 10px 16px;
+      font-family: var(--mono); font-weight: 500; font-size: 0.58rem;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(255,255,255,0.42); border-bottom: 1px solid var(--g-14); white-space: nowrap;
+    }
+    .g-table td {
+      padding: 14px 16px; font-weight: 300; font-size: 0.94rem; line-height: 1.6;
+      color: rgba(255,255,255,0.7); border-bottom: 1px solid rgba(255,255,255,0.055);
+      vertical-align: top;
+    }
+    .g-table tbody tr { transition: background 0.16s ease; }
+    .g-table tbody tr:hover { background: rgba(0,217,255,0.035); }
+    .g-table tbody tr:last-child td { border-bottom: none; }
+    .g-table td:first-child { font-weight: 500; color: #fff; white-space: nowrap; }
+
+    /* the checklist: tickable, and deliberately not remembered — it is
+       a pass over one batch, not a document */
+    .g-lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(298px, 100%), 1fr)); gap: 16px; margin: 0 0 20px; }
+    .g-list { padding: 20px 22px; border-radius: 6px; border: 1px solid; }
+    .g-list-h {
+      display: flex; align-items: center; gap: 9px;
+      font-family: var(--mono); font-weight: 600; font-size: 0.68rem;
+      letter-spacing: 0.13em; text-transform: uppercase; margin: 0 0 16px;
+    }
+    .g-list-h::before { content: ''; width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .g-list ul { list-style: none; margin: 0; padding: 0; }
+    .g-list li { margin-bottom: 14px; }
+    .g-list li:last-child { margin-bottom: 0; }
+    .g-check { display: flex; gap: 11px; align-items: flex-start; cursor: pointer; }
+    .g-check input {
+      appearance: none; -webkit-appearance: none;
+      margin: 4px 0 0; width: 16px; height: 16px; flex-shrink: 0;
+      border-radius: 3px; border: 1px solid rgba(255,255,255,0.26);
+      background: rgba(255,255,255,0.03); cursor: pointer; position: relative;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .g-check:hover input { border-color: rgba(255,255,255,0.48); }
+    .g-check input:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+    .g-check input::after {
+      content: ''; position: absolute; left: 4px; top: 0;
+      width: 5px; height: 10px; border: solid transparent; border-width: 0 2px 2px 0;
+      transform: rotate(43deg);
+    }
+    .g-check input:checked::after { border-color: #020403; }
+    .g-ok .g-check input:checked { background: var(--ok); border-color: var(--ok); }
+    .g-bad .g-check input:checked { background: var(--bad); border-color: var(--bad); }
+    .g-check-t {
+      font-family: var(--sans); font-weight: 300; font-size: 0.92rem; line-height: 1.6;
+      color: rgba(255,255,255,0.72); transition: opacity 0.15s ease;
+    }
+    .g-check-t b { font-weight: 500; color: #fff; }
+    .g-check input:checked ~ .g-check-t { opacity: 0.4; }
+
+    /* the last word, said quietly */
+    .g-note {
+      max-width: 760px; margin: 28px 0 0; padding-left: 16px;
+      border-left: 1px solid var(--g-14);
+      font-family: var(--sans); font-weight: 300; font-size: 0.88rem;
+      line-height: 1.75; color: rgba(255,255,255,0.44);
+    }
+
     /* ── Terminal "listening…" animated ellipsis ── */
     @keyframes dots {
       0%   { content: ''; }
@@ -677,9 +857,36 @@
 <h1 style="font-family:'Playfair Display',Georgia,serif;font-weight:500;font-size:2.6rem;line-height:1.1;letter-spacing:-0.015em;color:#fff;margin:0 0 18px">Buying Telegram accounts</h1>
 <p style="font-family:Barlow,sans-serif;font-weight:300;font-size:1rem;line-height:1.8;color:rgba(255,255,255,0.72);margin:0 0 14px;font-size:1.05rem;color:rgba(255,255,255,0.78)">What to buy, where, and how to tell a usable account from one that will die in a week — before you spend anything.</p>
 <h2 style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px">In this guide</h2>
-<ol style="margin:0 0 8px 1.15rem;padding:0"><li style="font-family:Barlow,sans-serif;font-weight:300;font-size:1rem;line-height:1.8;color:rgba(255,255,255,0.72);margin:0 0 14px;margin-bottom:8px">Session strings, tdata folders and API credentials — what each one is and which you actually need</li><li style="font-family:Barlow,sans-serif;font-weight:300;font-size:1rem;line-height:1.8;color:rgba(255,255,255,0.72);margin:0 0 14px;margin-bottom:8px">Age, country and format: what changes the survival rate and what is just price</li><li style="font-family:Barlow,sans-serif;font-weight:300;font-size:1rem;line-height:1.8;color:rgba(255,255,255,0.72);margin:0 0 14px;margin-bottom:8px">The checks to run on a fresh batch before it touches a module</li></ol>
-<h2 style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px">Why it matters</h2>
-<p style="font-family:Barlow,sans-serif;font-weight:300;font-size:1rem;line-height:1.8;color:rgba(255,255,255,0.72);margin:0 0 14px">Accounts are the one thing ATREOX does not sell you, and the one thing that decides whether everything downstream works. A cheap batch that dies in its first week costs more than a good batch that runs for months, and the difference is visible before you pay if you know what to look for.</p>
+<div class="g-toc panel" style="padding:16px 18px"><a href="#hidden-mechanics"><span class="g-toc-n">01</span><span class="g-toc-t">The Hidden Mechanics of Telegram Accounts</span></a><a href="#testing-sellers"><span class="g-toc-n">02</span><span class="g-toc-t">Testing Sellers and Avoiding Instant Bans</span></a><a href="#evaluating-sellers"><span class="g-toc-n">03</span><span class="g-toc-t">Evaluating Marketplace Sellers</span></a><a href="#marketplaces-and-geos"><span class="g-toc-n">04</span><span class="g-toc-t">Marketplaces, Formats, and GEOs</span></a><a href="#the-checklist"><span class="g-toc-n">05</span><span class="g-toc-t">The Expanded Account Checklist</span></a><a href="#future-tools"><span class="g-toc-n">06</span><span class="g-toc-t">Future Tools and Final Expectations</span></a></div>
+<h2 id="hidden-mechanics" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">01</span>The Hidden Mechanics of Telegram Accounts</h2>
+<p class="g-p">The foundation of everything in ATREOX is your accounts. They are your workforce, but here is the hard truth that beginners often miss: the biggest problem causing bans or limits is usually the accounts themselves. When you open a marketplace, you see millions of accounts and thousands of sellers. It is incredibly easy to spend a significant amount of money on a batch, watch them all get blocked immediately after their first neuro-commenting session, and assume either the software is broken or you did something terribly wrong. In reality, you just need to understand how to buy, verify, and test accounts properly.</p>
+<div class="g-callout"><p class="g-p">A common trap is assuming that two accounts with the exact same description from different sellers will yield the same results. They won't. Behind the scenes, Telegram evaluates an account based on over 100 hidden parameters to determine its trust score and lifespan. This includes the device ID used during registration, the specific version of the Telegram client, the quality of the phone number pool, and countless other microscopic details. The autoregers who create these accounts bake these parameters in from day one. Our team has analyzed massive volumes of accounts, and we've concluded that learning how to vet these hidden parameters by testing sellers is the most critical skill for anyone starting in Telegram traffic.</p><p class="g-p">This directly ties into pricing. You cannot expect a $0.20 account to perform identically to a $0.90 account, even if both meet our recommended basic characteristics. Cheaper accounts almost always mean those hidden registration parameters are of lower quality. This doesn't mean you should blindly buy the most expensive accounts on the market. It simply means that cheaper accounts carry a higher risk of bans and require far more meticulous testing and a slower warmup process.</p></div>
+<h2 id="testing-sellers" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">02</span>Testing Sellers and Avoiding Instant Bans</h2>
+<p class="g-p">Instead of buying 100 accounts from a single unknown seller right away, you need to run a testing protocol.</p>
+<ol class="g-steps"><li><p class="g-p">Buy about 20 accounts each from a few different sellers that offer roughly the same parameters.</p></li><li><p class="g-p">Let them rest for three days without doing anything heavy.</p></li><li><p class="g-p">Apply your profile templates.</p></li><li><p class="g-p">Then, put them into the Active Warmup module on very conservative settings up to day five.</p></li><li><p class="g-p">Finally, run them through just one single neuro-commenting session.</p></li></ol>
+<p class="g-p">The difference in survival rates between the sellers will usually be massive, instantly showing you who provides the actual quality you can scale with.</p>
+<div class="g-card"><span class="g-kicker">A faster, lighter test</span><p class="g-p">If you want a faster, lighter approach to testing a new seller, buy just 5 accounts. Import them into ATREOX and immediately run the account checks.</p>
+<figure class="g-fig"><img src="/public/screenshots/buying-telegram-accounts/02.png" alt="ATREOX Account Manager running health and capability checks on imported Telegram accounts" width="1919" height="956" loading="lazy" decoding="async"><figcaption>Health check and capability check in the Account Manager</figcaption></figure>
+<p class="g-p">Running a health check and capability check will update their status in the dashboard, ensuring you haven't bought accounts that are already heavily limited from the start.</p></div>
+<p class="g-p">You might wonder how an account can be banned immediately upon import if marketplaces have built-in checkers that verify validity right before purchase. The reality is that the marketplace checker only confirms the account is alive at that exact moment on their native IP. But the moment that account hits the new IP of your proxy inside the ATREOX dashboard, Telegram runs a minimal stress test. If the account's hidden trust score is too low, it will be banned instantly upon that IP change. When you see this happen, take it as a clear signal that the account couldn't even survive the most basic environmental shift, and you should abandon that seller entirely.</p>
+<h2 id="evaluating-sellers" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">03</span>Evaluating Marketplace Sellers</h2>
+<p class="g-p">When evaluating sellers on LZT Market, you will notice that almost everyone has a perfect 100% rating.</p>
+<figure class="g-fig"><img src="/public/screenshots/buying-telegram-accounts/03.png" alt="LZT Market seller ratings all showing 100 percent" width="816" height="197" loading="lazy" decoding="async"><figcaption>Every seller shows 100% — the rating alone tells you nothing</figcaption></figure>
+<p class="g-p">You must remember that these positive reviews are generated automatically if the buyer does not explicitly write a bad one. Therefore, a 100% rating is largely an illusion.</p>
+<p class="g-p">You must manually open each seller's profile and look exclusively for the presence of negative reviews.</p>
+<div class="g-plates"><div class="g-plate g-bad"><span class="g-plate-label">Avoid</span><p class="g-p">If a seller has 7 or more negative reviews, that is a massive red flag and you should avoid them.</p></div><div class="g-plate g-ok"><span class="g-plate-label">Acceptable</span><p class="g-p">A count of 0 to 1 negative reviews is generally acceptable.</p></div></div>
+<h2 id="marketplaces-and-geos" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">04</span>Marketplaces, Formats, and GEOs</h2>
+<p class="g-p">When buying accounts, ATREOX requires the TData format. TData is the local session data Telegram Desktop stores on a computer—a folder containing everything needed to log in without a phone number or SMS code. It ensures zero friction, no re-verification, and higher trust from Telegram.</p>
+<p class="g-p">When it comes to selecting a GEO for your accounts, the golden rule is that the account GEO must strictly match the GEO of the proxies you bought or plan to buy. USA accounts are not always the best option. In fact, at the time of writing this guide, the ATREOX team predominantly uses Indonesian accounts paired with Indonesian proxies, which also happen to be significantly cheaper and highly effective compared to American equivalents.</p>
+<p class="g-p">If your primary marketplace is ever down, you need untested backups. Established English-facing marketplaces include:</p>
+<div class="g-tablewrap panel"><table class="g-table"><thead><tr><th scope="col">Marketplace</th><th scope="col">What it is known for</th></tr></thead><tbody><tr><td>AccsMarket</td><td>the most recognized bulk-TData market</td></tr><tr><td>BuyAccs</td><td>cited for lower burn rates</td></tr><tr><td>Accs Trading</td><td>TData + Session, crypto payments</td></tr></tbody></table></div>
+<h2 id="the-checklist" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">05</span>The Expanded Account Checklist</h2>
+<p class="g-p">Before scaling your operations, run every new batch and seller against this expanded checklist to ensure your marketplace filters are set correctly.</p>
+<figure class="g-fig"><img src="/public/screenshots/buying-telegram-accounts/01.png" alt="Telegram account marketplace filters for TData, GEO and rest time" width="814" height="889" loading="lazy" decoding="async"><figcaption>Marketplace filters set to the parameters from the checklist</figcaption></figure>
+<div class="g-lists"><div class="g-list g-ok"><h3 class="g-list-h">The &quot;Must-Have&quot; Parameters</h3><ul><li><label class="g-check"><input type="checkbox"><span class="g-check-t"><b>Format &amp; Ownership:</b> TData format exclusively, with &quot;Not sold before&quot; checked, and no account password set.</span></label></li><li><label class="g-check"><input type="checkbox"><span class="g-check-t"><b>GEO Match:</b> The account origin country must perfectly match your proxy location.</span></label></li><li><label class="g-check"><input type="checkbox"><span class="g-check-t"><b>Rest Time:</b> 14 to 30 days of rest time after registration is highly recommended for beginners. 7 days is the absolute minimum, reserved only for experienced users who know how to manage aggressive warmups.</span></label></li><li><label class="g-check"><input type="checkbox"><span class="g-check-t"><b>Clean Record:</b> Absolutely no spamblock. A spam-blocked account cannot comment and is dead weight.</span></label></li></ul></div><div class="g-list g-bad"><h3 class="g-list-h">The &quot;Red Flags&quot; to Avoid</h3><ul><li><label class="g-check"><input type="checkbox"><span class="g-check-t"><b>Instant IP Death:</b> If a seller's accounts get banned immediately during the initial ATREOX health check due to the IP change, abandon that seller.</span></label></li><li><label class="g-check"><input type="checkbox"><span class="g-check-t"><b>0-Day / Fresh Accounts:</b> No rest time equals an instant ban.</span></label></li><li><label class="g-check"><input type="checkbox"><span class="g-check-t"><b>&quot;Sold Before&quot; or Password-Protected:</b> Someone else holds the keys to the session or can recover it.</span></label></li></ul></div></div>
+<h2 id="future-tools" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">06</span>Future Tools and Final Expectations</h2>
+<p class="g-p">In the future, the ability to register accounts directly inside ATREOX will be introduced as a separate Telegram Autoregistrar module. Until then, our team insists that you conduct your own research and develop a solid understanding of which accounts are worth buying and which are not. Without this foundational knowledge, an autoregistrar will not help you anyway. If you decide to purchase a third-party autoregistrar for mass registration in the meantime, we cannot provide any recommendations for those tools. You do so entirely at your own risk.</p>
+<p class="g-note">Finally, please keep in mind that these are general recommendations from the ATREOX team. There are no people in this world who drive Telegram traffic without constantly losing accounts. The goal of this guide is not to promise a magical zero-ban workflow, but to help you minimize those losses. By following these steps, you can reduce your ban rate so effectively that losing a few accounts out of a batch of 100 becomes completely unnoticeable to your overall operation.</p>
 </article>
 </div>
   <div id="root"></div>
