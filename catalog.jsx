@@ -818,7 +818,7 @@ const GUIDES = [
         title: 'Map of the page',
         blocks: [
           ['map', [
-            { name: 'Toolbar', holds: 'Reload pool · Reassign proxies · Bulk import · Add account. Top right, always present.' },
+            { name: 'Toolbar', holds: 'Reassign proxies · Bulk import · Add account. Top right, always present.' },
             { name: 'Capability summary', holds: 'A banner counting how much of the pool has passed, failed or never had a capability check.' },
             { name: 'Shared-proxy warning', holds: 'Appears only when two or more active accounts sit behind the same proxy. Carries its own Reassign now button.' },
             { name: 'Status tiles', holds: 'Seven counts — Active, Busy, Cooldown, Needs Reauth, Banned, Flagged, Dead. Each one is also a filter for the list below.' },
@@ -966,11 +966,15 @@ const GUIDES = [
             { id: 'ctl-tile-banned', name: 'Banned', where: 'Status tiles', kind: 'tile', tone: 'bad', value: '0',
               rows: [['Counts', 'Accounts Telegram has banned. Selecting any of these brings up the cleanup bar at the bottom of the page.']] },
             { id: 'ctl-tile-flagged', name: 'Flagged', where: 'Status tiles', kind: 'tile', tone: 'warn', value: '0',
-              rows: [['Counts', 'Accounts carrying Telegram\'s own restricted, scam or fake flag, as read during the last health check. Independent of status — an account can be active and flagged at once.']] },
+              rows: [
+                ['Counts', 'Accounts carrying Telegram\'s own restricted, scam or fake flag, as read during the last health check. Independent of status — an account can be active and flagged at once.'],
+                ['What to do', 'Do not throw it away. Give it no work for about two weeks and the flag lifts by itself. The mistake is keeping it commenting while it is flagged, not keeping it at all.'],
+              ] },
             { id: 'ctl-tile-dead', name: 'Dead', where: 'Status tiles', kind: 'tile', tone: 'bad', value: '0',
               rows: [
                 ['Counts', 'Accounts whose last capability check came back frozen or can\'t resolve — Telegram itself saying this account cannot do the one thing the engine needs.'],
                 ['Exception', 'An account you disabled yourself shows as Needs Reauth, not Dead, so a deliberate action is never masked by a capability verdict.'],
+                ['What to do', 'Do not delete it. Leave it alone for about three weeks, then run Check capability on it again — a meaningful share of frozen accounts come back on their own. Deleting on the day of the verdict throws away accounts that would have recovered.'],
               ] },
           ]],
           ['p', "Below the tiles, one row per account. Narrow screens drop the middle columns first and keep Check and Status to the end."],
@@ -1016,8 +1020,10 @@ const GUIDES = [
               id: 'ctl-reset-counts', name: 'Reset counts', where: 'Bulk actions bar', kind: 'button', value: 'Reset counts',
               rows: [
                 ['What it does', 'Sets the selected accounts\' comment counters back to zero and resumes any of them that were paused for hitting their limit.'],
+                ['What the limit is', 'A safety fuse. The count is cumulative, not daily — it never falls on its own, so an account that reaches its limit stops commenting and stays stopped until someone clears the counter. This button is that clearing.'],
+                ['Where the limit is set', 'Not here. On the Neurocommenting page, in the commenting pool: one value applied across every pooled account, or a separate value on a single account. There is no default — an account has no limit at all until one is set.'],
                 ['What it does not do', 'It does not delete comment history — the rows stay, so cost tracking and statistics are unaffected. It does not change the limit itself either.'],
-                ['Why it matters', 'The comment limit is otherwise a lifetime cap with no reset of its own. Resume alone would buy a capped account exactly one more post before it hit the same ceiling again, because the count never went down. This is what makes a recurring limit workable.'],
+                ['Why it matters', 'Resume on its own would buy a capped account exactly one more post before it hit the same ceiling again, because the count never went down. Clearing the counter is what makes a recurring limit workable.'],
                 ['When to use it', 'When accounts are sitting at LIMIT REACHED and you want them working again without raising the cap.'],
               ],
             },
@@ -1077,7 +1083,9 @@ const GUIDES = [
               rows: [
                 ['What it does', 'Forces the account\'s status to one of four values: active, cooldown, banned, disabled.'],
                 ['Default', 'Whatever the account\'s current status is. The Save button stays disabled until you pick something different.'],
-                ['When to use it', 'The panel describes it as being for when an automated check disagrees, or the account needs a forced reset.'],
+                ['What it is really for', 'Parking an account you need kept out of circulation without deleting it. The usual case: no comment limit was set, the account has posted far more than it should have, and the next comment is the one that gets it banned. Moving it off active buys you time to decide.'],
+                ['Why parking works', 'The engine only ever builds its pool from accounts whose status is active. A parked account is never selected for commenting, even if its id is still sitting in the commenting pool. In the panel the pool\'s available column offers active accounts only, so it cannot be added back by accident — and disabled or banned accounts already in the pool are pulled out of it automatically.'],
+                ['Use disabled, not cooldown', 'Parking at cooldown does not hold. Setting it here writes no expiry, and on its next poll round the engine reactivates any cooldown account whose expiry is empty or already past — so the account quietly returns to active within one cycle. disabled stays put until you change it back.'],
               ],
             },
             {
@@ -1106,7 +1114,7 @@ const GUIDES = [
             "Wait out the rest, then use Apply template to give the batch a face.",
           ]],
           ['p', "After that the pool is ready for a module to claim from. The tiles are the thing to watch day to day: a rising Cooldown count is pacing, a rising Dead count is the accounts themselves."],
-          ['note', "One button on this page does less than it looks like it does. Reload pool records a request for the engine to reconcile its account pool — but the engine already reloads from the database every poll round, so account changes reach it within one poll interval whether or not you press it.",
+          ['note', "Account changes reach the engine on their own: it re-reads the pool from the database every poll round, so an account you add, park or re-proxy is picked up within one poll interval without you doing anything else.",
           ],
         ],
       },
