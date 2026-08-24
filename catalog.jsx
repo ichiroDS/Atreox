@@ -1126,14 +1126,149 @@ const GUIDES = [
     group: 'module',
     short: 'One face across a batch',
     title: 'Profile Templates',
-    summary: 'Building a template and applying it across a batch without tripping profile limits.',
-    covers: [
-      'Name, bio and avatar, and using the {first_name} token so a batch is not identical',
-      'Running a bulk apply and reading its per-account results',
-      'The 1h profile-change and 48h username cooldowns in practice',
-    ],
+    summary: 'What a template holds, what applying one actually does to an account, and the cooldowns that pace a rollout across a pool.',
+    seoTitle: 'Profile Templates: fields, limits and rollout pacing in ATREOX',
+    seoDescription:
+      'Build a name, bio and avatar once and apply it across a batch. Character limits, the {first_name} token, the 1-hour cooldown and the 72-hour lockout that blocks a rollout.',
     module: 'profile-templates',
     video: null,
+    body: [
+      {
+        id: 'what-it-is',
+        title: 'What this module is',
+        blocks: [
+          ['p', "The profile is what someone sees after clicking the name on a comment. An account with no picture, no bio and a default name reads as exactly what it is. A template is that profile built once and applied across a batch: name, surname, bio and avatar, stored as one reusable object."],
+          ['p', "It is included with any purchase, and it is the smallest of the modules — one page holding a grid of templates, plus the Apply template action over on the Accounts page. Everything expensive about it happens on the engine side, in the pacing."],
+          ['callout', [
+            "A template applies identically to every account it touches. The same first name, the same surname, the same bio, the same picture. There is no per-account variation built into this — if you want a batch that does not look like one batch, that is several templates applied to several groups, not one template with randomness in it.",
+          ]],
+        ],
+      },
+      {
+        id: 'map',
+        title: 'Map of the page',
+        blocks: [
+          ['p', "Two places, not one. The templates themselves live on their own page; applying them happens where the accounts are."],
+          ['map', [
+            { name: 'Templates page — toolbar', holds: 'A single New template button, top right.' },
+            { name: 'Templates page — grid', holds: 'One card per template, three across on a wide screen. Clicking a card opens it for editing; each card also carries its own delete button. With no templates yet, an empty state stands in with the same create button.' },
+            { name: 'Create / Edit dialog', holds: 'Template name, Name, Surname, Description, Avatar. The same dialog for both, with the title and wording changing.' },
+            { name: 'Accounts page — Apply template', holds: 'In the bulk actions bar. Pick a template, apply it to the current selection, watch a progress step report per-account results.' },
+          ]],
+        ],
+      },
+      {
+        id: 'building-one',
+        title: 'Building a template',
+        blocks: [
+          ['controls', [
+            {
+              id: 'ctl-template-name', name: 'Template name', where: 'Create / Edit dialog', kind: 'field', value: 'Western tech enthusiasts',
+              rows: [
+                ['What it does', 'Names the template inside ATREOX. It is a label for you — never applied to any account.'],
+                ['Required', 'Yes. It is the only required field; the Save button stays disabled while it is empty.'],
+              ],
+            },
+            {
+              id: 'ctl-first-name', name: 'Name', where: 'Create / Edit dialog', kind: 'field', value: 'Alex',
+              rows: [
+                ['What it does', 'The Telegram first name written onto every account this template is applied to.'],
+                ['Applied how', 'Identically. Every account in the batch ends up with this exact first name.'],
+                ['Also used by', 'The {first_name} token in the Description below, which substitutes this value.'],
+              ],
+            },
+            {
+              id: 'ctl-last-name', name: 'Surname', where: 'Create / Edit dialog', kind: 'field', value: 'Morgan',
+              rows: [
+                ['What it does', 'The Telegram last name, applied identically to every account in the batch.'],
+                ['Optional', 'Yes — leave it blank and accounts get a first name only, which is ordinary on Telegram.'],
+              ],
+            },
+            {
+              id: 'ctl-description', name: 'Description', where: 'Create / Edit dialog', kind: 'field', value: "hi, I'm {first_name} — into crypto and AI",
+              rows: [
+                ['What it does', 'The account bio. This is the one field with room for a call to action, since it is what a reader sees after clicking through from a comment.'],
+                ['The token', '{first_name} is replaced with the template’s own Name field. It does not vary per account — it is a convenience for writing the bio once, not a source of variation.'],
+                ['Two limits', 'The dialog counts twice: the raw text against 200 characters, and the text after substitution against 70. Both must pass or Save stays disabled.'],
+                ['Why 70', 'That is the length that actually reaches Telegram after the token is filled in. A long token and a short-looking template can still overflow it, which is why the second counter exists.'],
+              ],
+            },
+            {
+              id: 'ctl-avatar', name: 'Avatar', where: 'Create / Edit dialog', kind: 'button', tone: 'plain', value: 'Choose file',
+              rows: [
+                ['What it does', 'One image, shared by every account the template is applied to.'],
+                ['Formats', 'PNG or JPEG.'],
+                ['Size', 'Up to 5 MB.'],
+                ['Optional', 'Yes. Leave it out and the template applies names and bio only, touching no picture.'],
+                ['On edit', 'Choosing a new file replaces the current avatar for the template; accounts pick it up the next time it is applied.'],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'applying',
+        title: 'Applying one to a batch',
+        blocks: [
+          ['p', "Applying happens on the Accounts page, not here. Select the accounts, press Apply template in the bulk actions bar, choose which template, and the rollout starts as a background task with a progress readout."],
+          ['controls', [
+            {
+              id: 'ctl-apply', name: 'Apply template', where: 'Accounts page → bulk actions bar', kind: 'button', value: 'Apply template',
+              rows: [
+                ['What it does', 'Writes the template’s name, surname, bio and avatar onto every selected account, one at a time.'],
+                ['Progress', 'The dialog switches to a progress step with a per-account result. Closing it does not stop the run — a corner widget keeps the task and takes you back to it.'],
+                ['No templates yet', 'The picker is replaced by a note pointing at the Profile Templates page.'],
+                ['What it does not touch', 'Usernames. A template has no username field; that is a per-account edit on the Accounts page, and it has its own much slower cooldown.'],
+              ],
+            },
+          ]],
+          ['p', "Three things can make an individual account come back unchanged, and all three are reported per account rather than failing the batch:"],
+          ['table', {
+            head: ['Reason', 'What it means', 'What to do'],
+            rows: [
+              ['Resting', 'The account is inside the 72-hour lockout that Auto-Warmup applies on the Accounts page. Template application is blocked for the whole window, and the message says how many hours are left.', 'Wait it out, or apply to the rest of the batch and come back.'],
+              ['Rate limited', 'This account had a profile change less than an hour ago. The message says roughly how many minutes remain.', 'Retry after the hour. This is per account, not pool-wide.'],
+              ['Floodwait', 'Telegram asked the engine to slow down. Three of these in a row pauses the run for 30 minutes.', 'Nothing — it resumes on its own.'],
+            ],
+          }],
+          ['p', "Note the asymmetry in the resting rule: the 72-hour lockout blocks the bulk template path only. Editing one account's profile by hand on the Accounts page is deliberately still allowed during rest."],
+        ],
+      },
+      {
+        id: 'pacing',
+        title: 'How a rollout is paced',
+        blocks: [
+          ['p', "Nothing here is configurable — the pacing is fixed in the engine, and it is the reason a template applied across a hundred accounts is not a hundred simultaneous profile writes."],
+          ['table', {
+            head: ['Rule', 'Value', 'Scope'],
+            rows: [
+              ['Profile change cooldown', 'One change per hour', 'Per account'],
+              ['Username change cooldown', 'One change per 48 hours', 'Per account'],
+              ['Gap between accounts in a rollout', '30 to 90 seconds, randomised', 'Per run'],
+              ['Floodwait tolerance', '3 in a row pauses the run for 30 minutes', 'Per run'],
+              ['Connections', 'One account connected at a time, then disconnected', 'Whole module'],
+            ],
+          }],
+          ['p', "The username cooldown is deliberately slower than the others. A username is the most visible and searchable thing on a profile, so it is worth changing far less often than a bio — and it is counted per account, so rolling a change across a pool scales with the pool rather than queueing behind one shared timer."],
+        ],
+      },
+      {
+        id: 'first-run',
+        title: 'First run',
+        blocks: [
+          ['steps', [
+            "Create one template. Name it for the audience it is meant to read as, not for the batch it will go on — you will reuse it.",
+            "Fill in Name and, if you want one, Surname. Both go on every account identically.",
+            "Write the bio and watch the second counter, the interpolated one, not the first. That is the number Telegram sees.",
+            "Add an avatar if you have one. It is optional, and a template with no picture still applies names and bio.",
+            "Go to the Accounts page, select a batch that is past its 72-hour rest, and use Apply template.",
+          ]],
+          ['p', "If you are running more than one niche, build more than one template. One template across the whole pool gives every account the same face, which is fine for a small batch and obvious on a large one."],
+          ['note', "Templates are also used by Active Warmup. Its Gradual profile updates action re-applies an account’s assigned template on a schedule, through this same pipeline and these same cooldowns — which is why that action stays switched off until a template exists to apply.",
+          ],
+        ],
+      },
+    ],
   },
   {
     slug: 'active-warmup',
@@ -1155,7 +1290,7 @@ const GUIDES = [
           ['p', "Active Warmup has an account do human-shaped things — read channels, scroll, mark things read, react, join — so that when it eventually starts commenting it has a history behind it instead of nothing. It is the opposite motion to the lockout on the Accounts page: that one says do not work yet, this one says do something human meanwhile."],
           ['p', "Enrolling an account supervises it indefinitely, not for one run. It works only inside its schedule window, gets lighter as it matures, and stops when you disable it."],
           ['callout', [
-            "Three different things in this panel are called warmup, and they are genuinely separate mechanisms. On the Dashboard, the Warmup switch beside Start is an owner-wide ramp on posting rate — off by default. On the Accounts page, Auto-Warmup ON/OFF is the per-account lockout: 72 hours of no commenting, then a tightening comment cap through day 23 — off by default. This page is the third: the account doing human activity. They compose rather than replace each other, and each is switched on separately.",
+            "Three different things in this panel are called warmup, and they are genuinely separate mechanisms. On the Dashboard, the Warmup switch beside Start is an owner-wide ramp on posting rate — off by default. On the Accounts page, Auto-Warmup ON/OFF is the per-account lockout: 72 hours of no commenting, then a tightening comment cap through day 23 — off by default. This page is the third: the account doing human activity, also off by default. All three are opt-in, all three are switched on separately, and they compose rather than replace each other.",
           ]],
         ],
       },
