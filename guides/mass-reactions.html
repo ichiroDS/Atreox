@@ -878,6 +878,171 @@
     .g-check-t b { font-weight: 500; color: #fff; }
     .g-check input:checked ~ .g-check-t { opacity: 0.4; }
 
+
+    /* ── Module map: the panel's regions, in the order they appear ── */
+    .g-map { list-style: none; margin: 0 0 20px; padding: 0; max-width: var(--gcol); }
+    .g-map li {
+      display: flex; gap: 14px; align-items: baseline;
+      padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .g-map li:last-child { border-bottom: none; }
+    .g-map-n {
+      font-family: var(--mono); font-weight: 600; font-size: 0.6rem;
+      color: rgba(0,217,255,0.7); flex-shrink: 0;
+    }
+    .g-map-body { display: block; min-width: 0; }
+    .g-map-name {
+      display: block; font-family: var(--sans); font-weight: 500;
+      font-size: 1rem; color: #fff; margin-bottom: 3px;
+    }
+    .g-map-holds {
+      display: block; font-family: var(--sans); font-weight: 300;
+      font-size: 0.92rem; line-height: 1.6; color: rgba(255,255,255,0.66);
+    }
+
+    /* ── Control replicas ────────────────────────────────────────────
+       Drawings of the panel's own controls, each folding open to what it
+       does. Everything here is a <span> with CSS — never an <input>,
+       never a handler — because this is an illustration inside a guide
+       and anything that accepted a value would imply it went somewhere.
+       The text under each one is in the markup whether the fold is open
+       or shut, so the static page carries all of it. */
+    .g-ctl { margin: 0 0 22px; }
+    .g-ctl-warn {
+      display: flex; align-items: flex-start; gap: 8px;
+      margin: 0 0 12px; padding: 10px 13px; border-radius: 6px;
+      border: 1px dashed var(--g-22); background: rgba(0,217,255,0.03);
+      font-family: var(--mono); font-weight: 400; font-size: 0.62rem;
+      letter-spacing: 0.04em; line-height: 1.65; color: rgba(255,255,255,0.5);
+    }
+    .g-ctl-warn svg { flex-shrink: 0; margin-top: 2px; color: var(--g); }
+
+    .g-ctl-item {
+      border: 1px solid var(--g-14); border-radius: 6px;
+      background: rgba(4,10,16,0.5); margin-bottom: 8px;
+    }
+    .g-ctl-item:last-child { margin-bottom: 0; }
+    .g-ctl-item[open] { border-color: var(--g-40); background: rgba(0,217,255,0.04); }
+    .g-ctl-item > summary {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; cursor: pointer; list-style: none;
+      padding: 13px 16px;
+    }
+    .g-ctl-item > summary::-webkit-details-marker { display: none; }
+    .g-ctl-item > summary:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+    .g-ctl-label { display: block; min-width: 0; }
+    .g-ctl-name {
+      display: block; font-family: var(--sans); font-weight: 500;
+      font-size: 0.98rem; color: #fff; line-height: 1.3;
+    }
+    .g-ctl-where {
+      display: block; margin-top: 3px;
+      font-family: var(--mono); font-weight: 400; font-size: 0.58rem;
+      letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.38);
+    }
+
+    .g-ctl-rows { margin: 0; padding: 0 16px 15px; }
+    .g-ctl-rows > div {
+      display: flex; gap: 14px; padding: 9px 0;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .g-ctl-rows dt {
+      flex: 0 0 140px; margin: 0;
+      font-family: var(--mono); font-weight: 500; font-size: 0.57rem;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: rgba(0,217,255,0.65); padding-top: 3px;
+    }
+    .g-ctl-rows dd {
+      flex: 1; min-width: 0; margin: 0;
+      font-family: var(--sans); font-weight: 300; font-size: 0.94rem;
+      line-height: 1.65; color: #fff;
+    }
+
+    /* the drawings themselves */
+    .g-r-btn, .g-r-select, .g-r-field, .g-r-badge {
+      flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px;
+      border-radius: 4px; white-space: nowrap;
+      font-family: var(--mono); font-weight: 500; font-size: 0.6rem;
+      letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .g-r-btn {
+      padding: 8px 13px; border: 1px solid var(--g-40);
+      background: rgba(0,217,255,0.1); color: var(--g-bright);
+    }
+    .g-r-btn.t-ok   { border-color: rgba(63,214,140,0.4);  background: rgba(63,214,140,0.1);  color: var(--ok); }
+    .g-r-btn.t-bad  { border-color: rgba(255,97,97,0.4);   background: rgba(255,97,97,0.1);   color: var(--bad); }
+    .g-r-btn.t-warn { border-color: rgba(255,183,77,0.42); background: rgba(255,183,77,0.1);  color: #ffb74d; }
+    .g-r-btn.t-plain{ border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.72); }
+
+    .g-r-select {
+      padding: 8px 11px; border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(0,217,255,0.04); color: #fff; text-transform: none;
+      letter-spacing: 0.02em; font-size: 0.68rem; min-width: 130px;
+      justify-content: space-between;
+    }
+    .g-r-select svg, .g-r-caret { color: var(--g); transform: rotate(90deg); flex-shrink: 0; }
+    .g-r-caret { display: inline-block; font-size: 0.85rem; line-height: 1; }
+
+    .g-r-field {
+      padding: 8px 11px; border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.5);
+      text-transform: none; letter-spacing: 0; font-size: 0.66rem;
+      min-width: 150px; max-width: 260px; overflow: hidden; text-overflow: ellipsis;
+      display: inline-block; white-space: nowrap;
+    }
+
+    .g-r-badge { padding: 5px 10px; border: 1px solid; font-size: 0.56rem; }
+    .g-r-badge.t-ok   { border-color: rgba(63,214,140,0.32); background: rgba(63,214,140,0.1); color: var(--ok); }
+    .g-r-badge.t-bad  { border-color: rgba(255,97,97,0.32);  background: rgba(255,97,97,0.1);  color: var(--bad); }
+    .g-r-badge.t-warn { border-color: rgba(255,183,77,0.34); background: rgba(255,183,77,0.1); color: #ffb74d; }
+    .g-r-badge.t-plain{ border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.66); }
+
+    .g-r-toggle {
+      flex-shrink: 0; position: relative; display: inline-block;
+      width: 40px; height: 22px; border-radius: 11px;
+      border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.06);
+    }
+    .g-r-toggle::after {
+      content: ''; position: absolute; top: 2px; left: 2px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: rgba(255,255,255,0.45);
+    }
+    .g-r-toggle.is-on { border-color: var(--g-40); background: rgba(0,217,255,0.22); }
+    .g-r-toggle.is-on::after { left: auto; right: 2px; background: var(--g); box-shadow: 0 0 10px rgba(0,217,255,0.7); }
+
+    .g-r-slider {
+      flex-shrink: 0; position: relative; display: inline-block;
+      width: 150px; height: 4px; border-radius: 2px;
+      background: rgba(255,255,255,0.14);
+    }
+    .g-r-slider-fill { position: absolute; inset: 0 auto 0 0; border-radius: 2px; background: var(--g); }
+    .g-r-slider-thumb {
+      position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 50%;
+      transform: translate(-50%, -50%); background: var(--g);
+      box-shadow: 0 0 10px rgba(0,217,255,0.6);
+    }
+
+    .g-r-tile {
+      flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+      min-width: 54px; padding: 7px 12px; border-radius: 6px;
+      border: 1px solid var(--g-14); background: rgba(0,217,255,0.03);
+    }
+    .g-r-tile-n { font-family: var(--sans); font-weight: 600; font-size: 1.05rem; color: #fff; }
+    .g-r-tile.t-ok   { border-color: rgba(63,214,140,0.3); }
+    .g-r-tile.t-ok   .g-r-tile-n { color: var(--ok); }
+    .g-r-tile.t-bad  { border-color: rgba(255,97,97,0.3); }
+    .g-r-tile.t-bad  .g-r-tile-n { color: var(--bad); }
+    .g-r-tile.t-warn { border-color: rgba(255,183,77,0.32); }
+    .g-r-tile.t-warn .g-r-tile-n { color: #ffb74d; }
+
+    @media (max-width: 640px) {
+      .g-ctl-item > summary { flex-direction: column; align-items: flex-start; gap: 11px; padding: 13px 14px; }
+      .g-ctl-rows { padding: 0 14px 14px; }
+      .g-ctl-rows > div { flex-direction: column; gap: 4px; }
+      .g-ctl-rows dt { flex: none; padding-top: 0; }
+      .g-r-slider, .g-r-field { width: 100%; max-width: none; }
+    }
+
     /* the last word, said quietly */
     .g-note {
       max-width: var(--gcol); margin: 28px 0 0; padding-left: 16px;

@@ -241,6 +241,44 @@ function ReaderStep({ n, title, body, last }) {
   );
 }
 
+/* One control, drawn to look like the panel's own. Deliberately inert:
+   no state, no handlers, no value that can change — a switch is drawn
+   in whatever position the engine's default puts it and stays there.
+   Anything that looked adjustable would be lying, since none of this
+   reaches an API. Shape comes from `kind`, everything else is CSS. */
+function ControlReplica({ c }) {
+  switch (c.kind) {
+    case 'toggle':
+      return <span aria-hidden="true" className={'g-r-toggle' + (c.on ? ' is-on' : '')} />;
+    case 'slider':
+      return (
+        <span aria-hidden="true" className="g-r-slider">
+          <span className="g-r-slider-fill" style={{ width: (c.pct ?? 50) + '%' }} />
+          <span className="g-r-slider-thumb" style={{ left: (c.pct ?? 50) + '%' }} />
+        </span>
+      );
+    case 'select':
+      return (
+        <span aria-hidden="true" className="g-r-select">
+          {c.value}<ChevronRight size={12} />
+        </span>
+      );
+    case 'field':
+      return <span aria-hidden="true" className="g-r-field">{c.value}</span>;
+    case 'tile':
+      return (
+        <span aria-hidden="true" className={'g-r-tile' + (c.tone ? ' t-' + c.tone : '')}>
+          <span className="g-r-tile-n">{c.value}</span>
+        </span>
+      );
+    case 'badge':
+      return <span aria-hidden="true" className={'g-r-badge' + (c.tone ? ' t-' + c.tone : '')}>{c.value}</span>;
+    case 'button':
+    default:
+      return <span aria-hidden="true" className={'g-r-btn' + (c.tone ? ' t-' + c.tone : '')}>{c.value || c.name}</span>;
+  }
+}
+
 /* ── The blocks a written guide is made of ─────────────────────────
    A guide with a `body` in catalog.jsx carries its own text, section by
    section, as data. This turns that data into the page; the same data
@@ -342,6 +380,61 @@ function ReaderBlocks({ blocks, onOpen }) {
               <details key={j}>
                 <summary>{qa.q}</summary>
                 <p className="g-p">{qa.a}</p>
+              </details>
+            ))}
+          </div>
+        );
+
+      /* The map of a module: its regions in panel order, each with what
+         sits inside it. Not a nav — a floor plan, so someone reading
+         the guide can find the thing being described. */
+      case 'map':
+        return (
+          <ol key={i} className="g-map">
+            {v.map((region, j) => (
+              <li key={j}>
+                <span className="g-map-n">{String(j + 1).padStart(2, '0')}</span>
+                <span className="g-map-body">
+                  <span className="g-map-name">{region.name}</span>
+                  <span className="g-map-holds">{region.holds}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+        );
+
+      /* Replicas of the panel's own controls, each one a <details> whose
+         summary IS the control. Two things this is deliberately not: it
+         is not live (no state, no handlers, no requests — the replicas
+         are CSS, drawn once in whatever the panel's default is) and it
+         is not the delivery mechanism for the text. Every row of every
+         explanation is in the markup from the start; <details> only
+         folds it, so the static page a crawler reads carries the whole
+         thing and the interactivity is the layer on top. */
+      case 'controls':
+        return (
+          <div key={i} className="g-ctl">
+            <p className="g-ctl-warn">
+              <Shield size={13} /> Illustration, not the panel. Nothing here is connected —
+              no state, no saving, no requests. Click a control to read what it does.
+            </p>
+            {v.map((c, j) => (
+              <details key={j} className="g-ctl-item" id={c.id}>
+                <summary>
+                  <span className="g-ctl-label">
+                    <span className="g-ctl-name">{c.name}</span>
+                    {c.where && <span className="g-ctl-where">{c.where}</span>}
+                  </span>
+                  <ControlReplica c={c} />
+                </summary>
+                <dl className="g-ctl-rows">
+                  {c.rows.map(([k, val], m) => (
+                    <div key={m}>
+                      <dt>{k}</dt>
+                      <dd>{val}</dd>
+                    </div>
+                  ))}
+                </dl>
               </details>
             ))}
           </div>
@@ -676,7 +769,12 @@ function GuideReader({ slug, onOpen, onClose }) {
               </>
             )}
 
-            {mod && (
+            {/* The module's catalog write-up, laid out as a lesson —
+                the fallback for a module guide that has not been written
+                out properly yet. A `body` supersedes it entirely; showing
+                both would say the same thing twice, in less detail the
+                second time. */}
+            {mod && !guide.body && (
               <>
                 <ReaderHeading>Why it matters</ReaderHeading>
                 <p style={readerProse}>{mod.problem}</p>
