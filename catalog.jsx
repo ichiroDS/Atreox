@@ -1141,14 +1141,321 @@ const GUIDES = [
     group: 'module',
     short: 'History before it earns',
     title: 'Active Warmup',
-    summary: 'Setting up a warmup plan matched to how old your accounts actually are.',
-    covers: [
-      'Careful / Normal / Aggressive — what each preset actually sets',
-      'Building a schedule, choosing a timezone, and why random breaks matter',
-      'Auto-adapt and progressive increase, and when to leave caps fixed',
-    ],
+    summary: 'Every control on the Active Warmup page, the caps the engine actually enforces, and the two floors you cannot configure your way past.',
+    seoTitle: 'Active Warmup: every control, cap and floor in the ATREOX panel',
+    seoDescription:
+      'Intensity presets, schedule windows, per-hour and per-day caps, the 20 warmup actions and their gates — defaults and limits taken from the engine, not the marketing copy.',
     module: 'active-warmup',
     video: null,
+    body: [
+      {
+        id: 'what-it-is',
+        title: 'What this module is',
+        blocks: [
+          ['p', "Active Warmup has an account do human-shaped things — read channels, scroll, mark things read, react, join — so that when it eventually starts commenting it has a history behind it instead of nothing. It is the opposite motion to the lockout on the Accounts page: that one says do not work yet, this one says do something human meanwhile."],
+          ['p', "Enrolling an account supervises it indefinitely, not for one run. It works only inside its schedule window, gets lighter as it matures, and stops when you disable it."],
+          ['callout', [
+            "Three different things in this panel are called warmup, and they are genuinely separate mechanisms. On the Dashboard, the Warmup switch beside Start is an owner-wide ramp on posting rate — off by default. On the Accounts page, Auto-Warmup ON/OFF is the per-account lockout: 72 hours of no commenting, then a tightening comment cap through day 23 — off by default. This page is the third: the account doing human activity. They compose rather than replace each other, and each is switched on separately.",
+          ]],
+        ],
+      },
+      {
+        id: 'map',
+        title: 'Map of the page',
+        blocks: [
+          ['p', "Nine sections, with a jump-nav across the top in this order."],
+          ['map', [
+            { name: 'Control', holds: 'Running/stopped state, four counts — Supervised, Active now, Resting, Outside window — the per-account status list, and the Enable button.' },
+            { name: 'Accounts', holds: 'Which accounts the configuration below applies to when you press Enable. Replaced by a single account when you are editing one already enrolled.' },
+            { name: 'Intensity', holds: 'Auto-adapt by account stage, and the manual preset picker it hides.' },
+            { name: 'Schedule', holds: 'Activity windows, client timezone, random breaks.' },
+            { name: 'Limits', holds: 'Actions per hour and per day, joins per day, messages per day, and progressive increase.' },
+            { name: 'Actions', holds: 'Economy mode, and the checklist of twenty individual warmup actions.' },
+            { name: 'Template', holds: 'The profile template the Gradual profile updates action re-applies. Optional.' },
+            { name: 'Targets', holds: 'Specific channels to read, and whether accounts may touch your own channels.' },
+            { name: 'Logs', holds: 'Engine log and the warmup action log.' },
+          ]],
+        ],
+      },
+      {
+        id: 'control',
+        title: 'Control',
+        blocks: [
+          ['controls', [
+            {
+              id: 'ctl-enable', name: 'Enable', where: 'Control', kind: 'button', value: 'Enable (12 accounts)',
+              rows: [
+                ['What it does', 'Enrols every account picked in the Accounts section below on the configuration currently shown on this page, and starts supervising them.'],
+                ['Not a run', 'There is no start and stop. An enrolled account stays supervised until you disable it — working only inside its schedule window, and more lightly as it ages.'],
+                ['In edit mode', 'The same button becomes Save changes and targets only the one account you are editing.'],
+              ],
+            },
+            {
+              id: 'ctl-stat-tiles', name: 'Supervised / Active now / Resting / Outside window', where: 'Control', kind: 'tile', value: '12',
+              rows: [
+                ['What they count', 'Supervised is everything enrolled. Active now is what is working this moment. Resting is accounts inside the Accounts page’s 72-hour lockout, which forces this module down to its floor. Outside window is accounts idle because their schedule is closed.'],
+                ['Module state', 'The module reads as running whenever at least one account is supervised, and stopped when none is.'],
+              ],
+            },
+            {
+              id: 'ctl-status-list', name: 'Per-account status list', where: 'Control', kind: 'badge', tone: 'plain', value: 'Resting (reading-only)',
+              rows: [
+                ['What it shows', 'One badge per enrolled account, in the engine’s own order of precedence: the account’s own status first, then Resting, then Outside window with the time the next one opens, then Maintenance, then Active with the intensity currently in force.'],
+                ['Per-row actions', 'Disable removes the account from supervision. Edit loads that account’s own configuration into the form below so you can change one account without touching the rest.'],
+              ],
+            },
+          ]],
+          ['p', "How many accounts actually run at once is not a setting on this page. The engine leases a fixed number of workers per owner — three by default — so however many accounts are enrolled, only that many are ever connected and acting at the same time. Enrolling a hundred accounts does not put a hundred sessions online."],
+        ],
+      },
+      {
+        id: 'intensity',
+        title: 'Intensity',
+        blocks: [
+          ['controls', [
+            {
+              id: 'ctl-auto-adapt', name: 'Auto-adapt by account stage', where: 'Intensity', kind: 'toggle', on: true,
+              rows: [
+                ['What it does', 'Picks the intensity preset from how old the account actually is, and moves it up on its own as it ages: under 7 days Careful, 7 to 30 days Normal, past 30 days Aggressive.'],
+                ['Default', 'On.'],
+                ['Which clock', 'The account’s real age, counted from when it was added to the pool — not from when you enrolled it here. A 40-day-old account enrolled today starts on Aggressive immediately.'],
+                ['While it is on', 'The four numbers in Limits below are not read at all. Caps come from the preset the account’s age selects. Turn this off if you want those numbers to mean anything.'],
+                ['When to turn it off', 'When you want one fixed intensity regardless of age — usually because you are deliberately running below what the age band would pick.'],
+              ],
+            },
+            {
+              id: 'ctl-preset', name: 'Preset', where: 'Intensity', kind: 'select', value: 'Careful',
+              rows: [
+                ['What it does', 'Sets one fixed intensity for the accounts being enrolled.'],
+                ['Visible when', 'Only when Auto-adapt is off. With Auto-adapt on the picker is hidden, because it would have no effect.'],
+                ['Options', 'Careful, Normal, Aggressive. Maintenance is not selectable — it is a state an account graduates into on its own.'],
+                ['Default', 'Careful.'],
+              ],
+            },
+          ]],
+          ['p', "What each preset is worth, per account:"],
+          ['table', {
+            head: ['Preset', 'Actions / hour', 'Actions / day', 'Joins / day', 'Messages / day'],
+            rows: [
+              ['Careful', '3', '10', '1', '2'],
+              ['Normal', '5', '15', '2', '3'],
+              ['Aggressive', '8', '25', '3', '5'],
+              ['Maintenance', '2', '6', '1', '1'],
+            ],
+          }],
+          ['p', "Maintenance is below Careful on purpose. It is not a starting point anyone picks — it is the ceiling an account settles into once it already has the history this module exists to build."],
+        ],
+      },
+      {
+        id: 'schedule',
+        title: 'Schedule',
+        blocks: [
+          ['p', "When accounts are allowed to be active. Outside the windows they sit idle; the counts on the Control section show how many are waiting."],
+          ['controls', [
+            {
+              id: 'ctl-windows', name: 'Activity windows', where: 'Schedule', kind: 'field', value: '09:00 — 11:00',
+              rows: [
+                ['What it does', 'One or more start/end pairs, in the timezone below. An account may only act inside one of them.'],
+                ['Default', 'Two windows: 09:00 to 11:00, and 15:00 to 18:00.'],
+                ['No windows at all', 'Removing every window makes the account always eligible — its hourly and daily caps still bound it, but nothing stops it by time of day.'],
+                ['Crossing midnight', 'A window whose end is earlier than its start wraps through midnight and works as you would expect. A window whose start and end are identical is skipped entirely.'],
+              ],
+            },
+            {
+              id: 'ctl-timezone', name: 'Client timezone', where: 'Schedule', kind: 'select', value: 'UTC',
+              rows: [
+                ['What it does', 'The timezone the windows are read in.'],
+                ['Default', 'Your browser’s own timezone, falling back to UTC.'],
+                ['When to change it', 'Set it to where the accounts are supposed to be from, not where you are. A GEO whose accounts are all active at 04:00 local is a pattern.'],
+              ],
+            },
+            {
+              id: 'ctl-random-breaks', name: 'Random breaks', where: 'Schedule', kind: 'toggle', on: true,
+              rows: [
+                ['What it does', 'Occasionally stretches the gap between two actions so activity is not evenly spaced.'],
+                ['How often', 'A one-in-seven chance per action, and when it fires the gap is multiplied by between two and four.'],
+                ['Default', 'On.'],
+                ['Baseline pacing', 'Even with this off, the gap is never fixed: it is the hour divided by your actions-per-hour cap, then jittered between 0.6 and 1.4 of that.'],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'limits',
+        title: 'Safety limits',
+        blocks: [
+          ['callout', [
+            "These four numbers do nothing while Auto-adapt is on, and Auto-adapt is on by default. The engine reads them only when Auto-adapt is off; otherwise the caps come from the preset the account’s age selects. The panel still shows the fields as editable either way.",
+          ]],
+          ['controls', [
+            {
+              id: 'ctl-actions-hour', name: 'Actions / hour', where: 'Limits', kind: 'field', value: '5',
+              rows: [
+                ['What it does', 'Ceiling on every warmup action this account may take in an hour. Also sets the pace: the gap between actions is one hour divided by this number, jittered.'],
+                ['Default', '5.'],
+                ['Range', '1 to 100.'],
+                ['At the minimum', 'One action an hour — about as slow as this module goes without being switched off.'],
+                ['At the maximum', '100 an hour is far above every preset, Aggressive included at 8. Nothing in the engine tempers it for you beyond the daily cap and the shared worker limit.'],
+              ],
+            },
+            {
+              id: 'ctl-actions-day', name: 'Actions / day', where: 'Limits', kind: 'field', value: '15',
+              rows: [
+                ['What it does', 'Ceiling on total warmup actions per day for this account. Checked after the hourly cap; once it is spent the account does nothing more that day.'],
+                ['Default', '15.'],
+                ['Range', '1 to 500.'],
+              ],
+            },
+            {
+              id: 'ctl-joins-day', name: 'Joins / day', where: 'Limits', kind: 'field', value: '2',
+              rows: [
+                ['What it does', 'Caps one action specifically — Joining groups. Nothing else counts against it.'],
+                ['Default', '2.'],
+                ['Range', '0 to 50.'],
+                ['At zero', 'The account never joins anything during warmup, even with the action toggled on.'],
+              ],
+            },
+            {
+              id: 'ctl-messages-day', name: 'Messages / day', where: 'Limits', kind: 'field', value: '3',
+              rows: [
+                ['What it does', 'Caps exactly two actions: Saved-messages notes and Forward to Saved Messages. Both write only to the account’s own Saved Messages — nothing here sends a message to another person or chat.'],
+                ['Default', '3.'],
+                ['Range', '0 to 50.'],
+                ['At zero', 'Those two actions never fire. Every other action is unaffected.'],
+              ],
+            },
+            {
+              id: 'ctl-progressive', name: 'Progressive increase', where: 'Limits', kind: 'toggle', on: true,
+              rows: [
+                ['What it does', 'Ramps whatever caps are in force from 30% on the first day of enrolment to 100% by day seven.'],
+                ['Default', 'On.'],
+                ['Which clock', 'Counted from when you enrolled the account here — not from the account’s age. An old account enrolled today gets Aggressive caps by age and still ramps into them from 30%.'],
+                ['Interaction', 'Applies on top of whichever preset is in force, auto-adapted or fixed. It never raises a cap above 100% of it.'],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'actions',
+        title: 'What accounts actually do',
+        blocks: [
+          ['controls', [
+            {
+              id: 'ctl-economy', name: 'Economy mode', where: 'Actions', kind: 'toggle', on: true,
+              rows: [
+                ['What it does', 'Drops every action marked traffic-heavy, whatever the checklist says. Those are the ones that download real media: View videos, Listen to voice messages, GIF search / inline bots, Sticker packs, Story views.'],
+                ['Default', 'On.'],
+                ['Why', 'Those actions burn real gigabytes, and mobile proxies are billed by traffic.'],
+                ['When to turn it off', 'Only when your proxies are not metered and you want the fuller behavioural picture.'],
+              ],
+            },
+            {
+              id: 'ctl-action-checklist', name: 'Action checklist', where: 'Actions', kind: 'toggle', on: true,
+              rows: [
+                ['What it does', 'Twenty individual actions across nine categories, each switched on or off for the accounts being enrolled.'],
+                ['Default', 'Reading only. A newly enrolled account has View dialogs, Scroll channel, Mark as read and Search messages on, and the other sixteen off.'],
+                ['Three hard gates', 'Reactions, Story views and Joining groups need the account to be at least 3 days old. Economy mode removes the traffic-heavy ones. Gradual profile updates stays off until a template is selected — with nothing to apply it would do nothing every time it ran.'],
+                ['One more gate', 'An account with no target channels of its own depends on the shared pool from Channel Parser. While that pool has fewer than 20 channels, the account is collapsed to View dialogs — the one action needing no channel — rather than failing everything else for want of a target.'],
+              ],
+            },
+          ]],
+          ['p', "The full list, with what forces each one off:"],
+          ['table', {
+            head: ['Action', 'Category', 'On for a new account', 'Gated by'],
+            rows: [
+              ['View dialogs', 'Reading', 'Yes', '—'],
+              ['Scroll channel', 'Reading', 'Yes', '—'],
+              ['Mark as read', 'Reading', 'Yes', '—'],
+              ['Search messages', 'Reading', 'Yes', '—'],
+              ['Vote in polls', 'Activity', 'No', '—'],
+              ['View videos', 'Activity', 'No', 'Economy mode'],
+              ['Listen to voice messages', 'Activity', 'No', 'Economy mode'],
+              ['GIF search / inline bots', 'Entertainment', 'No', 'Economy mode'],
+              ['Sticker packs', 'Entertainment', 'No', 'Economy mode'],
+              ['Forward to Saved Messages', 'Social', 'No', 'Messages / day'],
+              ['Saved-messages notes', 'Social', 'No', 'Messages / day'],
+              ['Archive chats', 'Groups', 'No', '—'],
+              ['Mute chats / notification settings', 'Groups', 'No', '—'],
+              ['View profiles', 'Profile', 'No', '—'],
+              ['Check settings', 'Profile', 'No', '—'],
+              ['Gradual profile updates', 'Profile', 'No', 'Needs a template'],
+              ['Drafts', 'Profile', 'No', '—'],
+              ['Reactions', 'Reactions', 'No', '3+ days old'],
+              ['Story views', 'Stories', 'No', '3+ days old, Economy mode'],
+              ['Joining groups', 'Joins', 'No', '3+ days old, Joins / day'],
+            ],
+          }],
+          ['p', "Accounts never message each other. There is no action for it and it is excluded deliberately — a closed circle of accounts that only ever talk among themselves maps the whole network the moment one of them is examined."],
+        ],
+      },
+      {
+        id: 'targets-and-template',
+        title: 'Template and targets',
+        blocks: [
+          ['controls', [
+            {
+              id: 'ctl-template', name: 'Profile template', where: 'Template', kind: 'select', value: 'No template',
+              rows: [
+                ['What it does', 'Chooses the template the Gradual profile updates action re-applies, through the same pipeline and pacing the Profile Templates page uses.'],
+                ['Default', 'No template.'],
+                ['If you have none', 'The picker is replaced by a link to the Profile Templates page, and the action stays blocked in the checklist.'],
+                ['When to set it', 'Only if you want accounts touching their profiles during warmup. It is optional and off by default.'],
+              ],
+            },
+            {
+              id: 'ctl-target-channels', name: 'Target channels', where: 'Targets', kind: 'field', value: '@channel_one, @channel_two',
+              rows: [
+                ['What it does', 'A specific list of channels for these accounts to read and join, comma or newline separated.'],
+                ['Default', 'Empty.'],
+                ['If left empty', 'The account reads random channels from the pool Channel Parser has discovered. An account with its own list is unaffected by the state of that pool.'],
+                ['When to set it', 'When you want accounts building history in a particular niche rather than whatever discovery happens to have found.'],
+              ],
+            },
+            {
+              id: 'ctl-own-channels', name: 'Allow reading/joining my own channels', where: 'Targets', kind: 'toggle', on: false,
+              rows: [
+                ['What it does', 'Lets warmup accounts read and join channels you own.'],
+                ['Default', 'Off.'],
+                ['Why off', 'A fresh account whose entire reading history is your own channels is a giveaway. The panel warns about this when you switch it on.'],
+                ['When to turn it on', 'Once accounts are past their early warmup stage — not before.'],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'floors',
+        title: 'Two things you cannot configure past',
+        blocks: [
+          ['p', "Most of this page is yours to set. Two overrides are not, and both are enforced in the engine rather than left to the form."],
+          ['plates', [
+            { tone: 'bad', label: 'The resting floor', text: "While an account is inside the Accounts page’s 72-hour lockout, this module drops to its floor no matter what is configured: Careful’s numeric caps, joins and messages forced to zero, and only Reading actions allowed. Aggressive intensity and every action switched on have no effect during that window." },
+            { tone: 'ok', label: 'Maintenance graduation', text: "Once an account has been enrolled here for 60 days, its caps are forced down to the Maintenance preset — 2 an hour, 6 a day, one join, one message — regardless of preset, auto-adapt or progressive increase. It is a ceiling for efficiency, not a safety floor, and it never disables the account." },
+          ]],
+          ['p', "A run of three consecutive floodwaits pauses that one account for 30 minutes. It does not stop the others — every account runs its own schedule."],
+          ['p', "Every action an account takes is written to the warmup log with its outcome, kept for 30 days, so what an account was doing in the week before it froze is still answerable afterwards."],
+        ],
+      },
+      {
+        id: 'first-run',
+        title: 'First run',
+        blocks: [
+          ['p', "The defaults are already the conservative configuration. For a fresh batch, most of this page is worth leaving alone."],
+          ['steps', [
+            "Pick the accounts in the Accounts section. Start with a handful rather than the whole pool — only three ever run at once anyway, so a small first group tells you what a large one will do.",
+            "Leave Auto-adapt on. It will put fresh accounts on Careful and move them up as they age, which is what you want and means the four numbers under Limits need no attention.",
+            "Set the timezone under Schedule to match where the accounts are supposed to be from, and adjust the two default windows if those hours do not suit that region.",
+            "Leave the action checklist on its Reading-only default, Economy mode on, and own channels off.",
+            "Press Enable. The accounts are supervised from that moment, inside their windows, ramping from 30% of their caps to full over the first week.",
+          ]],
+          ['p', "Watch the Control section rather than the logs day to day: Resting means the lockout on the Accounts page is still in force, Outside window means the schedule is simply closed, and Active with an intensity beside it means the account is working."],
+          ['note', "Turning an account’s warmup off is done from the status list on this page, not from the Accounts page. The Auto-Warmup buttons there control the separate 72-hour lockout, and switching those off does not stop an account being supervised here.",
+          ],
+        ],
+      },
+    ],
   },
   {
     slug: 'channel-parser',
