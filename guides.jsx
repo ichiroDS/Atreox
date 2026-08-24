@@ -209,12 +209,12 @@ function ReaderHeading({ children, n }) {
    is allowed to get inside that, which is a smaller number for the
    oldest reason in typesetting: past roughly 80 characters the eye
    loses the start of the next line. */
-const READER_MAX = 900;
-const COLUMN = 660;   /* pairs with --gcol in index.html */
+const READER_MAX = 1100;
+const COLUMN = 790;   /* pairs with --gcol in index.html */
 
 const readerProse = {
-  fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1.05rem',
-  color: 'rgba(255,255,255,0.72)', lineHeight: 1.8, maxWidth: COLUMN,
+  fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1.2rem',
+  color: '#fff', lineHeight: 1.8, maxWidth: COLUMN,
 };
 
 /* A numbered step with the rail that makes a list read as a sequence. */
@@ -232,7 +232,7 @@ function ReaderStep({ n, title, body, last }) {
       </div>
       <div style={{ minWidth: 0, paddingTop: 4 }}>
         <h3 style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.72rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'white', marginBottom: 8 }}>{title}</h3>
-        <p style={{ ...readerProse, fontSize: '0.94rem', lineHeight: 1.75, color: 'rgba(255,255,255,0.66)' }}>{body}</p>
+        <p style={{ ...readerProse, fontSize: '0.94rem', lineHeight: 1.75 }}>{body}</p>
       </div>
     </div>
   );
@@ -367,6 +367,11 @@ function ReaderBlocks({ blocks, onOpen }) {
           </div>
         );
 
+      /* Below a width a table's own class flips it into a stack of
+         cards, one per row, each cell labelled from its own column
+         header via data-label (CSS reads that back with `attr()`) —
+         a five-column table with prose in every cell is something you
+         scroll sideways through forever otherwise. */
       case 'table':
         return (
           <div key={i} className="g-tablewrap panel">
@@ -375,7 +380,7 @@ function ReaderBlocks({ blocks, onOpen }) {
               <tbody>
                 {v.rows.map((r, j) => (
                   <tr key={j}>{r.map((c, k) => (
-                    <td key={k}>
+                    <td key={k} data-label={v.head[k]}>
                       {/* a cell is either plain text or, for something like a
                           Pros/Cons column, a short list — an array says which */}
                       {Array.isArray(c)
@@ -484,13 +489,13 @@ function ReaderNav({ slug, onOpen, compact }) {
 
   if (compact) {
     return (
-      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 6, marginBottom: 8 }}>
+      <div style={{ flex: '1 1 100%', width: '100%', display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 6, marginBottom: 8 }}>
         {GUIDES.map(item)}
       </div>
     );
   }
   return (
-    <nav className="panel" style={{ padding: 12, position: 'sticky', top: 92 }}>
+    <nav className="panel" style={{ flex: '0 0 250px', minWidth: 0, padding: 12, position: 'sticky', top: 92 }}>
       {groups.map(([title, list], gi) => (
         <div key={title} style={{ marginBottom: gi === 0 ? 14 : 0 }}>
           <span style={{ display: 'block', padding: '6px 12px 10px', fontFamily: MONO, fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: `rgba(${GREEN_RGB},0.6)` }}>
@@ -548,7 +553,7 @@ function GuideReader({ slug, onOpen, onClose }) {
 
   return (
     <div style={{ paddingTop: 128, paddingBottom: 88 }}>
-      <div style={{ maxWidth: 1340, margin: '0 auto', padding: '0 6%' }}>
+      <div style={{ maxWidth: 1760, margin: '0 auto', padding: '0 6%' }}>
 
         <a href="/guides" onClick={e => { if (plainClick(e)) { e.preventDefault(); onClose(); } }}
           className="quiet-link quiet-link-dim" style={{ marginBottom: 26 }}>
@@ -558,10 +563,13 @@ function GuideReader({ slug, onOpen, onClose }) {
 
         <div style={{ display: 'flex', gap: 30, alignItems: 'flex-start', flexWrap: compact ? 'wrap' : 'nowrap' }}>
 
-          {/* left rail */}
-          <div style={{ flex: compact ? '1 1 100%' : '0 0 250px', minWidth: 0, width: compact ? '100%' : undefined }}>
-            <ReaderNav slug={guide.slug} onOpen={onOpen} compact={compact} />
-          </div>
+          {/* left rail — no wrapping div around it: sticky's containing
+              block is its own parent, and a wrapper sized to fit only
+              the nav (its one child) gives the nav nowhere to travel
+              before it has to stick. Direct flex-item, same as the
+              chapter sidebar on the right, whose sticking this same way
+              already worked. */}
+          <ReaderNav slug={guide.slug} onOpen={onOpen} compact={compact} />
 
           {/* the guide */}
           {/* the id is what a link from Functions lands on; the margin
@@ -587,7 +595,7 @@ function GuideReader({ slug, onOpen, onClose }) {
             <h1 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(2rem, 4vw, 2.9rem)', color: 'white', letterSpacing: '-0.015em', lineHeight: 1.1, marginBottom: 18 }}>
               {guide.title}
             </h1>
-            <p style={{ ...readerProse, fontSize: '1.05rem', color: 'rgba(255,255,255,0.78)', marginBottom: 6 }}>
+            <p style={{ ...readerProse, marginBottom: 6 }}>
               {guide.summary}
             </p>
 
@@ -614,7 +622,7 @@ function GuideReader({ slug, onOpen, onClose }) {
                     <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', color: `rgba(${GREEN_RGB},0.6)`, marginTop: 4, flexShrink: 0 }}>
                       {String(i + 1).padStart(2, '0')}
                     </span>
-                    <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>{c}</span>
+                    <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: '#fff', lineHeight: 1.6 }}>{c}</span>
                   </div>
                 ))}
               </div>
@@ -654,7 +662,7 @@ function GuideReader({ slug, onOpen, onClose }) {
                   {mod.config.map(([t, b]) => (
                     <div key={t} className="panel" style={{ padding: '16px 18px' }}>
                       <span style={{ display: 'block', fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', letterSpacing: '0.13em', textTransform: 'uppercase', color: GREEN, marginBottom: 8 }}>{t}</span>
-                      <span style={{ display: 'block', fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.62)', lineHeight: 1.65 }}>{b}</span>
+                      <span style={{ display: 'block', fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: '#fff', lineHeight: 1.65 }}>{b}</span>
                     </div>
                   ))}
                 </div>

@@ -163,7 +163,7 @@ function renderBlocks(blocks) {
         return `<div class="g-tablewrap panel"><table class="g-table"><thead><tr>${
           v.head.map(h => `<th scope="col">${esc(h)}</th>`).join('')
         }</tr></thead><tbody>${
-          v.rows.map(r => `<tr>${r.map(c => `<td>${
+          v.rows.map(r => `<tr>${r.map((c, k) => `<td data-label="${esc(v.head[k])}">${
             Array.isArray(c) ? `<ul class="g-td-list">${c.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : esc(c)
           }</td>`).join('')}</tr>`).join('')
         }</tbody></table></div>`;

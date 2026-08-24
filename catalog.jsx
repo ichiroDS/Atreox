@@ -441,7 +441,7 @@ const GUIDES = [
           ['bullets', [
             "the account GEO;",
             "the phone number pool used for registration;",
-            "the registration device device ID;",
+            "the registration device ID;",
             "the Telegram app version used during registration;",
             "the account age;",
             "the history of similar accounts with the same parameters;",
@@ -543,13 +543,13 @@ const GUIDES = [
           ['p', "There are many stores, forums, and sellers in Telegram chats offering Telegram accounts for sale, but the following marketplaces are among the most popular:"],
           ['p', "If your primary marketplace is ever down, you need untested backups. Established English-facing marketplaces include:"],
           ['table', {
-            head: ['Marketplace', 'What it is known for'],
+            head: ['Marketplace', 'Role', 'What it is known for'],
             rows: [
-              ['AccsMarket', 'The most recognized bulk-TData market. A well-established marketplace that has been operating for years and has earned user trust.'],
-              ['BuyAccs', 'Cited for lower burn rates.'],
-              ['Accs Trading', 'TData + Session, crypto payments.'],
-              ['lzt.market', 'A large selection of accounts with account validity checks before purchase.'],
-              ['dark.shopping', 'A wide range of accounts, although prices may be above market average; replacement is available if an account is invalid.'],
+              ['lzt.market', 'Primary', 'A large selection of accounts with account validity checks before purchase.'],
+              ['dark.shopping', 'Primary', 'A wide range of accounts, although prices may be above market average; replacement is available if an account is invalid.'],
+              ['AccsMarket', 'Backup', 'The most recognized bulk-TData market. A well-established marketplace that has been operating for years and has earned user trust.'],
+              ['BuyAccs', 'Backup', 'Cited for lower burn rates.'],
+              ['Accs Trading', 'Backup', 'TData + Session, crypto payments.'],
             ],
           }],
         ],
