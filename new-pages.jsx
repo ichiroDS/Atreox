@@ -473,9 +473,25 @@ function PricingPage({ setPage }) {
           </div>
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: 44 }}>
+        {/* Two quiet lines under the cards, deliberately outside them.
+            Neither is part of the price: one is the way out if nothing
+            here fits, the other is what you can earn back once you are
+            already a customer. Kept in the footnote register so neither
+            competes with the decision the cards are asking for. */}
+        <div style={{ textAlign: 'center', marginTop: 44, display: 'flex', flexDirection: 'column', gap: 10 }}>
           <p style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.7rem', letterSpacing: '0.04em', color: 'rgba(255,255,255,0.38)' }}>
             Running something bigger, or need a module that isn't here? <a href="mailto:hello@atreoxai.com" style={{ color: GREEN, textDecoration: 'none' }}>Get in touch</a>.
+          </p>
+          <p style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.7rem', letterSpacing: '0.04em', color: 'rgba(255,255,255,0.38)' }}>
+            Already a customer? Earn 25% of what anyone you refer pays, for as long as they stay
+            subscribed. <a href="/referral-program"
+              onClick={e => {
+                if (e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                  e.preventDefault();
+                  setPage('referral');
+                }
+              }}
+              style={{ color: GREEN, textDecoration: 'none' }}>Referral programme</a>.
           </p>
         </div>
       </PageSection>
