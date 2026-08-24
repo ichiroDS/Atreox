@@ -2436,14 +2436,306 @@ const GUIDES = [
     group: 'module',
     short: 'A pass that lands right',
     title: 'Mass Reactions',
-    summary: 'Running a reaction pass that arrives like an audience instead of a switch being flipped.',
-    covers: [
-      'Monitor vs existing mode, post age limits and processing order',
-      'Coverage range, arrival curve, spread window and react probability',
-      'Discussion-group reactions, floodwait policy, and using dry run first',
-    ],
+    summary: 'Reactions that arrive like an audience instead of a switch being flipped — every setting on the page, and the numbers behind it.',
+    seoTitle: 'Mass Reactions: every setting on the ATREOX reactions page',
+    seoDescription:
+      'Targets, coverage, the arrival curve, per-account rate caps and the emoji list. Defaults and edge behaviour taken from the engine, control names from the panel.',
     module: 'mass-reactions',
     video: null,
+    body: [
+      {
+        id: 'what-it-is',
+        title: 'What this page is',
+        blocks: [
+          ['p', "Mass Reactions places reactions on new posts, or on the comments under them, using a pool of your accounts. It watches for posts as they appear and plans a fan-out for each one."],
+          ['p', "By default it aims at comments rather than at the post. That is the product intent: a post with a lot of reactions is worth less than a post whose comment section looks alive."],
+          ['callout', [
+            "Dry run is on when you first arrive, and it stays on until you switch it off. In dry run the module does everything except the send — it catches posts, plans which account reacts with what and when, and writes all of it down. So the first thing a new owner gets is an inspectable plan rather than live traffic, and the honest first step on this page is to run it that way for a while and read the result.",
+          ]],
+        ],
+      },
+      {
+        id: 'map',
+        title: 'Map of the page',
+        blocks: [
+          ['p', "Nine regions, with a jump-nav across the top in this order."],
+          ['map', [
+            { name: 'Control', holds: 'Start and Stop, the Dry run switch, six counters, and one row per account with what it has placed today.' },
+            { name: 'Reactions Pool', holds: 'Two columns of accounts, the same shape and the same one-module-at-a-time rule as the other pools.' },
+            { name: 'Stats', holds: 'Attempts, successful, unsuccessful and the rate between them.' },
+            { name: 'Channels', holds: 'The target channels, each tile showing whether its comments can actually be reacted to, plus the paste box and the discussion-group check.' },
+            { name: 'What to react to', holds: 'Comments or channel posts, and how many comments under each post.' },
+            { name: 'Emoji', holds: 'Which reactions accounts place, in what order, and which of them every probed target accepts.' },
+            { name: 'Limits', holds: 'Per-account rate caps, the chance a message is covered at all, and the share of the pool that covers it.' },
+            { name: 'Pacing', holds: 'How soon the first reaction lands, how the rest are spread behind it, the arrival curve, and the floodwait policy.' },
+            { name: 'Joining', holds: 'One switch that explains why there is nothing to configure.' },
+          ]],
+        ],
+      },
+      {
+        id: 'targets',
+        title: 'Targets',
+        blocks: [
+          ['p', "Targets are their own list, deliberately not the channel list from Neurocommenting. That one means channels you comment on; these are usually your own channels, and overloading one list with both would be confusing."],
+          ['controls', [
+            {
+              id: 'ctl-mr-add', name: 'Add', where: 'Channels', kind: 'button', value: 'Add',
+              rows: [
+                ['What it does', 'Adds channels from the paste box. One per line, as @channel or a t.me link, and the box says how many it recognised before you press it.'],
+                ['What happens next', 'A discussion check runs automatically on what you just added, so a channel that cannot be reacted to in comment mode says so immediately rather than at the first failed send.'],
+              ],
+            },
+            {
+              id: 'ctl-mr-probe', name: 'Check discussion groups', where: 'Channels', kind: 'button', tone: 'plain', value: 'Check discussion groups',
+              rows: [
+                ['What it does', 'Asks each target for its linked discussion group and what reactions that group allows.'],
+                ['The three answers', 'Not checked yet — never probed. No comments — the channel has no linked discussion group, so comment mode has nothing to aim at. Reactions off — the group accepts no reactions at all, and this is a setting on the group, not on the channel.'],
+                ['Why it matters before starting', 'Both failing states are permanent until someone changes the group. Sending into them is a guaranteed failure per attempt.'],
+                ['What else it collects', 'The list of reactions the group actually allows, which is what the Emoji section checks your set against.'],
+              ],
+            },
+            {
+              id: 'ctl-mr-foreign', name: 'A channel you do not administer', where: 'Channels → a tile', kind: 'badge', tone: 'warn', value: 'not your channel',
+              rows: [
+                ['What the marker means', 'The channel is not one you administer. Its admins can open a message and see exactly which accounts reacted.'],
+                ['What the engine does about it', 'Uses a smaller share of your pool per message on that target — no more than 35%, whatever the coverage band below is set to.'],
+                ['Why', 'The reactor list on someone else’s channel is an enumerable list of your accounts. A smaller slice per message is less of the pool exposed in one place.'],
+                ['The safest targets', 'Your own channels, where nobody but you can enumerate who reacted.'],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'what-to-react-to',
+        title: 'What to react to',
+        blocks: [
+          ['controls', [
+            {
+              id: 'ctl-mr-target-mode', name: 'Target', where: 'What to react to', kind: 'button', value: 'Comments',
+              rows: [
+                ['The two choices', 'Comments — reactions land on comments in the channel’s linked discussion group. Channel posts — they land on the post itself.'],
+                ['Default', 'Comments.'],
+                ['What comments cost', 'Membership. A reaction in a discussion group requires the account to be in that group, so accounts have to join first.'],
+                ['What posts cost', 'Nothing extra — no joining needed. But a lively comment section is what makes a post look read, which is why the default is the other way.'],
+              ],
+            },
+            {
+              id: 'ctl-mr-comments-per-post', name: 'First comments per post', where: 'What to react to', kind: 'slider', pct: 30,
+              rows: [
+                ['What it does', 'How many comments under each post get reacted to, taken in the order they were written — the top of the thread, where a reader actually looks. Whoever wrote them.'],
+                ['Default', '3.'],
+                ['A count of comments, not of reactions', 'Each selected comment is then fanned out across the pool on its own. The reactions under one post are therefore this number multiplied by a share of the pool, not this number.'],
+                ['How deep it looks', 'The first fifty comments of a thread are scanned to choose from, so the choice comes from a real window rather than whatever one page happened to hold, and a thread with thousands of comments is never walked.'],
+                ['In post mode', 'Inert. The slider is only shown while the target is comments.'],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'emoji',
+        title: 'Emoji',
+        blocks: [
+          ['p', "A discussion group sets its own list of allowed reactions. Sending one outside that list is a guaranteed failure, which is why the section checks your set against what the probe found."],
+          ['controls', [
+            {
+              id: 'ctl-mr-emoji-set', name: 'The emoji set', where: 'Emoji', kind: 'badge', tone: 'plain', value: '👍 ❤ 🔥 👏',
+              rows: [
+                ['Default', 'Four: thumbs up, heart, fire, applause. Deliberately the most universally enabled ones — a wide default set is the fastest way to collect failures on a channel with a restricted list.'],
+                ['The warning', 'An emoji that some probed target does not accept is flagged. A target nobody has probed makes no claim either way, and the section says so rather than implying the set is safe.'],
+              ],
+            },
+            {
+              id: 'ctl-mr-emoji-mode', name: 'Pick order', where: 'Emoji', kind: 'button', tone: 'plain', value: 'Random',
+              rows: [
+                ['The two choices', 'Random, or sequential through the list.'],
+                ['Default', 'Random.'],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'limits',
+        title: 'Limits',
+        blocks: [
+          ['p', "Two different things live here. Four rate caps bound what one account does; two more decide how much of the pool shows up on any given message. They deliberately do not multiply together."],
+          ['controls', [
+            {
+              id: 'ctl-mr-per-hour', name: 'Per hour', where: 'Limits', kind: 'field', value: '4',
+              rows: [
+                ['What it does', 'The most reactions one account may place in an hour, across every target.'],
+                ['Default', '4.'],
+                ['Why so low', 'Past a certain rate an account stops reading as a person scrolling and starts reading as a script.'],
+              ],
+            },
+            {
+              id: 'ctl-mr-per-day', name: 'Per day', where: 'Limits', kind: 'field', value: '20',
+              rows: [
+                ['What it does', 'The same signal over a longer window.'],
+                ['Default', '20.'],
+              ],
+            },
+            {
+              id: 'ctl-mr-per-channel', name: 'Per channel, per day', where: 'Limits', kind: 'field', value: '8',
+              rows: [
+                ['What it does', 'Caps one account’s reactions on a single channel in a day.'],
+                ['Default', '8.'],
+                ['Why it is separate', 'Reactions concentrated on one channel are the easiest pattern for that channel’s own anti-spam to catch, even while the hourly and daily caps are nowhere near reached.'],
+              ],
+            },
+            {
+              id: 'ctl-mr-per-run', name: 'Per account, per run', where: 'Limits', kind: 'field', value: '200',
+              rows: [
+                ['What it does', 'A hard ceiling on one account’s total activity for a run, independent of the three caps above.'],
+                ['Default', '200.'],
+              ],
+            },
+            {
+              id: 'ctl-mr-probability', name: 'Chance a message gets reacted to at all', where: 'Limits', kind: 'slider', pct: 50,
+              rows: [
+                ['What it does', 'Decides, per caught message, whether it gets anything at all.'],
+                ['Default', '50%.'],
+                ['Why not 100%', 'Some messages getting nothing is what a real audience looks like. Every message being covered is a pattern visible across the whole channel, not just a bigger number.'],
+              ],
+            },
+            {
+              id: 'ctl-mr-coverage', name: 'Share of the pool per covered message', where: 'Limits', kind: 'slider', pct: 50,
+              rows: [
+                ['What it does', 'Given that a message is covered, how much of the eligible pool takes part.'],
+                ['Default', '35% to 65%.'],
+                ['Drawn fresh', 'A new value inside the band for every message, so the counts vary instead of landing on the same number every time.'],
+                ['Does not multiply', 'This and the chance above are separate on purpose: one decides whether, the other decides how many. An earlier design multiplied them and made the real share unpredictable.'],
+                ['Overridden where', 'On a channel you do not administer the share is capped at 35% however the band is set.'],
+              ],
+            },
+            {
+              id: 'ctl-mr-skip-reacted', name: 'Skip already-reacted messages', where: 'Limits', kind: 'toggle', on: false,
+              rows: [
+                ['What it does', 'Leaves alone any message that already carries more than the number you set.'],
+                ['Default', 'Off.'],
+                ['Zero', 'React only to messages with no reactions at all.'],
+                ['What it costs', 'Nothing. The existing count arrives with the message, so this needs no extra request.'],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'pacing',
+        title: 'Pacing',
+        blocks: [
+          ['p', "Three separate timings, each answering a different question: when the first reaction may land, how the rest are spread behind it, and how fast one account is allowed to work through its own queue."],
+          ['controls', [
+            {
+              id: 'ctl-mr-first-delay', name: 'First reaction after a post appears', where: 'Pacing', kind: 'field', value: '60 — 600',
+              rows: [
+                ['What it does', 'How long after a post appears the earliest reaction may land.'],
+                ['Default', '60 to 600 seconds — one to ten minutes.'],
+                ['Never instant', 'Nobody reads that fast. A reaction arriving in the first seconds is the clearest possible tell.'],
+              ],
+            },
+            {
+              id: 'ctl-mr-spread', name: 'Spread window', where: 'Pacing', kind: 'field', value: '90',
+              rows: [
+                ['What it does', 'How long the whole fan-out for one message is smeared over.'],
+                ['Default', '90 minutes.'],
+              ],
+            },
+            {
+              id: 'ctl-mr-curve', name: 'Arrival curve', where: 'Pacing', kind: 'select', value: 'Human — front-loaded',
+              rows: [
+                ['The two choices', 'Human — reactions cluster in the first minutes and thin out after, the shape a real post’s reactions have. Uniform — flat across the window.'],
+                ['Default', 'Human.'],
+                ['Why uniform is the risky one', 'A flat spread is a metronome, and a metronome is a signature.'],
+              ],
+            },
+            {
+              id: 'ctl-mr-account-gap', name: 'Gap between one account’s reactions', where: 'Pacing', kind: 'field', value: '30 — 120',
+              rows: [
+                ['What it does', 'The minimum spacing between two reactions by the same account, enforced at send time.'],
+                ['Default', '30 to 120 seconds.'],
+                ['Why it is separate from the curve', 'The arrival curve spaces different accounts across one message and says nothing about one account’s own queue. Comment mode puts one account onto several comments under the same post, so without this an account could fire five reactions inside a minute — which no amount of cross-account jitter disguises.'],
+              ],
+            },
+            {
+              id: 'ctl-mr-floodwait-pause', name: 'Pause after a FloodWait', where: 'Pacing', kind: 'field', value: '120',
+              rows: [
+                ['What it does', 'How long an account waits after Telegram tells it to slow down.'],
+                ['Default', '120 seconds.'],
+              ],
+            },
+            {
+              id: 'ctl-mr-floodwait-streak', name: 'FloodWaits before quarantine', where: 'Pacing', kind: 'field', tone: 'warn', value: '3',
+              rows: [
+                ['What it does', 'After this many floodwaits in a row, the account stops and stays stopped until you clear it.'],
+                ['Default', '3.'],
+                ['Why a streak', 'One floodwait is ordinary. Three in a row is the account telling you it is being throttled specifically.'],
+              ],
+            },
+          ]],
+          ['note', "One timing is not on this page: a planned reaction is cancelled rather than sent if the post it belongs to has aged past four hours by the time its turn comes. A reaction landing on a post that old reads as a bot catching up rather than as a reader, so a job delayed by a floodwait or a restart is dropped instead of arriving late.",
+          ],
+        ],
+      },
+      {
+        id: 'joining',
+        title: 'Joining',
+        blocks: [
+          ['p', "There is one switch here and it cannot be turned on. That is the honest state of things rather than an oversight."],
+          ['controls', [
+            {
+              id: 'ctl-mr-without-join', name: 'React without joining', where: 'Joining', kind: 'toggle', on: false,
+              rows: [
+                ['What it would do', 'Let accounts react in a discussion group without joining it first.'],
+                ['Why it is off', 'It was measured rather than assumed: a non-member can read a comment thread but cannot react in it — Telegram requires membership for the send.'],
+                ['Why the switch still exists', 'It explains why there is nothing to configure, which is more use than a silent gap. The engine refuses to set it rather than accepting a value it would then ignore.'],
+              ],
+            },
+          ]],
+          ['p', "Joining itself is paced by the engine’s existing channel-join limits, not by a second set here: at most one join per pass, then a wait of three to ten minutes before the next. An account already in the group is skipped without a join being issued at all."],
+          ['callout', [
+            "This is the slowest part of starting the module, and it is meant to be. Forty accounts entering one discussion group inside a minute is a textbook pattern — so a pool of forty accounts takes hours to finish joining a new target, and reactions in comment mode ramp up as that finishes rather than all being available at once.",
+          ]],
+        ],
+      },
+      {
+        id: 'reading-it',
+        title: 'Reading the run',
+        blocks: [
+          ['p', "Control carries six counters: accounts, targets, posts queued, reactions queued, sent and failed. Below them, one row per account with what it has placed today."],
+          ['p', "Statistics has the same four tiles as the commenting page — attempts, successful, unsuccessful and the rate — and the same caveat applies to them: the panel subtracts what the totals were when Start was last pressed, and that subtraction is held in the browser tab, so reloading the page silently turns them back into all-time numbers."],
+          ['controls', [
+            {
+              id: 'ctl-mr-dry-run', name: 'Dry run', where: 'Control, beside Start', kind: 'toggle', on: true,
+              rows: [
+                ['What it does', 'Everything except the send. Posts are caught, jobs are planned and logged, and nothing reaches Telegram.'],
+                ['Default', 'On, for a new owner.'],
+                ['What it is for', 'Reading a plan before it becomes traffic — which accounts, which emoji, how many per message, and how the arrival is spread.'],
+                ['Switching it off', 'Takes effect immediately. There is no separate confirmation, so the toast saying reactions will now actually be sent is the whole warning.'],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'first-run',
+        title: 'First run',
+        blocks: [
+          ['p', "The defaults are the conservative end of every range. The order below matters more than the numbers."],
+          ['steps', [
+            "Put accounts in the reactions pool. The one-module rule holds: anything commenting or answering DMs has to leave that pool first.",
+            "Add your targets and press Check discussion groups. A channel that comes back as no comments or reactions off cannot be used in comment mode at all, and it is better to learn that now.",
+            "Leave Dry run on. Press Start and let it plan for a while.",
+            "Read the plan. What you are looking for is whether the reaction counts per message look like an audience, and whether the arrival is spread rather than bunched.",
+            "If comments are the target, expect the joining to take hours before the pool is fully useful. That is the join pacing working, not a fault.",
+            "Only then switch Dry run off.",
+          ]],
+          ['p', "Two numbers are worth watching afterwards: failures on a target, which usually means an emoji outside that group's allowed list, and the floodwait streak, which is the account asking to be slowed down."],
+        ],
+      },
+    ],
   },
 ];
 
