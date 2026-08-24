@@ -484,7 +484,7 @@ function FooterBar({ setPage }) {
         <div style={{ flex: '0 0 auto' }}>
           <h5 style={colHead}>Legal</h5>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {[['privacy','Privacy Policy'],['terms','Terms of Service']].map(([id, label]) => (
+            {[['referral','Referral Program'],['privacy','Privacy Policy'],['terms','Terms of Service']].map(([id, label]) => (
               <span key={id} onClick={() => setPage(id)}
                 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.52)', cursor: 'pointer', transition: 'color 0.2s' }}
                 onMouseEnter={e => e.target.style.color = ACCENT}

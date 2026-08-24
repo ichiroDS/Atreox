@@ -382,8 +382,9 @@ const PIPELINE = [
    `body`    THE GUIDE ITSELF, once it is written: sections, each with
              an `id` (its anchor, and a public one — the chapter list
              links to it), a `title` and a list of blocks. A block is
-             [kind, value]; the kinds are p, callout, steps, card,
-             figure, plates, table, checklist and note, and both
+             [kind, value]; the kinds are p, callout, steps, bullets,
+             card, cards, options, kv, stat, figure, plates, table,
+             checklist, note, linkout and faq, and both
              renderers — ReaderBlocks in guides.jsx and renderBlocks in
              scripts/prerender.mjs — must know every one of them. The
              prerenderer throws on a kind it does not, which is how a
@@ -432,6 +433,24 @@ const GUIDES = [
         ],
       },
       {
+        id: 'why-blocked',
+        title: 'Why Telegram Accounts Get Blocked So Quickly',
+        blocks: [
+          ['p', "The stability of a Telegram account does not depend on one single factor, but on a set of parameters. In practice, it is not just a phone number and GEO, but a complete profile of where and how the account was created."],
+          ['p', "Account survival depends on:"],
+          ['bullets', [
+            "the account GEO;",
+            "the phone number pool used for registration;",
+            "the registration device device ID;",
+            "the Telegram app version used during registration;",
+            "the account age;",
+            "the history of similar accounts with the same parameters;",
+            "current ban waves affecting specific combinations of parameters.",
+          ]],
+          ['p', "That is why Telegram accounts with the same description in a marketplace are not equal. Two lots may have the same country, similar aging period, and the same price, but the real risk of being blocked can be completely different."],
+        ],
+      },
+      {
         id: 'testing-sellers',
         title: 'Testing Sellers and Avoiding Instant Bans',
         blocks: [
@@ -450,7 +469,7 @@ const GUIDES = [
               ['p', "If you want a faster, lighter approach to testing a new seller, buy just 5 accounts. Import them into ATREOX and immediately run the account checks."],
               ['figure', {
                 src: '/public/screenshots/buying-telegram-accounts/02.png',
-                w: 1919, h: 956,
+                w: 1400, h: 697,
                 alt: 'ATREOX Account Manager running health and capability checks on imported Telegram accounts',
                 caption: 'Health check and capability check in the Account Manager',
               }],
@@ -458,6 +477,19 @@ const GUIDES = [
             ],
           }],
           ['p', "You might wonder how an account can be banned immediately upon import if marketplaces have built-in checkers that verify validity right before purchase. The reality is that the marketplace checker only confirms the account is alive at that exact moment on their native IP. But the moment that account hits the new IP of your proxy inside the ATREOX dashboard, Telegram runs a minimal stress test. If the account's hidden trust score is too low, it will be banned instantly upon that IP change. When you see this happen, take it as a clear signal that the account couldn't even survive the most basic environmental shift, and you should abandon that seller entirely."],
+        ],
+      },
+      {
+        id: 'recheck-frequency',
+        title: 'How Often You Should Recheck an Account',
+        blocks: [
+          ['p', "Checking too often usually does not help. Account behavior does not change every minute."],
+          ['p', "The logic is simple:"],
+          ['bullets', [
+            "after the initial check, you make a decision about purchase or warm-up;",
+            "it makes sense to run a second check after a few days or after the warm-up stage;",
+            "for accounts that are already working, it is worth considering the date of the latest rating update.",
+          ]],
         ],
       },
       {
@@ -480,19 +512,66 @@ const GUIDES = [
         ],
       },
       {
+        id: 'main-filters',
+        title: 'Main Filters When Buying Telegram Accounts',
+        blocks: [
+          ['p', "When purchasing Telegram accounts, you should primarily pay attention to the following factors:"],
+          ['bullets', [
+            "account origin (phishing, stealer, auto-registered, self-registered)",
+            "account country (GEO)",
+            "SpamBlock status (temporary, GEO-based, permanent)",
+          ]],
+          ['figure', {
+            src: '/public/screenshots/buying-telegram-accounts/accsexamples.jpg',
+            w: 1280, h: 583,
+            alt: 'Telegram account marketplace listings showing autoreg tags, no-spamblock badges and country of origin',
+            caption: 'Two listings with matching filters — autoreg, no spamblock, same country',
+          }],
+          ['p', "Different Telegram account marketplaces provide different filtering options and account characteristics. Understanding these criteria is important because otherwise you may not only purchase an account that is unsuitable for your intended use but could also violate local laws and regulations."],
+          ['callout', [
+            "Many Telegram account stores sell phishing or stealer accounts, meaning compromised accounts obtained without the owner's permission. Such accounts are popular among users involved in gray-area Telegram automation because they are inexpensive, available in large quantities, and have already been warmed up through real user activity. However, purchasing and using compromised accounts may violate applicable laws and platform policies.",
+          ]],
+          ['p', "For more legitimate use cases, buyers typically choose auto-registered accounts created specifically for resale. The account GEO and SpamBlock status are then selected based on the intended purpose. In most cases, users choose Telegram accounts from the same region where they plan to operate, advertise, communicate, or automate activities."],
+        ],
+      },
+      {
         id: 'marketplaces-and-geos',
         title: 'Marketplaces, Formats, and GEOs',
         blocks: [
           ['p', "When buying accounts, ATREOX requires the TData format. TData is the local session data Telegram Desktop stores on a computer—a folder containing everything needed to log in without a phone number or SMS code. It ensures zero friction, no re-verification, and higher trust from Telegram."],
           ['p', "When it comes to selecting a GEO for your accounts, the golden rule is that the account GEO must strictly match the GEO of the proxies you bought or plan to buy. USA accounts are not always the best option. In fact, at the time of writing this guide, the ATREOX team predominantly uses Indonesian accounts paired with Indonesian proxies, which also happen to be significantly cheaper and highly effective compared to American equivalents."],
+          ['p', "There are many stores, forums, and sellers in Telegram chats offering Telegram accounts for sale, but the following marketplaces are among the most popular:"],
           ['p', "If your primary marketplace is ever down, you need untested backups. Established English-facing marketplaces include:"],
           ['table', {
             head: ['Marketplace', 'What it is known for'],
             rows: [
-              ['AccsMarket', 'the most recognized bulk-TData market'],
-              ['BuyAccs', 'cited for lower burn rates'],
-              ['Accs Trading', 'TData + Session, crypto payments'],
+              ['AccsMarket', 'The most recognized bulk-TData market. A well-established marketplace that has been operating for years and has earned user trust.'],
+              ['BuyAccs', 'Cited for lower burn rates.'],
+              ['Accs Trading', 'TData + Session, crypto payments.'],
+              ['lzt.market', 'A large selection of accounts with account validity checks before purchase.'],
+              ['dark.shopping', 'A wide range of accounts, although prices may be above market average; replacement is available if an account is invalid.'],
             ],
+          }],
+        ],
+      },
+      {
+        id: 'proxies-role',
+        title: 'The Role of Proxies: Why Account Evaluation Is Incomplete Without Them',
+        blocks: [
+          ['p', "The final survival of an account depends not only on the account itself, but also on proxy quality. If you use a proxy with the same GEO as the account country, it looks more natural. But even then, the provider quality and connection stability matter. This means Telegram accounts cannot be evaluated separately from their environment. A good account with a bad proxy can perform poorly in real work."],
+          ['linkout', { href: '/guides/proxies-for-telegram-accounts', label: 'Full guide: Choosing and connecting proxies' }],
+        ],
+      },
+      {
+        id: 'best-geos',
+        title: 'Which Telegram Account GEOs Are Best to Use?',
+        blocks: [
+          ['p', "It is important to understand that GEO really matters."],
+          ['figure', {
+            src: '/public/screenshots/buying-telegram-accounts/geobenchmark.jpg',
+            w: 1280, h: 544,
+            alt: 'ATREOX dashboard Geo benchmark showing best and worst performing account countries by survival rate',
+            caption: 'Geo benchmark in the ATREOX dashboard: survival rate by account country',
           }],
         ],
       },
@@ -544,22 +623,172 @@ const GUIDES = [
     slug: 'proxies',
     url: 'proxies-for-telegram-accounts',
     group: 'setup',
-    title: 'Choosing and connecting proxies',
+    title: 'Buying & Managing Proxies',
     short: 'One per account, done right',
     summary:
-      'One proxy per account, and why nearly every account loss starts with getting this wrong.',
-    intro:
-      'One account, one proxy — no exceptions. Two accounts behind the same address look like two accounts behind the same address, and Telegram treats them that way. This is the cheapest mistake to avoid and the most expensive one to make.',
-    covers: [
-      'Residential, mobile and datacentre — what each survives and what each costs',
-      'Paste formats the importer accepts, and bulk-assigning across a batch',
-      'Reading a failed proxy check, and reassigning without losing the account',
-    ],
+      'Fifty accounts on one IP look like a farm to Telegram. The right proxy type, a GEO that matches, and a rotation setting that doesn\'t log you out.',
+    seoTitle: 'Buying & Managing Proxies for Telegram Automation',
+    seoDescription:
+      'Datacenter, residential or mobile; static or rotating; exact GEO matching; a DataImpulse config that works; and the two ways to load proxies into ATREOX.',
     module: null,
     video: null,
+    body: [
+      {
+        id: 'why-proxies-matter',
+        title: 'Why Proxies Matter & The Three Core Types',
+        blocks: [
+          ['p', "Accounts without proxies are dead accounts before they even begin. If you attempt to connect fifty or a hundred Telegram accounts from a single server or home IP address, Telegram immediately identifies the entire cluster as an automated farm."],
+          ['figure', {
+            src: '/public/screenshots/proxies-for-telegram-accounts/connection.png',
+            w: 1280, h: 472,
+            alt: 'Diagram showing a Telegram account connecting through a SOCKS5 proxy to the internet and then to the Telegram server',
+            caption: 'One proxy, one account, one path to the Telegram server',
+          }],
+          ['p', "One flag on a single account will instantly trigger a chain reaction, wiping out every session connected to that same IP address. This guide covers how to choose, buy, and connect the right proxies to ensure maximum account lifespan."],
+          ['p', "Search queries like \"best proxies for Telegram,\" \"Telegram SOCKS5,\" or \"cheap IPv4 for Telegram\" dominate the automation space for a reason. Proper proxy management directly dictates your account lifespan, ban frequency, operation speed, and capacity to scale."],
+          ['figure', {
+            src: '/public/screenshots/proxies-for-telegram-accounts/proxy.jpg',
+            w: 1280, h: 720,
+            alt: 'Three shields representing datacenter, residential and mobile proxies, over an IPv4 SOCKS5 network illustration',
+            caption: 'Datacenter, residential, mobile — three networks, three trust levels',
+          }],
+          ['p', "There are three distinct categories of proxies. Understanding the difference is critical because choosing the wrong network type for your specific task guarantees instant failure."],
+          ['table', {
+            head: ['Type', 'What it is', 'Behavior in Telegram Automation', 'Pros', 'Cons'],
+            rows: [
+              [
+                'Datacenter (IPv4)',
+                'IPs from data centers or hosting servers. Fast, cheap, bought in bulk.',
+                'Good for low-risk tasks and mass scaling. However, aggressive actions (spam patterns, mass logins) trigger limits much faster here.',
+                ['Cheapest option.', 'Stable speed/ping.', 'Easy to scale.'],
+                ['IPs are often "burned" by previous users.', 'Lowest trust level.', 'High risk during heavy automation.'],
+              ],
+              [
+                'Residential',
+                'Real home internet IPs. Looks like a standard user connecting from an apartment.',
+                'Excellent for account warmup, careful activity, and mimicking real human behavior. Long lifespan if limits are respected.',
+                ['High trust score.', 'Great for safe logins.', 'Fewer blocks.'],
+                ['More expensive than Datacenter.', 'Speed can fluctuate.', 'Quality depends on the provider\'s pool.'],
+              ],
+              [
+                'Mobile (4G/5G/LTE)',
+                'Mobile carrier IPs. Shared dynamically among thousands of real cellular users.',
+                'The most "alive" and natural IP possible. Excellent for mimicking mobile app usage, but requires careful GEO management.',
+                ['Maximum natural trust.', 'Easy rotation.', 'Highest survival rate.'],
+                ['Most expensive.', 'Unstable ping.', 'Bad IP/Country jumps cause suspicion.'],
+              ],
+            ],
+          }],
+          ['p', "The Practical Logic (Simply Put):"],
+          ['options', [
+            { text: 'Need maximum savings and massive scale? Use Datacenter SOCKS5 (but keep your action tempo very conservative).' },
+            { text: 'Need a "normal user" history and smooth warmup? Use Residential.' },
+            { text: 'Need maximum natural behavior? Use Mobile proxies. Despite the cost, we strongly recommend beginners start with Mobile Proxies for the best survival rates.', badge: 'Recommended for beginners' },
+          ]],
+        ],
+      },
+      {
+        id: 'rotation-trap',
+        title: 'The Rotation Trap: Static vs. Rotating',
+        blocks: [
+          ['p', "Telegram automation fundamentally requires the SOCKS5 protocol for stable, persistent connections. However, how that IP behaves over time introduces significant risks."],
+          ['p', "Proxies generally come in two connection types: static (the IP never changes) and rotating (the IP changes periodically)."],
+          ['callout', [
+            "Here is a crucial warning: Rotating proxies can cause instant account logouts. If your proxy rotates its IP too frequently, abruptly, or across different regions without proper session anchoring, Telegram's security system flags it as a hijacked session and forcefully deauthorizes the account. Therefore, even premium mobile rotating proxies can perform worse than cheap static ones if you do not configure your session handling correctly. If you use rotating proxies, ensure the rotation interval is stable and always stays within the exact same city or region.",
+          ]],
+        ],
+      },
+      {
+        id: 'golden-rule-geo',
+        title: 'The Golden Rule: Exact GEO Matching',
+        blocks: [
+          ['p', "A critical mistake beginners make is purchasing premium accounts from one region and running them through proxies from another."],
+          ['callout', [
+            "If you purchase Indonesian accounts, you must run them exclusively through Indonesian mobile proxies. When a Telegram session originally registered on a cellular network in Jakarta suddenly authenticates from a server in Frankfurt, the platform detects an anomalous location jump and flags the account instantly. Always align your account GEO and proxy GEO with strict precision.",
+          ]],
+        ],
+      },
+      {
+        id: 'dataimpulse-setup',
+        title: 'Buying Mobile Proxies (DataImpulse Setup)',
+        blocks: [
+          ['p', "For reliable mobile proxies, the ATREOX team frequently uses DataImpulse. They offer a pay-as-you-go model billed by bandwidth (GB) with clean SOCKS5 outputs."],
+          ['p', "The exact settings to use when generating your list:"],
+          ['kv', [
+            ['Targeting', 'Default'],
+            ['Country', 'MUST exactly match your account GEO.'],
+            ['Rotation Interval', '120s (a safe baseline for background refreshing).'],
+            ['Type', 'Rotating'],
+            ['Protocol', 'SOCKS5 (The most stable format for Telegram; do not use HTTP/HTTPS).'],
+            ['Format', 'login:password@hostname:port or socks5://user:pass@ip:port'],
+            ['Quantity', 'Generate exactly one proxy line per account you own.'],
+          ]],
+        ],
+      },
+      {
+        id: 'loading-proxies',
+        title: 'Loading Proxies into ATREOX',
+        blocks: [
+          ['p', "We frequently hear from users who say, \"I bought proxies, they work in my browser, but my Telegram accounts won't connect in ATREOX!\" This is almost always due to incorrect formatting (using HTTP instead of SOCKS5) or dead SOCKS ports."],
+          ['p', "ATREOX simplifies network distribution, ensuring you never accidentally overlap connections."],
+          ['figure', {
+            src: '/public/screenshots/proxies-for-telegram-accounts/reassign.png',
+            w: 678, h: 696,
+            alt: 'ATREOX Reassign Proxies dialog pasting a distinct proxy per account with format detection',
+            caption: 'Reassign Proxies: one distinct proxy per account, or the whole request is rejected',
+          }],
+          ['cards', [
+            {
+              kicker: '1. Manual Assignment (For Single Accounts)',
+              blocks: [
+                ['steps', [
+                  'Open the Account Manager and click on the specific account.',
+                  'Navigate to the "Proxies" tab.',
+                  'Paste your connection string (e.g., ip:port:login:password).',
+                  'Click Save.',
+                ]],
+              ],
+            },
+            {
+              kicker: '2. Bulk Reassignment (Proxy Pool)',
+              blocks: [
+                ['p', "The Proxy Pool feature allows you to automatically distribute a large batch of proxies across hundreds of accounts in just two clicks."],
+                ['steps', [
+                  'Select your target accounts in the dashboard.',
+                  'Open the Reassign Proxies menu.',
+                  'Paste your entire list of proxies in bulk.',
+                ]],
+                ['p', "The engine strictly enforces one distinct proxy per account. It never reuses a proxy across two accounts in the same call. Note: If you do not provide enough distinct proxies for your selected target accounts, the engine will reject the whole request to protect your cluster."],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'bandwidth-budgeting',
+        title: 'Bandwidth Consumption and Campaign Budgeting',
+        blocks: [
+          ['p', "Unlike static proxies that are rented per monthly slot, mobile proxies are usually billed by traffic consumption. If your available data balance hits zero in the middle of an active campaign, your network connection drops and every running account goes dark simultaneously."],
+          ['p', "Rule of thumb: Budget approximately 1 GB of data per 100 accounts per full neuro-commenting session."],
+          ['stat', { value: '1 GB', label: 'per 100 accounts, per session' }],
+          ['p', "Running out of data will not get your accounts banned, but it will instantly freeze your campaign flow until the balance is refilled. Always maintain an adequate traffic buffer."],
+        ],
+      },
+      {
+        id: 'faq',
+        title: 'Frequently Asked Questions (FAQ)',
+        blocks: [
+          ['faq', [
+            { q: 'Which proxies are best for Telegram automation?', a: 'For automation, stable proxies with anchored IPs (either static or carefully managed rotating IPs within the same GEO) are best. They provide predictable account behavior and drastically reduce the risk of deauthorization and bans.' },
+            { q: 'Why is it important to use a separate proxy for every account?', a: 'Sharing a single proxy across multiple accounts links their network footprint. If one account gets flagged for spam, Telegram will instantly ban all other accounts sharing that identical IP address. The rule is absolute: 1 Account = 1 Proxy.' },
+            { q: 'Can I use rotating proxies for Telegram?', a: "Yes, but only with proper configuration. Rapid, uncontrolled IP changes—especially across different cities or countries—will trigger Telegram's security protocols and result in an instant session logout." },
+            { q: 'How do proxies impact account security?', a: 'Proxies are the baseline of your operational security. Unstable, "dirty," or rapidly jumping IP addresses will force Telegram to initiate security checks, apply heavy limits, or permanently ban the session.' },
+            { q: 'How can I minimize ban risks when using proxies?', a: 'Always match the proxy GEO to the account GEO, strictly use SOCKS5 formats, respect action limits, utilize the Active Warmup module to gradually increase account activity, and never skimp on network quality.' },
+          ]],
+        ],
+      },
+    ],
   },
-
-  /* ── Module guides ── */
   {
     slug: 'account-manager',
     url: 'account-manager',
