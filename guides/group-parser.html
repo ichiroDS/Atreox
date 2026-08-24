@@ -184,7 +184,7 @@
       /* guide body: the measure a paragraph may reach, and the two
          verdict colours the checklist and the review plates read in.
          --gcol pairs with COLUMN in guides.jsx. */
-      --gcol:     660px;
+      --gcol:     790px;
       --ok:       #3fd68c;
       --bad:      #ff6161;
     }
@@ -578,8 +578,8 @@
        tables and checklists use all of it; sentences do not, because
        past roughly 80 characters the eye loses the next line's start. */
     .g-p {
-      font-family: var(--sans); font-weight: 300; font-size: 1.05rem;
-      line-height: 1.8; color: rgba(255,255,255,0.72);
+      font-family: var(--sans); font-weight: 300; font-size: 1.2rem;
+      line-height: 1.75; color: #fff;
       max-width: var(--gcol); margin: 0 0 17px;
     }
     .g-p:last-child { margin-bottom: 0; }
@@ -622,7 +622,7 @@
       border-radius: 6px;
       background: linear-gradient(180deg, rgba(0,217,255,0.06), rgba(0,217,255,0.015));
     }
-    .g-callout .g-p { color: rgba(255,255,255,0.84); }
+    .g-callout .g-p { color: #fff; }
 
     /* a protocol, as the sequence it is */
     .g-steps { list-style: none; margin: 0 0 20px; padding: 0; max-width: 780px; counter-reset: g-step; }
@@ -647,8 +647,8 @@
     .g-bullets { list-style: none; margin: 0 0 16px; padding: 0; max-width: var(--gcol); }
     .g-bullets li {
       position: relative; padding: 0 0 10px 20px;
-      font-family: var(--sans); font-weight: 300; font-size: 1.05rem;
-      line-height: 1.7; color: rgba(255,255,255,0.72);
+      font-family: var(--sans); font-weight: 300; font-size: 1.2rem;
+      line-height: 1.7; color: #fff;
     }
     .g-bullets li::before {
       content: ''; position: absolute; left: 2px; top: 0.7em;
@@ -706,7 +706,7 @@
       font-family: var(--serif); font-weight: 500; font-size: 2.4rem; line-height: 1;
       color: var(--g); text-shadow: 0 0 26px rgba(0,217,255,0.3);
     }
-    .g-stat .g-p { max-width: 480px; color: rgba(255,255,255,0.78); }
+    .g-stat .g-p { max-width: 480px; color: #fff; }
 
     /* native <details> — no script needed, so the prerendered page and
        the reader accordion the exact same way */
@@ -752,7 +752,7 @@
     /* two verdicts, read at a glance */
     .g-plates { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(258px, 100%), 1fr)); gap: 14px; margin: 0 0 20px; }
     .g-plate { padding: 18px 20px; border-radius: 6px; border: 1px solid; }
-    .g-plate .g-p { margin: 0; max-width: none; font-size: 0.93rem; line-height: 1.7; color: rgba(255,255,255,0.76); }
+    .g-plate .g-p { margin: 0; max-width: none; font-size: 0.93rem; line-height: 1.7; color: #fff; }
     .g-plate-label {
       display: flex; align-items: center; gap: 9px;
       font-family: var(--mono); font-weight: 600; font-size: 0.72rem;
@@ -777,13 +777,37 @@
     }
     .g-table td {
       padding: 14px 16px; font-weight: 300; font-size: 0.94rem; line-height: 1.6;
-      color: rgba(255,255,255,0.7); border-bottom: 1px solid rgba(255,255,255,0.055);
+      color: #fff; border-bottom: 1px solid rgba(255,255,255,0.055);
       vertical-align: top;
     }
     .g-table tbody tr { transition: background 0.16s ease; }
     .g-table tbody tr:hover { background: rgba(0,217,255,0.035); }
     .g-table tbody tr:last-child td { border-bottom: none; }
     .g-table td:first-child { font-weight: 500; color: #fff; white-space: nowrap; }
+
+    /* Below this, a wide table (five columns of prose, say) stops being
+       a thing you scroll sideways through forever and becomes a stack
+       of cards instead — one per row, each cell labelled from its own
+       column header via the data-label both renderers write. */
+    @media (max-width: 640px) {
+      .g-tablewrap { overflow-x: visible; }
+      .g-table, .g-table tbody, .g-table tr, .g-table td { display: block; width: 100%; }
+      .g-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+      .g-table tr {
+        margin-bottom: 14px; padding: 4px 16px; border: 1px solid var(--g-14); border-radius: 6px;
+        background: rgba(0,217,255,0.02);
+      }
+      .g-table tr:last-child { margin-bottom: 0; }
+      .g-table td {
+        padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); white-space: normal;
+      }
+      .g-table td:last-child { border-bottom: none; }
+      .g-table td::before {
+        content: attr(data-label); display: block; margin-bottom: 4px;
+        font-family: var(--mono); font-weight: 500; font-size: 0.56rem;
+        letter-spacing: 0.14em; text-transform: uppercase; color: rgba(0,217,255,0.7);
+      }
+    }
 
     /* the checklist: tickable, and deliberately not remembered — it is
        a pass over one batch, not a document */
@@ -818,7 +842,7 @@
     .g-bad .g-check input:checked { background: var(--bad); border-color: var(--bad); }
     .g-check-t {
       font-family: var(--sans); font-weight: 300; font-size: 0.92rem; line-height: 1.6;
-      color: rgba(255,255,255,0.72); transition: opacity 0.15s ease;
+      color: #fff; transition: opacity 0.15s ease;
     }
     .g-check-t b { font-weight: 500; color: #fff; }
     .g-check input:checked ~ .g-check-t { opacity: 0.4; }

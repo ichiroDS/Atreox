@@ -184,7 +184,7 @@
       /* guide body: the measure a paragraph may reach, and the two
          verdict colours the checklist and the review plates read in.
          --gcol pairs with COLUMN in guides.jsx. */
-      --gcol:     660px;
+      --gcol:     790px;
       --ok:       #3fd68c;
       --bad:      #ff6161;
     }
@@ -578,8 +578,8 @@
        tables and checklists use all of it; sentences do not, because
        past roughly 80 characters the eye loses the next line's start. */
     .g-p {
-      font-family: var(--sans); font-weight: 300; font-size: 1.05rem;
-      line-height: 1.8; color: rgba(255,255,255,0.72);
+      font-family: var(--sans); font-weight: 300; font-size: 1.2rem;
+      line-height: 1.75; color: #fff;
       max-width: var(--gcol); margin: 0 0 17px;
     }
     .g-p:last-child { margin-bottom: 0; }
@@ -622,7 +622,7 @@
       border-radius: 6px;
       background: linear-gradient(180deg, rgba(0,217,255,0.06), rgba(0,217,255,0.015));
     }
-    .g-callout .g-p { color: rgba(255,255,255,0.84); }
+    .g-callout .g-p { color: #fff; }
 
     /* a protocol, as the sequence it is */
     .g-steps { list-style: none; margin: 0 0 20px; padding: 0; max-width: 780px; counter-reset: g-step; }
@@ -647,8 +647,8 @@
     .g-bullets { list-style: none; margin: 0 0 16px; padding: 0; max-width: var(--gcol); }
     .g-bullets li {
       position: relative; padding: 0 0 10px 20px;
-      font-family: var(--sans); font-weight: 300; font-size: 1.05rem;
-      line-height: 1.7; color: rgba(255,255,255,0.72);
+      font-family: var(--sans); font-weight: 300; font-size: 1.2rem;
+      line-height: 1.7; color: #fff;
     }
     .g-bullets li::before {
       content: ''; position: absolute; left: 2px; top: 0.7em;
@@ -706,7 +706,7 @@
       font-family: var(--serif); font-weight: 500; font-size: 2.4rem; line-height: 1;
       color: var(--g); text-shadow: 0 0 26px rgba(0,217,255,0.3);
     }
-    .g-stat .g-p { max-width: 480px; color: rgba(255,255,255,0.78); }
+    .g-stat .g-p { max-width: 480px; color: #fff; }
 
     /* native <details> — no script needed, so the prerendered page and
        the reader accordion the exact same way */
@@ -752,7 +752,7 @@
     /* two verdicts, read at a glance */
     .g-plates { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(258px, 100%), 1fr)); gap: 14px; margin: 0 0 20px; }
     .g-plate { padding: 18px 20px; border-radius: 6px; border: 1px solid; }
-    .g-plate .g-p { margin: 0; max-width: none; font-size: 0.93rem; line-height: 1.7; color: rgba(255,255,255,0.76); }
+    .g-plate .g-p { margin: 0; max-width: none; font-size: 0.93rem; line-height: 1.7; color: #fff; }
     .g-plate-label {
       display: flex; align-items: center; gap: 9px;
       font-family: var(--mono); font-weight: 600; font-size: 0.72rem;
@@ -777,13 +777,37 @@
     }
     .g-table td {
       padding: 14px 16px; font-weight: 300; font-size: 0.94rem; line-height: 1.6;
-      color: rgba(255,255,255,0.7); border-bottom: 1px solid rgba(255,255,255,0.055);
+      color: #fff; border-bottom: 1px solid rgba(255,255,255,0.055);
       vertical-align: top;
     }
     .g-table tbody tr { transition: background 0.16s ease; }
     .g-table tbody tr:hover { background: rgba(0,217,255,0.035); }
     .g-table tbody tr:last-child td { border-bottom: none; }
     .g-table td:first-child { font-weight: 500; color: #fff; white-space: nowrap; }
+
+    /* Below this, a wide table (five columns of prose, say) stops being
+       a thing you scroll sideways through forever and becomes a stack
+       of cards instead — one per row, each cell labelled from its own
+       column header via the data-label both renderers write. */
+    @media (max-width: 640px) {
+      .g-tablewrap { overflow-x: visible; }
+      .g-table, .g-table tbody, .g-table tr, .g-table td { display: block; width: 100%; }
+      .g-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+      .g-table tr {
+        margin-bottom: 14px; padding: 4px 16px; border: 1px solid var(--g-14); border-radius: 6px;
+        background: rgba(0,217,255,0.02);
+      }
+      .g-table tr:last-child { margin-bottom: 0; }
+      .g-table td {
+        padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); white-space: normal;
+      }
+      .g-table td:last-child { border-bottom: none; }
+      .g-table td::before {
+        content: attr(data-label); display: block; margin-bottom: 4px;
+        font-family: var(--mono); font-weight: 500; font-size: 0.56rem;
+        letter-spacing: 0.14em; text-transform: uppercase; color: rgba(0,217,255,0.7);
+      }
+    }
 
     /* the checklist: tickable, and deliberately not remembered — it is
        a pass over one batch, not a document */
@@ -818,7 +842,7 @@
     .g-bad .g-check input:checked { background: var(--bad); border-color: var(--bad); }
     .g-check-t {
       font-family: var(--sans); font-weight: 300; font-size: 0.92rem; line-height: 1.6;
-      color: rgba(255,255,255,0.72); transition: opacity 0.15s ease;
+      color: #fff; transition: opacity 0.15s ease;
     }
     .g-check-t b { font-weight: 500; color: #fff; }
     .g-check input:checked ~ .g-check-t { opacity: 0.4; }
@@ -957,7 +981,7 @@
 <p class="g-p">Search queries like &quot;best proxies for Telegram,&quot; &quot;Telegram SOCKS5,&quot; or &quot;cheap IPv4 for Telegram&quot; dominate the automation space for a reason. Proper proxy management directly dictates your account lifespan, ban frequency, operation speed, and capacity to scale.</p>
 <figure class="g-fig"><picture><img src="/public/screenshots/proxies-for-telegram-accounts/proxy.jpg" alt="Three shields representing datacenter, residential and mobile proxies, over an IPv4 SOCKS5 network illustration" width="1280" height="720" loading="lazy" decoding="async"></picture><figcaption>Datacenter, residential, mobile — three networks, three trust levels</figcaption></figure>
 <p class="g-p">There are three distinct categories of proxies. Understanding the difference is critical because choosing the wrong network type for your specific task guarantees instant failure.</p>
-<div class="g-tablewrap panel"><table class="g-table"><thead><tr><th scope="col">Type</th><th scope="col">What it is</th><th scope="col">Behavior in Telegram Automation</th><th scope="col">Pros</th><th scope="col">Cons</th></tr></thead><tbody><tr><td>Datacenter (IPv4)</td><td>IPs from data centers or hosting servers. Fast, cheap, bought in bulk.</td><td>Good for low-risk tasks and mass scaling. However, aggressive actions (spam patterns, mass logins) trigger limits much faster here.</td><td><ul class="g-td-list"><li>Cheapest option.</li><li>Stable speed/ping.</li><li>Easy to scale.</li></ul></td><td><ul class="g-td-list"><li>IPs are often &quot;burned&quot; by previous users.</li><li>Lowest trust level.</li><li>High risk during heavy automation.</li></ul></td></tr><tr><td>Residential</td><td>Real home internet IPs. Looks like a standard user connecting from an apartment.</td><td>Excellent for account warmup, careful activity, and mimicking real human behavior. Long lifespan if limits are respected.</td><td><ul class="g-td-list"><li>High trust score.</li><li>Great for safe logins.</li><li>Fewer blocks.</li></ul></td><td><ul class="g-td-list"><li>More expensive than Datacenter.</li><li>Speed can fluctuate.</li><li>Quality depends on the provider's pool.</li></ul></td></tr><tr><td>Mobile (4G/5G/LTE)</td><td>Mobile carrier IPs. Shared dynamically among thousands of real cellular users.</td><td>The most &quot;alive&quot; and natural IP possible. Excellent for mimicking mobile app usage, but requires careful GEO management.</td><td><ul class="g-td-list"><li>Maximum natural trust.</li><li>Easy rotation.</li><li>Highest survival rate.</li></ul></td><td><ul class="g-td-list"><li>Most expensive.</li><li>Unstable ping.</li><li>Bad IP/Country jumps cause suspicion.</li></ul></td></tr></tbody></table></div>
+<div class="g-tablewrap panel"><table class="g-table"><thead><tr><th scope="col">Type</th><th scope="col">What it is</th><th scope="col">Behavior in Telegram Automation</th><th scope="col">Pros</th><th scope="col">Cons</th></tr></thead><tbody><tr><td data-label="Type">Datacenter (IPv4)</td><td data-label="What it is">IPs from data centers or hosting servers. Fast, cheap, bought in bulk.</td><td data-label="Behavior in Telegram Automation">Good for low-risk tasks and mass scaling. However, aggressive actions (spam patterns, mass logins) trigger limits much faster here.</td><td data-label="Pros"><ul class="g-td-list"><li>Cheapest option.</li><li>Stable speed/ping.</li><li>Easy to scale.</li></ul></td><td data-label="Cons"><ul class="g-td-list"><li>IPs are often &quot;burned&quot; by previous users.</li><li>Lowest trust level.</li><li>High risk during heavy automation.</li></ul></td></tr><tr><td data-label="Type">Residential</td><td data-label="What it is">Real home internet IPs. Looks like a standard user connecting from an apartment.</td><td data-label="Behavior in Telegram Automation">Excellent for account warmup, careful activity, and mimicking real human behavior. Long lifespan if limits are respected.</td><td data-label="Pros"><ul class="g-td-list"><li>High trust score.</li><li>Great for safe logins.</li><li>Fewer blocks.</li></ul></td><td data-label="Cons"><ul class="g-td-list"><li>More expensive than Datacenter.</li><li>Speed can fluctuate.</li><li>Quality depends on the provider's pool.</li></ul></td></tr><tr><td data-label="Type">Mobile (4G/5G/LTE)</td><td data-label="What it is">Mobile carrier IPs. Shared dynamically among thousands of real cellular users.</td><td data-label="Behavior in Telegram Automation">The most &quot;alive&quot; and natural IP possible. Excellent for mimicking mobile app usage, but requires careful GEO management.</td><td data-label="Pros"><ul class="g-td-list"><li>Maximum natural trust.</li><li>Easy rotation.</li><li>Highest survival rate.</li></ul></td><td data-label="Cons"><ul class="g-td-list"><li>Most expensive.</li><li>Unstable ping.</li><li>Bad IP/Country jumps cause suspicion.</li></ul></td></tr></tbody></table></div>
 <p class="g-p">The Practical Logic (Simply Put):</p>
 <div class="g-options"><div class="g-option"><p class="g-p" style="margin:0">Need maximum savings and massive scale? Use Datacenter SOCKS5 (but keep your action tempo very conservative).</p></div><div class="g-option"><p class="g-p" style="margin:0">Need a &quot;normal user&quot; history and smooth warmup? Use Residential.</p></div><div class="g-option"><span class="g-option-badge">Recommended for beginners</span><p class="g-p" style="margin:0">Need maximum natural behavior? Use Mobile proxies. Despite the cost, we strongly recommend beginners start with Mobile Proxies for the best survival rates.</p></div></div>
 <h2 id="rotation-trap" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">02</span>The Rotation Trap: Static vs. Rotating</h2>

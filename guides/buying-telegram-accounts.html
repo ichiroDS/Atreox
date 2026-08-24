@@ -184,7 +184,7 @@
       /* guide body: the measure a paragraph may reach, and the two
          verdict colours the checklist and the review plates read in.
          --gcol pairs with COLUMN in guides.jsx. */
-      --gcol:     660px;
+      --gcol:     790px;
       --ok:       #3fd68c;
       --bad:      #ff6161;
     }
@@ -578,8 +578,8 @@
        tables and checklists use all of it; sentences do not, because
        past roughly 80 characters the eye loses the next line's start. */
     .g-p {
-      font-family: var(--sans); font-weight: 300; font-size: 1.05rem;
-      line-height: 1.8; color: rgba(255,255,255,0.72);
+      font-family: var(--sans); font-weight: 300; font-size: 1.2rem;
+      line-height: 1.75; color: #fff;
       max-width: var(--gcol); margin: 0 0 17px;
     }
     .g-p:last-child { margin-bottom: 0; }
@@ -622,7 +622,7 @@
       border-radius: 6px;
       background: linear-gradient(180deg, rgba(0,217,255,0.06), rgba(0,217,255,0.015));
     }
-    .g-callout .g-p { color: rgba(255,255,255,0.84); }
+    .g-callout .g-p { color: #fff; }
 
     /* a protocol, as the sequence it is */
     .g-steps { list-style: none; margin: 0 0 20px; padding: 0; max-width: 780px; counter-reset: g-step; }
@@ -647,8 +647,8 @@
     .g-bullets { list-style: none; margin: 0 0 16px; padding: 0; max-width: var(--gcol); }
     .g-bullets li {
       position: relative; padding: 0 0 10px 20px;
-      font-family: var(--sans); font-weight: 300; font-size: 1.05rem;
-      line-height: 1.7; color: rgba(255,255,255,0.72);
+      font-family: var(--sans); font-weight: 300; font-size: 1.2rem;
+      line-height: 1.7; color: #fff;
     }
     .g-bullets li::before {
       content: ''; position: absolute; left: 2px; top: 0.7em;
@@ -706,7 +706,7 @@
       font-family: var(--serif); font-weight: 500; font-size: 2.4rem; line-height: 1;
       color: var(--g); text-shadow: 0 0 26px rgba(0,217,255,0.3);
     }
-    .g-stat .g-p { max-width: 480px; color: rgba(255,255,255,0.78); }
+    .g-stat .g-p { max-width: 480px; color: #fff; }
 
     /* native <details> — no script needed, so the prerendered page and
        the reader accordion the exact same way */
@@ -752,7 +752,7 @@
     /* two verdicts, read at a glance */
     .g-plates { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(258px, 100%), 1fr)); gap: 14px; margin: 0 0 20px; }
     .g-plate { padding: 18px 20px; border-radius: 6px; border: 1px solid; }
-    .g-plate .g-p { margin: 0; max-width: none; font-size: 0.93rem; line-height: 1.7; color: rgba(255,255,255,0.76); }
+    .g-plate .g-p { margin: 0; max-width: none; font-size: 0.93rem; line-height: 1.7; color: #fff; }
     .g-plate-label {
       display: flex; align-items: center; gap: 9px;
       font-family: var(--mono); font-weight: 600; font-size: 0.72rem;
@@ -777,13 +777,37 @@
     }
     .g-table td {
       padding: 14px 16px; font-weight: 300; font-size: 0.94rem; line-height: 1.6;
-      color: rgba(255,255,255,0.7); border-bottom: 1px solid rgba(255,255,255,0.055);
+      color: #fff; border-bottom: 1px solid rgba(255,255,255,0.055);
       vertical-align: top;
     }
     .g-table tbody tr { transition: background 0.16s ease; }
     .g-table tbody tr:hover { background: rgba(0,217,255,0.035); }
     .g-table tbody tr:last-child td { border-bottom: none; }
     .g-table td:first-child { font-weight: 500; color: #fff; white-space: nowrap; }
+
+    /* Below this, a wide table (five columns of prose, say) stops being
+       a thing you scroll sideways through forever and becomes a stack
+       of cards instead — one per row, each cell labelled from its own
+       column header via the data-label both renderers write. */
+    @media (max-width: 640px) {
+      .g-tablewrap { overflow-x: visible; }
+      .g-table, .g-table tbody, .g-table tr, .g-table td { display: block; width: 100%; }
+      .g-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+      .g-table tr {
+        margin-bottom: 14px; padding: 4px 16px; border: 1px solid var(--g-14); border-radius: 6px;
+        background: rgba(0,217,255,0.02);
+      }
+      .g-table tr:last-child { margin-bottom: 0; }
+      .g-table td {
+        padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); white-space: normal;
+      }
+      .g-table td:last-child { border-bottom: none; }
+      .g-table td::before {
+        content: attr(data-label); display: block; margin-bottom: 4px;
+        font-family: var(--mono); font-weight: 500; font-size: 0.56rem;
+        letter-spacing: 0.14em; text-transform: uppercase; color: rgba(0,217,255,0.7);
+      }
+    }
 
     /* the checklist: tickable, and deliberately not remembered — it is
        a pass over one batch, not a document */
@@ -818,7 +842,7 @@
     .g-bad .g-check input:checked { background: var(--bad); border-color: var(--bad); }
     .g-check-t {
       font-family: var(--sans); font-weight: 300; font-size: 0.92rem; line-height: 1.6;
-      color: rgba(255,255,255,0.72); transition: opacity 0.15s ease;
+      color: #fff; transition: opacity 0.15s ease;
     }
     .g-check-t b { font-weight: 500; color: #fff; }
     .g-check input:checked ~ .g-check-t { opacity: 0.4; }
@@ -956,7 +980,7 @@
 <h2 id="why-blocked" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">02</span>Why Telegram Accounts Get Blocked So Quickly</h2>
 <p class="g-p">The stability of a Telegram account does not depend on one single factor, but on a set of parameters. In practice, it is not just a phone number and GEO, but a complete profile of where and how the account was created.</p>
 <p class="g-p">Account survival depends on:</p>
-<ul class="g-bullets"><li>the account GEO;</li><li>the phone number pool used for registration;</li><li>the registration device device ID;</li><li>the Telegram app version used during registration;</li><li>the account age;</li><li>the history of similar accounts with the same parameters;</li><li>current ban waves affecting specific combinations of parameters.</li></ul>
+<ul class="g-bullets"><li>the account GEO;</li><li>the phone number pool used for registration;</li><li>the registration device ID;</li><li>the Telegram app version used during registration;</li><li>the account age;</li><li>the history of similar accounts with the same parameters;</li><li>current ban waves affecting specific combinations of parameters.</li></ul>
 <p class="g-p">That is why Telegram accounts with the same description in a marketplace are not equal. Two lots may have the same country, similar aging period, and the same price, but the real risk of being blocked can be completely different.</p>
 <h2 id="testing-sellers" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">03</span>Testing Sellers and Avoiding Instant Bans</h2>
 <p class="g-p">Instead of buying 100 accounts from a single unknown seller right away, you need to run a testing protocol.</p>
@@ -979,7 +1003,7 @@
 <h2 id="main-filters" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">06</span>Main Filters When Buying Telegram Accounts</h2>
 <p class="g-p">When purchasing Telegram accounts, you should primarily pay attention to the following factors:</p>
 <ul class="g-bullets"><li>account origin (phishing, stealer, auto-registered, self-registered)</li><li>account country (GEO)</li><li>SpamBlock status (temporary, GEO-based, permanent)</li></ul>
-<figure class="g-fig"><picture><img src="/public/screenshots/buying-telegram-accounts/accsexamples.jpg" alt="Telegram account marketplace listings showing autoreg tags, no-spamblock badges and country of origin" width="1280" height="583" loading="lazy" decoding="async"></picture><figcaption>Two listings with matching filters — autoreg, no spamblock, same country</figcaption></figure>
+<figure class="g-fig"><picture><source srcset="/public/screenshots/buying-telegram-accounts/accsexamples.webp" type="image/webp"><img src="/public/screenshots/buying-telegram-accounts/accsexamples.jpg" alt="Telegram account marketplace listings showing autoreg tags, no-spamblock badges and country of origin" width="1280" height="583" loading="lazy" decoding="async"></picture><figcaption>Two listings with matching filters — autoreg, no spamblock, same country</figcaption></figure>
 <p class="g-p">Different Telegram account marketplaces provide different filtering options and account characteristics. Understanding these criteria is important because otherwise you may not only purchase an account that is unsuitable for your intended use but could also violate local laws and regulations.</p>
 <div class="g-callout"><p class="g-p">Many Telegram account stores sell phishing or stealer accounts, meaning compromised accounts obtained without the owner's permission. Such accounts are popular among users involved in gray-area Telegram automation because they are inexpensive, available in large quantities, and have already been warmed up through real user activity. However, purchasing and using compromised accounts may violate applicable laws and platform policies.</p></div>
 <p class="g-p">For more legitimate use cases, buyers typically choose auto-registered accounts created specifically for resale. The account GEO and SpamBlock status are then selected based on the intended purpose. In most cases, users choose Telegram accounts from the same region where they plan to operate, advertise, communicate, or automate activities.</p>
@@ -988,13 +1012,13 @@
 <p class="g-p">When it comes to selecting a GEO for your accounts, the golden rule is that the account GEO must strictly match the GEO of the proxies you bought or plan to buy. USA accounts are not always the best option. In fact, at the time of writing this guide, the ATREOX team predominantly uses Indonesian accounts paired with Indonesian proxies, which also happen to be significantly cheaper and highly effective compared to American equivalents.</p>
 <p class="g-p">There are many stores, forums, and sellers in Telegram chats offering Telegram accounts for sale, but the following marketplaces are among the most popular:</p>
 <p class="g-p">If your primary marketplace is ever down, you need untested backups. Established English-facing marketplaces include:</p>
-<div class="g-tablewrap panel"><table class="g-table"><thead><tr><th scope="col">Marketplace</th><th scope="col">What it is known for</th></tr></thead><tbody><tr><td>AccsMarket</td><td>The most recognized bulk-TData market. A well-established marketplace that has been operating for years and has earned user trust.</td></tr><tr><td>BuyAccs</td><td>Cited for lower burn rates.</td></tr><tr><td>Accs Trading</td><td>TData + Session, crypto payments.</td></tr><tr><td>lzt.market</td><td>A large selection of accounts with account validity checks before purchase.</td></tr><tr><td>dark.shopping</td><td>A wide range of accounts, although prices may be above market average; replacement is available if an account is invalid.</td></tr></tbody></table></div>
+<div class="g-tablewrap panel"><table class="g-table"><thead><tr><th scope="col">Marketplace</th><th scope="col">Role</th><th scope="col">What it is known for</th></tr></thead><tbody><tr><td data-label="Marketplace">lzt.market</td><td data-label="Role">Primary</td><td data-label="What it is known for">A large selection of accounts with account validity checks before purchase.</td></tr><tr><td data-label="Marketplace">dark.shopping</td><td data-label="Role">Primary</td><td data-label="What it is known for">A wide range of accounts, although prices may be above market average; replacement is available if an account is invalid.</td></tr><tr><td data-label="Marketplace">AccsMarket</td><td data-label="Role">Backup</td><td data-label="What it is known for">The most recognized bulk-TData market. A well-established marketplace that has been operating for years and has earned user trust.</td></tr><tr><td data-label="Marketplace">BuyAccs</td><td data-label="Role">Backup</td><td data-label="What it is known for">Cited for lower burn rates.</td></tr><tr><td data-label="Marketplace">Accs Trading</td><td data-label="Role">Backup</td><td data-label="What it is known for">TData + Session, crypto payments.</td></tr></tbody></table></div>
 <h2 id="proxies-role" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">08</span>The Role of Proxies: Why Account Evaluation Is Incomplete Without Them</h2>
 <p class="g-p">The final survival of an account depends not only on the account itself, but also on proxy quality. If you use a proxy with the same GEO as the account country, it looks more natural. But even then, the provider quality and connection stability matter. This means Telegram accounts cannot be evaluated separately from their environment. A good account with a bad proxy can perform poorly in real work.</p>
 <a href="/guides/proxies-for-telegram-accounts" class="quiet-link" style="margin-bottom:16px">Full guide: Choosing and connecting proxies →</a>
 <h2 id="best-geos" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">09</span>Which Telegram Account GEOs Are Best to Use?</h2>
 <p class="g-p">It is important to understand that GEO really matters.</p>
-<figure class="g-fig"><picture><img src="/public/screenshots/buying-telegram-accounts/geobenchmark.jpg" alt="ATREOX dashboard Geo benchmark showing best and worst performing account countries by survival rate" width="1280" height="544" loading="lazy" decoding="async"></picture><figcaption>Geo benchmark in the ATREOX dashboard: survival rate by account country</figcaption></figure>
+<figure class="g-fig"><picture><source srcset="/public/screenshots/buying-telegram-accounts/geobenchmark.webp" type="image/webp"><img src="/public/screenshots/buying-telegram-accounts/geobenchmark.jpg" alt="ATREOX dashboard Geo benchmark showing best and worst performing account countries by survival rate" width="1280" height="544" loading="lazy" decoding="async"></picture><figcaption>Geo benchmark in the ATREOX dashboard: survival rate by account country</figcaption></figure>
 <h2 id="the-checklist" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">10</span>The Expanded Account Checklist</h2>
 <p class="g-p">Before scaling your operations, run every new batch and seller against this expanded checklist to ensure your marketplace filters are set correctly.</p>
 <figure class="g-fig"><picture><source srcset="/public/screenshots/buying-telegram-accounts/01.webp" type="image/webp"><img src="/public/screenshots/buying-telegram-accounts/01.png" alt="Telegram account marketplace filters for TData, GEO and rest time" width="814" height="889" loading="lazy" decoding="async"></picture><figcaption>Marketplace filters set to the parameters from the checklist</figcaption></figure>
