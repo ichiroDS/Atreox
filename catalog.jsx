@@ -1807,14 +1807,167 @@ const GUIDES = [
     group: 'module',
     short: 'Rooms worth walking into',
     title: 'Group Parser',
-    summary: 'Finding groups that are actually alive, and that you can actually post in.',
-    covers: [
-      'Messages in the last 7 days vs unique senders — why the second is the real filter',
-      'Open-join and can-post gates, slow mode, and join requests',
-      'Reading a group result row before committing accounts to it',
-    ],
+    summary: 'Finding groups that are actually alive and that you can actually post in — the filters, the score, and where a promoted group goes.',
+    seoTitle: 'Group Parser: every control on the ATREOX group search',
+    seoDescription:
+      'Unique senders rather than message count, the open-join and can-post gates, slow mode, and what promoting a group actually does. Taken from the engine and the panel.',
     module: 'group-parser',
     video: null,
+    body: [
+      {
+        id: 'what-it-is',
+        title: 'What this page is',
+        blocks: [
+          ['p', "Group Parser finds public groups — the rooms where people talk to each other, rather than channels where one account broadcasts. It lives on the same page as Channel Parser, behind the second of the two tabs at the top."],
+          ['p', "It looks similar to its neighbour and behaves differently in every place that matters, because what makes a group worth having is not what makes a channel worth having."],
+          ['callout', [
+            "The channel pipeline's most destructive filter simply does not exist here. A channel is rejected outright if it has no linked discussion group to comment in — measured on real candidates, that alone removes about three quarters of them. A group is the discussion surface, so there is nothing to link to and nothing to reject for. Expect a group search to return far more than a channel search on the same effort.",
+          ]],
+        ],
+      },
+      {
+        id: 'map',
+        title: 'Map of the page',
+        blocks: [
+          ['map', [
+            { name: 'Parser tabs', holds: 'Channel parser · Group parser, at the very top. This guide is the second one.' },
+            { name: 'Search', holds: 'Keywords and endings, accounts, members range, languages, the two activity floors, the two access switches, and how many results to stop at.' },
+            { name: 'Progress', holds: 'While a run is going: the chunk it is on, and the live log of what each account decided about each candidate.' },
+            { name: 'Results', holds: 'The table, with Export CSV above it and status tabs across it — and, unlike the channel table, a Promote and a Reject on every row.' },
+          ]],
+        ],
+      },
+      {
+        id: 'how-it-searches',
+        title: 'How it finds candidates',
+        blocks: [
+          ['p', "Two different Telegram searches are run for every keyword and their results are merged. They were both kept because measurement said to: on a live test the two found different groups and the overlap between them was zero."],
+          ['table', {
+            head: ['Search', 'What it matches'],
+            rows: [
+              ['By name', 'The group’s own name. The same call the channel parser makes — Telegram returns channels and groups in one list and only a flag separates them.'],
+              ['By message text', 'What people are actually saying, returning the groups those messages live in. A group only surfaces if it has a recent on-topic message, so this applies an activity test at the source rather than after four requests of inspection.'],
+            ],
+          }],
+          ['p', "The second one also pages, which is where the volume comes from — the name search has a hard ceiling of roughly ten results per query however many you ask for. Three pages are taken per keyword: enough for several times that ceiling, while staying a small, bounded number of requests."],
+          ['p', "Keywords, endings, account selection and the maximum-results picker work exactly as they do on the channel tab, including the ten-per-request batching and the confirmation before a long run."],
+        ],
+      },
+      {
+        id: 'filters',
+        title: 'The filters',
+        blocks: [
+          ['p', "Members and languages mean the same thing here as on the channel tab. Everything else is different, because a group has no posts and no comments to count."],
+          ['controls', [
+            {
+              id: 'ctl-gp-messages', name: 'Min messages (7d)', where: 'Search → Activity', kind: 'field', value: '20',
+              rows: [
+                ['What it does', 'Rejects a group with fewer messages than this in the last seven days.'],
+                ['Default', '20.'],
+                ['How it is measured', 'From one pull of the last fifty messages. A group busy enough to fill fifty messages inside a week is measured against that sample rather than its whole history.'],
+                ['Why it is the weaker of the two', 'Message count alone cannot tell a community from two bots posting all day. That is what the next one is for.'],
+              ],
+            },
+            {
+              id: 'ctl-gp-senders', name: 'Min unique senders', where: 'Search → Activity', kind: 'field', tone: 'ok', value: '5',
+              rows: [
+                ['What it does', 'Rejects a group unless this many distinct people sent at least one message in the sample.'],
+                ['Default', '5. Deliberately low — it is there to exclude the obvious dead and bot-run cases, not to demand a large sample.'],
+                ['The number that matters', 'Two hundred messages from two accounts is not a community. This is the only filter that separates a real conversation from a feed, and it has no equivalent at all in the channel pipeline.'],
+                ['Which one to raise', 'This one. Raising the message floor finds busier spam; raising the sender floor finds more people.'],
+              ],
+            },
+            {
+              id: 'ctl-gp-open-join', name: 'Only groups anyone can join', where: 'Search → Access', kind: 'toggle', on: true,
+              rows: [
+                ['What it does', 'Skips groups where joining has to be approved by an admin.'],
+                ['Default', 'On.'],
+                ['Why on', 'Joinable means joinable on demand. A join request may simply never be granted, and an account waiting on one is an account doing nothing.'],
+                ['Checked how', 'From the group itself, not guessed from anything else.'],
+              ],
+            },
+            {
+              id: 'ctl-gp-can-post', name: 'Only groups members can post in', where: 'Search → Access', kind: 'toggle', on: true,
+              rows: [
+                ['What it does', 'Skips read-only groups where new members cannot send messages.'],
+                ['Default', 'On.'],
+                ['Why on', 'A group nobody may post in cannot be commented in, whatever else is true about it.'],
+              ],
+            },
+          ]],
+          ['p', "Two more checks run before any of those: the group has to be public — with a username to point an account at — and it has to actually be a group rather than a broadcast channel that arrived in the same result list."],
+        ],
+      },
+      {
+        id: 'results',
+        title: 'Reading a row',
+        blocks: [
+          ['p', "The table carries more than the channel one, because more of what decides a group is visible up front: members, messages in the last seven days, distinct senders, slow mode, how joining works, language, where the search found it, and a score."],
+          ['controls', [
+            {
+              id: 'ctl-gp-score', name: 'Score', where: 'Results', kind: 'tile', tone: 'ok', value: '68',
+              rows: [
+                ['What it is', 'Zero to a hundred, weighted toward conversation rather than size.'],
+                ['How it is built', 'Up to 25 points for members, on a logarithmic scale — a thousand members is worth about 15 and a million barely more than 25. Up to 35 for messages in the week, full marks at around 140. Up to 25 for distinct senders, full marks at about 17 people. Fifteen more for matching a language you asked for.'],
+                ['The penalty', 'Ten points off for slow mode of a minute or longer, because that throttles the exact thing an account would be there to do.'],
+                ['Different from the channel score on purpose', 'That one can hand 40 of its 100 points to raw member count. Here members cap at 25 and the two activity terms carry 60 between them — a big silent group is worth less than a smaller talkative one.'],
+              ],
+            },
+            {
+              id: 'ctl-gp-slowmode', name: 'Slow mode', where: 'Results → a row', kind: 'badge', tone: 'warn', value: '30s',
+              rows: [
+                ['What it shows', 'How long a member has to wait between messages. Off means no cooldown.'],
+                ['Why it is on the row', 'It is the difference between a group an account can take part in and one where it gets a turn every few minutes. Anything from a minute up also costs the group ten points.'],
+              ],
+            },
+            {
+              id: 'ctl-gp-source', name: 'Source', where: 'Results → a row', kind: 'badge', tone: 'plain', value: 'search global',
+              rows: [
+                ['What it shows', 'Which of the two searches surfaced this group — its name, or something said in it.'],
+                ['Why it is worth a glance', 'A group found by message text had a recent on-topic message in it. A group found by name only matched a name.'],
+              ],
+            },
+            {
+              id: 'ctl-gp-promote', name: 'Promote', where: 'Results → a row', kind: 'button', tone: 'ok', value: 'Promote',
+              rows: [
+                ['What it does', 'Marks the group accepted and adds it to NeuroDialogs’ promoted-groups list.'],
+                ['Where it actually goes', 'Into the DM module, not the commenting one. Accounts answering private messages may then mention it when it naturally fits, rate-limited to at most one mention every few messages per conversation.'],
+                ['When it takes effect', 'The next message. That list is read fresh on every generation, so there is nothing to restart and no cache to clear.'],
+                ['If you wanted it for commenting', 'That is not what this button does. The commenting engine watches channels, and a standalone group is not one.'],
+              ],
+            },
+            {
+              id: 'ctl-gp-reject', name: 'Reject', where: 'Results → a row', kind: 'button', tone: 'bad', value: 'Reject',
+              rows: [
+                ['What it does', 'Marks the group rejected so it does not resurface on a later scan.'],
+                ['Why it is worth using', 'It is the only thing that remembers a decision. Without it the same unsuitable group comes back on every re-run of the same keywords.'],
+              ],
+            },
+            {
+              id: 'ctl-gp-export', name: 'Export CSV', where: 'Results', kind: 'button', tone: 'plain', value: 'Export CSV',
+              rows: [
+                ['What it does', 'Exports every row matching the current tab and filters — not just the page on screen, unlike the comment history on the Neurocommenting page.'],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'first-run',
+        title: 'First run',
+        blocks: [
+          ['steps', [
+            "Search a few keywords with both access switches left on. Everything they exclude is something an account could not have used anyway.",
+            "Sort your attention by senders rather than by members. A group with 800 members and 30 people talking is worth more than one with 40,000 and four.",
+            "Look at slow mode before committing. A minute or more between messages changes what an account can do there, and the score already docks it.",
+            "Reject the ones that are wrong, rather than ignoring them. It is the only way they stop coming back.",
+            "Promote the ones worth having — remembering that this hands them to NeuroDialogs to mention in conversation, not to the commenting engine.",
+          ]],
+          ['note', "Searching shares its account budget with the channel tab. A channel search and a group search running at once cannot together exceed the same owner-wide worker cap, so running both in parallel does not get through the work any faster — it just splits the same accounts between them.",
+          ],
+        ],
+      },
+    ],
   },
   {
     slug: 'neurocommenting',
