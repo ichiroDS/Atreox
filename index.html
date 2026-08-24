@@ -180,6 +180,13 @@
       --logotype: 'Marcellus', 'Playfair Display', Georgia, serif;
       --sans:     'Barlow', sans-serif;
       --mono:     'JetBrains Mono', ui-monospace, 'Cascadia Mono', monospace;
+
+      /* guide body: the measure a paragraph may reach, and the two
+         verdict colours the checklist and the review plates read in.
+         --gcol pairs with COLUMN in guides.jsx. */
+      --gcol:     660px;
+      --ok:       #3fd68c;
+      --bad:      #ff6161;
     }
 
     html { scroll-behavior: smooth; background: var(--bg); }
@@ -558,6 +565,179 @@
     }
     .guide-nav-item:hover { background: rgba(0,217,255,0.07); }
     .guide-nav-item:focus-visible { outline: 1px solid var(--g); outline-offset: 1px; }
+
+    /* ══ Guide body ══════════════════════════════════════════════
+       The blocks a written guide is built from. One stylesheet, two
+       renderers: the React reader and scripts/prerender.mjs both emit
+       these exact class names, so the page a crawler downloads and the
+       page a reader ends up looking at are the same page — no second
+       set of styles to keep in step.
+
+       --gcol is the measure a paragraph is allowed to reach. The guide
+       column itself is wider (READER_MAX in guides.jsx) and the screens,
+       tables and checklists use all of it; sentences do not, because
+       past roughly 80 characters the eye loses the next line's start. */
+    .g-p {
+      font-family: var(--sans); font-weight: 300; font-size: 1.05rem;
+      line-height: 1.8; color: rgba(255,255,255,0.72);
+      max-width: var(--gcol); margin: 0 0 17px;
+    }
+    .g-p:last-child { margin-bottom: 0; }
+    .g-p b, .g-p strong { font-weight: 500; color: rgba(255,255,255,0.92); }
+
+    /* the chapter list, which is also the way into the chapters */
+    .g-toc { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr)); gap: 1px; }
+    .g-toc a {
+      display: flex; gap: 11px; align-items: baseline;
+      padding: 9px 11px; border-radius: 4px; text-decoration: none;
+      transition: background 0.16s ease;
+    }
+    .g-toc a:hover { background: rgba(0,217,255,0.07); }
+    .g-toc a:focus-visible { outline: 1px solid var(--g); outline-offset: 1px; }
+    .g-toc-t {
+      font-family: var(--sans); font-weight: 300; font-size: 0.95rem;
+      line-height: 1.5; color: rgba(255,255,255,0.7);
+      transition: color 0.16s ease;
+    }
+    .g-toc a:hover .g-toc-t { color: #fff; }
+    .g-toc-n {
+      font-family: var(--mono); font-weight: 500; font-size: 0.62rem;
+      color: rgba(0,217,255,0.6); flex-shrink: 0;
+    }
+
+    /* the paragraph the whole guide turns on */
+    .g-callout {
+      max-width: 800px; margin: 0 0 20px; padding: 22px 26px;
+      border: 1px solid var(--g-22); border-left: 2px solid var(--g);
+      border-radius: 6px;
+      background: linear-gradient(180deg, rgba(0,217,255,0.06), rgba(0,217,255,0.015));
+    }
+    .g-callout .g-p { color: rgba(255,255,255,0.84); }
+
+    /* a protocol, as the sequence it is */
+    .g-steps { list-style: none; margin: 0 0 20px; padding: 0; max-width: 780px; counter-reset: g-step; }
+    .g-steps li { position: relative; counter-increment: g-step; padding: 0 0 18px 46px; }
+    .g-steps li::before {
+      content: counter(g-step, decimal-leading-zero);
+      position: absolute; left: 0; top: 0;
+      width: 28px; height: 28px; box-sizing: border-box;
+      border: 1px solid rgba(0,217,255,0.34); background: rgba(0,217,255,0.07);
+      border-radius: 3px; display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-weight: 600; font-size: 0.62rem; color: var(--g);
+    }
+    .g-steps li::after {
+      content: ''; position: absolute; left: 14px; top: 34px; bottom: 2px; width: 1px;
+      background: linear-gradient(180deg, rgba(0,217,255,0.3), rgba(0,217,255,0.05));
+    }
+    .g-steps li:last-child { padding-bottom: 0; }
+    .g-steps li:last-child::after { display: none; }
+    .g-steps .g-p { margin: 0; padding-top: 4px; }
+
+    /* a card holding an alternative to whatever precedes it */
+    .g-card {
+      margin: 0 0 20px; padding: 20px 22px;
+      border: 1px dashed var(--g-22); border-radius: 6px;
+      background: rgba(0,217,255,0.02);
+    }
+    .g-card > :last-child { margin-bottom: 0; }
+    .g-kicker {
+      display: block; font-family: var(--mono); font-weight: 500; font-size: 0.6rem;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--g); margin: 0 0 13px;
+    }
+
+    /* screens. width/height sit on the img so the column never jumps */
+    .g-fig { margin: 22px 0; }
+    .g-fig img {
+      display: block; width: 100%; height: auto;
+      border: 1px solid var(--g-14); border-radius: 6px; background: #05090d;
+    }
+    .g-fig figcaption {
+      margin-top: 11px; font-family: var(--mono); font-weight: 400; font-size: 0.62rem;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      color: rgba(255,255,255,0.4); line-height: 1.7;
+    }
+
+    /* two verdicts, read at a glance */
+    .g-plates { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(258px, 100%), 1fr)); gap: 14px; margin: 0 0 20px; }
+    .g-plate { padding: 18px 20px; border-radius: 6px; border: 1px solid; }
+    .g-plate .g-p { margin: 0; max-width: none; font-size: 0.93rem; line-height: 1.7; color: rgba(255,255,255,0.76); }
+    .g-plate-label {
+      display: flex; align-items: center; gap: 9px;
+      font-family: var(--mono); font-weight: 600; font-size: 0.72rem;
+      letter-spacing: 0.14em; text-transform: uppercase; margin: 0 0 11px;
+    }
+    .g-plate-label::before { content: ''; width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .g-ok { border-color: rgba(63,214,140,0.32); background: rgba(63,214,140,0.055); }
+    .g-ok .g-plate-label, .g-ok .g-list-h { color: var(--ok); }
+    .g-ok .g-plate-label::before, .g-ok .g-list-h::before { background: var(--ok); box-shadow: 0 0 12px rgba(63,214,140,0.6); }
+    .g-bad { border-color: rgba(255,97,97,0.32); background: rgba(255,97,97,0.055); }
+    .g-bad .g-plate-label, .g-bad .g-list-h { color: var(--bad); }
+    .g-bad .g-plate-label::before, .g-bad .g-list-h::before { background: var(--bad); box-shadow: 0 0 12px rgba(255,97,97,0.55); }
+
+    /* a table that scrolls itself rather than the page */
+    .g-tablewrap { margin: 0 0 20px; overflow-x: auto; }
+    .g-table { width: 100%; border-collapse: collapse; font-family: var(--sans); }
+    .g-table th {
+      text-align: left; padding: 10px 16px;
+      font-family: var(--mono); font-weight: 500; font-size: 0.58rem;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(255,255,255,0.42); border-bottom: 1px solid var(--g-14); white-space: nowrap;
+    }
+    .g-table td {
+      padding: 14px 16px; font-weight: 300; font-size: 0.94rem; line-height: 1.6;
+      color: rgba(255,255,255,0.7); border-bottom: 1px solid rgba(255,255,255,0.055);
+      vertical-align: top;
+    }
+    .g-table tbody tr { transition: background 0.16s ease; }
+    .g-table tbody tr:hover { background: rgba(0,217,255,0.035); }
+    .g-table tbody tr:last-child td { border-bottom: none; }
+    .g-table td:first-child { font-weight: 500; color: #fff; white-space: nowrap; }
+
+    /* the checklist: tickable, and deliberately not remembered — it is
+       a pass over one batch, not a document */
+    .g-lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(298px, 100%), 1fr)); gap: 16px; margin: 0 0 20px; }
+    .g-list { padding: 20px 22px; border-radius: 6px; border: 1px solid; }
+    .g-list-h {
+      display: flex; align-items: center; gap: 9px;
+      font-family: var(--mono); font-weight: 600; font-size: 0.68rem;
+      letter-spacing: 0.13em; text-transform: uppercase; margin: 0 0 16px;
+    }
+    .g-list-h::before { content: ''; width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .g-list ul { list-style: none; margin: 0; padding: 0; }
+    .g-list li { margin-bottom: 14px; }
+    .g-list li:last-child { margin-bottom: 0; }
+    .g-check { display: flex; gap: 11px; align-items: flex-start; cursor: pointer; }
+    .g-check input {
+      appearance: none; -webkit-appearance: none;
+      margin: 4px 0 0; width: 16px; height: 16px; flex-shrink: 0;
+      border-radius: 3px; border: 1px solid rgba(255,255,255,0.26);
+      background: rgba(255,255,255,0.03); cursor: pointer; position: relative;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .g-check:hover input { border-color: rgba(255,255,255,0.48); }
+    .g-check input:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+    .g-check input::after {
+      content: ''; position: absolute; left: 4px; top: 0;
+      width: 5px; height: 10px; border: solid transparent; border-width: 0 2px 2px 0;
+      transform: rotate(43deg);
+    }
+    .g-check input:checked::after { border-color: #020403; }
+    .g-ok .g-check input:checked { background: var(--ok); border-color: var(--ok); }
+    .g-bad .g-check input:checked { background: var(--bad); border-color: var(--bad); }
+    .g-check-t {
+      font-family: var(--sans); font-weight: 300; font-size: 0.92rem; line-height: 1.6;
+      color: rgba(255,255,255,0.72); transition: opacity 0.15s ease;
+    }
+    .g-check-t b { font-weight: 500; color: #fff; }
+    .g-check input:checked ~ .g-check-t { opacity: 0.4; }
+
+    /* the last word, said quietly */
+    .g-note {
+      max-width: 760px; margin: 28px 0 0; padding-left: 16px;
+      border-left: 1px solid var(--g-14);
+      font-family: var(--sans); font-weight: 300; font-size: 0.88rem;
+      line-height: 1.75; color: rgba(255,255,255,0.44);
+    }
 
     /* ── Terminal "listening…" animated ellipsis ── */
     @keyframes dots {

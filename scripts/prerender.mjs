@@ -95,6 +95,61 @@ const H3 = 'font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.7
 
 const section = (title, inner) => `<h2 style="${H2}">${esc(title)}</h2>\n${inner}`;
 
+/* ── A written guide's own body ────────────────────────────────────
+   The mirror of ReaderBlocks in guides.jsx: same catalog data, same
+   class names, and those classes are defined once in index.html. So
+   this is not a second design of the guide — it is the same design,
+   rendered without React for whoever arrives without it. */
+const NUM = 'display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle';
+
+function renderBlocks(blocks) {
+  return blocks.map(([kind, v]) => {
+    switch (kind) {
+      case 'p':
+        return `<p class="g-p">${esc(v)}</p>`;
+
+      case 'callout':
+        return `<div class="g-callout">${v.map(t => `<p class="g-p">${esc(t)}</p>`).join('')}</div>`;
+
+      case 'steps':
+        return `<ol class="g-steps">${v.map(t => `<li><p class="g-p">${esc(t)}</p></li>`).join('')}</ol>`;
+
+      case 'card':
+        return `<div class="g-card">${v.kicker ? `<span class="g-kicker">${esc(v.kicker)}</span>` : ''}${renderBlocks(v.blocks)}</div>`;
+
+      case 'figure':
+        return `<figure class="g-fig"><img src="${esc(v.src)}" alt="${esc(v.alt)}" width="${v.w}" height="${v.h}" loading="lazy" decoding="async"><figcaption>${esc(v.caption)}</figcaption></figure>`;
+
+      case 'plates':
+        return `<div class="g-plates">${v.map(p =>
+          `<div class="g-plate g-${p.tone}"><span class="g-plate-label">${esc(p.label)}</span><p class="g-p">${esc(p.text)}</p></div>`).join('')}</div>`;
+
+      case 'table':
+        return `<div class="g-tablewrap panel"><table class="g-table"><thead><tr>${
+          v.head.map(h => `<th scope="col">${esc(h)}</th>`).join('')
+        }</tr></thead><tbody>${
+          v.rows.map(r => `<tr>${r.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')
+        }</tbody></table></div>`;
+
+      /* Plain checkboxes with no name and no script: they tick on the
+         prerendered page exactly as they do once React is up, and
+         neither version remembers a thing. */
+      case 'checklist':
+        return `<div class="g-lists">${v.map(col =>
+          `<div class="g-list g-${col.tone}"><h3 class="g-list-h">${esc(col.title)}</h3><ul>${
+            col.items.map(([label, text]) =>
+              `<li><label class="g-check"><input type="checkbox"><span class="g-check-t"><b>${esc(label)}</b> ${esc(text)}</span></label></li>`).join('')
+          }</ul></div>`).join('')}</div>`;
+
+      case 'note':
+        return `<p class="g-note">${esc(v)}</p>`;
+
+      default:
+        throw new Error(`unknown guide block "${kind}" — prerender and guides.jsx have drifted`);
+    }
+  }).join('\n');
+}
+
 function renderGuide(guide, guides, mod) {
   const parts = [];
 
@@ -102,9 +157,22 @@ function renderGuide(guide, guides, mod) {
   parts.push(`<h1 style="font-family:'Playfair Display',Georgia,serif;font-weight:500;font-size:2.6rem;line-height:1.1;letter-spacing:-0.015em;color:#fff;margin:0 0 18px">${esc(guide.title)}</h1>`);
   parts.push(`<p style="${P};font-size:1.05rem;color:rgba(255,255,255,0.78)">${esc(guide.summary)}</p>`);
 
-  parts.push(section('In this guide',
-    `<ol style="margin:0 0 8px 1.15rem;padding:0">${guide.covers
-      .map(c => `<li style="${P};margin-bottom:8px">${esc(c)}</li>`).join('')}</ol>`));
+  /* The chapter list is the guide's own sections when it has a body,
+     and the anchors are real: a search result deep-linking to one
+     lands on it before a line of JavaScript has run. */
+  parts.push(section('In this guide', guide.body
+    ? `<div class="g-toc panel" style="padding:16px 18px">${guide.body
+        .map((s, i) => `<a href="#${esc(s.id)}"><span class="g-toc-n">${String(i + 1).padStart(2, '0')}</span><span class="g-toc-t">${esc(s.title)}</span></a>`)
+        .join('')}</div>`
+    : `<ol style="margin:0 0 8px 1.15rem;padding:0">${guide.covers
+        .map(c => `<li style="${P};margin-bottom:8px">${esc(c)}</li>`).join('')}</ol>`));
+
+  /* A written guide carries its own text, section by section. */
+  if (guide.body) {
+    for (const [i, s] of guide.body.entries()) {
+      parts.push(`<h2 id="${esc(s.id)}" style="${H2}"><span style="${NUM}">${String(i + 1).padStart(2, '0')}</span>${esc(s.title)}</h2>\n${renderBlocks(s.blocks)}`);
+    }
+  }
 
   /* A prep guide carries its own opening paragraph; a module guide is
      its module's write-up, laid out as a lesson — same as the reader. */
@@ -144,8 +212,12 @@ ${parts.join('\n')}
 /* ── The head, per guide ───────────────────────────────────────── */
 function headFor(guide, mod, ogImage) {
   const url = `${ORIGIN}/guides/${guide.url}`;
-  const title = `${guide.title} — ATREOX guide`;
-  const desc = guide.summary;
+  /* The <h1> on the page is always guide.title. What a search result
+     shows can say more than that without changing the page, so a guide
+     whose text has outgrown its one-line summary carries its own pair
+     in the catalog and everything else falls back to the old shape. */
+  const title = guide.seoTitle ? `${guide.seoTitle} — ATREOX` : `${guide.title} — ATREOX guide`;
+  const desc = guide.seoDescription || guide.summary;
   return [
     '<!-- HEAD:META -->',
     `  <title>${esc(title)}</title>`,

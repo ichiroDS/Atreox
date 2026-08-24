@@ -5,14 +5,15 @@
    Two views, one page. The index is a wall of floating cards, one per
    guide, carrying a name and a handful of words — enough to choose
    from, never enough to read instead of opening. Clicking one opens
-   the reader: every guide in a rail down the left, the chosen one in
-   the middle, and the module it belongs to (with its price and the way
-   into the panel) held in a rail on the right.
+   the reader: every guide in a rail down the left, and the chosen one
+   filling everything to the right of it. Nothing else — a page you
+   came to read is not the place to sell you the next thing.
 
-   The reader builds its body from catalog.jsx — a module guide is the
-   module's own write-up, laid out as a lesson — so a guide is never
-   emptier than the Functions page it teaches. Screens and video drop
-   into the same sections later without the layout changing.
+   The reader builds its body from catalog.jsx. A guide with a `body`
+   there is a written guide and renders section by section; a module
+   guide without one is the module's own write-up, laid out as a lesson,
+   so a guide is never emptier than the Functions page it teaches.
+   Screens drop into the same sections without the layout changing.
 
    The page says nothing about which guides have been filmed. A video
    URL in the catalog adds a Watch button; no URL simply means no
@@ -38,7 +39,6 @@ const {
 const GREEN = window.ACCENT;
 const GREEN_RGB = window.ACCENT_RGB;
 const CONTACT = 'hello@atreoxai.com';
-const DASHBOARD_URL = 'https://app.atreoxai.com';
 
 /* Which guide the current URL is asking for. The path is the answer;
    the hash is only still read because a link from before guides had
@@ -101,7 +101,7 @@ function GuideTile({ guide, index, inView, onOpen }) {
 
         <span style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 'auto', paddingTop: 4 }}>
           <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.42)' }}>
-            {guide.covers.length} chapters
+            {(guide.body || guide.covers).length} chapters
           </span>
           {mod && (
             <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: mod.included ? 'rgba(255,255,255,0.42)' : `rgba(${GREEN_RGB},0.8)` }}>
@@ -180,9 +180,18 @@ function ReaderHeading({ children, n }) {
   );
 }
 
+/* Two widths, because a reading page needs two. READER_MAX is how wide
+   the guide itself gets now that nothing sits to its right — screens,
+   tables and the checklist all use it. COLUMN is how wide a paragraph
+   is allowed to get inside that, which is a smaller number for the
+   oldest reason in typesetting: past roughly 80 characters the eye
+   loses the start of the next line. */
+const READER_MAX = 900;
+const COLUMN = 660;   /* pairs with --gcol in index.html */
+
 const readerProse = {
-  fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem',
-  color: 'rgba(255,255,255,0.72)', lineHeight: 1.8,
+  fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1.05rem',
+  color: 'rgba(255,255,255,0.72)', lineHeight: 1.8, maxWidth: COLUMN,
 };
 
 /* A numbered step with the rail that makes a list read as a sequence. */
@@ -204,6 +213,119 @@ function ReaderStep({ n, title, body, last }) {
       </div>
     </div>
   );
+}
+
+/* ── The blocks a written guide is made of ─────────────────────────
+   A guide with a `body` in catalog.jsx carries its own text, section by
+   section, as data. This turns that data into the page; the same data
+   goes through scripts/prerender.mjs to become the static HTML a
+   crawler reads. Neither renderer owns any styling — the class names
+   below are defined once in index.html and emitted by both, so the two
+   cannot drift apart, and the words have exactly one home. */
+function ReaderBlocks({ blocks }) {
+  return blocks.map((block, i) => {
+    const [kind, v] = block;
+    switch (kind) {
+
+      case 'p':
+        return <p key={i} className="g-p">{v}</p>;
+
+      /* the paragraphs a guide would be pointless without */
+      case 'callout':
+        return (
+          <div key={i} className="g-callout">
+            {v.map((t, j) => <p key={j} className="g-p">{t}</p>)}
+          </div>
+        );
+
+      /* a protocol: the sentences are the steps, unchanged */
+      case 'steps':
+        return (
+          <ol key={i} className="g-steps">
+            {v.map((t, j) => <li key={j}><p className="g-p">{t}</p></li>)}
+          </ol>
+        );
+
+      /* the same job done a lighter way, set apart from the main path */
+      case 'card':
+        return (
+          <div key={i} className="g-card">
+            {v.kicker && <span className="g-kicker">{v.kicker}</span>}
+            <ReaderBlocks blocks={v.blocks} />
+          </div>
+        );
+
+      /* width and height are on the element itself: the browser can
+         then hold the space before the file arrives, so a screen
+         landing mid-scroll never shoves the paragraph you are reading */
+      case 'figure':
+        return (
+          <figure key={i} className="g-fig">
+            <img src={v.src} alt={v.alt} width={v.w} height={v.h}
+              loading="lazy" decoding="async" />
+            <figcaption>{v.caption}</figcaption>
+          </figure>
+        );
+
+      /* a verdict you read without reading: green passes, red doesn't */
+      case 'plates':
+        return (
+          <div key={i} className="g-plates">
+            {v.map(pl => (
+              <div key={pl.label} className={'g-plate g-' + pl.tone}>
+                <span className="g-plate-label">{pl.label}</span>
+                <p className="g-p">{pl.text}</p>
+              </div>
+            ))}
+          </div>
+        );
+
+      case 'table':
+        return (
+          <div key={i} className="g-tablewrap panel">
+            <table className="g-table">
+              <thead><tr>{v.head.map(h => <th key={h} scope="col">{h}</th>)}</tr></thead>
+              <tbody>
+                {v.rows.map((r, j) => (
+                  <tr key={j}>{r.map((c, k) => <td key={k}>{c}</td>)}</tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+
+      /* Tickable, and on purpose not saved anywhere: this is a pass over
+         one batch with the marketplace open in the next tab, not a
+         document to come back to. Uncontrolled inputs, so the boxes work
+         on the prerendered page too — before any of this has booted. */
+      case 'checklist':
+        return (
+          <div key={i} className="g-lists">
+            {v.map(col => (
+              <div key={col.title} className={'g-list g-' + col.tone}>
+                <h3 className="g-list-h">{col.title}</h3>
+                <ul>
+                  {col.items.map(([label, text], j) => (
+                    <li key={j}>
+                      <label className="g-check">
+                        <input type="checkbox" />
+                        <span className="g-check-t"><b>{label}</b> {text}</span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        );
+
+      case 'note':
+        return <p key={i} className="g-note">{v}</p>;
+
+      default:
+        return null;
+    }
+  });
 }
 
 /* The rail on the left: every guide, always, so moving between them
@@ -261,82 +383,7 @@ function ReaderNav({ slug, onOpen, compact }) {
   );
 }
 
-/* The rail on the right: what this guide is teaching you to run, what
-   it costs, and the button that starts it. */
-function ReaderRail({ guide, mod, setPage, compact }) {
-  const Icon = mod ? mod.icon : Shield;
-  return (
-    <aside className="panel ticks" style={{ padding: '24px 22px', position: compact ? 'static' : 'sticky', top: 92 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-        <span aria-hidden="true" style={{
-          width: 40, height: 40, borderRadius: 5, flexShrink: 0,
-          background: `rgba(${GREEN_RGB},0.09)`, border: `1px solid rgba(${GREEN_RGB},0.26)`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <Icon size={18} color={GREEN} />
-        </span>
-        <span style={{ minWidth: 0 }}>
-          <span style={{ display: 'block', fontFamily: MONO, fontWeight: 500, fontSize: '0.6rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: `rgba(${GREEN_RGB},0.7)`, marginBottom: 4 }}>
-            {mod ? 'Module' : 'Preparation'}
-          </span>
-          <span style={{ display: 'block', fontFamily: 'Barlow, sans-serif', fontWeight: 600, fontSize: '0.98rem', color: 'white', lineHeight: 1.25 }}>
-            {mod ? mod.name : 'Before you start'}
-          </span>
-        </span>
-      </div>
-
-      {mod && (
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, paddingBottom: 18, marginBottom: 18, borderBottom: `1px solid rgba(${GREEN_RGB},0.14)` }}>
-          <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '2rem', color: mod.included ? 'white' : GREEN, lineHeight: 1, textShadow: mod.included ? 'none' : `0 0 26px rgba(${GREEN_RGB},0.3)` }}>
-            {mod.included ? 'Free' : eur(mod.price)}
-          </span>
-          <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.66rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)' }}>
-            {mod.included ? 'with any module' : '/ month'}
-          </span>
-        </div>
-      )}
-
-      <span style={{ display: 'block', fontFamily: MONO, fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', marginBottom: 14 }}>
-        {'// '}Start in three steps
-      </span>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 22 }}>
-        {[
-          'Load your accounts and proxies',
-          mod ? `Switch on ${mod.name}` : 'Import them through Account Manager',
-          'Watch the log and adjust',
-        ].map((t, i) => (
-          <div key={i} style={{ display: 'flex', gap: 11, alignItems: 'flex-start' }}>
-            <span aria-hidden="true" style={{
-              width: 20, height: 20, borderRadius: '50%', flexShrink: 0, marginTop: 1,
-              border: `1px solid rgba(${GREEN_RGB},0.32)`, background: `rgba(${GREEN_RGB},0.08)`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: MONO, fontWeight: 600, fontSize: '0.55rem', color: GREEN, lineHeight: 1,
-            }}>{i + 1}</span>
-            <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.66)', lineHeight: 1.5 }}>{t}</span>
-          </div>
-        ))}
-      </div>
-
-      <a href={window.withReferral(DASHBOARD_URL)} target="_self" className="btn-solid"
-        style={{ width: '100%', justifyContent: 'center', padding: '14px 20px', fontSize: '0.76rem', marginBottom: 10 }}>
-        Start working <ArrowUpRight size={14} />
-      </a>
-      {mod ? (
-        <button type="button" className="btn-outline" onClick={() => setPage('functions', 'fn-' + mod.key)}
-          style={{ width: '100%', justifyContent: 'center', padding: '13px 20px', fontSize: '0.74rem' }}>
-          What it does <ArrowUpRight size={13} />
-        </button>
-      ) : (
-        <a href={`mailto:${CONTACT}?subject=Setup%20help`} className="btn-outline"
-          style={{ width: '100%', justifyContent: 'center', padding: '13px 20px', fontSize: '0.74rem' }}>
-          Ask us directly <ArrowUpRight size={13} />
-        </a>
-      )}
-    </aside>
-  );
-}
-
-function GuideReader({ slug, onOpen, onClose, setPage }) {
+function GuideReader({ slug, onOpen, onClose }) {
   const guide = GUIDES.find(g => g.slug === slug) || GUIDES[0];
   const mod = guide.module ? MODULE_BY_KEY[guide.module] : null;
   const [compact, setCompact] = useState(window.innerWidth < 1040);
@@ -367,7 +414,11 @@ function GuideReader({ slug, onOpen, onClose, setPage }) {
           {/* the guide */}
           {/* the id is what a link from Functions lands on; the margin
               leaves the way back out of the guide above the fold */}
-          <article id={'guide-' + guide.slug} style={{ flex: '1 1 420px', minWidth: 0, scrollMarginTop: 150 }}>
+          {/* With no rail on the right, the freed width goes to the
+              guide — but to the guide's furniture (screens, tables, the
+              checklist), not to its sentences: prose inside stays capped
+              at COLUMN so a line never runs longer than the eye tracks. */}
+          <article id={'guide-' + guide.slug} style={{ flex: '1 1 420px', minWidth: 0, maxWidth: READER_MAX, scrollMarginTop: 150 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18, flexWrap: 'wrap' }}>
               <Pill dot>{mod ? mod.tagline : 'Preparation'}</Pill>
               {guide.video && (
@@ -386,16 +437,37 @@ function GuideReader({ slug, onOpen, onClose, setPage }) {
 
             {/* chapters — the map of the page, and the slots screens land in */}
             <ReaderHeading>In this guide</ReaderHeading>
-            <div className="panel" style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {guide.covers.map((c, i) => (
-                <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                  <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', color: `rgba(${GREEN_RGB},0.6)`, marginTop: 4, flexShrink: 0 }}>
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>{c}</span>
-                </div>
-              ))}
-            </div>
+            {guide.body ? (
+              /* A written guide's chapters are its own sections, so the
+                 list is also the way into them — real hrefs, so a copied
+                 link lands on the section and not just on the page. */
+              <div className="panel g-toc" style={{ padding: '16px 18px' }}>
+                {guide.body.map((s, i) => (
+                  <a key={s.id} href={'#' + s.id}>
+                    <span className="g-toc-n">{String(i + 1).padStart(2, '0')}</span>
+                    <span>{s.title}</span>
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <div className="panel" style={{ maxWidth: COLUMN + 40, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {guide.covers.map((c, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                    <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', color: `rgba(${GREEN_RGB},0.6)`, marginTop: 4, flexShrink: 0 }}>
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>{c}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {guide.body && guide.body.map((s, i) => (
+              <section key={s.id} id={s.id} style={{ scrollMarginTop: 108 }}>
+                <ReaderHeading n={String(i + 1).padStart(2, '0')}>{s.title}</ReaderHeading>
+                <ReaderBlocks blocks={s.blocks} />
+              </section>
+            ))}
 
             {guide.intro && (
               <>
@@ -432,7 +504,7 @@ function GuideReader({ slug, onOpen, onClose, setPage }) {
                 {mod.guard && (
                   <>
                     <ReaderHeading>Read this before you turn it up</ReaderHeading>
-                    <div className="panel" style={{ padding: '20px 22px', display: 'flex', gap: 14, alignItems: 'flex-start', borderColor: `rgba(${GREEN_RGB},0.3)` }}>
+                    <div className="panel" style={{ maxWidth: COLUMN + 75, padding: '20px 22px', display: 'flex', gap: 14, alignItems: 'flex-start', borderColor: `rgba(${GREEN_RGB},0.3)` }}>
                       <Shield size={17} color={GREEN} style={{ marginTop: 3, flexShrink: 0 }} />
                       <p style={{ ...readerProse, fontSize: '0.94rem', lineHeight: 1.75, margin: 0 }}>{mod.guard}</p>
                     </div>
@@ -450,11 +522,6 @@ function GuideReader({ slug, onOpen, onClose, setPage }) {
               </a>
             </div>
           </article>
-
-          {/* right rail */}
-          <div style={{ flex: compact ? '1 1 100%' : '0 0 270px', minWidth: 0, width: compact ? '100%' : undefined }}>
-            <ReaderRail guide={guide} mod={mod} setPage={setPage} compact={compact} />
-          </div>
         </div>
       </div>
     </div>
