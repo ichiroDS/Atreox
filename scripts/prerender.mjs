@@ -125,7 +125,7 @@ function controlReplica(c) {
     case 'slider':
       return `<span aria-hidden="true" class="g-r-slider"><span class="g-r-slider-fill" style="width:${c.pct ?? 50}%"></span><span class="g-r-slider-thumb" style="left:${c.pct ?? 50}%"></span></span>`;
     case 'select':
-      return `<span aria-hidden="true" class="g-r-select">${esc(c.value)}<span class="g-r-caret">›</span></span>`;
+      return `<span aria-hidden="true" class="g-r-select"><span class="g-r-select-v">${esc(c.value)}</span><span class="g-r-caret"></span></span>`;
     case 'field':
       return `<span aria-hidden="true" class="g-r-field">${esc(c.value)}</span>`;
     case 'tile':
@@ -181,8 +181,8 @@ function renderBlocks(blocks) {
          the fold is presentation, the text is the page. */
       case 'controls':
         return `<div class="g-ctl">
-<p class="g-ctl-warn">Illustration, not the panel. Nothing here is connected — no state, no saving, no requests. Click a control to read what it does.</p>
-${v.map(c => `<details class="g-ctl-item"${c.id ? ` id="${esc(c.id)}"` : ''}><summary><span class="g-ctl-label"><span class="g-ctl-name">${esc(c.name)}</span>${c.where ? `<span class="g-ctl-where">${esc(c.where)}</span>` : ''}</span>${controlReplica(c)}</summary><dl class="g-ctl-rows">${
+<p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
+${v.map(c => `<details class="g-ctl-item"${c.id ? ` id="${esc(c.id)}"` : ''}><summary><span class="g-ctl-stage">${controlReplica(c)}</span><span class="g-ctl-label"><span class="g-ctl-name">${esc(c.name)}</span>${c.where ? `<span class="g-ctl-where">${esc(c.where)}</span>` : ''}</span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows">${
           c.rows.map(([k, val]) => `<div><dt>${esc(k)}</dt><dd>${esc(val)}</dd></div>`).join('')
         }</dl></details>`).join('\n')}
 </div>`;
