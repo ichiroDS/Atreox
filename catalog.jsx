@@ -2024,14 +2024,411 @@ const GUIDES = [
     group: 'module',
     short: 'DMs at a human pace',
     title: 'NeuroDialogs',
-    summary: 'Setting up DM answering that converts without reading as an instant-reply bot.',
-    covers: [
-      'Prompt presets and attaching a knowledge file',
-      'Session rhythm, hot vs idle gaps, and the two reply-delay ranges',
-      'The link gate, per-thread caps, block-rate pause, and the daily spend limit',
-    ],
+    summary: 'The module that answers private messages — how a session is shaped, what bounds it, and every setting on the page.',
+    seoTitle: 'NeuroDialogs: every setting on the ATREOX DM answering page',
+    seoDescription:
+      'Session rhythm, reply delays, the four limits, the link gate and the block-rate pause. Defaults and edge behaviour taken from the engine, control names from the panel.',
     module: 'neurodialogs',
     video: null,
+    body: [
+      {
+        id: 'what-it-is',
+        title: 'What this page is',
+        blocks: [
+          ['p', "NeuroDialogs answers the people who write to your accounts — someone who saw a comment, opened the profile and sent a message. It is the only module in the system where a real person is on the other end and can decide to press report."],
+          ['p', "Everything about the page follows from that. The accounts are not online waiting; they come online for a while, read what arrived, answer some of it at human speed, and go offline again."],
+          ['callout', [
+            "The obvious design — keep every account connected and reply the moment a message lands — was rejected on purpose. An account that is online around the clock and answers within two seconds at four in the morning is not a person, and the pattern is visible from outside. Almost every default on this page exists to break that pattern, which is why a correctly running pool looks idle most of the time.",
+          ]],
+        ],
+      },
+      {
+        id: 'map',
+        title: 'Map of the page',
+        blocks: [
+          ['p', "Five regions, with a jump-nav across the top in this order."],
+          ['map', [
+            { name: 'Control', holds: 'Start and Stop, five counters, one row per account with what it is doing right now, and the live log underneath.' },
+            { name: 'Dialogs Pool', holds: 'Two columns of accounts — available and in the pool — the same shape as the commenting pool, and the same one-module-at-a-time rule.' },
+            { name: 'Prompts', holds: 'Prompt presets, which one is active, the reply-length slider and the knowledge file attached to each.' },
+            { name: 'Sessions', holds: 'Everything about rhythm and restraint: Rhythm, Replying, Limits, Group Promotion, and a folded Safety group.' },
+            { name: 'Conversations', holds: 'Every thread, searchable, with the full exchange and a box to write in it yourself.' },
+          ]],
+        ],
+      },
+      {
+        id: 'control',
+        title: 'Control',
+        blocks: [
+          ['p', "Start does not start a conversation with anyone. It puts the pool into service; each account then schedules its own first session and comes online when its turn arrives."],
+          ['controls', [
+            {
+              id: 'ctl-nd-start', name: 'Start', where: 'Control', kind: 'button', value: 'Start',
+              rows: [
+                ['What it does', 'Marks the module enabled and hands the pool to the runner. Accounts come online on their own schedule from that point, never all at once.'],
+                ['What refuses it', 'An empty dialogs pool, and an active prompt that cannot be assembled — one pointing at a knowledge file that has since been deleted, for instance. Both refuse with a message naming what to fix, rather than reporting a running module that does nothing.'],
+                ['How many at once', 'Three accounts online at a time, by default. A larger pool does not mean more simultaneous sessions; it means the turns spread further apart.'],
+                ['Never at night', 'Sessions only happen inside an account’s own waking hours. An account whose local time is the small hours does not come online, whatever the gaps say.'],
+                ['What a fresh start looks like', 'Nothing. Zero online, zero replies, for hours. The panel says so in its own words under the counters, because a correct run and a broken one look identical otherwise.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-stop', name: 'Stop', where: 'Control', kind: 'button', tone: 'bad', value: 'Stop',
+              rows: [
+                ['What it does', 'Sessions in flight finish and their accounts go offline. Nothing new is scheduled.'],
+                ['Never gated', 'Stop always works, whatever the subscription says.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-state', name: 'An account row', where: 'Control', kind: 'badge', tone: 'plain', value: 'waiting',
+              rows: [
+                ['The four states', 'Online — in a session right now. Waiting — awake, with the next session due at the time shown beside it. Asleep — outside its own waking hours. Paused — pulled out by the safety layer, with the reason next to it.'],
+                ['The three counters', 'Replies sent today, new people this account started talking to today, and how many of those people blocked or refused it today. A waiting badge appears when someone is unanswered.'],
+                ['Paused is the only one to act on', 'The other three are ordinary. A paused account has a Resume button on its own row and does not come back without it.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-readonly', name: 'reading only — automatic replies are off', where: 'Control, beside the state', kind: 'badge', tone: 'warn', value: 'reading only',
+              rows: [
+                ['What it means', 'The module is started and the accounts are working, but Automatic replies in Safety is off, so nothing is written.'],
+                ['Why that is useful', 'It keeps the accounts warm and the inbox current while a prompt is being reworked. It is a real operating mode, not a broken one.'],
+              ],
+            },
+          ]],
+          ['p', "Five counters sit above the account rows: accounts in the pool, online now, conversations, unread, replies today. Daily AI spend is deliberately not among them — it is a number nobody watches, and the limit that protects it works without anyone looking."],
+        ],
+      },
+      {
+        id: 'prompts',
+        title: 'Prompts',
+        blocks: [
+          ['p', "A prompt preset is a name, a template you write, a maximum reply length, and optionally a knowledge file. The active one is what every account in the pool speaks with."],
+          ['controls', [
+            {
+              id: 'ctl-nd-template', name: 'Prompt template', where: 'Prompts → editor', kind: 'field', value: 'You are {account_first_name}, a real person…',
+              rows: [
+                ['What it does', 'The instruction the model answers under. Written as plain text, with tokens substituted before each call.'],
+                ['The tokens', 'Eight, offered as buttons under the box: {message}, {sender_name}, {message_language}, {context}, {account_id}, {account_username}, {account_phone}, {account_first_name}.'],
+                ['Substitution', 'Plain text replacement, like the commenting persona. Braces that are not a known token are left alone.'],
+                ['What is appended for you', 'The length instruction is added to the end of every prompt automatically, so there is no need to repeat it in the text.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-maxlen', name: 'Max reply length', where: 'Prompts → editor', kind: 'slider', pct: 27,
+              rows: [
+                ['What it does', 'Caps the reply, in characters, as an instruction appended to the prompt.'],
+                ['Default', '300 characters.'],
+                ['Range', '40 to 1000. The lower bound is real, not a formality — a 40-character cap forces the kind of terse message a person actually sends, and anything below it produces fragments.'],
+                ['Why shorter is usually right', 'A long, well-structured paragraph arriving in a DM from a stranger reads as generated. Short reads as typed.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-knowledge', name: 'Knowledge file', where: 'Prompts → editor', kind: 'select', value: 'None',
+              rows: [
+                ['What it does', 'Attaches a document whose contents go into the prompt, so the model states your prices, dates and links instead of inventing them.'],
+                ['Accepted', 'Plain text and Markdown — .txt, .md, .markdown — up to 512 KB. Anything else is refused rather than accepted and fed to the model as noise.'],
+                ['How much is used', 'The first 12,000 characters. A longer file is cut at a line break near that point and marked truncated in the picker, so it is visible which files are only partly in play.'],
+                ['Not a search index', 'The whole file goes into every generation. That is deliberate at this size, and it is also why the cut exists — the text is re-sent on every single reply.'],
+              ],
+            },
+          ]],
+          ['note', "Deleting a knowledge file that a preset still points at does not fail quietly. The preset stops assembling, and the module refuses to start until it is fixed — which is better than accounts confidently answering questions with nothing behind the answer.",
+          ],
+        ],
+      },
+      {
+        id: 'rhythm',
+        title: 'Rhythm',
+        blocks: [
+          ['p', "When an account comes online is demand-driven, not a timer. An inbox with people waiting pulls the next session in; an empty one lets it drift out. That is why there are two gap ranges rather than one interval."],
+          ['controls', [
+            {
+              id: 'ctl-nd-idle-gap', name: 'Gap between sessions — inbox empty', where: 'Sessions → Rhythm', kind: 'field', value: '120 — 300',
+              rows: [
+                ['What it does', 'How long an account stays offline when nobody is waiting for an answer.'],
+                ['Default', '120 to 300 minutes — two to five hours.'],
+                ['Picked how', 'A fresh random value inside the range after every session, not a fixed cadence. A constant interval is a metronome in the traffic pattern.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-hot-gap', name: 'Gap between sessions — people waiting', where: 'Sessions → Rhythm', kind: 'field', value: '20 — 60',
+              rows: [
+                ['What it does', 'The same thing, for an inbox with unanswered people in it. Shorter, because a lead that waits five hours is usually gone.'],
+                ['Default', '20 to 60 minutes.'],
+                ['The trade', 'Shorter converts better and looks less human. This pair is the main dial between the two.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-session-len', name: 'Session length', where: 'Sessions → Rhythm', kind: 'field', value: '20 — 40',
+              rows: [
+                ['What it does', 'How long an account stays online per visit.'],
+                ['Default', '20 to 40 minutes.'],
+                ['Still runs when capped', 'An account that has hit its daily reply limit comes online anyway: it reads, marks things read and writes nothing. That is a real state, not a wasted session.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-extension', name: 'Max extension', where: 'Sessions → Rhythm', kind: 'field', value: '20',
+              rows: [
+                ['What it does', 'Extra minutes a session may run past its planned end while the other person is still actively replying.'],
+                ['Default', '20 minutes.'],
+                ['Why it exists', 'A person pulled into a live conversation does not stop mid-sentence because a timer expired.'],
+                ['Zero', 'Turns the extension off — sessions then end exactly on their planned length.'],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'replying',
+        title: 'Replying',
+        blocks: [
+          ['p', "Two different delay distributions, because a cold first reply and a follow-up inside a running conversation are not the same act. One range for both produced either implausibly fast strangers or uselessly slow conversations."],
+          ['controls', [
+            {
+              id: 'ctl-nd-first-delay', name: 'First reply to a stranger', where: 'Sessions → Replying', kind: 'field', value: '300 — 2700',
+              rows: [
+                ['What it does', 'How long before the first answer to someone new.'],
+                ['Default', '300 to 2700 seconds — five to forty-five minutes.'],
+                ['Why so wide', 'An instant answer to a cold DM is the clearest bot tell there is. The width matters as much as the length: a consistent delay is its own signature.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-reply-delay', name: 'Reply inside a live conversation', where: 'Sessions → Replying', kind: 'field', value: '40 — 180',
+              rows: [
+                ['What it does', 'The delay between messages once a conversation is already running.'],
+                ['Default', '40 to 180 seconds.'],
+                ['Fast on purpose', 'That is what a person engaged in a chat actually does.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-context', name: 'Context messages', where: 'Sessions → Replying', kind: 'field', value: '10',
+              rows: [
+                ['What it does', 'How many previous messages of the conversation are sent to the model with each reply.'],
+                ['Default', '10. The field accepts 0 to 50.'],
+                ['At zero', 'Every reply is written with no memory of the conversation.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-skip', name: 'Skip chance', where: 'Sessions → Replying', kind: 'slider', pct: 17,
+              rows: [
+                ['What it does', 'The chance of deliberately leaving an answerable conversation for the next session instead of answering it now.'],
+                ['Default', '15%. The slider runs from 0 to 90%.'],
+                ['Why', 'Nobody clears their whole inbox every time they open it.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-language', name: 'Reply language', where: 'Sessions → Replying', kind: 'select', value: 'Match the sender',
+              rows: [
+                ['What it does', 'Either answers in whatever language the message arrived in, or pins one language for every reply.'],
+                ['Default', 'Match the sender.'],
+                ['Fixed', 'Reveals a second picker for the language itself.'],
+              ],
+            },
+          ]],
+          ['p', "Two more things happen without a setting: consecutive incoming messages are folded into one reply rather than answered one by one, and the typing indicator runs for roughly as long as a person would take, if typing simulation is on."],
+        ],
+      },
+      {
+        id: 'limits',
+        title: 'The four limits',
+        blocks: [
+          ['p', "Four independent numbers, because no single one expresses the risk. Zero means no limit on any of them."],
+          ['controls', [
+            {
+              id: 'ctl-nd-per-thread', name: 'Replies per person', where: 'Sessions → Limits', kind: 'field', value: '5',
+              rows: [
+                ['What it does', 'The total number of replies one conversation may ever receive.'],
+                ['Default', '5. It is a lifetime count per conversation, not per session or per day.'],
+                ['What it prevents', 'One person being pestered. A conversation that reaches it is closed with the reason shown in the inbox.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-per-session', name: 'Replies per session', where: 'Sessions → Limits', kind: 'field', value: '8',
+              rows: [
+                ['What it does', 'The most one account may write in one visit.'],
+                ['Default', '8.'],
+                ['What it prevents', 'One sitting turning into a blast.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-per-day', name: 'Replies per day', where: 'Sessions → Limits', kind: 'field', value: '25',
+              rows: [
+                ['What it does', 'One account’s total daily exposure.'],
+                ['Default', '25.'],
+                ['On reaching it', 'The account still comes online and reads for the rest of the day. It simply writes nothing.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-new-threads', name: 'New people per day', where: 'Sessions → Limits', kind: 'field', tone: 'warn', value: '5',
+              rows: [
+                ['What it does', 'How many strangers this account starts talking to in a day.'],
+                ['Default', '5.'],
+                ['The important one', 'Unique non-contacts messaged is the closest available proxy for what actually trips Telegram’s own flood protection. Of the four, this is the one to keep low on fresh accounts.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-dialogs-read', name: 'Chats read per session', where: 'Sessions → Limits', kind: 'field', value: '15',
+              rows: [
+                ['What it does', 'How many conversations an account opens and reads in one visit.'],
+                ['Default', '15. The minimum is 1 — unlike the four above, this one has no unlimited setting.'],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'safety',
+        title: 'Safety',
+        blocks: [
+          ['p', "The group is folded by default, with its current values written along the header so nothing is hidden by being shut. Everything in it is enforced in code — a prompt instruction is not an enforcement mechanism, and models break instructions regularly."],
+          ['controls', [
+            {
+              id: 'ctl-nd-link-gate', name: 'No links before N exchanges', where: 'Sessions → Safety', kind: 'field', value: '3',
+              rows: [
+                ['What it does', 'Withholds any link the model writes until the conversation has been through this many back-and-forth rounds.'],
+                ['Default', '3.'],
+                ['What counts as a link', 'More than http addresses: t.me and tg:// forms, bare domains, and an @mention too — an @channel funnels exactly like a link and carries the same risk sent unprompted.'],
+                ['The exception', 'If the person explicitly asked for it, one round is enough.'],
+                ['Why in code', 'A link in the first message to a stranger is the fastest route to a spam report. The prompts all say not to; the gate is what makes it true.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-block-rate', name: 'Auto-pause at block rate', where: 'Sessions → Safety', kind: 'slider', pct: 25,
+              rows: [
+                ['What it does', 'Pauses an account once this share of its recent sends comes back as a block or a privacy refusal.'],
+                ['Default', '25%.'],
+                ['Why it is the number to watch', 'Recipients blocking an account is the earliest externally visible sign it is heading for a ban — days before the ban itself.'],
+                ['After it fires', 'The account appears paused in Control with the reason beside it and stays out until you resume it by hand.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-cost', name: 'Daily AI spend limit', where: 'Sessions → Safety', kind: 'field', value: '5',
+              rows: [
+                ['What it does', 'Caps what the whole pool may spend on generation in a day, in dollars.'],
+                ['Default', '5.'],
+                ['On reaching it', 'Replying stops for the rest of the day. This is why the number is not a counter on the Control panel — it works without being watched.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-auto-reply', name: 'Automatic replies', where: 'Sessions → Safety', kind: 'toggle', on: true,
+              rows: [
+                ['What it does', 'Off keeps accounts coming online and reading without writing anything.'],
+                ['Default', 'On.'],
+                ['Where it shows', 'The Control panel wears a reading only badge for as long as it is off, so the state is never silent.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-stop-after-link', name: 'Stop after sending a link', where: 'Sessions → Safety', kind: 'toggle', on: true,
+              rows: [
+                ['What it does', 'Ends automatic replying in a conversation once a link has gone out.'],
+                ['Default', 'On.'],
+                ['Why', 'The link was the point of the conversation. Continuing past it is where an answer turns into pestering.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-backlog', name: 'Answer the backlog', where: 'Sessions → Safety', kind: 'toggle', on: false,
+              rows: [
+                ['What it does', 'Answers unread messages that arrived before the module was started, rather than only marking them read.'],
+                ['Default', 'Off.'],
+                ['Why off', 'A pool started on dozens of stale conversations produces exactly the burst of outbound messages that gets accounts banned — the one thing the rest of this page exists to prevent.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-idle-actions', name: 'Fill empty sessions with warmup actions', where: 'Sessions → Safety', kind: 'toggle', on: true,
+              rows: [
+                ['What it does', 'With nothing to answer, the account scrolls, reads and uses its saved messages instead of sitting online doing nothing.'],
+                ['Default', 'On.'],
+                ['Which actions', 'Active Warmup’s own action library. This does not enrol the account in that module — it borrows the behaviour for the length of the session.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-blacklist', name: 'Never reply to these people', where: 'Sessions → Safety', kind: 'field', value: '@someone',
+              rows: [
+                ['What it does', 'A list of people no account will ever answer.'],
+                ['Format', 'An @username or a numeric id, one per line or comma-separated.'],
+              ],
+            },
+          ]],
+          ['callout', [
+            "Two more guards run without a setting of their own. Outgoing text is compared against what the pool has recently sent, and a reply too close to one already used is withheld and rewritten next session — one preset across a hundred accounts otherwise converges on identical phrasing, which is the textbook signature of a spam network. And a short, deliberately narrow set of incoming conversations is never answered automatically at all: payment demands, accusations and threats, apparent minors, anything crisis-shaped. Those are handed to you in the inbox instead.",
+          ]],
+        ],
+      },
+      {
+        id: 'promotion',
+        title: 'Group promotion',
+        blocks: [
+          ['p', "Separate from the link gate, and often confused with it. The gate decides whether any link may go out yet; this decides how often, once past the gate, a reply also mentions one of your groups."],
+          ['controls', [
+            {
+              id: 'ctl-nd-groups', name: 'Promoted groups', where: 'Sessions → Group Promotion', kind: 'field', value: '@mygroup',
+              rows: [
+                ['What it does', 'The groups a reply may promote. One per line, as @group or a t.me link.'],
+                ['Empty', 'The feature is simply off — no group instruction is added to the prompt at all.'],
+                ['Where else this is written', 'Group Parser’s promote action writes into this same list, so a group promoted from there appears here.'],
+              ],
+            },
+            {
+              id: 'ctl-nd-every-n', name: 'Promote every N replies', where: 'Sessions → Group Promotion', kind: 'field', value: '5',
+              rows: [
+                ['What it does', 'At most one group mention per this many outgoing messages, counted per conversation.'],
+                ['Default', '5.'],
+                ['Zero', 'Never promote, whatever is in the list above.'],
+                ['Enforced where', 'In code, when the prompt is composed — the model is not asked to limit itself.'],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'inbox',
+        title: 'Conversations',
+        blocks: [
+          ['p', "Every thread the pool has, searchable, with the exchange on the right. A conversation that has stopped says why."],
+          ['table', {
+            head: ['Reason it stopped', 'What it means'],
+            rows: [
+              ['link sent', 'A link went out and Stop after sending a link is on.'],
+              ['reply limit reached', 'The conversation hit Replies per person.'],
+              ['blacklisted', 'This person is on the never-reply list.'],
+              ['they blocked us', 'The recipient blocked the account.'],
+              ['needs a human', 'The incoming screen caught something that must not get an automated answer.'],
+              ['stopped manually', 'You wrote in it yourself.'],
+              ['Telegram service account — never answered', 'Telegram’s own service messages. Never answered, by design.'],
+            ],
+          }],
+          ['controls', [
+            {
+              id: 'ctl-nd-composer', name: 'The reply box', where: 'Conversations', kind: 'field', value: 'Reply as acc_101…',
+              rows: [
+                ['What it does', 'Sends a message as that account, from you.'],
+                ['What it costs', 'The conversation. Writing in it takes it over — the engine stops answering that thread automatically until you hand it back.'],
+                ['Why', 'Two authors writing into one chat minutes apart, possibly contradicting each other, is worse than silence.'],
+                ['Handing it back', 'A resume action on the thread returns it to automatic answering.'],
+              ],
+            },
+          ]],
+          ['p', "The warning strip at the top of Control counts two things worth acting on: accounts auto-paused for safety, and conversations waiting on a human. Both are the kind of thing that will not resolve itself."],
+        ],
+      },
+      {
+        id: 'first-run',
+        title: 'First run',
+        blocks: [
+          ['p', "The defaults on this page are already the cautious configuration. On a fresh pool, most of it is worth leaving alone."],
+          ['steps', [
+            "Put accounts in the dialogs pool. The one-module rule applies here as everywhere: an account that is commenting has to leave that pool first.",
+            "Pick or write a prompt. Duplicate the closest built-in rather than starting from an empty box, and attach a knowledge file if there are prices, dates or links the answers must get right.",
+            "Leave Rhythm, Replying and Limits at their defaults. They are the conservative setting already, and New people per day is the one to lower rather than raise on fresh accounts.",
+            "Open Safety once and read it. Everything in it is on by default except Answer the backlog, which should stay off on a pool that has any history at all.",
+            "Press Start, then leave it. The first sessions are hours away, and nothing being online is the expected state.",
+          ]],
+          ['p', "After that, the two things worth checking are the paused count and the blocked counter on each account row. A rising block count on one account is that account being disliked; a rising count across the pool is the prompt."],
+          ['note', "Saving settings never needs a restart — they apply from the next session. The prompt is the exception in the other direction: the module refuses to start at all on a prompt that cannot be assembled, so a broken preset is caught at the button rather than discovered in someone’s DMs.",
+          ],
+        ],
+      },
+    ],
   },
   {
     slug: 'mass-reactions',
