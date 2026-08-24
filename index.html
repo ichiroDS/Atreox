@@ -585,25 +585,35 @@
     .g-p:last-child { margin-bottom: 0; }
     .g-p b, .g-p strong { font-weight: 500; color: rgba(255,255,255,0.92); }
 
-    /* the chapter list, which is also the way into the chapters */
+    /* the chapter list, which is also the way into the chapters.
+       .g-toc-side is the sticky sidebar cut: one column, narrower, worn
+       by the same links — a bare `a` has no color of its own in this
+       stylesheet, so before .g-toc-t existed on every renderer the
+       titles fell back to the browser's own link blue on a near-black
+       panel, which is the "unreadable" bug this replaced. */
     .g-toc { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr)); gap: 1px; }
+    .g-toc-side { display: flex; flex-direction: column; gap: 1px; }
     .g-toc a {
       display: flex; gap: 11px; align-items: baseline;
       padding: 9px 11px; border-radius: 4px; text-decoration: none;
-      transition: background 0.16s ease;
+      border: 1px solid transparent;
+      transition: background 0.16s ease, border-color 0.16s ease;
     }
     .g-toc a:hover { background: rgba(0,217,255,0.07); }
     .g-toc a:focus-visible { outline: 1px solid var(--g); outline-offset: 1px; }
+    .g-toc a[aria-current] { background: rgba(0,217,255,0.1); border-color: var(--g-40); }
     .g-toc-t {
       font-family: var(--sans); font-weight: 300; font-size: 0.95rem;
-      line-height: 1.5; color: rgba(255,255,255,0.7);
+      line-height: 1.5; color: rgba(255,255,255,0.82);
       transition: color 0.16s ease;
     }
-    .g-toc a:hover .g-toc-t { color: #fff; }
+    .g-toc a:hover .g-toc-t,
+    .g-toc a[aria-current] .g-toc-t { color: var(--g-bright); }
     .g-toc-n {
       font-family: var(--mono); font-weight: 500; font-size: 0.62rem;
       color: rgba(0,217,255,0.6); flex-shrink: 0;
     }
+    .g-toc a[aria-current] .g-toc-n { color: var(--g-bright); }
 
     /* the paragraph the whole guide turns on */
     .g-callout {
@@ -633,6 +643,19 @@
     .g-steps li:last-child::after { display: none; }
     .g-steps .g-p { margin: 0; padding-top: 4px; }
 
+    /* a plain list — things that are all true at once, not a sequence */
+    .g-bullets { list-style: none; margin: 0 0 16px; padding: 0; max-width: var(--gcol); }
+    .g-bullets li {
+      position: relative; padding: 0 0 10px 20px;
+      font-family: var(--sans); font-weight: 300; font-size: 1.05rem;
+      line-height: 1.7; color: rgba(255,255,255,0.72);
+    }
+    .g-bullets li::before {
+      content: ''; position: absolute; left: 2px; top: 0.7em;
+      width: 5px; height: 5px; border-radius: 50%; background: var(--g);
+    }
+    .g-bullets li:last-child { padding-bottom: 0; }
+
     /* a card holding an alternative to whatever precedes it */
     .g-card {
       margin: 0 0 20px; padding: 20px 22px;
@@ -645,8 +668,77 @@
       letter-spacing: 0.18em; text-transform: uppercase; color: var(--g); margin: 0 0 13px;
     }
 
-    /* screens. width/height sit on the img so the column never jumps */
+    /* several cards side by side — the grid supplies the spacing the
+       lone .g-card margin would otherwise double up on */
+    .g-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 16px; margin: 0 0 20px; }
+    .g-cards .g-card { margin: 0; }
+
+    /* a short row of equal, neutral choices */
+    .g-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 14px; margin: 0 0 20px; }
+    .g-option { padding: 18px 20px; border: 1px solid var(--g-14); border-radius: 6px; background: rgba(0,217,255,0.02); }
+    .g-option-badge {
+      display: inline-block; margin-bottom: 10px; padding: 3px 9px; border-radius: 3px;
+      border: 1px solid var(--g-40); background: rgba(0,217,255,0.1);
+      font-family: var(--mono); font-weight: 600; font-size: 0.56rem;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--g-bright);
+    }
+
+    /* parameter — value, value set in monospace since it's usually
+       something you type in literally, somewhere else */
+    .g-kv { margin: 0 0 20px; max-width: var(--gcol); }
+    .g-kv-row {
+      display: flex; gap: 16px; padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-family: var(--sans); font-size: 0.94rem; line-height: 1.6;
+    }
+    .g-kv-row:last-child { border-bottom: none; }
+    .g-kv-row dt { width: 150px; flex-shrink: 0; font-weight: 500; color: rgba(255,255,255,0.62); margin: 0; }
+    .g-kv-row dd { margin: 0; font-family: var(--mono); font-weight: 400; color: #fff; }
+
+    /* the one number a section turns on */
+    .g-stat {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      text-align: center; margin: 0 0 20px; padding: 30px 26px;
+      border: 1px solid var(--g-22); border-radius: 6px;
+      background: linear-gradient(180deg, rgba(0,217,255,0.06), rgba(0,217,255,0.015));
+    }
+    .g-stat-value {
+      font-family: var(--serif); font-weight: 500; font-size: 2.4rem; line-height: 1;
+      color: var(--g); text-shadow: 0 0 26px rgba(0,217,255,0.3);
+    }
+    .g-stat .g-p { max-width: 480px; color: rgba(255,255,255,0.78); }
+
+    /* native <details> — no script needed, so the prerendered page and
+       the reader accordion the exact same way */
+    .g-faq { margin: 0 0 20px; border-top: 1px solid var(--g-14); }
+    .g-faq details { border-bottom: 1px solid var(--g-14); padding: 16px 0; }
+    .g-faq summary {
+      cursor: pointer; list-style: none; position: relative;
+      padding-right: 26px; font-family: var(--sans); font-weight: 500;
+      font-size: 0.98rem; color: #fff; line-height: 1.5;
+    }
+    .g-faq summary::-webkit-details-marker { display: none; }
+    .g-faq summary::after {
+      content: '+'; position: absolute; right: 2px; top: -2px;
+      font-family: var(--mono); font-size: 1.1rem; color: var(--g); line-height: 1.5;
+      transition: transform 0.15s ease;
+    }
+    .g-faq details[open] summary::after { content: '−'; }
+    .g-faq details[open] summary { color: var(--g-bright); }
+    .g-faq .g-p { margin-top: 12px; margin-bottom: 0; }
+
+    /* a Pros/Cons list riding inside a table cell */
+    .g-td-list { list-style: none; margin: 0; padding: 0; }
+    .g-td-list li { position: relative; padding-left: 14px; margin-bottom: 4px; }
+    .g-td-list li:last-child { margin-bottom: 0; }
+    .g-td-list li::before { content: '–'; position: absolute; left: 0; color: rgba(255,255,255,0.35); }
+
+    /* screens. width/height sit on the img so the column never jumps.
+       picture has no layout box of its own by default — it only
+       exists so the browser can pick a source — so it needs telling to
+       behave like the block its img already is. */
     .g-fig { margin: 22px 0; }
+    .g-fig picture { display: block; }
     .g-fig img {
       display: block; width: 100%; height: auto;
       border: 1px solid var(--g-14); border-radius: 6px; background: #05090d;
@@ -861,6 +953,7 @@
   <script type="text/babel" src="/guides.jsx"></script>
   <script type="text/babel" src="/new-pages.jsx"></script>
   <script type="text/babel" src="/legal-pages.jsx"></script>
+  <script type="text/babel" src="/referral-page.jsx"></script>
   <script type="text/babel" src="/app.jsx"></script>
 </body>
 </html>

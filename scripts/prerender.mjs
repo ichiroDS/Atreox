@@ -33,6 +33,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { optimizeImages } from './optimize-images.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 /* The host that answers 200. Vercel has www as the project's primary
@@ -48,6 +49,18 @@ const write = (p, s) => {
   const full = path.join(ROOT, p);
   fs.mkdirSync(path.dirname(full), { recursive: true });
   fs.writeFileSync(full, s);
+};
+
+/* A <picture><source> that points at a missing file doesn't fall back
+   to the <img> the way a broken <img src> alone would — a browser that
+   commits to a <source> and then gets a 404 just shows a broken image.
+   optimize-images.mjs writes a .webp next to every screenshot, but a
+   file it couldn't touch (still open elsewhere, say) has none, so the
+   <source> is only worth emitting once the sibling is confirmed to
+   exist — the same failure that skipped the file skips its <source>. */
+const webpSrc = src => {
+  const webp = src.replace(/\.(jpe?g|png)$/i, '.webp');
+  return fs.existsSync(path.join(ROOT, webp.replace(/^\//, ''))) ? webp : null;
 };
 
 /* ── The catalog, read the way the browser reads it ────────────────
@@ -117,8 +130,30 @@ function renderBlocks(blocks) {
       case 'card':
         return `<div class="g-card">${v.kicker ? `<span class="g-kicker">${esc(v.kicker)}</span>` : ''}${renderBlocks(v.blocks)}</div>`;
 
-      case 'figure':
-        return `<figure class="g-fig"><img src="${esc(v.src)}" alt="${esc(v.alt)}" width="${v.w}" height="${v.h}" loading="lazy" decoding="async"><figcaption>${esc(v.caption)}</figcaption></figure>`;
+      case 'cards':
+        return `<div class="g-cards">${v.map(c =>
+          `<div class="g-card">${c.kicker ? `<span class="g-kicker">${esc(c.kicker)}</span>` : ''}${renderBlocks(c.blocks)}</div>`).join('')}</div>`;
+
+      case 'options':
+        return `<div class="g-options">${v.map(o =>
+          `<div class="g-option">${o.badge ? `<span class="g-option-badge">${esc(o.badge)}</span>` : ''}<p class="g-p" style="margin:0">${esc(o.text)}</p></div>`).join('')}</div>`;
+
+      case 'kv':
+        return `<dl class="g-kv">${v.map(([k, val]) =>
+          `<div class="g-kv-row"><dt>${esc(k)}</dt><dd>${esc(val)}</dd></div>`).join('')}</dl>`;
+
+      case 'stat':
+        return `<div class="g-stat"><span class="g-stat-value">${esc(v.value)}</span><p class="g-p" style="margin:0">${esc(v.label)}</p></div>`;
+
+      case 'faq':
+        return `<div class="g-faq">${v.map(qa =>
+          `<details><summary>${esc(qa.q)}</summary><p class="g-p">${esc(qa.a)}</p></details>`).join('')}</div>`;
+
+      case 'figure': {
+        const webp = webpSrc(v.src);
+        const source = webp ? `<source srcset="${esc(webp)}" type="image/webp">` : '';
+        return `<figure class="g-fig"><picture>${source}<img src="${esc(v.src)}" alt="${esc(v.alt)}" width="${v.w}" height="${v.h}" loading="lazy" decoding="async"></picture><figcaption>${esc(v.caption)}</figcaption></figure>`;
+      }
 
       case 'plates':
         return `<div class="g-plates">${v.map(p =>
@@ -128,7 +163,9 @@ function renderBlocks(blocks) {
         return `<div class="g-tablewrap panel"><table class="g-table"><thead><tr>${
           v.head.map(h => `<th scope="col">${esc(h)}</th>`).join('')
         }</tr></thead><tbody>${
-          v.rows.map(r => `<tr>${r.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')
+          v.rows.map(r => `<tr>${r.map(c => `<td>${
+            Array.isArray(c) ? `<ul class="g-td-list">${c.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : esc(c)
+          }</td>`).join('')}</tr>`).join('')
         }</tbody></table></div>`;
 
       /* Plain checkboxes with no name and no script: they tick on the
@@ -143,6 +180,12 @@ function renderBlocks(blocks) {
 
       case 'note':
         return `<p class="g-note">${esc(v)}</p>`;
+
+      case 'bullets':
+        return `<ul class="g-bullets">${v.map(t => `<li>${esc(t)}</li>`).join('')}</ul>`;
+
+      case 'linkout':
+        return `<a href="${esc(v.href)}" class="quiet-link" style="margin-bottom:16px">${esc(v.label)} →</a>`;
 
       default:
         throw new Error(`unknown guide block "${kind}" — prerender and guides.jsx have drifted`);
@@ -198,7 +241,7 @@ function renderGuide(guide, guides, mod) {
     `<li style="margin-bottom:6px"><a href="/guides/${esc(g.url)}"${g.url === guide.url ? ' aria-current="page"' : ''} style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.9rem;color:${g.url === guide.url ? '#00d9ff' : 'rgba(255,255,255,0.6)'};text-decoration:none">${esc(g.title)}</a></li>`
   ).join('');
 
-  return `<div id="prerendered" style="max-width:1340px;margin:0 auto;padding:128px 5% 64px">
+  return `<div id="prerendered" style="max-width:1340px;margin:0 auto;padding:128px 6% 88px">
 <nav aria-label="Guides" style="margin-bottom:26px">
 <a href="/guides" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.62rem;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.34);text-decoration:none">All guides</a>
 <ul style="list-style:none;margin:14px 0 0;padding:0">${rail}</ul>
@@ -209,22 +252,50 @@ ${parts.join('\n')}
 </div>`;
 }
 
-/* ── The head, per guide ───────────────────────────────────────── */
-function headFor(guide, mod, ogImage) {
-  const url = `${ORIGIN}/guides/${guide.url}`;
-  /* The <h1> on the page is always guide.title. What a search result
-     shows can say more than that without changing the page, so a guide
-     whose text has outgrown its one-line summary carries its own pair
-     in the catalog and everything else falls back to the old shape. */
-  const title = guide.seoTitle ? `${guide.seoTitle} — ATREOX` : `${guide.title} — ATREOX guide`;
-  const desc = guide.seoDescription || guide.summary;
+/* ── /referral-program — one page, hand-written to match
+   referral-page.jsx, the same way renderGuide()'s hand-written module
+   sections mirror GuideReader's JSX. There is only one of these, so it
+   isn't worth building a second block-kind engine for it. ───────── */
+function renderReferral() {
+  const refWebp = webpSrc('/public/screenshots/reffereal-programme/ref.png');
+  const refSource = refWebp ? `<source srcset="${esc(refWebp)}" type="image/webp">` : '';
+  const step = (n, html) =>
+    `<div style="display:flex;gap:16px;padding-bottom:18px"><span style="width:28px;height:28px;border-radius:3px;flex-shrink:0;border:1px solid rgba(0,217,255,0.34);background:rgba(0,217,255,0.07);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.62rem;color:#00d9ff;line-height:1">${n}</span><p class="g-p" style="margin:0;padding-top:4px">${html}</p></div>`;
+
+  return `<div id="prerendered" style="max-width:1340px;margin:0 auto;padding:128px 6% 88px">
+<div style="max-width:760px;margin:0 auto">
+<h1 style="font-family:'Playfair Display',Georgia,serif;font-weight:500;font-size:2.6rem;line-height:1.1;letter-spacing:-0.015em;color:#fff;margin:0 0 18px">Send them the link. Get paid while they stay.</h1>
+<p style="font-family:Barlow,sans-serif;font-weight:300;font-size:1.02rem;color:rgba(255,255,255,0.66);line-height:1.7;margin:0 0 32px">Open to content creators and regular users alike — anyone with a link to share.</p>
+
+${step('1', 'Open <b>Settings</b> inside the ATREOX dashboard.')}
+${step('2', 'Copy your referral link from the <b>Refer a customer</b> card.')}
+${step('3', "Everyone who buys through it shows up in your panel — referred total, who's currently paying, and what that's worth this month.")}
+
+<figure class="g-fig" style="margin:22px 0 32px">
+<picture>${refSource}
+<img src="/public/screenshots/reffereal-programme/ref.png" alt="ATREOX Settings page showing the referral link, referral stats, and commission rate" width="1400" height="723" loading="lazy" decoding="async"></picture>
+<figcaption>Refer a customer, in Settings — the link, and everyone who's used it</figcaption>
+</figure>
+
+<div class="g-callout" style="max-width:none;text-align:center;padding:30px 26px">
+<span style="display:block;font-family:'Playfair Display',Georgia,serif;font-weight:500;font-size:2.6rem;color:#00d9ff;line-height:1;text-shadow:0 0 26px rgba(0,217,255,0.3);margin-bottom:10px">25%</span>
+<p class="g-p" style="margin:0 auto;max-width:520px;text-align:center">You earn <b>25% recurring commission</b> for as long as a customer you referred stays subscribed.</p>
+</div>
+
+<p class="g-note">The number in your panel is re-calculated from current subscriptions — it's an estimate, not an invoice. The actual payout is based on invoices that have actually been paid.</p>
+</div>
+</div>`;
+}
+
+/* ── The head, per page — shared by every prerendered file ───────── */
+function metaBlock({ url, title, desc, ogImage, type }) {
   return [
     '<!-- HEAD:META -->',
     `  <title>${esc(title)}</title>`,
     `  <meta name="description" content="${esc(desc)}">`,
     `  <link rel="canonical" href="${esc(url)}">`,
     '',
-    '  <meta property="og:type" content="article">',
+    `  <meta property="og:type" content="${type}">`,
     `  <meta property="og:url" content="${esc(url)}">`,
     '  <meta property="og:site_name" content="ATREOX">',
     `  <meta property="og:title" content="${esc(title)}">`,
@@ -237,6 +308,28 @@ function headFor(guide, mod, ogImage) {
     `  <meta name="twitter:image" content="${esc(ogImage)}">`,
     '  <!-- /HEAD:META -->',
   ].join('\n');
+}
+
+function headFor(guide, mod, ogImage) {
+  /* The <h1> on the page is always guide.title. What a search result
+     shows can say more than that without changing the page, so a guide
+     whose text has outgrown its one-line summary carries its own pair
+     in the catalog and everything else falls back to the old shape. */
+  const title = guide.seoTitle ? `${guide.seoTitle} — ATREOX` : `${guide.title} — ATREOX guide`;
+  return metaBlock({
+    url: `${ORIGIN}/guides/${guide.url}`, title,
+    desc: guide.seoDescription || guide.summary,
+    ogImage, type: 'article',
+  });
+}
+
+function headForReferral() {
+  return metaBlock({
+    url: `${ORIGIN}/referral-program`,
+    title: 'Referral program — ATREOX',
+    desc: 'Earn 25% recurring commission for as long as a customer you referred stays subscribed. Copy your link from Settings — open to creators and regular users alike.',
+    ogImage: OG_FALLBACK, type: 'website',
+  });
 }
 
 /* ── Open Graph cards ──────────────────────────────────────────────
@@ -312,6 +405,7 @@ const STATIC_PAGES = [
   ['/functions', '0.9'],
   ['/pricing', '0.9'],
   ['/guides', '0.8'],
+  ['/referral-program', '0.5'],
   ['/privacy', '0.3'],
   ['/terms', '0.3'],
 ];
@@ -348,6 +442,9 @@ const robots = () => [
 ].join('\n');
 
 /* ── Run ───────────────────────────────────────────────────────── */
+const imgResult = await optimizeImages(path.join(ROOT, 'public', 'screenshots'));
+if (imgResult.processed) console.log(`[optimize-images] ${imgResult.processed} image(s) optimized, ${imgResult.skipped} already small`);
+
 const { GUIDES, MODULE_BY_KEY } = loadCatalog();
 
 /* The slug -> address map the legacy-anchor redirect in index.html
@@ -380,6 +477,14 @@ for (const guide of GUIDES) {
   write(`guides/${guide.url}.html`, html);
 }
 
+/* One page, same shell-swap trick as every guide above. */
+{
+  const html = shell
+    .replace(/<!-- HEAD:META -->[\s\S]*?<!-- \/HEAD:META -->/, () => headForReferral())
+    .replace('<div id="root"></div>', () => `${renderReferral()}\n  <div id="root"></div>`);
+  write('referral-program.html', html);
+}
+
 /* A guide renamed in the catalog leaves its old file behind, and the
    deploy serves whatever is in the directory — so the address would go
    on answering with a page nothing links to any more. Sweep it. */
@@ -394,5 +499,6 @@ for (const f of fs.readdirSync(path.join(ROOT, 'guides'))) {
 write('sitemap.xml', sitemap(GUIDES));
 write('robots.txt', robots());
 
-console.log(`[prerender] ${GUIDES.length} guide pages, sitemap.xml, robots.txt`);
+console.log(`[prerender] ${GUIDES.length} guide pages, 1 referral page, sitemap.xml, robots.txt`);
 for (const g of GUIDES) console.log(`  /guides/${g.url}`);
+console.log('  /referral-program');

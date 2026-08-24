@@ -59,6 +59,29 @@ const plainClick = e =>
   !e.defaultPrevented && e.button === 0 &&
   !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
 
+/* Once a browser has committed to a <picture>'s <source>, a failed
+   request just leaves a broken image — there's no automatic retry
+   against the plain <img src> the way there would be without the
+   <source> there at all. scripts/optimize-images.mjs writes a .webp
+   sibling for every screenshot at build time, so normally this never
+   matters; state (not a DOM patch) is what's used to drop the <source>
+   on a failure, because a DOM patch doesn't survive this component's
+   next re-render — GuideReader's scrollspy causes plenty of those, and
+   each one would silently put the failed <source> right back. */
+function GuideFigure({ v }) {
+  const [webpFailed, setWebpFailed] = useState(false);
+  return (
+    <figure className="g-fig">
+      <picture>
+        {!webpFailed && <source srcSet={v.src.replace(/\.(jpe?g|png)$/i, '.webp')} type="image/webp" />}
+        <img src={v.src} alt={v.alt} width={v.w} height={v.h}
+          loading="lazy" decoding="async" onError={() => setWebpFailed(true)} />
+      </picture>
+      <figcaption>{v.caption}</figcaption>
+    </figure>
+  );
+}
+
 /* ══════════════════════════════════════════════════════════════════
    THE INDEX
 ══════════════════════════════════════════════════════════════════ */
@@ -222,7 +245,7 @@ function ReaderStep({ n, title, body, last }) {
    crawler reads. Neither renderer owns any styling — the class names
    below are defined once in index.html and emitted by both, so the two
    cannot drift apart, and the words have exactly one home. */
-function ReaderBlocks({ blocks }) {
+function ReaderBlocks({ blocks, onOpen }) {
   return blocks.map((block, i) => {
     const [kind, v] = block;
     switch (kind) {
@@ -251,21 +274,85 @@ function ReaderBlocks({ blocks }) {
         return (
           <div key={i} className="g-card">
             {v.kicker && <span className="g-kicker">{v.kicker}</span>}
-            <ReaderBlocks blocks={v.blocks} />
+            <ReaderBlocks blocks={v.blocks} onOpen={onOpen} />
+          </div>
+        );
+
+      /* several cards side by side, each its own full sequence — two
+         ways to do the same job, not one path with an aside */
+      case 'cards':
+        return (
+          <div key={i} className="g-cards">
+            {v.map((c, j) => (
+              <div key={j} className="g-card">
+                {c.kicker && <span className="g-kicker">{c.kicker}</span>}
+                <ReaderBlocks blocks={c.blocks} onOpen={onOpen} />
+              </div>
+            ))}
+          </div>
+        );
+
+      /* a short row of equal, neutral choices — not a verdict like
+         'plates', just "if this, then that one" */
+      case 'options':
+        return (
+          <div key={i} className="g-options">
+            {v.map((o, j) => (
+              <div key={j} className="g-option">
+                {o.badge && <span className="g-option-badge">{o.badge}</span>}
+                <p className="g-p" style={{ margin: 0 }}>{o.text}</p>
+              </div>
+            ))}
+          </div>
+        );
+
+      /* parameter — value, the value set in a monospace font because
+         it's usually a literal you type in somewhere else */
+      case 'kv':
+        return (
+          <dl key={i} className="g-kv">
+            {v.map(([k, val], j) => (
+              <div key={j} className="g-kv-row">
+                <dt>{k}</dt>
+                <dd>{val}</dd>
+              </div>
+            ))}
+          </dl>
+        );
+
+      /* the one number a section turns on, said the way 25% is said on
+         the referral page */
+      case 'stat':
+        return (
+          <div key={i} className="g-stat">
+            <span className="g-stat-value">{v.value}</span>
+            <p className="g-p" style={{ margin: 0 }}>{v.label}</p>
+          </div>
+        );
+
+      /* native <details> — it accordions with zero JS, which matters
+         here: the prerendered page gets exactly this same markup */
+      case 'faq':
+        return (
+          <div key={i} className="g-faq">
+            {v.map((qa, j) => (
+              <details key={j}>
+                <summary>{qa.q}</summary>
+                <p className="g-p">{qa.a}</p>
+              </details>
+            ))}
           </div>
         );
 
       /* width and height are on the element itself: the browser can
          then hold the space before the file arrives, so a screen
          landing mid-scroll never shoves the paragraph you are reading */
+      /* scripts/optimize-images.mjs writes a .webp sibling next to every
+         screenshot at build time; the catalog only ever names the
+         original, so the swap happens here, once, for every figure —
+         not something each guide entry has to ask for. */
       case 'figure':
-        return (
-          <figure key={i} className="g-fig">
-            <img src={v.src} alt={v.alt} width={v.w} height={v.h}
-              loading="lazy" decoding="async" />
-            <figcaption>{v.caption}</figcaption>
-          </figure>
-        );
+        return <GuideFigure key={i} v={v} />;
 
       /* a verdict you read without reading: green passes, red doesn't */
       case 'plates':
@@ -287,7 +374,15 @@ function ReaderBlocks({ blocks }) {
               <thead><tr>{v.head.map(h => <th key={h} scope="col">{h}</th>)}</tr></thead>
               <tbody>
                 {v.rows.map((r, j) => (
-                  <tr key={j}>{r.map((c, k) => <td key={k}>{c}</td>)}</tr>
+                  <tr key={j}>{r.map((c, k) => (
+                    <td key={k}>
+                      {/* a cell is either plain text or, for something like a
+                          Pros/Cons column, a short list — an array says which */}
+                      {Array.isArray(c)
+                        ? <ul className="g-td-list">{c.map((t, m) => <li key={m}>{t}</li>)}</ul>
+                        : c}
+                    </td>
+                  ))}</tr>
                 ))}
               </tbody>
             </table>
@@ -321,6 +416,31 @@ function ReaderBlocks({ blocks }) {
 
       case 'note':
         return <p key={i} className="g-note">{v}</p>;
+
+      /* a plain list where order isn't the point — unlike 'steps', which
+         numbers a sequence you follow in order, this is just a set of
+         things that are all true at once */
+      case 'bullets':
+        return (
+          <ul key={i} className="g-bullets">
+            {v.map((t, j) => <li key={j}>{t}</li>)}
+          </ul>
+        );
+
+      /* a single link out, e.g. to the guide this one leans on */
+      /* When this points at another guide, it should swap in place like
+         every other cross-guide link on the page rather than doing a
+         full reload — but it's still a real href underneath, so a
+         crawler, a middle click or a copied link all still work. */
+      case 'linkout': {
+        const target = onOpen && guideFromPath(v.href);
+        return (
+          <a key={i} href={v.href} className="quiet-link" style={{ marginBottom: 16 }}
+            onClick={e => { if (target && plainClick(e)) { e.preventDefault(); onOpen(target.slug); } }}>
+            {v.label} <ArrowUpRight size={12} />
+          </a>
+        );
+      }
 
       default:
         return null;
@@ -383,10 +503,25 @@ function ReaderNav({ slug, onOpen, compact }) {
   );
 }
 
+/* The chapter list, as links — shared between the sticky sidebar (wide
+   viewports) and the inline panel (compact ones, and the fallback for a
+   module guide with no `body`). `activeId` is only ever set on the
+   sidebar; passing it to the inline panel too costs nothing and keeps
+   the two in sync if a resize swaps one for the other mid-scroll. */
+function ChapterNav({ sections, activeId }) {
+  return sections.map((s, i) => (
+    <a key={s.id} href={'#' + s.id} aria-current={s.id === activeId ? 'true' : undefined}>
+      <span className="g-toc-n">{String(i + 1).padStart(2, '0')}</span>
+      <span className="g-toc-t">{s.title}</span>
+    </a>
+  ));
+}
+
 function GuideReader({ slug, onOpen, onClose }) {
   const guide = GUIDES.find(g => g.slug === slug) || GUIDES[0];
   const mod = guide.module ? MODULE_BY_KEY[guide.module] : null;
   const [compact, setCompact] = useState(window.innerWidth < 1040);
+  const [activeId, setActiveId] = useState(null);
 
   useEffect(() => {
     const onResize = () => setCompact(window.innerWidth < 1040);
@@ -394,9 +529,26 @@ function GuideReader({ slug, onOpen, onClose }) {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
+  /* Which chapter is "active": the one whose heading is nearest the top
+     of a band just under the sticky nav, so the sidebar tracks the
+     section you're actually reading rather than the one that merely
+     touched the viewport in passing. */
+  useEffect(() => {
+    if (!guide.body) return;
+    const els = guide.body.map(s => document.getElementById(s.id)).filter(Boolean);
+    if (!els.length) return;
+    const obs = new IntersectionObserver(entries => {
+      const visible = entries.filter(e => e.isIntersecting)
+        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+      if (visible.length) setActiveId(visible[0].target.id);
+    }, { rootMargin: '-100px 0px -70% 0px', threshold: 0 });
+    els.forEach(el => obs.observe(el));
+    return () => obs.disconnect();
+  }, [guide.slug]);
+
   return (
-    <div style={{ paddingTop: 128 }}>
-      <div style={{ maxWidth: 1340, margin: '0 auto', padding: '0 5%' }}>
+    <div style={{ paddingTop: 128, paddingBottom: 88 }}>
+      <div style={{ maxWidth: 1340, margin: '0 auto', padding: '0 6%' }}>
 
         <a href="/guides" onClick={e => { if (plainClick(e)) { e.preventDefault(); onClose(); } }}
           className="quiet-link quiet-link-dim" style={{ marginBottom: 26 }}>
@@ -417,8 +569,12 @@ function GuideReader({ slug, onOpen, onClose }) {
           {/* With no rail on the right, the freed width goes to the
               guide — but to the guide's furniture (screens, tables, the
               checklist), not to its sentences: prose inside stays capped
-              at COLUMN so a line never runs longer than the eye tracks. */}
-          <article id={'guide-' + guide.slug} style={{ flex: '1 1 420px', minWidth: 0, maxWidth: READER_MAX, scrollMarginTop: 150 }}>
+              at COLUMN so a line never runs longer than the eye tracks.
+              The auto side margins matter on a guide with no chapter
+              sidebar (below): capped at READER_MAX with nothing beside
+              it, the column would otherwise hug the left rail and leave
+              the rest of the row empty on one side. */}
+          <article id={'guide-' + guide.slug} style={{ flex: '1 1 420px', minWidth: 0, maxWidth: READER_MAX, margin: '0 auto', scrollMarginTop: 150 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18, flexWrap: 'wrap' }}>
               <Pill dot>{mod ? mod.tagline : 'Preparation'}</Pill>
               {guide.video && (
@@ -435,20 +591,22 @@ function GuideReader({ slug, onOpen, onClose }) {
               {guide.summary}
             </p>
 
-            {/* chapters — the map of the page, and the slots screens land in */}
-            <ReaderHeading>In this guide</ReaderHeading>
+            {/* chapters — the map of the page, and the slots screens land in.
+                A written guide's own chapter list lives in the sticky
+                sidebar once there is room for one (below); here it only
+                falls back inline when that sidebar isn't showing —
+                compact widths, or a module guide with no `body` at all,
+                which still gets its plain "what this covers" list. */}
+            {(compact || !guide.body) && <ReaderHeading>In this guide</ReaderHeading>}
             {guide.body ? (
-              /* A written guide's chapters are its own sections, so the
-                 list is also the way into them — real hrefs, so a copied
-                 link lands on the section and not just on the page. */
-              <div className="panel g-toc" style={{ padding: '16px 18px' }}>
-                {guide.body.map((s, i) => (
-                  <a key={s.id} href={'#' + s.id}>
-                    <span className="g-toc-n">{String(i + 1).padStart(2, '0')}</span>
-                    <span>{s.title}</span>
-                  </a>
-                ))}
-              </div>
+              compact && (
+                /* A written guide's chapters are its own sections, so the
+                   list is also the way into them — real hrefs, so a copied
+                   link lands on the section and not just on the page. */
+                <div className="panel g-toc" style={{ padding: '16px 18px' }}>
+                  <ChapterNav sections={guide.body} activeId={activeId} />
+                </div>
+              )
             ) : (
               <div className="panel" style={{ maxWidth: COLUMN + 40, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {guide.covers.map((c, i) => (
@@ -465,7 +623,7 @@ function GuideReader({ slug, onOpen, onClose }) {
             {guide.body && guide.body.map((s, i) => (
               <section key={s.id} id={s.id} style={{ scrollMarginTop: 108 }}>
                 <ReaderHeading n={String(i + 1).padStart(2, '0')}>{s.title}</ReaderHeading>
-                <ReaderBlocks blocks={s.blocks} />
+                <ReaderBlocks blocks={s.blocks} onOpen={onOpen} />
               </section>
             ))}
 
@@ -522,6 +680,22 @@ function GuideReader({ slug, onOpen, onClose }) {
               </a>
             </div>
           </article>
+
+          {/* chapter sidebar: a third rail, sticky the same way the left
+              one is — a sibling in this same flex row, so it can stay
+              pinned for as long as the row (i.e. the article) is tall,
+              not just for the height of whatever block it started next
+              to. Only for a written guide, and only once there's room
+              beside the text rather than under it. */}
+          {guide.body && !compact && (
+            <nav aria-label="Chapters" className="panel g-toc g-toc-side"
+              style={{ flex: '0 0 220px', minWidth: 0, position: 'sticky', top: 92, padding: 12 }}>
+              <span style={{ display: 'block', padding: '6px 10px 10px', fontFamily: MONO, fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: `rgba(${GREEN_RGB},0.6)` }}>
+                In this guide
+              </span>
+              <ChapterNav sections={guide.body} activeId={activeId} />
+            </nav>
+          )}
         </div>
       </div>
     </div>
