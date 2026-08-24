@@ -1628,14 +1628,217 @@ const GUIDES = [
     group: 'module',
     short: 'Empty list to live comments',
     title: 'Neurocommenting',
-    summary: 'From an empty channel list to comments going out, and what to change when they read wrong.',
-    covers: [
-      'Writing a persona prompt: identity, tone, length, language rule, skip conditions',
-      'Building the commenting pool and letting auto-assignment spread it',
-      'Delay presets, rate-limit windows, per-account caps, and reading the blacklist',
-    ],
+    summary: 'The page that runs the engine — every control on it, what it does once the engine reads it, and the order to touch them in.',
+    seoTitle: 'Neurocommenting: every control on the ATREOX commenting page',
+    seoDescription:
+      'Start the engine, build a commenting pool, assign channels, set the delay window and write a persona prompt. Defaults, limits and edge behaviour, taken from the engine.',
     module: 'neurocommenting',
     video: null,
+    body: [
+      {
+        id: 'what-it-is',
+        title: 'What this page is',
+        blocks: [
+          ['p', "Neurocommenting is the module that actually posts. Everything else feeds it: accounts come from Account Manager, targets from the two parsers, a face from Profile Templates. This page is where the engine is started, and where the behaviour of every comment it writes is set."],
+          ['p', "It is one page with seven regions and a jump-nav across the top in this order. Nothing here is a separate screen — the dialogs are the only things that open on top."],
+          ['callout', [
+            "Start is not a switch that stays on. The engine caps a single session at ten hours by default: at the top of the round where that is reached it stops itself cleanly, exactly as if you had pressed Stop, and it does not come back on its own — not on the next round, and not when the service restarts. Nothing in the panel says this, so the honest expectation is that a long run ends by itself and you press Start again.",
+          ]],
+        ],
+      },
+      {
+        id: 'map',
+        title: 'Map of the page',
+        blocks: [
+          ['map', [
+            { name: 'Control', holds: 'The run state and uptime, the Start/Stop button, the Warmup switch, Delay settings, and the engine log.' },
+            { name: 'Pool', holds: 'Two columns of accounts — available and in the pool — the three assignment buttons, the limit controls, and the per-account list of which channels each account owns.' },
+            { name: 'Stats', holds: 'What the pool has produced: successful, failed and total.' },
+            { name: 'Comments', holds: 'Every comment that went out, filterable, with the full text and the post it answered behind each row.' },
+            { name: 'Channels', holds: 'The monitored channel list — what the engine watches — plus the presets that save a list and reload it later.' },
+            { name: 'Blacklist', holds: 'Account-and-channel pairs the engine has taken out of circulation on its own, grouped by channel, with Prune unresolvable and Clear blacklist above them.' },
+            { name: 'Persona', holds: 'The prompt presets, which one is active, and the sensitive-content filter.' },
+          ]],
+        ],
+      },
+      {
+        id: 'control',
+        title: 'Control',
+        blocks: [
+          ['p', "Four things sit here: the run state with its uptime, the button that starts and stops the engine, one switch, and the delay window every comment waits out. The engine log is underneath, collapsed."],
+          ['controls', [
+            {
+              id: 'ctl-start', name: 'Start', where: 'Control', kind: 'button', value: 'Start',
+              rows: [
+                ['What it does', 'Builds your account pool, connects every active account, and begins polling the monitored channels. A round runs every poll interval — 60 seconds by default — and each round re-reads the account pool and the channel list from the database.'],
+                ['Before it starts', 'A preflight dialog opens if accounts, channels or an active persona are missing, listing which of the three failed and offering Start anyway. A check whose data has not loaded yet counts as passing, so a slow page never blocks the button.'],
+                ['What can refuse it', 'The active persona is assembled into a system prompt at start time. A persona that cannot be assembled fails the start outright, rather than failing quietly at the first comment.'],
+                ['Session cap', 'Ten hours by default. The check runs at the top of a round, never mid-send, and the stop is the clean one — the running flag is cleared and the pool disconnected, so the engine stays stopped until someone presses Start again.'],
+                ['Restarting for a change', 'Almost never needed. Accounts, the channel list, the delay window and the Warmup switch are all re-read every round. The persona is the exception — it is read once at start and cached.'],
+              ],
+            },
+            {
+              id: 'ctl-stop', name: 'Stop', where: 'Control', kind: 'button', tone: 'bad', value: 'Stop',
+              rows: [
+                ['What it does', 'Ends the session and disconnects the pool. Comments still waiting out their delay are cancelled.'],
+                ['What happens to a cancelled comment', 'It is not lost. The post goes back on the pending queue carrying its original catch time, and the rate-limit slot it was holding is released — so a later session picks it up in its real place in the order rather than as something that just happened.'],
+                ['Never gated', 'Stop works whatever the subscription says. Only Start is gated.'],
+              ],
+            },
+            {
+              id: 'ctl-warmup', name: 'Warmup', where: 'Control, beside Start', kind: 'toggle', on: false,
+              rows: [
+                ['What it does', 'Ramps an account’s hourly and daily comment caps up gradually instead of letting a fresh account post at the full rate from its first hour.'],
+                ['Default', 'Off. Without it every account posts at the full configured rate immediately.'],
+                ['The ramp', 'Fourteen days, counted from when the account was added, moving linearly from 1 comment an hour and 3 a day up to the engine’s configured ceiling. Never below 1, never above the ceiling, and an account already older than fourteen days simply sits at the ceiling.'],
+                ['Not the same warmup', 'Three separate things carry this name. This switch is the rate ramp. The Accounts page’s Auto-Warmup is a per-account 72-hour lockout with its own 23-day cap schedule. Active Warmup is a whole module that has accounts read and react. All three are off by default and switched on separately.'],
+                ['Takes effect', 'Next poll round. No restart.'],
+              ],
+            },
+            {
+              id: 'ctl-delay', name: 'Delay before commenting', where: 'Control → Delay settings', kind: 'field', value: '480',
+              rows: [
+                ['What it does', 'The window a comment waits in before it is written. Once a post is caught and an account reserved, the engine picks a delay uniformly at random between Min and Max and sleeps that long.'],
+                ['Default', '480 to 1500 seconds — 8 to 25 minutes.'],
+                ['Presets', 'Three buttons fill both fields: Min (60-180s), Recommended (480-1500s), Max (1800-3600s). They only fill the fields — Save is what applies them.'],
+                ['Validation', 'Both numbers must be above zero, and Min must be below Max. Save stays disabled and the form says so while they are not.'],
+                ['What the wait costs', 'Nothing. The model is not called and Telegram is not touched until the delay is over, so a comment abandoned mid-wait costs nothing at all.'],
+                ['At the edges', 'Twenty-five minutes is long enough for conditions to change. Right before sending, the account is re-checked — cooldown, quiet hours, a manual pause, a floodwait from another post landing first — and if it is no longer usable the post goes back on the queue with its original timestamp instead of being sent into the changed condition.'],
+                ['Takes effect', 'Next poll round. No restart.'],
+              ],
+            },
+            {
+              id: 'ctl-logs', name: 'Engine logs', where: 'Control', kind: 'button', tone: 'plain', value: 'Engine logs',
+              rows: [
+                ['What it does', 'Streams the engine’s own log lines live while the card is open, with a dot showing whether the stream is connected.'],
+                ['Scope', 'Your engine only. Every line is tagged with its owner before it reaches the stream.'],
+                ['Clearing', 'The Clear button empties the view. Pressing Start empties it too, so a new run never reads as a continuation of the last one.'],
+                ['Only while open', 'The connection opens when you expand the card and closes when you collapse it. Lines emitted while it was shut are not replayed.'],
+              ],
+            },
+          ]],
+          ['p', "The uptime counter beside the state runs from the moment the session started. The bar under it is scaled to twelve hours — longer than the ten-hour session cap — so on the default configuration it fills to about five-sixths and the session ends there."],
+        ],
+      },
+      {
+        id: 'pool',
+        title: 'The commenting pool',
+        blocks: [
+          ['p', "The pool is the subset of your accounts that neurocommenting may use. It is not the same thing as your account list: an account can be healthy, connected and completely idle simply because it was never put in here."],
+          ['p', "Two columns — Available accounts on the left, In commenting pool on the right — an arrow on each row to move one across, and checkboxes with a bulk arrow to move many. Underneath sits the assignment layer, which decides which pooled account handles which channel."],
+          ['controls', [
+            {
+              id: 'ctl-pool-add', name: 'Add to pool', where: 'Pool → Available accounts', kind: 'button', value: 'Add to pool',
+              rows: [
+                ['What it does', 'Moves the account into the commenting pool and claims it for this module.'],
+                ['One module at a time', 'An account may be driven by one behavioural module only. One already held by NeuroDialogs, Mass Reactions or Active Warmup is refused and named in the message, and the rest of the batch still goes through — a refusal never fails the whole request.'],
+                ['Also refused', 'An account currently reserved by a running discovery search, and one still inside the Accounts page’s 72-hour resting window. Both come back as a reason rather than an error, and both clear on their own.'],
+                ['Removing releases it', 'Taking an account out of the pool frees it for another module immediately.'],
+                ['Unhealthy accounts', 'An account that goes banned or dead-session while pooled is pulled out automatically and reported, rather than sitting there posting into nothing.'],
+              ],
+            },
+            {
+              id: 'ctl-auto-assign', name: 'Auto-assign channels', where: 'Pool', kind: 'button', value: 'Auto-assign channels',
+              rows: [
+                ['What it does', 'Deals the whole monitored-channel list round-robin across the accounts currently in the pool, replacing any assignment that existed before.'],
+                ['How it divides', 'Evenly, with the remainder spread one extra to the first accounts in the list — 62 channels across 30 accounts gives two accounts three each and the rest two.'],
+                ['Why assign at all', 'An assigned account is the predictable path: when a post appears on a channel, its assigned account is used directly, with no scan of the pool. Everything else is fallback.'],
+                ['Refused when', 'The pool is empty, or no channels are configured. Both say which.'],
+              ],
+            },
+            {
+              id: 'ctl-shuffle', name: 'Shuffle channels', where: 'Pool', kind: 'button', tone: 'plain', value: 'Shuffle channels',
+              rows: [
+                ['What it does', 'Re-points the channels that are already assigned so every account ends up with a completely different set from the one it had, keeping the number each account holds the same.'],
+                ['Not the same as auto-assign', 'Auto-assign deals the full monitored list from scratch. Shuffle only touches what is already assigned, and guarantees no account keeps any of its previous channels.'],
+                ['When it refuses', 'When no such rearrangement exists: one account holding more than half of all assigned channels, fewer than two accounts with assignments, or nothing assigned yet. The reason comes back verbatim.'],
+              ],
+            },
+            {
+              id: 'ctl-clear-assignments', name: 'Clear assignments', where: 'Pool', kind: 'button', tone: 'plain', value: 'Clear assignments',
+              rows: [
+                ['What it does', 'Drops every channel-to-account assignment.'],
+                ['What happens then', 'Posting does not stop. Every channel falls back to picking from the pool by least-recently-used, so the work still spreads — it just stops being predictable per channel.'],
+              ],
+            },
+            {
+              id: 'ctl-set-limit', name: 'Set limit', where: 'Pool, right of the assignment buttons', kind: 'field', value: '10',
+              rows: [
+                ['What it does', 'Applies one comment limit to every account currently in the pool, in a single call.'],
+                ['What the limit is', 'A lifetime cap, not a daily one. The counter never falls on its own — an account that reaches its limit is paused automatically, marked limit reached, and stays that way.'],
+                ['Default', 'None. An account has no limit at all until one is set, here or on a single account.'],
+                ['How it applies', 'Only on Enter or the tick button, never on losing focus — it touches every pooled account at once, so an incidental click should not fire it.'],
+                ['Clearing it', 'The Clear limits button beside it removes the cap from every pooled account. An account paused for hitting a limit it is now clear of resumes by itself; one you paused by hand is left alone.'],
+              ],
+            },
+            {
+              id: 'ctl-reset-counts', name: 'Reset counts', where: 'Pool', kind: 'button', tone: 'warn', value: 'Reset counts',
+              rows: [
+                ['What it does', 'Sets the selected accounts’ comment counters back to zero and resumes any of them paused for hitting their limit. Asks first.'],
+                ['Why it exists', 'Because the limit is a lifetime cap. Resuming a capped account on its own buys exactly one more comment before it hits the same ceiling again, since the count never went down. Clearing the counter is what makes a recurring limit workable.'],
+                ['Selection, not the pool', 'It acts on whatever is ticked in either column. An account pulled out of the pool for hitting its limit sits in Available accounts, and this reaches it there without re-adding it first.'],
+                ['What survives', 'Comment history. The rows are not deleted — a floor timestamp moves instead — so cost tracking and statistics are unaffected.'],
+              ],
+            },
+            {
+              id: 'ctl-pause', name: 'Pause', where: 'Pool → assignment list', kind: 'button', tone: 'warn', value: 'Pause',
+              rows: [
+                ['What it does', 'Takes this one account out of posting until you resume it. It is excluded starting from the next poll round.'],
+                ['Why it is not a status', 'Nothing automated can move an account into or out of a manual pause — not floodwait handling, not the health checker clearing an account back to active, not cooldown expiry. That is the difference between this and parking an account in the Accounts page’s Danger zone.'],
+                ['Resume', 'Only ever un-pauses. It refuses on an account that is not paused, so a banned or disabled account cannot be revived by pressing it.'],
+              ],
+            },
+          ]],
+          ['p', "Under the buttons, one row per account that holds channels: how many comments it landed and how many failed, whether it is paused, and the channels it owns behind a fold."],
+          ['callout', [
+            "Assignment is a preference, not a rule. If the assigned account is in cooldown, in quiet hours, paused, at its cap or blocked from that channel, the post is not skipped — it falls back to the rest of the pool, ordered least-recently-used, with accounts that have already succeeded on that channel first and accounts that failed to resolve it last. Only when the pool itself is empty does the fallback widen to every active account.",
+          ]],
+        ],
+      },
+      {
+        id: 'persona',
+        title: 'Persona',
+        blocks: [
+          ['p', "The persona is the whole instruction the model gets. There is no separate tone, length or language setting — a preset is a name, an optional description, and one prompt you write yourself."],
+          ['p', "Presets come in two groups. System holds six built-ins, which you can read and copy but not edit; My Prompts holds yours. Clicking any card makes it active immediately, and the active persona is the one every comment is written with."],
+          ['controls', [
+            {
+              id: 'ctl-persona-card', name: 'A preset card', where: 'Persona', kind: 'button', tone: 'plain', value: 'Positive comment',
+              rows: [
+                ['What clicking does', 'Makes that preset active, straight away. There is no save step and no confirmation.'],
+                ['The six built-ins', 'Positive comment, Intimate, Emotional response, Question to author, Brief review, Analytical approach. Each is a short prompt naming a style, asking for a length, and telling the model to answer with the literal token SKIP when the post does not suit it.'],
+                ['Editing a built-in', 'Not possible. Open it to read it, or duplicate it into My Prompts and edit the copy.'],
+                ['Deleting', 'Your own presets only, and never the active one — the delete entry is disabled while a preset is active.'],
+                ['When it is read', 'At engine start, then cached. Editing the active preset while the engine is running does not change what is being posted until it is restarted.'],
+              ],
+            },
+            {
+              id: 'ctl-persona-prompt', name: 'Prompt', where: 'Persona → Create / Edit dialog', kind: 'field', value: 'Write a short comment on {post_text}…',
+              rows: [
+                ['What it does', 'The system prompt, verbatim. Whatever you write here is what the model is told; the post itself arrives separately as the message to answer.'],
+                ['Required', 'Yes, along with the name. Description is optional.'],
+                ['Tokens', 'Four are substituted before the call: {post_text}, {channel_title}, {account_username}, {account_first_name}. Substitution is plain text replacement, so stray braces elsewhere in the prompt cannot break it.'],
+                ['An unknown token', 'Is left exactly where it is. It is neither an error nor blanked out.'],
+                ['Say when to skip', 'Worth doing explicitly. All six built-ins end with an instruction to reply with the literal token SKIP when the post does not suit the persona; a prompt without one comments on everything it is given.'],
+                ['If the model refuses', 'A reply that opens with a recognisable refusal — in English, Russian or Ukrainian — is caught and treated as a skip rather than posted. A safety net for prompts with no skip instruction, not a substitute for one.'],
+              ],
+            },
+            {
+              id: 'ctl-sensitive', name: 'Sensitive content filter', where: 'Persona', kind: 'toggle', on: true,
+              rows: [
+                ['What it does', 'Appends a rule to the end of every prompt, above whatever the persona says: do not comment on posts about death, murder or violent crime, war or mobilisation, terrorism, disasters, mourning, or partisan politics and elections. Such a post is skipped instead.'],
+                ['Default', 'On.'],
+                ['Turning it off', 'Asks for confirmation first — the only switch on this page that does. Turning it back on does not.'],
+                ['In the numbers', 'A comment skipped this way is recorded under its own reason rather than folded in with ordinary skips, so it stays visible as a distinct outcome.'],
+                ['Loud at start', 'While it is off, the engine writes a warning into the log every time it starts.'],
+              ],
+            },
+          ]],
+          ['note', "The prompt is not the only thing shaping a comment. Accounts sharing one persona each get a small, fixed style nudge appended to their prompt — be a little more direct, keep it warm, plain and no fluff — so ten accounts on one preset do not all sound like the same writer. It is fixed per account, not random per comment.",
+          ],
+        ],
+      },
+    ],
   },
   {
     slug: 'neurodialogs',
