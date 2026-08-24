@@ -1656,7 +1656,7 @@ const GUIDES = [
             { name: 'Stats', holds: 'What the pool has produced: successful, failed and total.' },
             { name: 'Comments', holds: 'Every comment that went out, filterable, with the full text and the post it answered behind each row.' },
             { name: 'Channels', holds: 'The monitored channel list — what the engine watches — plus the presets that save a list and reload it later.' },
-            { name: 'Blacklist', holds: 'Account-and-channel pairs the engine has taken out of circulation on its own, grouped by channel, with Prune unresolvable and Clear blacklist above them.' },
+            { name: 'Blacklist', holds: 'Account-and-channel pairs the engine has taken out of circulation on its own, grouped by reason, with Prune unresolvable and Clear blacklist above them.' },
             { name: 'Persona', holds: 'The prompt presets, which one is active, and the sensitive-content filter.' },
           ]],
         ],
@@ -1835,6 +1835,184 @@ const GUIDES = [
             },
           ]],
           ['note', "The prompt is not the only thing shaping a comment. Accounts sharing one persona each get a small, fixed style nudge appended to their prompt — be a little more direct, keep it warm, plain and no fluff — so ten accounts on one preset do not all sound like the same writer. It is fixed per account, not random per comment.",
+          ],
+        ],
+      },
+      {
+        id: 'channels',
+        title: 'The channels it watches',
+        blocks: [
+          ['p', "The monitored list is what the engine polls. It is re-read at the top of every round, so a channel added here is being watched a minute later without anything being restarted."],
+          ['p', "Edits here save as you make them. There is no Save changes step — removing a row or flipping a switch is written immediately, and the count above the table is the current list."],
+          ['controls', [
+            {
+              id: 'ctl-add-channels', name: 'Add channel(s)', where: 'Channels', kind: 'button', value: 'Add channel(s)',
+              rows: [
+                ['What it does', 'Takes a paste of channels, one per line, and appends the new ones to the monitored list.'],
+                ['What a line may look like', 'An @username, a t.me link with or without the https, or a bare username. The link prefix and the @ are stripped before the name is checked.'],
+                ['What counts as valid', 'Five to thirty-two characters, letters, digits and underscores, not starting with a digit. A line that does not match is reported back as invalid rather than failing the whole paste.'],
+                ['Duplicates', 'Dropped, case-insensitively, both against the existing list and against the rest of the same paste. The result says how many were added, how many were duplicates and how many were invalid.'],
+                ['No limit', 'There is no cap on lines. This only appends to a list — nothing touches Telegram until the engine next polls.'],
+              ],
+            },
+            {
+              id: 'ctl-live-posting', name: 'Live posting', where: 'Channels → a row', kind: 'toggle', on: false,
+              rows: [
+                ['What it does', 'Marks this channel as one that is posted to for real even while the engine is running in dry run.'],
+                ['What it is not', 'It is not a per-channel on/off for commenting. It is an exception list to one global setting.'],
+                ['When dry run is on', 'Only channels with this switch on receive real comments. Everything else is generated and written to the log as what would have been posted.'],
+                ['When dry run is off', 'The switch is not consulted at all. Every monitored channel gets real comments regardless of how it is set here.'],
+                ['Where dry run lives', 'On the server, not on this page. Nothing in the panel shows which way it is set, so this switch reads as more powerful than it is.'],
+              ],
+            },
+            {
+              id: 'ctl-clear-channels', name: 'Clear all', where: 'Channels', kind: 'button', tone: 'bad', value: 'Clear all',
+              rows: [
+                ['What it does', 'Empties the monitored list. Asks first.'],
+                ['What it does not touch', 'Channel assignments, the blacklist and comment history all stay. So does every preset — this is the way to empty the list before loading a different one.'],
+                ['Effect on a running engine', 'It stops finding posts on the next round. It does not stop the engine, and comments already waiting out their delay still go out.'],
+              ],
+            },
+            {
+              id: 'ctl-save-preset', name: 'Save Preset', where: 'Channels', kind: 'button', tone: 'plain', value: 'Save Preset',
+              rows: [
+                ['What it does', 'Snapshots the current channel list under a name so it can be reloaded later.'],
+                ['A snapshot, not a link', 'Editing the list afterwards does not change the preset, and loading a preset replaces the list rather than merging into it.'],
+                ['What a preset carries', 'The channel names only. The live-posting flags are not part of it and are left as they are when a preset is loaded.'],
+              ],
+            },
+          ]],
+          ['note', "The line under the table — that resolved title and baseline ID are tracked by the engine and not exposed — is accurate. The engine resolves each channel once, caches the result and reuses it for every later post, which is why a restart does not re-resolve hundreds of channels. None of that cache is readable from this page.",
+          ],
+        ],
+      },
+      {
+        id: 'blacklist',
+        title: 'What the engine took out of circulation',
+        blocks: [
+          ['p', "When a post fails in a way that says something durable about one account on one channel, the engine writes it down. The blacklist is that record, grouped by reason, with a count on each group and the individual account-and-channel pairs behind the fold."],
+          ['table', {
+            head: ['Reason', 'What produced it'],
+            rows: [
+              ['Sending forbidden', 'Telegram refused the send for this account on this channel — banned in the channel, or writing not allowed.'],
+              ['No access', 'The channel is private to this account, or it needs rights the account does not have.'],
+              ['Username not found', 'The account could not resolve the name. Often about the account rather than the channel: a fresh, low-history account can fail to resolve a channel that other accounts reach fine.'],
+              ['Kicked from discussion group', 'The comment goes into the channel’s linked discussion group, and this account is not a member. The engine tries to join and re-send once; this is recorded only if that also fails, or if there is no discussion group at all.'],
+              ['Other', 'Anything that did not classify — the catch-all.'],
+            ],
+          }],
+          ['p', "The record is not passive. A failure of the first, second or fourth kind moves that channel off the account it was assigned to and onto one with a clean record there, handing the freed account one of the recipient’s channels in exchange so nobody’s workload changes size. A resolve failure is softer: the account is sorted to the back of the queue for that channel rather than moved off it."],
+          ['controls', [
+            {
+              id: 'ctl-prune', name: 'Prune unresolvable channels', where: 'Blacklist, in the header', kind: 'button', tone: 'warn', value: 'Prune unresolvable',
+              rows: [
+                ['What it does', 'Stops monitoring the channels that are very probably gone — renamed or deleted — rather than merely hard to reach right now.'],
+                ['The test it applies', 'Both conditions together: at least one recorded username-not-found failure, and never once successfully baselined by any account.'],
+                ['Why it is worth pressing', 'A dead channel otherwise sits in the poll list forever, spending a resolve attempt on every eligible account, every round, for nothing.'],
+                ['What it leaves', 'The blacklist history. Only the monitored list is trimmed — clear the blacklist separately if you want the rows gone too.'],
+              ],
+            },
+            {
+              id: 'ctl-clear-blacklist', name: 'Clear blacklist', where: 'Blacklist, in the header', kind: 'button', tone: 'bad', value: 'Clear blacklist',
+              rows: [
+                ['What it does', 'Deletes every recorded failure, across all reasons.'],
+                ['What it changes', 'The ranking. With the record gone, accounts sorted to the back of a channel for having failed there return to normal order, and the channel stops looking unresolvable to the prune button.'],
+                ['What it does not change', 'Whether an account can actually post there. Telegram’s answer is unchanged, so a genuinely banned account fails again and the entry comes back on the next attempt.'],
+              ],
+            },
+          ]],
+          ['callout', [
+            "An entry here is a record of what happened, not the thing keeping an account out. The exclusion itself is a separate 24-hour block on that one account for that one channel, held elsewhere and not shown on this page — it expires on its own, and deleting the blacklist entry does not lift it early. Clearing the blacklist tidies the history and the ranking; it does not give an account back a channel it is currently blocked from.",
+          ]],
+        ],
+      },
+      {
+        id: 'numbers',
+        title: 'Reading the numbers',
+        blocks: [
+          ['p', "Two regions report what happened. Statistics is four tiles of totals; Comments is the row-by-row history behind them."],
+          ['controls', [
+            {
+              id: 'ctl-stat-attempts', name: 'Total Attempts', where: 'Stats', kind: 'tile', value: '148',
+              rows: [
+                ['Counts', 'Successful plus unsuccessful. Comments generated in dry run are in neither — nothing was attempted, so they are excluded from both.'],
+              ],
+            },
+            {
+              id: 'ctl-stat-successful', name: 'Successful', where: 'Stats', kind: 'tile', tone: 'ok', value: '131',
+              rows: [
+                ['Counts', 'Comments that were really posted. Real sends only, never dry-run ones.'],
+              ],
+            },
+            {
+              id: 'ctl-stat-failed', name: 'Unsuccessful', where: 'Stats', kind: 'tile', tone: 'bad', value: '17',
+              rows: [
+                ['Counts', 'Real post attempts that failed. Nothing else — a comment the model declined to write, or a post nobody was free to take, is not counted here.'],
+                ['Not the same as the pool’s failed', 'The per-account failed number in the Pool section is broader: it also counts generation errors and posts skipped because no account was available. The two numbers are supposed to differ.'],
+              ],
+            },
+            {
+              id: 'ctl-stat-rate', name: 'Success Rate', where: 'Stats', kind: 'tile', value: '88.5%',
+              rows: [
+                ['Counts', 'Successful over total attempts, to one decimal. Zero attempts reads as 0.0%.'],
+              ],
+            },
+          ]],
+          ['callout', [
+            "These four are meant to read as “since you last pressed Start”, and they do — the totals are all-time on the server, and the panel subtracts whatever they were at the moment Start was clicked. That subtraction lives in the browser tab and nowhere else, so reloading the page, or opening it in a second tab, loses it: the tiles then quietly show the all-time totals instead, with nothing on screen saying which of the two you are looking at.",
+          ]],
+          ['p', "Comments below holds every event, newest first, fifty to a page. A row opens into the post it answered, the comment itself, and, for anything that did not post, the reason and the error."],
+          ['table', {
+            head: ['Kind', 'What it means'],
+            rows: [
+              ['generated', 'A comment was written. Whether it was actually sent is on the row itself — a dry-run comment is generated and not posted.'],
+              ['skipped', 'The model declined to write one: the persona’s own skip instruction, or the sensitive-content rule.'],
+              ['error', 'Generation failed before there was anything to send.'],
+              ['rate limited', 'The post was caught but no account was free to take it. Logged before any account is chosen, so this row has no account attached.'],
+              ['post failed', 'A real send was attempted and Telegram refused it.'],
+            ],
+          }],
+          ['controls', [
+            {
+              id: 'ctl-comments-filters', name: 'Kind · Channel · From · To', where: 'Comments', kind: 'select', value: 'All kinds',
+              rows: [
+                ['What they do', 'Narrow what the table shows.'],
+                ['Where the work happens', 'Only one kind on its own is filtered by the server. Several kinds at once, a channel, and both dates are applied in the browser — to the fifty rows of the current page, not to your whole history.'],
+                ['What that means in practice', 'A channel filter can come back empty while that channel has plenty of comments: they are simply on another page. The line under the table is honest about it — it says how many of the fetched rows are showing.'],
+              ],
+            },
+            {
+              id: 'ctl-export', name: 'Export CSV', where: 'Comments', kind: 'button', tone: 'plain', value: 'Export CSV',
+              rows: [
+                ['What it does', 'Downloads what is on screen — the current page, after the filters above. The filename carries the page number.'],
+                ['Not the whole history', 'Exporting everything means paging through and exporting each page.'],
+              ],
+            },
+            {
+              id: 'ctl-clear-comments', name: 'Clear', where: 'Comments', kind: 'button', tone: 'bad', value: 'Clear',
+              rows: [
+                ['What it does', 'Permanently deletes the entire comment and event history. Asks first, and cannot be undone.'],
+                ['What it takes with it', 'The Statistics tiles, which are counted from these rows, and the per-account numbers in the Pool. Reset counts is the gentler tool — it moves a floor timestamp instead of deleting anything.'],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'first-run',
+        title: 'First run',
+        blocks: [
+          ['p', "The shortest path from an empty page to comments going out. Steps one to four can be done in any order; the engine will not do anything useful until all four are done."],
+          ['steps', [
+            "Put accounts in the pool. They have to exist and be healthy in Account Manager first, and they cannot be held by another module — an account NeuroDialogs or Active Warmup is driving is refused here by name.",
+            "Add the channels you want watched. A paste of @usernames or t.me links is the normal way in; the parser takes both.",
+            "Press Auto-assign channels. Without assignments everything still works, but each post is decided by a scan instead of going straight to a known account.",
+            "Pick a persona. Six built-ins are there to read; duplicate the closest one and edit the copy rather than starting from an empty box, and keep its skip instruction.",
+            "Leave the delay window alone unless you have a reason. The default 8-to-25 minutes is the recommended preset already.",
+            "Press Start. The preflight dialog will tell you if accounts, channels or a persona are missing before anything runs.",
+          ]],
+          ['p', "Then watch two things. The engine log, expanded, shows the round-by-round decisions in real time; the Comments table shows what came out of them. A run that produces skipped rows and no comments is a persona problem, not an engine problem."],
+          ['note', "Remember the session cap: ten hours by default, then the engine stops itself and stays stopped. If comments dry up overnight, check the run state before changing anything else — the most likely answer is that the session ended on its own and nobody pressed Start again.",
           ],
         ],
       },
