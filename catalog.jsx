@@ -795,14 +795,330 @@ const GUIDES = [
     group: 'module',
     short: 'Import, check, keep alive',
     title: 'Account Manager',
-    summary: 'Getting accounts into ATREOX and keeping them alive once they are.',
-    covers: [
-      'Bulk import, tdata conversion, and what each failure reason means',
-      'Status check vs capability check — the second one is what catches a dead account',
-      'Reading cooldowns: floodwait, peerflood, profile update, discovery',
-    ],
+    summary: 'Every control on the Accounts page, what it actually does in the engine, and the order to touch them in on day one.',
+    seoTitle: 'Account Manager: every control on the ATREOX accounts page',
+    seoDescription:
+      'Add and bulk-import accounts, assign one proxy each, and run the three checks — health, proxy, capability. Defaults, rate limits and edge behaviour, taken from the engine.',
     module: 'account-manager',
     video: null,
+    body: [
+      {
+        id: 'what-it-is',
+        title: 'What this page is',
+        blocks: [
+          ['p', "Account Manager is the second item in the sidebar and the page every other module depends on. Accounts enter the system here, get a proxy here, and are checked here; the modules that earn — Neurocommenting, NeuroDialogs, Mass Reactions — draw from the pool this page maintains. It is included with any purchase because none of the others can run without it."],
+          ['p', "It is a single page, not a set of tabs. Everything below is a region of that one screen, in the order it appears, plus the five dialogs that open on top of it."],
+          ['callout', [
+            "Everything on this page is explicit. None of the three checks runs on a schedule or in the background — each one happens because you pressed a button, and each is read-only on the Telegram side: no messages, no profile writes, nothing that could itself get an account flagged.",
+          ]],
+        ],
+      },
+      {
+        id: 'map',
+        title: 'Map of the page',
+        blocks: [
+          ['map', [
+            { name: 'Toolbar', holds: 'Reassign proxies · Bulk import · Add account. Top right, always present.' },
+            { name: 'Capability summary', holds: 'A banner counting how much of the pool has passed, failed or never had a capability check.' },
+            { name: 'Shared-proxy warning', holds: 'Appears only when two or more active accounts sit behind the same proxy. Carries its own Reassign now button.' },
+            { name: 'Status tiles', holds: 'Seven counts — Active, Busy, Cooldown, Needs Reauth, Banned, Flagged, Dead. Each one is also a filter for the list below.' },
+            { name: 'Bulk actions bar', holds: 'Eight actions over the current selection. Always visible; the buttons disable at zero selected rather than the bar disappearing.' },
+            { name: 'Account list', holds: 'One row per account: name, Comments, Last used, Added, Proxy, Days, Progress, Check, Status. Clicking a row opens its detail dialog.' },
+            { name: 'Banned cleanup bar', holds: 'A floating bar at the bottom, only when the selection contains banned accounts.' },
+            { name: 'Dialogs', holds: 'Add account · Bulk import (Paste text / TData) · Reassign proxies · Reauth · Account detail (Overview / Profile).' },
+          ]],
+        ],
+      },
+      {
+        id: 'getting-accounts-in',
+        title: 'Getting accounts in',
+        blocks: [
+          ['p', "Two ways in, both in the toolbar. Add account is the single-account form; Bulk import takes either a paste of session lines or a zip of Telegram Desktop tdata folders, which it converts for you."],
+          ['controls', [
+            {
+              id: 'ctl-add-account', name: 'Add account', where: 'Toolbar', kind: 'button', value: 'Add account',
+              rows: [
+                ['What it does', 'Opens a form for one account: ID, display name, phone, session string, api_id, api_hash, and an optional proxy.'],
+                ['Required', 'ID (no spaces or slashes), session string, api_id, api_hash. Display name and phone are optional.'],
+                ['Validation', 'Session string must be at least 100 characters — a Telethon StringSession is usually 350+. api_id must be a positive integer. api_hash must be exactly 32 hex characters.'],
+                ['When to use it', 'One account at a time, when you already have a Telethon session string. If you have tdata folders instead, use Bulk import — it converts them.'],
+              ],
+            },
+            {
+              id: 'ctl-proxy-toggle', name: 'Proxy', where: 'Add account dialog', kind: 'toggle', on: false,
+              rows: [
+                ['What it does', 'Reveals the proxy fields for this account: Type, Host, Port, User, Pass.'],
+                ['Default', 'Off — an account is created with no proxy unless you turn this on.'],
+                ['Type', 'socks5 or http. socks5 is the default selection.'],
+                ['If left off', 'The account is saved without a proxy. Check proxy then returns a 400 for it, and the proxy column in the list stays empty.'],
+              ],
+            },
+            {
+              id: 'ctl-bulk-import', name: 'Bulk import', where: 'Toolbar', kind: 'button', value: 'Bulk import',
+              rows: [
+                ['What it does', 'Opens a two-tab dialog. Paste text takes one account per line; TData converts a zip of Telegram Desktop tdata folders into sessions first.'],
+                ['Line format', 'id|display_name|phone|session_string|api_id|api_hash — pipe-separated, leave display_name and phone blank if unused.'],
+                ['Limit', '100 accounts per request. Paste more and the dialog says so, then imports only the first 100.'],
+                ['Proxies', 'A separate field takes one proxy per line, in any of the four accepted formats. Mixed formats in the same paste are fine.'],
+                ['When to use it', 'Any time you are adding more than one account — this is the normal path after a marketplace purchase.'],
+              ],
+            },
+          ]],
+          ['p', "The proxy field in Bulk import, the one in Reassign proxies and the single-line editor in an account's detail dialog all run through the same parser, so all three accept exactly the same four shapes and reject the same way:"],
+          ['table', {
+            head: ['Format', 'Notes'],
+            rows: [
+              ['type:host:port:user:pass', 'Fully explicit. type is socks5 or http.'],
+              ['host:port:user:pass', 'Type assumed socks5.'],
+              ['user:pass@host:port', 'Type assumed socks5.'],
+              ['type://user:pass@host:port', 'URL style.'],
+            ],
+          }],
+          ['p', "User and password are optional throughout. host:port is split on the last colon and user:pass on the first, so a password containing a colon survives intact; the auth half is split on the last @, so a password containing @ does too."],
+        ],
+      },
+      {
+        id: 'proxies',
+        title: 'One proxy per account',
+        blocks: [
+          ['p', "Two accounts behind one IP is the failure this page works hardest to prevent. If it happens, a red banner appears above the tiles counting the affected accounts, with a button that selects them and opens the reassign dialog directly."],
+          ['controls', [
+            {
+              id: 'ctl-reassign', name: 'Reassign proxies', where: 'Toolbar', kind: 'button', value: 'Reassign proxies',
+              rows: [
+                ['What it does', 'Assigns one distinct proxy per target account, in order.'],
+                ['Target accounts', 'A dropdown with two choices: all active accounts, or the current selection. Selection is disabled when nothing is selected.'],
+                ['All or nothing', 'Every line is parsed and deduplicated first. If there are fewer distinct valid proxies than target accounts, the whole request is rejected before a single row is written — never a partial apply, never a proxy reused across two accounts in the same call.'],
+                ['Accounts in use', 'An account with a live connection in any of the engine\'s pools right now — posting, discovery, health checker, profile manager, channel joiner, active warmup — is skipped rather than swapped, and reported back with the reason. Telegram has no way to change the proxy under an open connection. Re-run it after the session ends; there is no queue to drain.'],
+                ['When to use it', 'After a bulk import, when the shared-proxy banner appears, or whenever you replace a batch of proxies.'],
+              ],
+            },
+            {
+              id: 'ctl-target-mode', name: 'Target accounts', where: 'Reassign proxies dialog', kind: 'select', value: 'All active accounts',
+              rows: [
+                ['What it does', 'Chooses who gets a new proxy: every active account, or only the rows you ticked.'],
+                ['Default', 'All active accounts.'],
+                ['When to change it', 'Switch to the selection when you are fixing a specific group — the shared-proxy banner\'s own button does this for you.'],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'the-three-checks',
+        title: 'The three checks',
+        blocks: [
+          ['p', "Three separate checks, three separate things they can tell you, three independent five-minute cooldowns. They do not substitute for each other: an account can pass health and still be unusable, which is the whole reason the capability check exists."],
+          ['controls', [
+            {
+              id: 'ctl-check-health', name: 'Check health', where: 'Bulk actions bar · Account detail → Actions', kind: 'button', tone: 'ok', value: 'Check health',
+              rows: [
+                ['What it does', 'Connects the account\'s own Telegram client for the length of the call, confirms the session is authorised, and makes one lightweight self-lookup. Reports back active, banned, disabled or unknown, plus whatever restricted / scam / fake flags Telegram already attaches to the account.'],
+                ['What it cannot see', 'A spam block. A self-lookup cannot detect one; it only ever shows up reactively when a real send fails, and that lands the account in cooldown instead.'],
+                ['Rate limit', 'One per account per five minutes. Sooner returns 429, and the button in the detail dialog shows the seconds remaining instead.'],
+                ['Side effects', 'None on the Telegram side — no messages, no profile writes. Read-only.'],
+                ['When to use it', 'Right after import, and whenever an account starts behaving oddly.'],
+              ],
+            },
+            {
+              id: 'ctl-check-proxy', name: 'Check proxy', where: 'Bulk actions bar · Account detail → Actions', kind: 'button', value: 'Check proxy',
+              rows: [
+                ['What it does', 'Opens a raw SOCKS5 or HTTP CONNECT through the account\'s configured proxy to a Telegram data-centre address and reports whether it got through, with the latency in milliseconds.'],
+                ['Timeout', '10 seconds, hard.'],
+                ['No proxy configured', 'Returns a 400. In the detail dialog the button is disabled with a tooltip saying so.'],
+                ['Rate limit', 'One per account per five minutes, counted separately from the other two checks.'],
+                ['Side effects', 'Never touches the Telegram session at all — no MTProto handshake, just a TCP connect.'],
+                ['When to use it', 'When accounts stop working all at once, or after changing proxies. It separates "the proxy is dead" from "the account is dead".'],
+              ],
+            },
+            {
+              id: 'ctl-check-capability', name: 'Check capability', where: 'Bulk actions bar · Account detail → Actions', kind: 'button', value: 'Check capability',
+              rows: [
+                ['What it does', 'Asks the account to resolve a known-good public username and read that channel\'s message history — the exact pair of operations the engine performs for every monitored channel. Result is saved and shown in the list\'s Check column.'],
+                ['Why it exists', 'An account can be frozen, or simply unable to resolve anything, while the health check\'s restricted / scam / fake flags stay at zero the whole time. Freezing is enforced at the request level, not written onto the account, so a self-lookup cannot see it.'],
+                ['Results', 'ok · can\'t resolve · frozen · unknown · error. frozen is a real Telegram restriction, lifted only through their own verification flow. error means the check itself was rate-limited by Telegram, which is not a verdict either way.'],
+                ['Rate limit', 'One per account per five minutes, on its own timer.'],
+                ['In bulk', 'Runs as a background task with a 1–3 second gap between accounts.'],
+                ['When to use it', 'On every fresh batch before you scale, and whenever a pool goes quiet without any account reporting a problem.'],
+              ],
+            },
+          ]],
+          ['p', "The capability check targets Telegram's own official channel rather than anything of yours, so running it never disturbs your monitored channels or counts against their limits."],
+        ],
+      },
+      {
+        id: 'reading-the-list',
+        title: 'Reading the pool',
+        blocks: [
+          ['p', "Seven tiles across the top, each a live count and a filter — click one to show only those accounts, click again to clear. Active, Cooldown, Needs Reauth and Banned are mutually exclusive; Busy, Flagged and Dead are separate signals that can apply on top of any of them."],
+          ['controls', [
+            { id: 'ctl-tile-active', name: 'Active', where: 'Status tiles', kind: 'tile', tone: 'ok', value: '12',
+              rows: [['Counts', 'Accounts whose status is active, that are not flagged, and that have not failed a capability check.']] },
+            { id: 'ctl-tile-busy', name: 'Busy', where: 'Status tiles', kind: 'tile', value: '3',
+              rows: [['Counts', 'Accounts currently claimed by discovery or the commenting pool. An account claimed by one of the two is still free for the other, so this counts anything not free for both.']] },
+            { id: 'ctl-tile-cooldown', name: 'Cooldown', where: 'Status tiles', kind: 'tile', tone: 'warn', value: '2',
+              rows: [
+                ['Counts', 'Accounts waiting out a cooldown.'],
+                ['Breakdown', 'Hovering the tile lists the reasons behind the number: floodwait, peerflood, profile update, discovery.'],
+              ] },
+            { id: 'ctl-tile-reauth', name: 'Needs Reauth', where: 'Status tiles', kind: 'tile', value: '1',
+              rows: [['Counts', 'Accounts whose status is disabled — a dead session. These are the only accounts the Reauth button will act on.']] },
+            { id: 'ctl-tile-banned', name: 'Banned', where: 'Status tiles', kind: 'tile', tone: 'bad', value: '0',
+              rows: [['Counts', 'Accounts Telegram has banned. Selecting any of these brings up the cleanup bar at the bottom of the page.']] },
+            { id: 'ctl-tile-flagged', name: 'Flagged', where: 'Status tiles', kind: 'tile', tone: 'warn', value: '0',
+              rows: [
+                ['Counts', 'Accounts carrying Telegram\'s own restricted, scam or fake flag, as read during the last health check. Independent of status — an account can be active and flagged at once.'],
+                ['What to do', 'Do not throw it away. Give it no work for about two weeks and the flag lifts by itself. The mistake is keeping it commenting while it is flagged, not keeping it at all.'],
+              ] },
+            { id: 'ctl-tile-dead', name: 'Dead', where: 'Status tiles', kind: 'tile', tone: 'bad', value: '0',
+              rows: [
+                ['Counts', 'Accounts whose last capability check came back frozen or can\'t resolve — Telegram itself saying this account cannot do the one thing the engine needs.'],
+                ['Exception', 'An account you disabled yourself shows as Needs Reauth, not Dead, so a deliberate action is never masked by a capability verdict.'],
+                ['What to do', 'Do not delete it. Leave it alone for about three weeks, then run Check capability on it again — a meaningful share of frozen accounts come back on their own. Deleting on the day of the verdict throws away accounts that would have recovered.'],
+              ] },
+          ]],
+          ['p', "Below the tiles, one row per account. Narrow screens drop the middle columns first and keep Check and Status to the end."],
+          ['table', {
+            head: ['Column', 'Shows'],
+            rows: [
+              ['Comments', 'How many comments this account has posted. Clicking the number opens a histogram.'],
+              ['Last used', 'When the engine last used this account.'],
+              ['Added', 'When the account entered the pool. This is the anchor every warmup calculation counts from.'],
+              ['Proxy', 'The proxy currently assigned, with a warning marker when another active account shares it.'],
+              ['Days', 'Days rested before the first neurocommenting session, out of the required 3. Only populated while Auto-Warmup is on.'],
+              ['Progress', 'How far through the full 23-day warmup the account is — 3 resting days plus 20 ramp days. Reaches 100% once both are done.'],
+              ['Check', 'The verdict from the last capability check. Hover for the raw result and when it ran.'],
+              ['Status', 'The account\'s state in the pool. A dead capability verdict overrides it here, since such an account cannot be used whatever its status says.'],
+            ],
+          }],
+        ],
+      },
+      {
+        id: 'bulk-actions',
+        title: 'Acting on a selection',
+        blocks: [
+          ['p', "Tick rows and the bar under the tiles comes alive. One bulk operation runs at a time — while one is in flight the rest disable, rather than letting several overlapping batches run at once."],
+          ['controls', [
+            {
+              id: 'ctl-apply-template', name: 'Apply template', where: 'Bulk actions bar', kind: 'button', value: 'Apply template',
+              rows: [
+                ['What it does', 'Applies a saved profile template across the selected accounts. The template itself is built on the Profile Templates page.'],
+                ['When to use it', 'After import, once accounts have rested — giving a batch a face is part of warming it up.'],
+              ],
+            },
+            {
+              id: 'ctl-reauth', name: 'Reauth', where: 'Bulk actions bar', kind: 'button', tone: 'warn', value: 'Reauth',
+              rows: [
+                ['What it does', 'Opens a dialog to upload a fresh tdata export, as a single zip containing exactly one tdata folder, replacing a dead session on an existing account.'],
+                ['Selection rule', 'Exactly one account, and its status must be disabled. Any other selection disables the button and the tooltip says why.'],
+                ['Safety', 'The new session is validated with a real connection — through this account\'s own proxy, using its existing api_id and api_hash — before anything is written. If that fails you get a clear error and the existing session is left untouched.'],
+                ['On success', 'The session string is replaced; api_id and api_hash are not. Status returns to active unless the account was deliberately paused, cooldowns are cleared, and both check timers reset so the next health and proxy checks run fresh instead of waiting out a stale five minutes.'],
+                ['When to use it', 'When an account lands in Needs Reauth and you still have a working tdata for it.'],
+              ],
+            },
+            {
+              id: 'ctl-reset-counts', name: 'Reset counts', where: 'Bulk actions bar', kind: 'button', value: 'Reset counts',
+              rows: [
+                ['What it does', 'Sets the selected accounts\' comment counters back to zero and resumes any of them that were paused for hitting their limit.'],
+                ['What the limit is', 'A safety fuse. The count is cumulative, not daily — it never falls on its own, so an account that reaches its limit stops commenting and stays stopped until someone clears the counter. This button is that clearing.'],
+                ['Where the limit is set', 'Not here. On the Neurocommenting page, in the commenting pool: one value applied across every pooled account, or a separate value on a single account. There is no default — an account has no limit at all until one is set.'],
+                ['What it does not do', 'It does not delete comment history — the rows stay, so cost tracking and statistics are unaffected. It does not change the limit itself either.'],
+                ['Why it matters', 'Resume on its own would buy a capped account exactly one more post before it hit the same ceiling again, because the count never went down. Clearing the counter is what makes a recurring limit workable.'],
+                ['When to use it', 'When accounts are sitting at LIMIT REACHED and you want them working again without raising the cap.'],
+              ],
+            },
+            {
+              id: 'ctl-warmup-on', name: 'Auto-Warmup ON', where: 'Bulk actions bar', kind: 'button', tone: 'warn', value: 'Auto-Warmup ON',
+              rows: [
+                ['What it does', 'Turns on the per-account warmup lifecycle: a hard block on commenting, parsing and template application for the first 72 hours after the account was added, then a tightening daily comment cap from day 4 through day 23.'],
+                ['Default', 'Off. A newly added account is not warming up until you switch it on.'],
+                ['Anchored to', 'When the account was added, not when you flipped the switch. Turning it on for an already-aged account applies whatever stage its real age implies rather than re-locking it for three days.'],
+                ['Cost', 'A plain database write. No Telegram traffic, so it completes immediately.'],
+                ['When to use it', 'On every fresh batch, before anything else touches it.'],
+              ],
+            },
+            {
+              id: 'ctl-warmup-off', name: 'Auto-Warmup OFF', where: 'Bulk actions bar', kind: 'button', tone: 'bad', value: 'Auto-Warmup OFF',
+              rows: [
+                ['What it does', 'Removes the resting lockout and the ramp cap. The accounts become immediately available for commenting, parsing and template application at full limits.'],
+                ['Confirmation', 'Asks first, and says plainly that accounts flagged or banned as a result are on you.'],
+                ['Side effect', 'The Days and Progress columns go back to showing a dash, the same as an account that never opted in.'],
+                ['When to use it', 'On accounts that are genuinely already aged and that you have decided do not need the ramp.'],
+              ],
+            },
+            {
+              id: 'ctl-delete-banned', name: 'Delete banned', where: 'Floating bar, bottom of page', kind: 'button', tone: 'bad', value: 'Delete banned',
+              rows: [
+                ['What it does', 'Permanently removes the banned accounts in your selection, and their session data, from the pool.'],
+                ['Scope', 'Only the banned accounts in the selection. Selecting a mixed set never puts a healthy account at risk.'],
+                ['What survives', 'Comment history already logged stays. The deletion itself cannot be undone.'],
+                ['When to use it', 'Housekeeping, once you have accepted the losses in a batch.'],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'one-account',
+        title: 'One account up close',
+        blocks: [
+          ['p', "Clicking a row opens its dialog, which has two tabs: Overview and Profile. Overview holds four blocks in order — Info, Proxy, Actions, Danger zone."],
+          ['controls', [
+            {
+              id: 'ctl-display-name', name: 'Display name', where: 'Detail → Overview → Info', kind: 'field', value: 'Acc 101',
+              rows: [
+                ['What it does', 'Renames the account inside ATREOX only. This is a label for you, not the Telegram profile name — that lives on the Profile tab.'],
+              ],
+            },
+            {
+              id: 'ctl-edit-proxy', name: 'Edit proxy', where: 'Detail → Overview → Proxy', kind: 'button', value: 'Edit proxy',
+              rows: [
+                ['What it does', 'A single-line proxy editor for this one account, accepting the same four formats as everywhere else.'],
+                ['Clear proxy', 'A second button removes the proxy entirely, leaving the account with none.'],
+                ['When to use it', 'One-off fixes. For a batch, use Reassign proxies instead — it guarantees no two accounts end up sharing.'],
+              ],
+            },
+            {
+              id: 'ctl-danger-status', name: 'Manual status override', where: 'Detail → Overview → Danger zone', kind: 'select', value: 'active',
+              rows: [
+                ['What it does', 'Forces the account\'s status to one of four values: active, cooldown, banned, disabled.'],
+                ['Default', 'Whatever the account\'s current status is. The Save button stays disabled until you pick something different.'],
+                ['What it is really for', 'Parking an account you need kept out of circulation without deleting it. The usual case: no comment limit was set, the account has posted far more than it should have, and the next comment is the one that gets it banned. Moving it off active buys you time to decide.'],
+                ['Why parking works', 'The engine only ever builds its pool from accounts whose status is active. A parked account is never selected for commenting, even if its id is still sitting in the commenting pool. In the panel the pool\'s available column offers active accounts only, so it cannot be added back by accident — and disabled or banned accounts already in the pool are pulled out of it automatically.'],
+                ['Use disabled, not cooldown', 'Parking at cooldown does not hold. Setting it here writes no expiry, and on its next poll round the engine reactivates any cooldown account whose expiry is empty or already past — so the account quietly returns to active within one cycle. disabled stays put until you change it back.'],
+              ],
+            },
+            {
+              id: 'ctl-profile-tab', name: 'Profile tab', where: 'Detail → Profile', kind: 'button', tone: 'plain', value: 'Profile',
+              rows: [
+                ['What it does', 'Edits the real Telegram profile for this account: first name, last name, username, bio and avatar, with a live preview of how it will look.'],
+                ['Rate limits', 'One profile change per account per hour. Username is slower still at one change per account per 48 hours, since it is the most visible and searchable of the fields.'],
+                ['Avatar', 'Up to 5 MB.'],
+                ['When to use it', 'Single-account touch-ups. For a whole batch, build a template on the Profile Templates page and use Apply template.'],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'first-run',
+        title: 'First run',
+        blocks: [
+          ['p', "The shortest path from an empty pool to accounts a module can draw on."],
+          ['steps', [
+            "Bring the accounts in — Bulk import for a batch, Add account for one. Paste your proxies into the same dialog if you have them ready.",
+            "If you imported without proxies, run Reassign proxies now, before anything connects. One distinct proxy per account, or the request is refused outright.",
+            "Select everything and press Check health. Anything that comes back banned on its first contact with a new IP was never going to survive; note the seller.",
+            "Select everything again and press Check capability. This is the check that catches a frozen account while every other signal still reads clean.",
+            "Select the survivors and press Auto-Warmup ON. It is off by default, and this is the step that buys the accounts their first 72 hours of rest.",
+            "Wait out the rest, then use Apply template to give the batch a face.",
+          ]],
+          ['p', "After that the pool is ready for a module to claim from. The tiles are the thing to watch day to day: a rising Cooldown count is pacing, a rising Dead count is the accounts themselves."],
+          ['note', "Account changes reach the engine on their own: it re-reads the pool from the database every poll round, so an account you add, park or re-proxy is picked up within one poll interval without you doing anything else.",
+          ],
+        ],
+      },
+    ],
   },
   {
     slug: 'profile-templates',

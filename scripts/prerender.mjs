@@ -115,6 +115,28 @@ const section = (title, inner) => `<h2 style="${H2}">${esc(title)}</h2>\n${inner
    rendered without React for whoever arrives without it. */
 const NUM = 'display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle';
 
+/* Mirror of ControlReplica in guides.jsx — same shapes, same classes.
+   Inert by construction: these are spans with CSS, not inputs, so there
+   is nothing here that could take a value or send one anywhere. */
+function controlReplica(c) {
+  switch (c.kind) {
+    case 'toggle':
+      return `<span aria-hidden="true" class="g-r-toggle${c.on ? ' is-on' : ''}"></span>`;
+    case 'slider':
+      return `<span aria-hidden="true" class="g-r-slider"><span class="g-r-slider-fill" style="width:${c.pct ?? 50}%"></span><span class="g-r-slider-thumb" style="left:${c.pct ?? 50}%"></span></span>`;
+    case 'select':
+      return `<span aria-hidden="true" class="g-r-select">${esc(c.value)}<span class="g-r-caret">›</span></span>`;
+    case 'field':
+      return `<span aria-hidden="true" class="g-r-field">${esc(c.value)}</span>`;
+    case 'tile':
+      return `<span aria-hidden="true" class="g-r-tile${c.tone ? ' t-' + c.tone : ''}"><span class="g-r-tile-n">${esc(c.value)}</span></span>`;
+    case 'badge':
+      return `<span aria-hidden="true" class="g-r-badge${c.tone ? ' t-' + c.tone : ''}">${esc(c.value)}</span>`;
+    default:
+      return `<span aria-hidden="true" class="g-r-btn${c.tone ? ' t-' + c.tone : ''}">${esc(c.value || c.name)}</span>`;
+  }
+}
+
 function renderBlocks(blocks) {
   return blocks.map(([kind, v]) => {
     switch (kind) {
@@ -148,6 +170,22 @@ function renderBlocks(blocks) {
       case 'faq':
         return `<div class="g-faq">${v.map(qa =>
           `<details><summary>${esc(qa.q)}</summary><p class="g-p">${esc(qa.a)}</p></details>`).join('')}</div>`;
+
+      case 'map':
+        return `<ol class="g-map">${v.map((region, j) =>
+          `<li><span class="g-map-n">${String(j + 1).padStart(2, '0')}</span><span class="g-map-body"><span class="g-map-name">${esc(region.name)}</span><span class="g-map-holds">${esc(region.holds)}</span></span></li>`
+        ).join('')}</ol>`;
+
+      /* Mirror of ReaderBlocks' 'controls'. Every explanation row is in
+         this markup whether or not anyone ever opens the <details> —
+         the fold is presentation, the text is the page. */
+      case 'controls':
+        return `<div class="g-ctl">
+<p class="g-ctl-warn">Illustration, not the panel. Nothing here is connected — no state, no saving, no requests. Click a control to read what it does.</p>
+${v.map(c => `<details class="g-ctl-item"${c.id ? ` id="${esc(c.id)}"` : ''}><summary><span class="g-ctl-label"><span class="g-ctl-name">${esc(c.name)}</span>${c.where ? `<span class="g-ctl-where">${esc(c.where)}</span>` : ''}</span>${controlReplica(c)}</summary><dl class="g-ctl-rows">${
+          c.rows.map(([k, val]) => `<div><dt>${esc(k)}</dt><dd>${esc(val)}</dd></div>`).join('')
+        }</dl></details>`).join('\n')}
+</div>`;
 
       case 'figure': {
         const webp = webpSrc(v.src);
@@ -221,7 +259,9 @@ function renderGuide(guide, guides, mod) {
      its module's write-up, laid out as a lesson — same as the reader. */
   if (guide.intro) parts.push(section('Why it matters', `<p style="${P}">${esc(guide.intro)}</p>`));
 
-  if (mod) {
+  /* Superseded the moment the guide has a body of its own — same rule
+     as the reader, so the two never disagree about what a page holds. */
+  if (mod && !guide.body) {
     parts.push(section('Why it matters', `<p style="${P}">${esc(mod.problem)}</p>`));
     parts.push(section('What the module does', `<p style="${P}">${esc(mod.does)}</p>`));
     parts.push(section('Step by step',
