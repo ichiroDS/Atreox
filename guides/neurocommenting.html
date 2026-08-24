@@ -879,75 +879,156 @@
     .g-check input:checked ~ .g-check-t { opacity: 0.4; }
 
 
-    /* ── Module map: the panel's regions, in the order they appear ── */
-    .g-map { list-style: none; margin: 0 0 20px; padding: 0; max-width: var(--gcol); }
+    /* ── Module map: the panel's regions drawn as a floor plan ──
+       Each region is a wireframe window — a titled box, the way the
+       panel itself draws one — hung off a numbered spine that runs the
+       length of the block, because the catalog's order IS the order on
+       screen. Same markup both renderers always emitted; the plan is
+       entirely these rules. */
+    .g-map { list-style: none; margin: 4px 0 24px; padding: 0 0 0 40px; position: relative; max-width: var(--gcol); }
+    .g-map::before {
+      content: ''; position: absolute; left: 12px; top: 9px; bottom: 26px; width: 1px;
+      background: linear-gradient(180deg, rgba(0,217,255,0.35), rgba(0,217,255,0.14) 62%, transparent);
+    }
     .g-map li {
-      display: flex; gap: 14px; align-items: baseline;
-      padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+      position: relative; margin-bottom: 10px;
+      border: 1px solid var(--g-14); border-radius: 6px;
+      background: linear-gradient(180deg, rgba(0,217,255,0.025), rgba(0,0,0,0.22)), rgba(4,10,16,0.5);
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
     }
-    .g-map li:last-child { border-bottom: none; }
+    .g-map li:last-child { margin-bottom: 0; }
+    .g-map li:hover { border-color: var(--g-40); box-shadow: 0 0 22px rgba(0,217,255,0.07); }
     .g-map-n {
-      font-family: var(--mono); font-weight: 600; font-size: 0.6rem;
-      color: rgba(0,217,255,0.7); flex-shrink: 0;
+      position: absolute; left: -40px; top: 8px;
+      display: flex; align-items: center; justify-content: center;
+      width: 24px; height: 24px; border-radius: 3px;
+      border: 1px solid rgba(0,217,255,0.32);
+      background: linear-gradient(rgba(0,217,255,0.07), rgba(0,217,255,0.07)), var(--bg);
+      font-family: var(--mono); font-weight: 600; font-size: 0.58rem; line-height: 1;
+      color: var(--g);
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
     }
+    /* the stub that hangs the box on the spine */
+    .g-map-n::after {
+      content: ''; position: absolute; left: 100%; top: 50%; width: 16px; height: 1px;
+      background: var(--g-22);
+    }
+    .g-map li:hover .g-map-n { border-color: var(--g); box-shadow: 0 0 14px rgba(0,217,255,0.35); }
     .g-map-body { display: block; min-width: 0; }
     .g-map-name {
-      display: block; font-family: var(--sans); font-weight: 500;
-      font-size: 1rem; color: #fff; margin-bottom: 3px;
+      display: block; padding: 10px 16px 9px;
+      border-bottom: 1px solid var(--g-10); border-radius: 5px 5px 0 0;
+      background: linear-gradient(180deg, rgba(0,217,255,0.05), transparent);
+      font-family: var(--sans); font-weight: 500; font-size: 0.97rem; color: #fff;
     }
     .g-map-holds {
-      display: block; font-family: var(--sans); font-weight: 300;
-      font-size: 0.92rem; line-height: 1.6; color: rgba(255,255,255,0.66);
+      display: block; padding: 10px 16px 12px;
+      font-family: var(--sans); font-weight: 300;
+      font-size: 0.9rem; line-height: 1.6; color: rgba(255,255,255,0.62);
+    }
+    @media (max-width: 640px) {
+      .g-map { padding-left: 34px; }
+      .g-map-n { left: -34px; }
+      .g-map-n::after { width: 10px; }
+      .g-map-name { padding: 9px 13px 8px; }
+      .g-map-holds { padding: 9px 13px 11px; }
     }
 
-    /* ── Control replicas ────────────────────────────────────────────
-       Drawings of the panel's own controls, each folding open to what it
-       does. Everything here is a <span> with CSS — never an <input>,
+    /* ── Control replicas: one console per block ─────────────────────
+       A single framed console, not a stack of boxes. The header bar
+       names it an illustration; each row is [the control, drawn on a
+       dashed graph-paper stage | its name and panel address | +].
+       Everything on a stage is a <span> with CSS — never an <input>,
        never a handler — because this is an illustration inside a guide
        and anything that accepted a value would imply it went somewhere.
        The text under each one is in the markup whether the fold is open
        or shut, so the static page carries all of it. */
-    .g-ctl { margin: 0 0 22px; }
+    .g-ctl {
+      margin: 0 0 24px; border: 1px solid var(--g-14); border-radius: 8px;
+      background: linear-gradient(180deg, rgba(0,217,255,0.03) 0%, rgba(0,0,0,0.28) 100%), rgba(4,10,16,0.55);
+      overflow: hidden;
+    }
     .g-ctl-warn {
-      display: flex; align-items: flex-start; gap: 8px;
-      margin: 0 0 12px; padding: 10px 13px; border-radius: 6px;
-      border: 1px dashed var(--g-22); background: rgba(0,217,255,0.03);
-      font-family: var(--mono); font-weight: 400; font-size: 0.62rem;
-      letter-spacing: 0.04em; line-height: 1.65; color: rgba(255,255,255,0.5);
+      display: flex; align-items: flex-start; gap: 10px;
+      margin: 0; padding: 11px 16px;
+      border-bottom: 1px dashed var(--g-22); background: rgba(0,217,255,0.03);
+      font-family: var(--mono); font-weight: 400; font-size: 0.6rem;
+      letter-spacing: 0.05em; line-height: 1.7; color: rgba(255,255,255,0.48);
     }
-    .g-ctl-warn svg { flex-shrink: 0; margin-top: 2px; color: var(--g); }
+    .g-ctl-warn-badge {
+      flex-shrink: 0; margin-top: 1px; padding: 3px 8px; border-radius: 3px;
+      border: 1px dashed var(--g-40); background: var(--g-06);
+      font-weight: 600; font-size: 0.54rem; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--g); line-height: 1.4;
+    }
+    .g-ctl-warn-text { min-width: 0; }
 
-    .g-ctl-item {
-      border: 1px solid var(--g-14); border-radius: 6px;
-      background: rgba(4,10,16,0.5); margin-bottom: 8px;
-    }
-    .g-ctl-item:last-child { margin-bottom: 0; }
-    .g-ctl-item[open] { border-color: var(--g-40); background: rgba(0,217,255,0.04); }
+    .g-ctl-item { scroll-margin-top: 110px; }
+    .g-ctl-item + .g-ctl-item { border-top: 1px solid rgba(0,217,255,0.08); }
+    .g-ctl-item[open] { background: rgba(0,217,255,0.03); box-shadow: inset 2px 0 0 rgba(0,217,255,0.5); }
     .g-ctl-item > summary {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 16px; cursor: pointer; list-style: none;
-      padding: 13px 16px;
+      display: grid; grid-template-columns: 216px minmax(0, 1fr) auto;
+      grid-template-areas: "stage label plus";
+      align-items: center; gap: 10px 18px;
+      padding: 12px 16px; cursor: pointer; list-style: none;
+      transition: background-color 0.16s ease;
     }
+    .g-ctl-item > summary:hover { background: rgba(0,217,255,0.03); }
     .g-ctl-item > summary::-webkit-details-marker { display: none; }
-    .g-ctl-item > summary:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
-    .g-ctl-label { display: block; min-width: 0; }
+    .g-ctl-item > summary:focus-visible { outline: 1px solid var(--g); outline-offset: -2px; border-radius: 4px; }
+
+    /* the stage: where the drawing sits. Dashed edge + graph paper =
+       schematic, not screenshot — the "this is not live" cue itself. */
+    .g-ctl-stage {
+      grid-area: stage; align-self: stretch;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 58px; padding: 11px 10px;
+      border: 1px dashed rgba(0,217,255,0.22); border-radius: 5px;
+      background:
+        linear-gradient(rgba(0,217,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,217,255,0.04) 1px, transparent 1px),
+        radial-gradient(ellipse at center, rgba(0,217,255,0.05), transparent 72%),
+        rgba(2,6,10,0.6);
+      background-size: 11px 11px, 11px 11px, 100% 100%, auto;
+      transition: border-color 0.18s ease;
+    }
+    .g-ctl-item > summary:hover .g-ctl-stage,
+    .g-ctl-item[open] .g-ctl-stage { border-color: var(--g-40); }
+
+    .g-ctl-label { grid-area: label; display: block; min-width: 0; }
     .g-ctl-name {
       display: block; font-family: var(--sans); font-weight: 500;
-      font-size: 0.98rem; color: #fff; line-height: 1.3;
+      font-size: 0.98rem; color: #fff; line-height: 1.35;
+      transition: color 0.16s ease;
     }
+    .g-ctl-item[open] .g-ctl-name { color: var(--g-bright); }
     .g-ctl-where {
-      display: block; margin-top: 3px;
-      font-family: var(--mono); font-weight: 400; font-size: 0.58rem;
+      display: block; margin-top: 4px;
+      font-family: var(--mono); font-weight: 400; font-size: 0.57rem;
       letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.38);
     }
+    .g-ctl-where::before { content: '// '; color: rgba(0,217,255,0.5); }
 
-    .g-ctl-rows { margin: 0; padding: 0 16px 15px; }
-    .g-ctl-rows > div {
-      display: flex; gap: 14px; padding: 9px 0;
-      border-top: 1px solid rgba(255,255,255,0.06);
+    /* the fold affordance: a + that becomes × */
+    .g-ctl-plus {
+      grid-area: plus; position: relative;
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 1px solid var(--g-22);
+      transition: transform 0.22s ease, border-color 0.18s ease, box-shadow 0.18s ease;
     }
+    .g-ctl-plus::before, .g-ctl-plus::after {
+      content: ''; position: absolute; left: 50%; top: 50%; background: var(--g);
+    }
+    .g-ctl-plus::before { width: 10px; height: 1px; transform: translate(-50%, -50%); }
+    .g-ctl-plus::after  { width: 1px; height: 10px; transform: translate(-50%, -50%); }
+    .g-ctl-item > summary:hover .g-ctl-plus { border-color: var(--g); box-shadow: 0 0 12px rgba(0,217,255,0.3); }
+    .g-ctl-item[open] .g-ctl-plus { transform: rotate(45deg); border-color: var(--g-40); }
+
+    .g-ctl-rows { margin: 0 16px; padding: 4px 0 14px; border-top: 1px dashed var(--g-14); }
+    .g-ctl-rows > div { display: flex; gap: 16px; padding: 9px 0; }
+    .g-ctl-rows > div + div { border-top: 1px solid rgba(255,255,255,0.05); }
     .g-ctl-rows dt {
-      flex: 0 0 140px; margin: 0;
+      flex: 0 0 145px; margin: 0;
       font-family: var(--mono); font-weight: 500; font-size: 0.57rem;
       letter-spacing: 0.14em; text-transform: uppercase;
       color: rgba(0,217,255,0.65); padding-top: 3px;
@@ -959,39 +1040,67 @@
     }
 
     /* the drawings themselves */
-    .g-r-btn, .g-r-select, .g-r-field, .g-r-badge {
-      flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px;
+    .g-r-btn, .g-r-field {
+      display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
       border-radius: 4px; white-space: nowrap;
-      font-family: var(--mono); font-weight: 500; font-size: 0.6rem;
-      letter-spacing: 0.1em; text-transform: uppercase;
+      font-family: var(--mono); font-weight: 500;
+    }
+    .g-r-select, .g-r-badge {
+      display: inline-flex; align-items: center; max-width: 100%;
+      border-radius: 4px; white-space: nowrap;
+      font-family: var(--mono); font-weight: 500;
     }
     .g-r-btn {
-      padding: 8px 13px; border: 1px solid var(--g-40);
-      background: rgba(0,217,255,0.1); color: var(--g-bright);
+      padding: 9px 14px; border: 1px solid var(--g-40);
+      background: linear-gradient(180deg, rgba(0,217,255,0.16), rgba(0,217,255,0.07));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 0 14px rgba(0,217,255,0.08);
+      color: var(--g-bright);
+      font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
     }
-    .g-r-btn.t-ok   { border-color: rgba(63,214,140,0.4);  background: rgba(63,214,140,0.1);  color: var(--ok); }
-    .g-r-btn.t-bad  { border-color: rgba(255,97,97,0.4);   background: rgba(255,97,97,0.1);   color: var(--bad); }
-    .g-r-btn.t-warn { border-color: rgba(255,183,77,0.42); background: rgba(255,183,77,0.1);  color: #ffb74d; }
-    .g-r-btn.t-plain{ border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.72); }
+    .g-r-btn.t-ok   { border-color: rgba(63,214,140,0.4);  background: linear-gradient(180deg, rgba(63,214,140,0.16), rgba(63,214,140,0.06));  color: var(--ok);  box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 0 14px rgba(63,214,140,0.08); }
+    .g-r-btn.t-bad  { border-color: rgba(255,97,97,0.4);   background: linear-gradient(180deg, rgba(255,97,97,0.16), rgba(255,97,97,0.06));   color: var(--bad); box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 0 14px rgba(255,97,97,0.08); }
+    .g-r-btn.t-warn { border-color: rgba(255,183,77,0.42); background: linear-gradient(180deg, rgba(255,183,77,0.16), rgba(255,183,77,0.06)); color: #ffb74d;    box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 0 14px rgba(255,183,77,0.08); }
+    .g-r-btn.t-plain{ border-color: rgba(255,255,255,0.22); background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03)); color: rgba(255,255,255,0.75); box-shadow: inset 0 1px 0 rgba(255,255,255,0.07); }
 
     .g-r-select {
-      padding: 8px 11px; border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(0,217,255,0.04); color: #fff; text-transform: none;
-      letter-spacing: 0.02em; font-size: 0.68rem; min-width: 130px;
-      justify-content: space-between;
+      min-width: 140px; border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(2,6,10,0.7); color: #fff; overflow: hidden;
+      letter-spacing: 0.02em; font-size: 0.66rem;
     }
-    .g-r-select svg, .g-r-caret { color: var(--g); transform: rotate(90deg); flex-shrink: 0; }
-    .g-r-caret { display: inline-block; font-size: 0.85rem; line-height: 1; }
+    .g-r-select-v {
+      flex: 1 1 auto; min-width: 0; padding: 8px 10px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .g-r-caret {
+      flex-shrink: 0; align-self: stretch;
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 24px; border-left: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,217,255,0.06);
+    }
+    .g-r-caret::before {
+      content: ''; width: 6px; height: 6px; margin-top: -3px;
+      border-right: 1px solid var(--g); border-bottom: 1px solid var(--g);
+      transform: rotate(45deg);
+    }
 
     .g-r-field {
-      padding: 8px 11px; border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.5);
-      text-transform: none; letter-spacing: 0; font-size: 0.66rem;
-      min-width: 150px; max-width: 260px; overflow: hidden; text-overflow: ellipsis;
-      display: inline-block; white-space: nowrap;
+      min-width: 150px; padding: 8px 11px; border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(2,6,10,0.75); box-shadow: inset 0 1px 4px rgba(0,0,0,0.5);
+      color: rgba(255,255,255,0.85);
+      letter-spacing: 0.01em; font-size: 0.64rem;
+    }
+    /* the caret that says "this is an input" — static when motion is off */
+    .g-r-field::after {
+      content: ''; display: inline-block; width: 1px; height: 11px; margin-left: 3px;
+      vertical-align: -2px; background: var(--g); box-shadow: 0 0 6px rgba(0,217,255,0.8);
+    }
+    @keyframes g-caret-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+    @media (prefers-reduced-motion: no-preference) {
+      .g-r-field::after { animation: g-caret-blink 1.15s linear infinite; }
     }
 
-    .g-r-badge { padding: 5px 10px; border: 1px solid; font-size: 0.56rem; }
+    .g-r-badge { gap: 7px; padding: 5px 11px; border: 1px solid; border-radius: 999px; font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; }
+    .g-r-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; flex-shrink: 0; }
     .g-r-badge.t-ok   { border-color: rgba(63,214,140,0.32); background: rgba(63,214,140,0.1); color: var(--ok); }
     .g-r-badge.t-bad  { border-color: rgba(255,97,97,0.32);  background: rgba(255,97,97,0.1);  color: var(--bad); }
     .g-r-badge.t-warn { border-color: rgba(255,183,77,0.34); background: rgba(255,183,77,0.1); color: #ffb74d; }
@@ -999,45 +1108,77 @@
 
     .g-r-toggle {
       flex-shrink: 0; position: relative; display: inline-block;
-      width: 40px; height: 22px; border-radius: 11px;
-      border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.06);
+      width: 42px; height: 23px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.22);
+      background: linear-gradient(180deg, rgba(0,0,0,0.5), rgba(255,255,255,0.05));
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
     }
     .g-r-toggle::after {
       content: ''; position: absolute; top: 2px; left: 2px;
-      width: 16px; height: 16px; border-radius: 50%;
-      background: rgba(255,255,255,0.45);
+      width: 17px; height: 17px; border-radius: 50%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.35));
+      box-shadow: 0 1px 3px rgba(0,0,0,0.5);
     }
-    .g-r-toggle.is-on { border-color: var(--g-40); background: rgba(0,217,255,0.22); }
-    .g-r-toggle.is-on::after { left: auto; right: 2px; background: var(--g); box-shadow: 0 0 10px rgba(0,217,255,0.7); }
+    .g-r-toggle.is-on {
+      border-color: var(--g-40);
+      background: linear-gradient(180deg, rgba(0,217,255,0.3), rgba(0,217,255,0.14));
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.35), 0 0 12px rgba(0,217,255,0.2);
+    }
+    .g-r-toggle.is-on::after {
+      left: auto; right: 2px;
+      background: linear-gradient(180deg, #8beaff, var(--g));
+      box-shadow: 0 0 10px rgba(0,217,255,0.7), 0 1px 3px rgba(0,0,0,0.4);
+    }
 
     .g-r-slider {
       flex-shrink: 0; position: relative; display: inline-block;
-      width: 150px; height: 4px; border-radius: 2px;
+      width: 150px; max-width: 100%; height: 4px; border-radius: 2px;
       background: rgba(255,255,255,0.14);
     }
-    .g-r-slider-fill { position: absolute; inset: 0 auto 0 0; border-radius: 2px; background: var(--g); }
+    .g-r-slider-fill { position: absolute; inset: 0 auto 0 0; border-radius: 2px; background: linear-gradient(90deg, rgba(0,217,255,0.55), var(--g)); }
     .g-r-slider-thumb {
       position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 50%;
       transform: translate(-50%, -50%); background: var(--g);
+      border: 2px solid #06131c;
       box-shadow: 0 0 10px rgba(0,217,255,0.6);
     }
 
     .g-r-tile {
       flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
-      min-width: 54px; padding: 7px 12px; border-radius: 6px;
-      border: 1px solid var(--g-14); background: rgba(0,217,255,0.03);
+      min-width: 64px; padding: 9px 14px; border-radius: 6px;
+      border: 1px solid var(--g-22);
+      background: linear-gradient(180deg, rgba(0,217,255,0.07), rgba(0,217,255,0.015));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
     }
-    .g-r-tile-n { font-family: var(--sans); font-weight: 600; font-size: 1.05rem; color: #fff; }
-    .g-r-tile.t-ok   { border-color: rgba(63,214,140,0.3); }
-    .g-r-tile.t-ok   .g-r-tile-n { color: var(--ok); }
-    .g-r-tile.t-bad  { border-color: rgba(255,97,97,0.3); }
-    .g-r-tile.t-bad  .g-r-tile-n { color: var(--bad); }
-    .g-r-tile.t-warn { border-color: rgba(255,183,77,0.32); }
-    .g-r-tile.t-warn .g-r-tile-n { color: #ffb74d; }
+    .g-r-tile-n { font-family: var(--sans); font-weight: 600; font-size: 1.15rem; line-height: 1; color: #fff; text-shadow: 0 0 14px rgba(0,217,255,0.35); }
+    .g-r-tile.t-ok   { border-color: rgba(63,214,140,0.35); background: linear-gradient(180deg, rgba(63,214,140,0.08), rgba(63,214,140,0.015)); }
+    .g-r-tile.t-ok   .g-r-tile-n { color: var(--ok); text-shadow: 0 0 14px rgba(63,214,140,0.4); }
+    .g-r-tile.t-bad  { border-color: rgba(255,97,97,0.35); background: linear-gradient(180deg, rgba(255,97,97,0.08), rgba(255,97,97,0.015)); }
+    .g-r-tile.t-bad  .g-r-tile-n { color: var(--bad); text-shadow: 0 0 14px rgba(255,97,97,0.4); }
+    .g-r-tile.t-warn { border-color: rgba(255,183,77,0.37); background: linear-gradient(180deg, rgba(255,183,77,0.08), rgba(255,183,77,0.015)); }
+    .g-r-tile.t-warn .g-r-tile-n { color: #ffb74d; text-shadow: 0 0 14px rgba(255,183,77,0.4); }
+
+    /* Opening animates where the browser can do it declaratively
+       (Chromium's ::details-content); elsewhere the fold just opens,
+       which is exactly what it did before. */
+    @media (prefers-reduced-motion: no-preference) {
+      :root { interpolate-size: allow-keywords; }
+      .g-ctl-item::details-content {
+        height: 0; overflow: clip; opacity: 0; transform: translateY(-5px);
+        transition: height 0.28s ease, opacity 0.28s ease, transform 0.28s ease,
+                    content-visibility 0.28s allow-discrete;
+      }
+      .g-ctl-item[open]::details-content { height: auto; opacity: 1; transform: none; }
+    }
 
     @media (max-width: 640px) {
-      .g-ctl-item > summary { flex-direction: column; align-items: flex-start; gap: 11px; padding: 13px 14px; }
-      .g-ctl-rows { padding: 0 14px 14px; }
+      .g-ctl-item > summary {
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas: "label plus" "stage stage";
+        gap: 12px 14px; padding: 13px 14px;
+      }
+      .g-ctl-stage { min-height: 54px; }
+      .g-ctl-rows { margin: 0 14px; }
       .g-ctl-rows > div { flex-direction: column; gap: 4px; }
       .g-ctl-rows dt { flex: none; padding-top: 0; }
       .g-r-slider, .g-r-field { width: 100%; max-width: none; }

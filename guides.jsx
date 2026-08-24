@@ -260,7 +260,8 @@ function ControlReplica({ c }) {
     case 'select':
       return (
         <span aria-hidden="true" className="g-r-select">
-          {c.value}<ChevronRight size={12} />
+          <span className="g-r-select-v">{c.value}</span>
+          <span className="g-r-caret" />
         </span>
       );
     case 'field':
@@ -403,8 +404,9 @@ function ReaderBlocks({ blocks, onOpen }) {
           </ol>
         );
 
-      /* Replicas of the panel's own controls, each one a <details> whose
-         summary IS the control. Two things this is deliberately not: it
+      /* Replicas of the panel's own controls: one console per block,
+         each row a <details> whose summary holds the control drawn on
+         its own dashed stage. Two things this is deliberately not: it
          is not live (no state, no handlers, no requests — the replicas
          are CSS, drawn once in whatever the panel's default is) and it
          is not the delivery mechanism for the text. Every row of every
@@ -415,17 +417,21 @@ function ReaderBlocks({ blocks, onOpen }) {
         return (
           <div key={i} className="g-ctl">
             <p className="g-ctl-warn">
-              <Shield size={13} /> Illustration, not the panel. Nothing here is connected —
-              no state, no saving, no requests. Click a control to read what it does.
+              <span className="g-ctl-warn-badge">Illustration</span>
+              <span className="g-ctl-warn-text">
+                Not the live panel — nothing here is connected: no state, no saving,
+                no requests. Click a control to read what it does.
+              </span>
             </p>
             {v.map((c, j) => (
               <details key={j} className="g-ctl-item" id={c.id}>
                 <summary>
+                  <span className="g-ctl-stage"><ControlReplica c={c} /></span>
                   <span className="g-ctl-label">
                     <span className="g-ctl-name">{c.name}</span>
                     {c.where && <span className="g-ctl-where">{c.where}</span>}
                   </span>
-                  <ControlReplica c={c} />
+                  <span className="g-ctl-plus" aria-hidden="true" />
                 </summary>
                 <dl className="g-ctl-rows">
                   {c.rows.map(([k, val], m) => (
