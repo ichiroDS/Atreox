@@ -2190,7 +2190,7 @@ const GUIDES = [
         title: 'The channels it watches',
         blocks: [
           ['p', "The monitored list is what the engine polls. It is re-read at the top of every round, so a channel added here is being watched a minute later without anything being restarted."],
-          ['p', "Edits here save as you make them. There is no Save changes step — removing a row or flipping a switch is written immediately, and the count above the table is the current list."],
+          ['p', "Edits here save as you make them. There is no Save changes step — removing a row is written immediately, and the count above the table is the current list. Every monitored channel is commented on for real; there is no per-channel switch and no rehearsal mode."],
           ['controls', [
             {
               id: 'ctl-add-channels', name: 'Add channel(s)', where: 'Channels', kind: 'button', value: 'Add channel(s)',
@@ -2200,16 +2200,6 @@ const GUIDES = [
                 ['What counts as valid', 'Five to thirty-two characters, letters, digits and underscores, not starting with a digit. A line that does not match is reported back as invalid rather than failing the whole paste.'],
                 ['Duplicates', 'Dropped, case-insensitively, both against the existing list and against the rest of the same paste. The result says how many were added, how many were duplicates and how many were invalid.'],
                 ['No limit', 'There is no cap on lines. This only appends to a list — nothing touches Telegram until the engine next polls.'],
-              ],
-            },
-            {
-              id: 'ctl-live-posting', name: 'Live posting', where: 'Channels → a row', kind: 'toggle', on: false,
-              rows: [
-                ['What it does', 'Marks this channel as one that is posted to for real even while the engine is running in dry run.'],
-                ['What it is not', 'It is not a per-channel on/off for commenting. It is an exception list to one global setting.'],
-                ['When dry run is on', 'Only channels with this switch on receive real comments. Everything else is generated and written to the log as what would have been posted.'],
-                ['When dry run is off', 'The switch is not consulted at all. Every monitored channel gets real comments regardless of how it is set here.'],
-                ['Where dry run lives', 'On the server, not on this page. Nothing in the panel shows which way it is set, so this switch reads as more powerful than it is.'],
               ],
             },
             {
@@ -2282,13 +2272,13 @@ const GUIDES = [
             {
               id: 'ctl-stat-attempts', name: 'Total Attempts', where: 'Stats', kind: 'tile', value: '148',
               rows: [
-                ['Counts', 'Successful plus unsuccessful. Comments generated in dry run are in neither — nothing was attempted, so they are excluded from both.'],
+                ['Counts', 'Successful plus unsuccessful — every real send that was attempted.'],
               ],
             },
             {
               id: 'ctl-stat-successful', name: 'Successful', where: 'Stats', kind: 'tile', tone: 'ok', value: '131',
               rows: [
-                ['Counts', 'Comments that were really posted. Real sends only, never dry-run ones.'],
+                ['Counts', 'Comments that reached Telegram.'],
               ],
             },
             {
@@ -2312,7 +2302,7 @@ const GUIDES = [
           ['table', {
             head: ['Kind', 'What it means'],
             rows: [
-              ['generated', 'A comment was written. Whether it was actually sent is on the row itself — a dry-run comment is generated and not posted.'],
+              ['generated', 'A comment was written. Whether it then reached Telegram is on the row itself — a send that failed is logged as post failed as well.'],
               ['skipped', 'The model declined to write one: the persona’s own skip instruction, or the sensitive-content rule.'],
               ['error', 'Generation failed before there was anything to send.'],
               ['rate limited', 'The post was caught but no account was free to take it. Logged before any account is chosen, so this row has no account attached.'],
