@@ -48,9 +48,9 @@ function LegalPage({ badge, title, lastUpdated, sections, setPage }) {
         <div className="panel" style={{ padding: '24px 28px', display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap', marginTop: 20 }}>
           <div style={{ flex: 1 }}>
             <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.88rem', color: 'white', marginBottom: 4 }}>Questions about this policy?</p>
-            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>Contact us at <a href="mailto:dsevcenko006@gmail.com" style={{ color: ACCENT, textDecoration: 'none' }}>dsevcenko006@gmail.com</a></p>
+            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>Contact us at <a href="mailto:hello@atreoxai.com" style={{ color: ACCENT, textDecoration: 'none' }}>hello@atreoxai.com</a></p>
           </div>
-          <GlassBtn onClick={() => window.location.href = 'mailto:dsevcenko006@gmail.com'}>Contact Us <ArrowUpRight size={14} /></GlassBtn>
+          <GlassBtn onClick={() => window.location.href = 'mailto:hello@atreoxai.com'}>Contact Us <ArrowUpRight size={14} /></GlassBtn>
         </div>
       </div>
 
@@ -98,7 +98,7 @@ function PrivacyPage({ setPage }) {
       heading: 'Your Rights',
       body: [
         'You have the right to access, correct, or delete your personal data at any time. You may also request that we restrict processing of your data or object to certain uses.',
-        'To exercise these rights, please contact us at dsevcenko006@gmail.com. We will respond to all requests within 30 days.',
+        'To exercise these rights, please contact us at hello@atreoxai.com. We will respond to all requests within 30 days.',
       ],
     },
     {
@@ -144,7 +144,7 @@ function TermsPage({ setPage }) {
       heading: 'Payments and Refunds',
       body: [
         'All purchases are processed securely through our payment provider. Subscription fees are charged on a recurring basis unless you cancel before the next billing cycle.',
-        'We offer a 30-day money-back guarantee for all paid courses. If you are unsatisfied for any reason, contact us within 30 days of purchase for a full refund. Refunds are not available after 30 days.',
+        'Refunds are handled case by case — contact us at hello@atreoxai.com. Where a failure on our side prevents the service from doing what it is sold to do, we will put it right, normally by extending your subscription or issuing service credit. Statutory rights of consumers in the EU/EEA, including the right of withdrawal, are not affected by anything in these Terms.',
         'Prices are subject to change with 30 days\' notice. Any price changes will not affect your current billing period.',
       ],
     },
