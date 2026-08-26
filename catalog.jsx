@@ -1370,7 +1370,7 @@ const GUIDES = [
           ]],
           ['p', "What each preset is worth, per account:"],
           ['table', {
-            head: ['Preset', 'Actions / hour', 'Actions / day', 'Joins / day', 'Messages / day'],
+            head: ['Preset', 'Actions / hour', 'Actions / day', 'Joins / day', 'Saved Messages / day'],
             rows: [
               ['Careful', '3', '10', '1', '2'],
               ['Normal', '5', '15', '2', '3'],
@@ -1452,7 +1452,7 @@ const GUIDES = [
               ],
             },
             {
-              id: 'ctl-messages-day', name: 'Messages / day', where: 'Limits', kind: 'field', value: '3',
+              id: 'ctl-messages-day', name: 'Saved Messages / day', where: 'Limits', kind: 'field', value: '3',
               rows: [
                 ['What it does', 'Caps exactly two actions: Saved-messages notes and Forward to Saved Messages. Both write only to the account’s own Saved Messages — nothing here sends a message to another person or chat.'],
                 ['Default', '3.'],
@@ -1509,8 +1509,8 @@ const GUIDES = [
               ['Listen to voice messages', 'Activity', 'No', 'Economy mode'],
               ['GIF search / inline bots', 'Entertainment', 'No', 'Economy mode'],
               ['Sticker packs', 'Entertainment', 'No', 'Economy mode'],
-              ['Forward to Saved Messages', 'Social', 'No', 'Messages / day'],
-              ['Saved-messages notes', 'Social', 'No', 'Messages / day'],
+              ['Forward to Saved Messages', 'Social', 'No', 'Saved Messages / day'],
+              ['Saved-messages notes', 'Social', 'No', 'Saved Messages / day'],
               ['Archive chats', 'Groups', 'No', '—'],
               ['Mute chats / notification settings', 'Groups', 'No', '—'],
               ['View profiles', 'Profile', 'No', '—'],
