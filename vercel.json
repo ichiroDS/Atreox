@@ -12,6 +12,7 @@
     { "source": "/guides/:slug", "destination": "/guides/:slug.html" },
     { "source": "/referral-program", "destination": "/referral-program.html" },
     { "source": "/privacy",      "destination": "/index.html"   },
-    { "source": "/terms",        "destination": "/index.html"   }
+    { "source": "/terms",        "destination": "/index.html"   },
+    { "source": "/contact",      "destination": "/index.html"   }
   ]
 }
