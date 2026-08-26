@@ -27,7 +27,8 @@ const ACCENT_RGB = window.ACCENT_RGB;
    variable on Vercel. Replace with the real key from the Cloudflare
    dashboard; until then the widget renders an error and the form cannot
    be submitted, which is the correct failure. */
-const TURNSTILE_SITE_KEY = window.TURNSTILE_SITE_KEY || 'MISSING_TURNSTILE_SITE_KEY';
+const TURNSTILE_SITE_KEY = window.TURNSTILE_SITE_KEY || '';
+const TURNSTILE_CONFIGURED = /^[A-Za-z0-9_-]{8,}$/.test(TURNSTILE_SITE_KEY);
 
 /* Must match api/contact.js. */
 const HONEYPOT_FIELD = 'company_website';
@@ -269,6 +270,28 @@ function ContactForm() {
   );
 }
 
+/* Until the Turnstile site key is set, the form cannot be submitted -
+   the server refuses anything without a verified token, correctly. Render
+   the address instead of a widget stuck on an error: a visibly broken
+   contact form is worse than none, and this way the page can ship before
+   the keys exist and starts working the moment they do, with no second
+   deploy. */
+function ContactFallback() {
+  return (
+    <div className="panel" style={{ padding: '34px 30px', textAlign: 'center' }}>
+      <p style={{
+        fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem',
+        color: 'rgba(255,255,255,0.62)', lineHeight: 1.7, maxWidth: 470, margin: '0 auto 20px',
+      }}>
+        Email us and it reaches the same place.
+      </p>
+      <a href="mailto:hello@atreoxai.com" className="btn-solid" style={{ display: 'inline-flex' }}>
+        hello@atreoxai.com <ArrowUpRight size={14} />
+      </a>
+    </div>
+  );
+}
+
 function ContactPage({ setPage }) {
   return (
     <div>
@@ -282,7 +305,7 @@ function ContactPage({ setPage }) {
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
           <Pill dot>Get in touch</Pill>
           <div style={{ marginTop: 26 }}>
-            <ContactForm />
+            {TURNSTILE_CONFIGURED ? <ContactForm /> : <ContactFallback />}
           </div>
 
           <p className="g-note" style={{ marginTop: 32 }}>
