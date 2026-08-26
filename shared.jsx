@@ -336,8 +336,8 @@ function Navbar({ currentPage, setPage }) {
       }}>
         {/* Wordmark alone, then the version marker — the slashed-A mark
             next to the word made the lockup double-say the name, so up
-            here the word carries it by itself (the mark still lives in
-            the favicon and the footer). The marker sits outside the
+            here the word carries it by itself (the mark lives on as the
+            favicon). The marker sits outside the
             click target on purpose: inside, it would take the pointer
             cursor and read as part of the home link rather than as a
             quiet statement of which version this is. */}
