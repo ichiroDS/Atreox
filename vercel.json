@@ -1,5 +1,5 @@
 {
-  "buildCommand": "node scripts/prerender.mjs",
+  "buildCommand": "node scripts/build-app.mjs && node scripts/prerender.mjs",
   "outputDirectory": ".",
   "framework": null,
   "trailingSlash": false,
