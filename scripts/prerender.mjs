@@ -446,6 +446,7 @@ const STATIC_PAGES = [
   ['/pricing', '0.9'],
   ['/guides', '0.8'],
   ['/referral-program', '0.5'],
+  ['/contact', '0.4'],
   ['/privacy', '0.3'],
   ['/terms', '0.3'],
 ];
