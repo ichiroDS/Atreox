@@ -237,6 +237,23 @@ function tiltHandlers(max = 5, lift = 0) {
     onMouseLeave: e => { e.currentTarget.style.transform = ''; },
   };
 }
+/* ── magneticHandlers: the element leans a few px toward the cursor and
+   snaps home when it leaves. Same contract as tiltHandlers: mutates
+   style.transform directly (no re-render), so keep it off elements whose
+   React style sets a transform of its own. ── */
+function magneticHandlers(max = 4) {
+  if (REDUCED_MOTION) return {};
+  return {
+    onMouseMove: e => {
+      const el = e.currentTarget;
+      const r = el.getBoundingClientRect();
+      const px = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
+      const py = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
+      el.style.transform = `translate(${(px * max).toFixed(1)}px, ${(py * max).toFixed(1)}px)`;
+    },
+    onMouseLeave: e => { e.currentTarget.style.transform = ''; },
+  };
+}
 function SectionHeading({ children, style }) {
   return (
     <h2 style={{
@@ -317,13 +334,15 @@ function Navbar({ currentPage, setPage }) {
         borderBottom: `1px solid rgba(${ACCENT_RGB},${scrolled ? 0.18 : 0.09})`,
         transition: 'background 0.25s ease, border-color 0.25s ease',
       }}>
-        {/* Logo mark + wordmark, then the version marker. The marker sits
-            outside the click target on purpose: inside, it would take the
-            pointer cursor and read as part of the home link rather than as a
+        {/* Wordmark alone, then the version marker — the slashed-A mark
+            next to the word made the lockup double-say the name, so up
+            here the word carries it by itself (the mark still lives in
+            the favicon and the footer). The marker sits outside the
+            click target on purpose: inside, it would take the pointer
+            cursor and read as part of the home link rather than as a
             quiet statement of which version this is. */}
         <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
           <div onClick={() => handleNav('home')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <LogoMark height={22} />
             <Wordmark />
           </div>
           <span style={{
@@ -354,7 +373,7 @@ function Navbar({ currentPage, setPage }) {
           <div style={{ flex: '1 1 0', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 14 }}>
             <SocialLinks size={16} />
             <span aria-hidden="true" style={{ width: 1, height: 18, background: `rgba(${ACCENT_RGB},0.16)` }} />
-            <a href={window.withReferral(DASHBOARD_URL)} target="_self" className="btn-solid" style={{ padding: '10px 20px', fontSize: '0.7rem' }}>
+            <a href={window.withReferral(DASHBOARD_URL)} target="_self" className="btn-solid btn-glitch" style={{ padding: '10px 20px', fontSize: '0.7rem' }}>
               Enter panel <ArrowUpRight size={13} />
             </a>
           </div>
@@ -438,6 +457,74 @@ function BlurText({ text, style, delay = 120, glowWords = [] }) {
           >{word}</motion.span>
         );
       })}
+    </span>
+  );
+}
+
+/* ── DecryptText: the headline resolves out of glyph noise, left to
+   right. The hacker cut of BlurText — same trigger (inView, once) and
+   the same word markup once settled, so glowWords land exactly as they
+   do there. Characters that haven't been reached yet churn through
+   GLYPHS in the accent colour at low opacity; the real text arrives at
+   an uneven pace, which is what makes it read as decoding rather than
+   as a wipe. REDUCED_MOTION renders the plain words and nothing moves. ── */
+const DECRYPT_GLYPHS = '#$%&@!?<>[]{}=+*/10';
+function DecryptText({ text, style, glowWords = [], speed = 26, startDelay = 0 }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
+  const [revealed, setRevealed] = useState(REDUCED_MOTION ? text.length : 0);
+  const [, setTick] = useState(0);  /* re-randomises the noise each step */
+
+  /* No observer, no trigger — and unlike BlurText, whose failure mode
+     was an invisible line, this one's would be a headline of permanent
+     garbage. Where IntersectionObserver doesn't exist the run starts
+     unconditionally. */
+  const go = isInView || !window.IntersectionObserver;
+
+  useEffect(() => {
+    if (!go || REDUCED_MOTION) return;
+    let n = 0, iv;
+    const t = setTimeout(() => {
+      iv = setInterval(() => {
+        n += 1 + Math.floor(Math.random() * 2);
+        if (n >= text.length) { n = text.length; clearInterval(iv); }
+        setRevealed(n);
+        setTick(x => x + 1);
+      }, speed);
+    }, startDelay);
+    return () => { clearTimeout(t); clearInterval(iv); };
+  }, [go]);
+
+  const glowSet = new Set(glowWords);
+  const words = [];
+  let pos = 0;
+  for (const word of text.split(' ')) {
+    const isGlow = glowSet.has(word.replace(/[.,!?]+$/, ''));
+    if (pos + word.length <= revealed) {
+      words.push(
+        <span key={pos} className={isGlow ? 'glow-word' : undefined}
+          style={{ display: 'inline-block', marginRight: '0.28em' }}>{word}</span>
+      );
+    } else {
+      const cut = Math.max(0, revealed - pos);
+      const noise = word.slice(cut).replace(/./g, () =>
+        DECRYPT_GLYPHS[Math.floor(Math.random() * DECRYPT_GLYPHS.length)]);
+      words.push(
+        <span key={pos} style={{ display: 'inline-block', marginRight: '0.28em' }}>
+          {word.slice(0, cut)}
+          <span style={{ color: `rgba(${ACCENT_RGB},0.5)` }}>{noise}</span>
+        </span>
+      );
+    }
+    pos += word.length + 1;
+  }
+
+  /* The noise is meaningless to a screen reader, so the real sentence
+     rides along visually hidden and the churn is aria-hidden. */
+  return (
+    <span ref={ref} style={style}>
+      <span style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}>{text}</span>
+      <span aria-hidden="true">{words}</span>
     </span>
   );
 }
@@ -536,11 +623,12 @@ function PageHero({ badge, title, sub }) {
   return (
     <section style={{ paddingTop: 170, paddingBottom: 84, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: `1px solid rgba(${ACCENT_RGB},0.12)` }}>
       <SectionBadge>{badge}</SectionBadge>
-      <BlurText text={title} style={{
+      <DecryptText text={title} style={{
+        display: 'block',
         fontFamily: SERIF, fontWeight: 500,
         fontSize: 'clamp(2.5rem, 4.6vw, 4rem)', color: 'white',
         lineHeight: 1.08, letterSpacing: '-0.015em', marginTop: 22, marginBottom: 20
-      }} delay={90} />
+      }} />
       <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1.02rem', color: 'rgba(255,255,255,0.66)', maxWidth: 640, margin: '0 auto', lineHeight: 1.7 }}>
         {sub}
       </p>
@@ -573,7 +661,7 @@ function SectionLockup({ title, children, style }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
         <span aria-hidden="true" style={{ fontFamily: MONO, fontWeight: 600, fontSize: '1rem', lineHeight: 1, color: ACCENT, userSelect: 'none' }}>//</span>
         <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.6rem, 3vw, 2.1rem)', color: 'white', letterSpacing: '-0.01em', lineHeight: 1 }}>
-          {title}
+          <DecryptText text={title} />
         </h2>
         <div aria-hidden="true" className="section-rule" style={{ flex: '1 1 32px', minWidth: 32 }} />
       </div>
@@ -662,7 +750,7 @@ function BgColorSystem({ page }) {
 
 Object.assign(window, {
   ACCENT, ACCENT_RGB, REDUCED_MOTION,
-  TypeText, tiltHandlers,
+  TypeText, tiltHandlers, magneticHandlers, DecryptText,
   motion, AnimatePresence, useInView,
   ArrowUpRight, Play, Zap, Palette, BarChart3, Shield, Check, Star,
   ChevronRight, ChevronDown, Users, BookOpen, GitBranch, Code2, Cpu,

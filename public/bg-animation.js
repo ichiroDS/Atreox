@@ -49,6 +49,7 @@
 
     var W = 0, H = 0;
     var pts = [];
+    var packets = [];      /* pulses travelling node-to-node — see frame() */
     var mouse = { x: -9999, y: -9999 };
     var raf = 0;
 
@@ -133,6 +134,34 @@
         }
       }
 
+      /* data packets: every so often a pulse rides one of the links, so
+         the field reads as a network carrying something rather than a
+         constellation standing still. Endpoints are the node objects
+         themselves, so a packet's path bends as its nodes drift. */
+      if (packets.length < 3 && Math.random() < 0.012) {
+        p = pts[(Math.random() * pts.length) | 0];
+        var near = null, nd = LINK;
+        for (j = 0; j < pts.length; j++) {
+          q = pts[j];
+          if (q === p) continue;
+          dx = p.x - q.x; dy = p.y - q.y;
+          d = Math.sqrt(dx * dx + dy * dy);
+          if (d < nd) { nd = d; near = q; }
+        }
+        if (near) packets.push({ a: p, b: near, t: 0 });
+      }
+      for (i = packets.length - 1; i >= 0; i--) {
+        var pk = packets[i];
+        pk.t += 0.016;
+        if (pk.t >= 1) { packets.splice(i, 1); continue; }
+        var kx = pk.a.x + (pk.b.x - pk.a.x) * pk.t;
+        var ky = pk.a.y + (pk.b.y - pk.a.y) * pk.t;
+        ctx.fillStyle = 'rgba(' + ACCENT_RGB + ',0.1)';
+        ctx.beginPath(); ctx.arc(kx, ky, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(' + ACCENT_RGB + ',0.7)';
+        ctx.beginPath(); ctx.arc(kx, ky, 1.7, 0, Math.PI * 2); ctx.fill();
+      }
+
       /* cursor-to-node links — brighter, makes the field feel alive */
       for (i = 0; i < pts.length; i++) {
         p = pts[i];
@@ -181,6 +210,25 @@
     window.addEventListener('resize', function () { resize(); if (REDUCED) staticFrame(); });
 
     if (REDUCED) { staticFrame(); return; }
+
+    /* Scroll parallax: the grid pattern and the lower glow trail the
+       page at a fraction of scroll speed. Background-position rather
+       than transform on the grid — the layer is viewport-sized, so
+       translating it would slide it off screen, while shifting the
+       repeating pattern cannot. The glow is a huge blob anchored past
+       the bottom edge; a small translate just lets it surface slowly. */
+    var grid = document.getElementById('bg-grid');
+    var glow2 = document.getElementById('bg-glow-2');
+    var pRaf = 0;
+    function applyParallax() {
+      pRaf = 0;
+      var y = window.scrollY || 0;
+      if (grid) grid.style.backgroundPosition = '0 ' + (-(y * 0.06)).toFixed(1) + 'px';
+      if (glow2) glow2.style.transform = 'translateY(' + (-(y * 0.05)).toFixed(1) + 'px)';
+    }
+    window.addEventListener('scroll', function () {
+      if (!pRaf) pRaf = requestAnimationFrame(applyParallax);
+    }, { passive: true });
 
     window.addEventListener('mousemove', function (e) {
       mouse.x = e.clientX; mouse.y = e.clientY;
