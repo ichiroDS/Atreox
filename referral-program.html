@@ -1344,6 +1344,16 @@
       .btn-solid::after { display: none; }
     }
   </style>
+  <!-- Vercel Web Analytics. Served from our own origin (/_vercel/...),
+       so no third-party host appears in the network log or in the privacy
+       policy, and it sets no cookies - which is what keeps the site free
+       of a consent banner. Aggregate page views and referrers only; the
+       question it exists to answer is whether the guides are read.
+       Requires Analytics to be enabled on the Vercel project; until then
+       the request 404s harmlessly and nothing else is affected.
+       scripts/prerender.mjs uses this file as the shell for every
+       generated page, so this one line covers the guides too. -->
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
   <!-- ── Boot splash: ring mark spins while JS/fonts initialize ── -->

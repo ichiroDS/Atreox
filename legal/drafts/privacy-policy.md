@@ -215,25 +215,39 @@ entirely by Stripe.
 > supervisory authority. We have no process. Worth writing one down
 > internally, separately from this document.
 
-## 9. Cookies
+## 9. Cookies and analytics
 
-> `[DECISION]` **Depends on the analytics decision.** As of today the
-> marketing site sets **no cookies and runs no analytics** — I checked.
-> The live policy nonetheless says cookies are used to "analyse site usage
-> and assist in our marketing efforts", which is not true.
->
-> - If analytics stays cookieless and aggregate-only (the recommendation
->   in the analytics proposal), this section says so, and **no cookie
->   banner is required** — which is worth real money in conversion and
->   maintenance.
-> - If we ever adopt anything that sets a cookie for analytics or
->   advertising, this section changes and a consent banner becomes
->   mandatory.
->
-> Separately: the dashboard sets a **`atreox_ref` referral cookie** (90
-> days, httpOnly) and authentication cookies via Clerk. Both are strictly
-> necessary for functions the user has asked for, so they do not need
-> consent — but they should be **listed here**, which today they are not.
+**This site sets no cookies for analytics or advertising, and therefore
+shows no cookie banner.** That is a deliberate outcome, not an oversight,
+and it is worth keeping.
+
+**Analytics.** We use Vercel Web Analytics. It is served from our own
+domain (`/_vercel/insights/`), so no third-party host is contacted, and
+it sets no cookies. It records aggregate page views and referrers — which
+pages are read and roughly where visitors arrived from. It does not build
+a profile of you and does not follow you between sites.
+
+**Cookies that are set**, all of them strictly necessary for something
+you asked for, and therefore not requiring consent:
+
+| Cookie | Set by | What for | Life |
+|---|---|---|---|
+| `atreox_ref` | the dashboard | Remembers which partner referred you so their commission is attributed | 90 days, httpOnly |
+| Session cookies | Clerk | Keeps you signed in to the dashboard | Session / as set by Clerk |
+
+**Spam protection.** The contact form loads Cloudflare Turnstile, which
+checks that a submission comes from a person rather than a script. It sets
+no cookies. It loads **only on the contact page** — not while you are
+reading a guide.
+
+> `[LAWYER]` The "strictly necessary, so no consent needed" position for
+> the referral cookie is the one worth a second opinion. It is set on a
+> first visit, before any account exists, and it exists so a third party
+> gets paid — which is closer to an affiliate-tracking purpose than to a
+> technical necessity, and affiliate cookies are not always treated as
+> exempt. If it turns out not to be exempt, the fix is a banner on first
+> visit, which would be a real loss and is worth knowing about before
+> someone else raises it.
 
 ## 10. Children
 

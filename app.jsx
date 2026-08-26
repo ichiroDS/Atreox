@@ -5,7 +5,7 @@ const {
   Navbar, BgColorSystem,
   HomePage,
   FunctionsPage, PricingPage, GuidesPage,
-  PrivacyPage, TermsPage, ReferralPage,
+  PrivacyPage, TermsPage, ReferralPage, ContactPage,
   guideHref, guideFromPath,
 } = window;
 
@@ -32,6 +32,7 @@ const PATH_TO_PAGE = {
   '/privacy':   'privacy',
   '/terms':     'terms',
   '/referral-program': 'referral',
+  '/contact':   'contact',
 };
 
 const PAGE_TO_PATH = {
@@ -42,6 +43,7 @@ const PAGE_TO_PATH = {
   'privacy':   '/privacy',
   'terms':     '/terms',
   'referral':  '/referral-program',
+  'contact':   '/contact',
 };
 
 /* Scroll to an anchor once the incoming page has actually rendered.
@@ -144,6 +146,7 @@ function App() {
       case 'guides':    return <GuidesPage    setPage={navigate} />;
       case 'privacy':   return <PrivacyPage   setPage={navigate} />;
       case 'terms':     return <TermsPage     setPage={navigate} />;
+      case 'contact':   return <ContactPage   setPage={navigate} />;
       case 'referral':  return <ReferralPage  setPage={navigate} />;
       default:          return <HomePage      setPage={navigate} />;
     }

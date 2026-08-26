@@ -43,6 +43,7 @@ const APP_FILES = [
   'new-pages.jsx',
   'legal-pages.jsx',
   'referral-page.jsx',
+  'contact-page.jsx',
   'app.jsx',
 ];
 
