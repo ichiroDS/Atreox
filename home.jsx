@@ -14,7 +14,7 @@ const {
   motion, useInView,
   ArrowUpRight, Zap, Shield, Globe, Brain, Check, Clock, Server, Ban, X,
   Network, Sparkles, MessageSquare, Layers, BookOpen,
-  BlurText, FooterBar, CrossLinks, SectionLockup, Pill,
+  DecryptText, magneticHandlers, FooterBar, CrossLinks, SectionLockup, Pill,
   TypeText, REDUCED_MOTION, SOCIAL_LINKS,
   MODULES, MODULE_BY_KEY, PIPELINE,
   FULL_MONTHLY, FULL_YEARLY, YEARLY_SAVING, CHEAPEST_MODULE, eur,
@@ -674,7 +674,7 @@ function Hero({ setPage }) {
   }, []);
 
   return (
-    <section style={{ position: 'relative', overflow: 'hidden', minHeight: 860 }}>
+    <section className="hero-crosshair" style={{ position: 'relative', overflow: 'hidden', minHeight: 860 }}>
       {/* The hero runs wider than the 1280 the rest of the page sits in —
           the card needs the room for eight modules, and widening the whole
           block rather than just the card keeps the pair centred on the same
@@ -687,9 +687,9 @@ function Hero({ setPage }) {
             className="overline" style={{ display: 'block', marginBottom: 22 }}>
             {'// '}<TypeText text="The ultimate Telegram growth engine" startDelay={1200} /><span className="cursor" />
           </motion.p>
-          <BlurText text="AI-powered Telegram growth, on autopilot."
-            style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(2.7rem, 5.8vw, 4.4rem)', color: 'white', lineHeight: 1.08, letterSpacing: '-0.015em', maxWidth: 640, marginBottom: 20 }}
-            delay={110}
+          <DecryptText text="AI-powered Telegram growth, on autopilot."
+            style={{ display: 'block', fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(2.7rem, 5.8vw, 4.4rem)', color: 'white', lineHeight: 1.08, letterSpacing: '-0.015em', maxWidth: 640, marginBottom: 20 }}
+            startDelay={250}
             glowWords={['Telegram']}
           />
           {/* positioning line — see POSITIONING at the top of this file */}
@@ -705,7 +705,7 @@ function Hero({ setPage }) {
           </motion.p>
           <motion.div initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }} animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.1 }}
             style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', marginBottom: 30 }}>
-            <a href={window.withReferral('https://app.atreoxai.com')} target="_self" className="btn-solid cta-breathe" style={{ padding: '15px 28px', fontSize: '0.8rem' }}>
+            <a href={window.withReferral('https://app.atreoxai.com')} target="_self" className="btn-solid cta-breathe" style={{ padding: '15px 28px', fontSize: '0.8rem' }} {...magneticHandlers(5)}>
               Enter panel <ArrowUpRight size={15} />
             </a>
             <button className="btn-outline" onClick={() => {
@@ -784,9 +784,9 @@ function WhatThisIsSection({ setPage }) {
             <motion.button key={m.key} type="button" onClick={() => setPage('functions', 'fn-' + m.key)}
               initial={{ opacity: 0, y: 14 }} animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.45, delay: 0.2 + i * 0.05 }}
-              className="panel panel-hover"
+              className="panel panel-hover mod-tile"
               style={{ padding: '18px 18px', textAlign: 'left', background: 'transparent', display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <Icon size={17} color={GREEN} />
+              <span className="mod-tile-icon" aria-hidden="true"><Icon size={17} color={GREEN} /></span>
               <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.65rem', letterSpacing: '0.13em', textTransform: 'uppercase', color: 'white', lineHeight: 1.35 }}>
                 {m.name}
               </span>
@@ -860,6 +860,31 @@ function AudienceSection() {
 ══════════════════════════════════════ */
 
 /* — shared chrome for a stage mock — */
+/* Counts a figure up from zero when its mock mounts. Every stage swap
+   remounts its mock (the stage body is keyed), so the numbers tick in
+   with the panel instead of standing there pre-filled. Tabular digits,
+   so the row doesn't wobble while they run. */
+function useCountUp(target, ms = 750) {
+  const [v, setV] = useState(REDUCED_MOTION ? target : 0);
+  useEffect(() => {
+    if (REDUCED_MOTION) return;
+    let raf;
+    const t0 = performance.now();
+    const step = now => {
+      const k = Math.min(1, (now - t0) / ms);
+      setV(Math.round(target * (1 - Math.pow(1 - k, 3))));
+      if (k < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target, ms]);
+  return v;
+}
+function CountN({ to, ms }) {
+  const v = useCountUp(to, ms);
+  return <span style={{ fontVariantNumeric: 'tabular-nums' }}>{v}</span>;
+}
+
 function MockFrame({ title, right, children }) {
   return (
     <div style={{ border: `1px solid rgba(${GREEN_RGB},0.16)`, borderRadius: 5, overflow: 'hidden', background: 'rgba(0,0,0,0.32)' }}>
@@ -891,11 +916,11 @@ function Verdict({ ok, children }) {
 /* 01 — discovery results */
 function MockFind() {
   const rows = [
-    ['@CryptoAlphaCalls', '18.4k', '42', true],
-    ['@Web3BuildersHub', '9.1k', '27', true],
-    ['@AltcoinRadar', '31.2k', '3', false],
-    ['@DeadSignalsDaily', '54.8k', '0', false],
-    ['@BuildersLounge', '6.7k', '19', true],
+    ['@CryptoAlphaCalls', '18.4k', 42, true],
+    ['@Web3BuildersHub', '9.1k', 27, true],
+    ['@AltcoinRadar', '31.2k', 3, false],
+    ['@DeadSignalsDaily', '54.8k', 0, false],
+    ['@BuildersLounge', '6.7k', 19, true],
   ];
   return (
     <MockFrame title="Channel Parser · results" right="scored">
@@ -903,7 +928,7 @@ function MockFind() {
         <div key={name} style={{ ...mockRow, opacity: ok ? 1 : 0.42 }}>
           <span style={{ color: ok ? GREEN : 'rgba(255,255,255,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: '1 1 auto', minWidth: 0 }}>{name}</span>
           <span style={{ color: 'rgba(255,255,255,0.35)', flexShrink: 0, width: 46, textAlign: 'right' }}>{members}</span>
-          <span style={{ color: 'rgba(255,255,255,0.35)', flexShrink: 0, width: 62, textAlign: 'right' }}>{comments} cmts</span>
+          <span style={{ color: 'rgba(255,255,255,0.35)', flexShrink: 0, width: 62, textAlign: 'right' }}><CountN to={comments} /> cmts</span>
           <Verdict ok={ok}>{ok ? 'accept' : 'reject'}</Verdict>
         </div>
       ))}
@@ -919,6 +944,14 @@ function MockWarm() {
     ['acct_0150', 46, 'reacted'],
     ['acct_0151', 22, 'resting'],
   ];
+  /* bars grow in from zero on mount — one flag flipped a frame after
+     mount is enough, the CSS transition does the rest */
+  const [grown, setGrown] = useState(REDUCED_MOTION);
+  useEffect(() => {
+    if (REDUCED_MOTION) return;
+    const raf = requestAnimationFrame(() => setGrown(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
   return (
     <MockFrame title="Active Warmup · status" right="window open">
       {rows.map(([id, pct, act]) => (
@@ -926,9 +959,9 @@ function MockWarm() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 7, fontFamily: MONO, fontSize: '0.64rem' }}>
             <span style={{ color: 'rgba(255,255,255,0.6)', flexShrink: 0 }}>{id}</span>
             <span style={{ color: `rgba(${GREEN_RGB},0.7)`, fontSize: '0.58rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{act}</span>
-            <span style={{ marginLeft: 'auto', color: 'rgba(255,255,255,0.3)', flexShrink: 0 }}>{pct}%</span>
+            <span style={{ marginLeft: 'auto', color: 'rgba(255,255,255,0.3)', flexShrink: 0 }}><CountN to={pct} />%</span>
           </div>
-          <div className="mini-bar"><i style={{ width: pct + '%' }} /></div>
+          <div className="mini-bar"><i style={{ width: (grown ? pct : 0) + '%', transition: 'width 0.8s cubic-bezier(0.16,1,0.3,1)' }} /></div>
         </div>
       ))}
     </MockFrame>
@@ -1000,7 +1033,7 @@ function MockReact() {
               display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 3,
               border: `1px solid rgba(${GREEN_RGB},0.24)`, background: `rgba(${GREEN_RGB},0.07)`,
               fontFamily: MONO, fontSize: '0.66rem', color: 'rgba(255,255,255,0.75)',
-            }}>{e} {n}</span>
+            }}>{e} <CountN to={n} /></span>
           ))}
         </div>
       </div>
@@ -1606,11 +1639,18 @@ function HomePage({ setPage }) {
       <Hero setPage={setPage} />
       <WhatThisIsSection setPage={setPage} />
       <AudienceSection />
-      <PipelineSection setPage={setPage} />
+      {/* The two banded sections give the scroll its rhythm: the core
+          pipeline and the comparison table sit on darker full-bleed
+          plates, so the page reads as blocks rather than one pour. */}
+      <div className="section-band">
+        <PipelineSection setPage={setPage} />
+      </div>
       <SocialSection />
       <PriceTeaserSection setPage={setPage} />
       <TrustSection setPage={setPage} />
-      <ComparisonSection />
+      <div className="section-band">
+        <ComparisonSection />
+      </div>
       <FAQSection setPage={setPage} />
       <ReferralSection setPage={setPage} />
       <CtaBannerSection setPage={setPage} />
