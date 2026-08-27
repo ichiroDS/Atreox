@@ -1706,9 +1706,14 @@ function HomePage({ setPage }) {
   return (
     <div>
       <Hero setPage={setPage} />
-      <VideoSection setPage={setPage} />
       <WhatThisIsSection setPage={setPage} />
       <AudienceSection />
+      {/* After "Who it's for" and before "How it runs": by this point the
+          reader knows what the product is and whether it is aimed at them,
+          which is the moment a demo answers a question rather than posing
+          one - and the clip then leads straight into the section that
+          explains the pipeline it just showed. */}
+      <VideoSection setPage={setPage} />
       {/* The two banded sections give the scroll its rhythm: the core
           pipeline and the comparison table sit on darker full-bleed
           plates, so the page reads as blocks rather than one pour. */}
