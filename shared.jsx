@@ -753,6 +753,85 @@ function BgColorSystem({ page }) {
   return null;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   LiteVideo — a YouTube video with no YouTube on the page.
+
+   THE CONSTRAINT. The Privacy Policy says this site sets no cookies for
+   analytics or advertising and therefore shows no consent banner. A
+   normal YouTube <iframe> breaks that on page load: it contacts Google
+   hosts and can set cookies before the visitor has done anything at
+   all. So the player is not on the page.
+
+   WHAT IS ON THE PAGE is a poster served from our own origin, a button
+   and a line of text saying what clicking will do. No iframe, no
+   third-party script, and — verified in the network panel, not assumed
+   — zero requests to any Google host until the click.
+
+   The poster is deliberately NOT i.ytimg.com. Google's thumbnail host
+   would be a request to Google on every page view, which is exactly the
+   thing this component exists to avoid; a facade that leaks the request
+   it was built to prevent is worse than no facade, because it looks
+   like a solution.
+
+   ON CLICK the iframe is created against youtube-nocookie.com, Google's
+   privacy-enhanced host. The click is the consent: the note on the
+   poster states the consequence beforehand, so nobody arrives at a
+   third party without having asked to.
+
+   Autoplay is on in the embed URL only because the user just pressed
+   play — it continues that action rather than starting one.
+   ═══════════════════════════════════════════════════════════════ */
+function LiteVideo({ id, title, poster, caption, note }) {
+  const [playing, setPlaying] = useState(false);
+
+  /* The no-JS and pre-hydration path. Until React runs, and for anyone
+     without it, this is an ordinary link to the watch page: it costs a
+     click to leave the site, and it costs nothing to load. */
+  if (!id) {
+    return (
+      <figure className="g-video">
+        <div className="g-video-frame" style={{ cursor: 'default' }}>
+          <img src={poster} alt="" width="1280" height="720" loading="lazy" decoding="async" />
+          <span className="g-video-note">Video coming soon</span>
+        </div>
+        {caption && <figcaption>{caption}</figcaption>}
+      </figure>
+    );
+  }
+
+  return (
+    <figure className="g-video">
+      {playing ? (
+        <div className="g-video-frame">
+          <iframe
+            src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1`}
+            title={title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          />
+        </div>
+      ) : (
+        <button
+          type="button"
+          className="g-video-frame"
+          aria-label={`Play: ${title}`}
+          onClick={() => setPlaying(true)}
+        >
+          {/* alt="" because the button already has an accessible name and
+              the poster carries no information the label does not. */}
+          <img src={poster} alt="" width="1280" height="720" loading="lazy" decoding="async" />
+          <span className="g-video-play" aria-hidden="true" />
+          <span className="g-video-note">
+            {note || 'Plays from YouTube · nothing is loaded from Google until you press play'}
+          </span>
+        </button>
+      )}
+      {caption && <figcaption>{caption}</figcaption>}
+    </figure>
+  );
+}
+
 Object.assign(window, {
   ACCENT, ACCENT_RGB, REDUCED_MOTION,
   TypeText, tiltHandlers, magneticHandlers, DecryptText,
@@ -764,5 +843,5 @@ Object.assign(window, {
   LogoMark, Wordmark, Navbar, BlurText, FadeTop, FadeBottom,
   SectionBadge, SectionHeading, GlassBtn, FooterBar, BgColorSystem,
   MONO, SERIF, PageHero, PageSection, SectionLockup, Pill, CrossLinks,
-  TelegramIcon, YouTubeIcon, SOCIAL_LINKS, SocialLinks, Ban,
+  TelegramIcon, YouTubeIcon, SOCIAL_LINKS, SocialLinks, Ban, LiteVideo,
 });

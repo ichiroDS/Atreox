@@ -1983,6 +1983,28 @@ const GUIDES = [
     video: null,
     body: [
       {
+        id: 'video-guide',
+        title: 'Watch it first',
+        blocks: [
+          ['p', "The whole setup, start to first posted comment, in one run-through. The written sections below cover the same ground in more detail and are the reference to come back to; this is the fastest way to see the shape of it."],
+          /* ── PUT THE YOUTUBE ID IN `id` BELOW ──
+             Just the id, not the URL: for
+             https://www.youtube.com/watch?v=dQw4w9WgXcQ that is
+             "dQw4w9WgXcQ". While it is null the block renders the poster
+             with "Video coming soon" and stays inert, which is why it is
+             safe to ship before the recording exists.
+
+             `poster` is a file in this repo on purpose — see LiteVideo in
+             shared.jsx. Do not point it at i.ytimg.com. */
+          ['video', {
+            id: null,
+            title: 'Setting up Neurocommenting',
+            poster: '/public/video/neurocommenting-guide.jpg',
+            caption: 'Full walkthrough — pool, channels, delays, persona, first comment.',
+          }],
+        ],
+      },
+      {
         id: 'what-it-is',
         title: 'What this page is',
         blocks: [

@@ -33,7 +33,7 @@ const {
   ArrowUpRight, Play, BookOpen, ChevronRight, Shield, Zap, X,
   PageHero, PageSection, SectionLockup, Pill, CrossLinks, FooterBar,
   MONO, SERIF, GUIDES, MODULE_BY_KEY, eur, REDUCED_MOTION,
-  guideHref, guideFromPath, GUIDE_BY_SLUG,
+  guideHref, guideFromPath, GUIDE_BY_SLUG, LiteVideo,
 } = window;
 
 const GREEN = window.ACCENT;
@@ -455,6 +455,22 @@ function ReaderBlocks({ blocks, onOpen }) {
          not something each guide entry has to ask for. */
       case 'figure':
         return <GuideFigure key={i} v={v} />;
+
+      /* The player is not on the page until it is asked for — see
+         LiteVideo in shared.jsx for why, and for what is verified about
+         it. The class names come from index.html, like every other
+         block, so this and prerender.mjs cannot drift. */
+      case 'video':
+        return (
+          <LiteVideo
+            key={i}
+            id={v.id}
+            title={v.title}
+            poster={v.poster}
+            caption={v.caption}
+            note={v.note}
+          />
+        );
 
       /* a verdict you read without reading: green passes, red doesn't */
       case 'plates':
