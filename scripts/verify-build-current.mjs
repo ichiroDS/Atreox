@@ -63,15 +63,30 @@ const KEEP = process.argv.includes('--write');
 const gitRaw = (...args) =>
   execFileSync('git', args, { cwd: ROOT, encoding: 'utf8' });
 
+/* NUL-separated, always. Without -z, git applies core.quotePath: any path
+   holding a non-ASCII byte comes back wrapped in quotes with its bytes
+   escaped to octal, so a Cyrillic screenshot filename arrives as the literal
+   string "public/screenshots/\320\241...png" — which matches no file on
+   disk. Such a path then reads as missing in both snapshots and is silently
+   skipped, i.e. the one class of file this check would quietly stop
+   checking. -z is the only output format git never quotes. */
+const NUL = String.fromCharCode(0);
+
+const splitZ = (out) => out.split(NUL).filter(Boolean);
+
+/* A -z porcelain record is "XY PATH". A rename emits a SECOND record holding
+   the original path with no status prefix, so anything that does not open
+   with two status characters and a space is that continuation and is skipped
+   rather than mistaken for a path of its own. */
+const STATUS_RE = /^[ MADRCU?!][ MADRCU?!] /;
+
 const porcelain = () =>
-  gitRaw('status', '--porcelain', '--untracked-files=all')
-    .split('\n')
-    .filter(Boolean);
+  splitZ(gitRaw('status', '--porcelain', '--untracked-files=all', '-z'))
+    .filter((record) => STATUS_RE.test(record));
 
-const pathOf = (line) => line.slice(3).trim().replace(/^"|"$/g, '');
+const pathOf = (record) => record.slice(3);
 
-const trackedFiles = () =>
-  gitRaw('ls-files').split('\n').filter(Boolean);
+const trackedFiles = () => splitZ(gitRaw('ls-files', '-z'));
 
 /* ── Volatile output ───────────────────────────────────────────────
    sitemap.xml stamps <lastmod> with the date of the build, so it differs
@@ -106,6 +121,43 @@ const readIfExists = (file) => {
   const full = path.join(ROOT, file);
   return fs.existsSync(full) ? fs.readFileSync(full) : null;
 };
+
+/* GitHub Actions annotations. Workflow commands are just stdout lines, so
+   this is inert everywhere else — no dependency, no branch to keep in sync.
+   Capped at 10 so a wholesale mismatch does not bury the run in annotations;
+   the count in the summary still tells the whole story. */
+function annotate(files) {
+  if (process.env.GITHUB_ACTIONS !== 'true') return;
+
+  for (const file of files.slice(0, 10)) {
+    console.log(
+      `::error file=${file},title=Generated file is out of date::` +
+        `${file} is not what the current sources produce. Run \`npm run build\` ` +
+        'and commit the result — or, if you edited this file by hand, move the ' +
+        'change into the source it is generated from.',
+    );
+  }
+  if (files.length > 10) {
+    console.log(`::error title=Generated files out of date::and ${files.length - 10} more`);
+  }
+
+  const summary = process.env.GITHUB_STEP_SUMMARY;
+  if (summary) {
+    fs.appendFileSync(
+      summary,
+      [
+        '### Build is not current',
+        '',
+        `${files.length} generated file(s) differ from what the sources produce:`,
+        '',
+        ...files.map((f) => `- \`${f}\``),
+        '',
+        'Run `npm run build` locally and commit the result.',
+        '',
+      ].join('\n'),
+    );
+  }
+}
 
 function main() {
   /* Snapshot everything the build could possibly write: every tracked file,
@@ -166,6 +218,14 @@ function main() {
     console.log('\nverify-build: PASS — the generated files match what the sources produce.');
     return 0;
   }
+
+  /* On a runner, say it where it can be read without downloading the log.
+     A ::error:: line becomes a check annotation, which shows on the commit,
+     on the PR, and through the API — so "which file" is answerable by
+     anyone looking at the red tick, not only by whoever can open the raw
+     log. The first run of this workflow failed with nothing visible but
+     "Process completed with exit code 1", which is how this got added. */
+  annotate(stale);
 
   console.error(
     `\nverify-build: FAIL — ${stale.length} generated file(s) do not match what the ` +
