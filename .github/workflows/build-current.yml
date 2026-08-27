@@ -14,11 +14,16 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      # 24, matching the Node the committed output is produced with locally.
+      # A checker on a different major than the builder can only ever report
+      # differences that are not the developer's doing - and the v5 actions
+      # replace v4, whose Node 20 runtime is deprecated and was already being
+      # forced onto 24 by the runner.
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       # ci, not install: the build output has to be reproduced from the exact
