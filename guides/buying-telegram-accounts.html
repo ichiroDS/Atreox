@@ -887,6 +887,83 @@
       color: rgba(255,255,255,0.4); line-height: 1.7;
     }
 
+    /* ── Video: a facade, not an embed ──
+       The player is NOT on the page. Until somebody clicks, this is a
+       self-hosted poster, a button and a line of text — no iframe, no
+       script, and not one request to a Google host. That is what keeps
+       the "no cookies, no consent banner" claim in the Privacy Policy
+       true, and it is why the poster is served from /public/video/
+       rather than from i.ytimg.com, which would be a Google request on
+       every page load and would defeat the whole arrangement.
+
+       On click the iframe is created pointing at youtube-nocookie.com.
+       The class names live here, once, because guides.jsx and
+       scripts/prerender.mjs both emit them and must not drift. */
+    .g-video { margin: 22px 0; }
+    .g-video-frame {
+      position: relative; display: block; width: 100%;
+      aspect-ratio: 16 / 9; overflow: hidden;
+      border: 1px solid var(--g-14); border-radius: 6px;
+      background: #05090d; padding: 0; cursor: pointer;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+    .g-video-frame:hover, .g-video-frame:focus-visible {
+      border-color: var(--g-40);
+      box-shadow: 0 0 0 1px var(--g-10), 0 0 34px rgba(0,217,255,0.10);
+    }
+    .g-video-frame img {
+      display: block; width: 100%; height: 100%; object-fit: cover;
+      /* Slightly held back so the play button and the label on top of it
+         stay legible whatever frame ends up here. */
+      opacity: 0.72; transition: opacity 0.18s ease, transform 0.35s ease;
+    }
+    .g-video-frame:hover img { opacity: 0.84; transform: scale(1.012); }
+    .g-video-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
+
+    /* The play target. 68px is comfortably past the 44px minimum on a
+       phone, and it is the whole button — the frame is clickable too. */
+    .g-video-play {
+      position: absolute; inset: 0; margin: auto;
+      width: 68px; height: 68px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,217,255,0.14); border: 1px solid var(--g-40);
+      box-shadow: 0 0 28px rgba(0,217,255,0.22);
+      backdrop-filter: blur(2px);
+      transition: background 0.18s ease, transform 0.18s ease;
+    }
+    .g-video-frame:hover .g-video-play { background: rgba(0,217,255,0.24); transform: scale(1.06); }
+    .g-video-play::after {
+      content: ''; margin-left: 4px;
+      border-style: solid; border-width: 11px 0 11px 18px;
+      border-color: transparent transparent transparent var(--g);
+    }
+
+    /* Sits on the poster so the consequence of clicking is readable
+       BEFORE the click, which is what makes the click consent rather
+       than a surprise. */
+    .g-video-note {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      padding: 10px 14px;
+      background: linear-gradient(0deg, rgba(2,4,3,0.92), rgba(2,4,3,0));
+      font-family: var(--mono); font-weight: 400; font-size: 0.6rem;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      color: rgba(255,255,255,0.52); text-align: left;
+    }
+    .g-video figcaption {
+      margin-top: 11px; font-family: var(--mono); font-weight: 400; font-size: 0.62rem;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      color: rgba(255,255,255,0.4); line-height: 1.7;
+    }
+
+    @media (max-width: 640px) {
+      .g-video-play { width: 58px; height: 58px; }
+      .g-video-play::after { border-width: 9px 0 9px 15px; }
+      .g-video-note { font-size: 0.55rem; padding: 9px 11px; }
+      /* The label under the clip is long; at 320px the button's own
+         padding is what pushes it past the column. */
+      .g-video-cta { padding: 13px 16px !important; }
+    }
+
     /* two verdicts, read at a glance */
     .g-plates { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(258px, 100%), 1fr)); gap: 14px; margin: 0 0 20px; }
     .g-plate { padding: 18px 20px; border-radius: 6px; border: 1px solid; }

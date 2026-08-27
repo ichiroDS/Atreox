@@ -193,6 +193,22 @@ ${v.map(c => `<details class="g-ctl-item"${c.id ? ` id="${esc(c.id)}"` : ''}><su
         return `<figure class="g-fig"><picture>${source}<img src="${esc(v.src)}" alt="${esc(v.alt)}" width="${v.w}" height="${v.h}" loading="lazy" decoding="async"></picture><figcaption>${esc(v.caption)}</figcaption></figure>`;
       }
 
+      /* The static half of LiteVideo (shared.jsx). React replaces this
+         the moment it mounts; what matters is that the version a crawler
+         and a no-JS visitor get is ALSO free of Google — so it is the
+         same poster with a plain link to the watch page rather than a
+         button that needs a script to do anything. Clicking leaves the
+         site, which costs a navigation and loads nothing here. */
+      case 'video': {
+        const inner = `<img src="${esc(v.poster)}" alt="" width="1280" height="720" loading="lazy" decoding="async"><span class="g-video-play" aria-hidden="true"></span><span class="g-video-note">${
+          esc(v.note || 'Plays from YouTube - nothing is loaded from Google until you press play')
+        }</span>`;
+        const frame = v.id
+          ? `<a class="g-video-frame" href="https://www.youtube.com/watch?v=${esc(v.id)}" rel="noopener" aria-label="Play: ${esc(v.title)}">${inner}</a>`
+          : `<div class="g-video-frame" style="cursor:default"><img src="${esc(v.poster)}" alt="" width="1280" height="720" loading="lazy" decoding="async"><span class="g-video-note">Video coming soon</span></div>`;
+        return `<figure class="g-video">${frame}${v.caption ? `<figcaption>${esc(v.caption)}</figcaption>` : ''}</figure>`;
+      }
+
       case 'plates':
         return `<div class="g-plates">${v.map(p =>
           `<div class="g-plate g-${p.tone}"><span class="g-plate-label">${esc(p.label)}</span><p class="g-p">${esc(p.text)}</p></div>`).join('')}</div>`;

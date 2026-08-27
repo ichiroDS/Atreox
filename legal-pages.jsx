@@ -300,6 +300,7 @@ function PrivacyPage({ setPage }) {
         'We use Vercel Web Analytics. It is served from our own domain, so no third-party host is contacted, and it sets no cookies. It records aggregate page views and referrers — which pages are read and roughly where visitors arrived from. It does not build a profile of you and does not follow you between sites.',
         'Two cookies are set, both strictly necessary for something you asked for: atreox_ref, set by the dashboard, remembers which partner referred you so their commission is attributed, and lasts 90 days; and session cookies set by Clerk, which keep you signed in to the dashboard.',
         'The contact form loads Cloudflare Turnstile, which checks that a submission comes from a person rather than a script. It sets no cookies, and it loads only on the contact page — not while you are reading a guide.',
+        'Videos are not embedded. Where a page shows a video, what is on the page is an image served from this site and a play button: no player, no YouTube script, and no request to Google. Pressing play is what loads the video, from youtube-nocookie.com, and YouTube may then set cookies in your browser — which is why the button says so before you press it. If you do not press it, nothing of Google’s is loaded at all.',
       ],
     },
     {

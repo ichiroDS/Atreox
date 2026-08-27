@@ -15,6 +15,7 @@ const {
   ArrowUpRight, Zap, Shield, Globe, Brain, Check, Clock, Server, Ban, X,
   Network, Sparkles, MessageSquare, Layers, BookOpen,
   DecryptText, magneticHandlers, FooterBar, CrossLinks, SectionLockup, Pill,
+  LiteVideo,
   TypeText, REDUCED_MOTION, SOCIAL_LINKS,
   MODULES, MODULE_BY_KEY, PIPELINE,
   FULL_MONTHLY, FULL_YEARLY, YEARLY_SAVING, CHEAPEST_MODULE, eur,
@@ -1163,6 +1164,71 @@ function PipelineSection({ setPage }) {
 /* ══════════════════════════════════════
    4 — WHAT IT COSTS
 ══════════════════════════════════════ */
+/* ═══ The clip, near the top ═══
+   Sits straight after the hero: the fastest answer to "what is this"
+   is watching it run for a minute, and it belongs above the reading.
+
+   The player is not on the page - LiteVideo renders a self-hosted
+   poster and loads youtube-nocookie.com only once somebody presses
+   play. That is what keeps the Privacy Policy's "no cookies, no
+   consent banner" true; see shared.jsx for the whole reasoning.
+
+   ── PUT THE YOUTUBE ID IN `id` BELOW ── just the id, not the URL.
+   While it is null the block shows the poster and says "Video coming
+   soon", so this ships safely before the clip is up. ═══ */
+function VideoSection({ setPage }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, amount: 0.12 });
+
+  return (
+    <section ref={ref} className="section-block" style={{ padding: '88px 5%', maxWidth: 1280, margin: '0 auto' }}>
+      <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
+        <SectionLockup title="See it run">
+          A minute of the panel doing the thing it is sold to do. If you would rather read,
+          the step-by-step is one click away and covers the same ground properly.
+        </SectionLockup>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 26 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.08 }}
+        style={{ maxWidth: 940, margin: '0 auto' }}>
+        <LiteVideo
+          id={null}
+          title="What ATREOX does"
+          poster="/public/video/home-clip.jpg"
+          note="Plays from YouTube · nothing is loaded from Google until you press play"
+        />
+
+        <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'center', marginTop: 26 }}>
+          {/* A real address, with the click intercepted only to keep the
+              transition in-app - the same shape Functions uses for its
+              guide links, so a middle-click, a crawler and a copied URL
+              all still work. */}
+          <a
+            href={window.guideHref('neurocommenting')}
+            onClick={e => {
+              if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+              e.preventDefault();
+              setPage('guides', 'guide-neurocommenting');
+            }}
+            className="btn-solid g-video-cta"
+            /* maxWidth caps the inline-flex box so the label wraps inside
+               it instead of the box growing past the column - at a 320px
+               viewport this line is wider than the content area, and
+               without the cap it pushed the page sideways. */
+            style={{ padding: '14px 26px', fontSize: '0.78rem', maxWidth: '100%' }}
+            {...magneticHandlers(4)}>
+            Step-by-step: how to start <ArrowUpRight size={14} />
+          </a>
+          <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.64rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.34)' }}>
+            Neurocommenting guide
+          </span>
+        </div>
+      </motion.div>
+    </section>
+  );
+}
+
 function PriceTeaserSection({ setPage }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.15 });
@@ -1640,6 +1706,7 @@ function HomePage({ setPage }) {
   return (
     <div>
       <Hero setPage={setPage} />
+      <VideoSection setPage={setPage} />
       <WhatThisIsSection setPage={setPage} />
       <AudienceSection />
       {/* The two banded sections give the scroll its rhythm: the core
