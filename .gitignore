@@ -6,3 +6,8 @@ ds-bundle/
 .design-sync/.cache/
 .design-sync/learnings/
 .design-sync/node_modules
+
+# Per-machine agent/editor config. .claude/launch.json was tracked by
+# accident and pointed at one developer's absolute paths.
+.claude/
+CLAUDE.md
