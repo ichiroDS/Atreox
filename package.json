@@ -6,6 +6,8 @@
   },
   "scripts": {
     "build": "node scripts/build-app.mjs && node scripts/prerender.mjs",
+    "verify:build": "node scripts/verify-build-current.mjs",
+    "prepare": "node scripts/install-hooks.mjs",
     "build:app": "node scripts/build-app.mjs",
     "watch": "node scripts/build-app.mjs --watch"
   },
