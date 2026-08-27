@@ -1377,13 +1377,16 @@ function ComparisonSection() {
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.1 }}
-        className="panel" style={{ padding: 0, overflow: 'hidden' }}>
-        {/* Wide on mobile — scrolls inside its own frame rather than the page. */}
+        className="panel cmp-frame" style={{ padding: 0, overflow: 'hidden' }}>
+        {/* Wide on mobile — scrolls inside its own frame rather than the
+            page, which is also why the sticky label column works at all:
+            the scrollport it sticks to is this div, not the document,
+            and the document's is turned off (body overflow-x: hidden). */}
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', minWidth: 660, borderCollapse: 'collapse' }}>
             <thead>
               <tr>
-                <th style={{ textAlign: 'left', padding: '20px 24px', fontFamily: MONO, fontWeight: 500, fontSize: '0.64rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', borderBottom: `1px solid rgba(${GREEN_RGB},0.16)` }}>
+                <th className="cmp-first" style={{ textAlign: 'left', padding: '20px 24px', fontFamily: MONO, fontWeight: 500, fontSize: '0.64rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', borderBottom: `1px solid rgba(${GREEN_RGB},0.16)` }}>
                   Feature
                 </th>
                 <th style={{
@@ -1414,7 +1417,7 @@ function ComparisonSection() {
                 const last = i === COMPARISON_ROWS.length - 1;
                 return (
                   <tr key={row.label} className="cmp-row">
-                    <td style={{
+                    <td className="cmp-first" style={{
                       padding: '15px 24px', fontFamily: 'Barlow, sans-serif', fontWeight: 400, fontSize: '0.95rem', color: 'rgba(255,255,255,0.88)', lineHeight: 1.4,
                       borderBottom: last ? 'none' : `1px solid rgba(${GREEN_RGB},0.09)`,
                     }}>
