@@ -17,7 +17,7 @@
 
 const React = window.React;
 const { useState, useEffect, useRef } = React;
-const { PageHero, PageSection, Pill, FooterBar, CrossLinks, MONO, ArrowUpRight } = window;
+const { PageHero, PageSection, SectionLockup, FooterBar, CrossLinks, MONO, ArrowUpRight } = window;
 
 const ACCENT = window.ACCENT;
 const ACCENT_RGB = window.ACCENT_RGB;
@@ -40,18 +40,25 @@ const TOPICS = [
   ['other', 'Other'],
 ];
 
+/* The site has one label scale and this page was using its own: 0.64rem at
+   0.11em against .overline's 0.66rem at 0.24em everywhere else. Close enough
+   to look like a mistake rather than a variation, which is most of why the
+   page read as a different template. */
 const labelStyle = {
   display: 'block',
-  fontFamily: MONO, fontWeight: 500, fontSize: '0.64rem',
-  letterSpacing: '0.11em', textTransform: 'uppercase',
-  color: 'rgba(255,255,255,0.45)', marginBottom: 8,
+  fontFamily: MONO, fontWeight: 500, fontSize: '0.66rem',
+  letterSpacing: '0.24em', textTransform: 'uppercase',
+  color: 'rgba(255,255,255,0.45)', marginBottom: 9,
 };
 
 const fieldStyle = {
   width: '100%', boxSizing: 'border-box',
   background: 'rgba(255,255,255,0.03)',
-  border: '1px solid rgba(255,255,255,0.12)',
-  borderRadius: 3, padding: '12px 14px',
+  border: '1px solid var(--g-14)',
+  /* 6px and --g-14 are the panel's own radius and border colour (see
+     index.html .panel). The form used 3px and a plain white 12% border,
+     so every field disagreed with the card it now sits in. */
+  borderRadius: 6, padding: '13px 15px',
   fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.92rem',
   // An explicit line box, so <input> and <select> come out the same height.
   // With line-height:normal the two disagree - each browser derives a
@@ -113,7 +120,21 @@ function useTurnstile(containerRef, onToken) {
       if (cancelled || !containerRef.current || !window.turnstile) return;
       widgetId = window.turnstile.render(containerRef.current, {
         sitekey: TURNSTILE_SITE_KEY,
+        // Already dark, and dark is as far as Turnstile goes - the widget is
+        // a cross-origin iframe and Cloudflare exposes no colour beyond the
+        // three themes, so it will always read a shade lighter than this
+        // page. What CAN be fixed is its shape and its language:
+        //
+        //   size: 'flexible' makes it span the form instead of sitting as a
+        //   fixed 300px block against a 680px column, which is what made it
+        //   look pasted in rather than part of the form.
+        //
+        //   language: 'en' because the default is 'auto', i.e. the visitor's
+        //   browser - so on a Russian-locale machine the one widget on an
+        //   otherwise English page rendered "Успешно." and "Конфиденциальность".
         theme: 'dark',
+        size: 'flexible',
+        language: 'en',
         callback: token => onToken(token),
         // A token is single-use and expires. Clearing it on both paths
         // means a stale token is never posted — the form asks the visitor
@@ -217,7 +238,10 @@ function ContactForm() {
 
   if (status === 'sent') {
     return (
-      <div className="panel" style={{ padding: '40px 32px', textAlign: 'center' }}>
+      /* No panel class and no padding of its own: this replaces the form
+         INSIDE the panel, so carrying a second one would nest a card in a
+         card. */
+      <div style={{ padding: '6px 0', textAlign: 'center' }}>
         <p style={{
           fontFamily: MONO, fontWeight: 500, fontSize: '0.66rem', letterSpacing: '0.12em',
           textTransform: 'uppercase', color: ACCENT, marginBottom: 12,
@@ -281,7 +305,7 @@ function ContactForm() {
           maxLength={5000} disabled={busy} />
       </Field>
 
-      <div ref={turnstileRef} style={{ marginBottom: 20, minHeight: 65 }} />
+      <div ref={turnstileRef} style={{ marginBottom: 22, minHeight: 65 }} />
 
       {serverError && (
         <p role="alert" style={{
@@ -314,7 +338,7 @@ function ContactForm() {
    deploy. */
 function ContactFallback() {
   return (
-    <div className="panel" style={{ padding: '34px 30px', textAlign: 'center' }}>
+    <div style={{ padding: '6px 0', textAlign: 'center' }}>
       <p style={{
         fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem',
         color: 'rgba(255,255,255,0.62)', lineHeight: 1.7, maxWidth: 470, margin: '0 auto 20px',
@@ -339,8 +363,19 @@ function ContactPage({ setPage }) {
 
       <PageSection style={{ paddingBottom: 40 }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
-          <Pill dot>Get in touch</Pill>
-          <div style={{ marginTop: 26 }}>
+          {/* SectionLockup, not a Pill. Every other section on the site opens
+              with the // glyph, a serif heading and the hairline running to
+              the edge; this page opened with a lone pill and then bare form
+              fields on the page background, which is why it read as a
+              different template rather than another page of the same site. */}
+          <SectionLockup title="Get in touch">
+            Billing, something broken, a refund, or anything else. One form,
+            one inbox.
+          </SectionLockup>
+          {/* The form now sits in a panel, like every other block of content
+              on the site. Bare fields directly on the page background were
+              the other half of the problem. */}
+          <div className="panel" style={{ padding: '34px 32px' }}>
             {TURNSTILE_CONFIGURED ? <ContactForm /> : <ContactFallback />}
           </div>
 
