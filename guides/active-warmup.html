@@ -505,18 +505,14 @@
        nothing transpiles in the browser any more. -->
   <script src="/public/vendor/react.production.min.js"></script>
   <script src="/public/vendor/react-dom.production.min.js"></script>
-  <!-- Clerk: served from our own custom Frontend API domain (atreoxai.com is the
-       verified Primary domain), so the session set on app.atreoxai.com hydrates here
-       too — no satellite-domain config needed. Deferred + polled for in new-pages.jsx
-       rather than relied on being ready by a fixed point, since load order vs. the
-       Babel-transpiled app scripts isn't guaranteed. -->
-  <script
-    defer
-    crossorigin="anonymous"
-    data-clerk-publishable-key="pk_live_Y2xlcmsuYXRyZW94YWkuY29tJA"
-    src="https://clerk.atreoxai.com/npm/@clerk/clerk-js@6/dist/clerk.browser.js"
-    type="text/javascript"
-  ></script>
+  <!-- Clerk is NOT loaded here any more. It used to be a defer script in this
+       head, which meant every page pulled it: the home page, all ten guides a
+       crawler reads, and the legal pages that describe which third parties
+       this site contacts. Its only consumer is the Pricing page, where the
+       signed-in state decides whether a button says "Get the full licence" or
+       "Manage in panel" — so it is now injected on demand by loadClerk() in
+       new-pages.jsx, and nowhere else. The publishable key and the custom
+       Frontend API domain moved there with it. -->
   <!-- Lightweight motion shim — no CDN needed -->
   <script>
   window.FramerMotion = (() => {

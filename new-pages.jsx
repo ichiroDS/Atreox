@@ -27,19 +27,53 @@ const GREEN_RGB = window.ACCENT_RGB;
 // so "active" means the same thing on both sides of the deep link.
 const CLERK_ACTIVE_STATUSES = new Set(['active', 'trialing']);
 
-// The Clerk script tag in index.html is `defer`, and this file is itself a
-// Babel-transpiled <script type="text/babel"> — neither load order relative
-// to the other is guaranteed, so poll for window.Clerk rather than assume
-// it's already there.
-function waitForClerk(timeoutMs = 8000) {
-  return new Promise((resolve) => {
-    if (window.Clerk) return resolve(window.Clerk);
-    const start = Date.now();
-    const iv = setInterval(() => {
-      if (window.Clerk) { clearInterval(iv); resolve(window.Clerk); }
-      else if (Date.now() - start > timeoutMs) { clearInterval(iv); resolve(null); }
-    }, 50);
+/* Clerk, loaded only where it is actually read.
+
+   It used to be a defer <script> in index.html, so every page fetched it —
+   including the guides and the legal pages, which have nothing to sign in
+   to and which describe, in writing, which third parties this site
+   contacts. The only thing on the whole site that reads it is
+   useSubscriptionState below, and the only thing that calls THAT is the
+   Pricing page's CTA wording.
+
+   So the script is injected here, on first use. Everywhere else the visitor
+   simply never meets clerk.atreoxai.com.
+
+   Served from our own Frontend API domain: atreoxai.com is the verified
+   Primary domain, so the session set on app.atreoxai.com hydrates here too
+   with no satellite-domain configuration.
+
+   One promise is cached for the life of the page: two components asking at
+   once must not inject two script tags, and a second ask after it has
+   loaded must not wait again. */
+const CLERK_SRC = 'https://clerk.atreoxai.com/npm/@clerk/clerk-js@6/dist/clerk.browser.js';
+const CLERK_PUBLISHABLE_KEY = 'pk_live_Y2xlcmsuYXRyZW94YWkuY29tJA';
+let clerkPromise = null;
+
+function loadClerk(timeoutMs = 8000) {
+  if (window.Clerk) return Promise.resolve(window.Clerk);
+  if (clerkPromise) return clerkPromise;
+
+  clerkPromise = new Promise((resolve) => {
+    let settled = false;
+    const finish = (value) => { if (!settled) { settled = true; resolve(value); } };
+
+    const timer = setTimeout(() => finish(null), timeoutMs);
+    const done = () => { clearTimeout(timer); finish(window.Clerk || null); };
+
+    const script = document.createElement('script');
+    script.src = CLERK_SRC;
+    script.crossOrigin = 'anonymous';
+    script.setAttribute('data-clerk-publishable-key', CLERK_PUBLISHABLE_KEY);
+    script.async = true;
+    script.onload = done;
+    /* A blocked or failed script resolves null rather than hanging: the
+       caller then renders the signed-out wording, which is the correct
+       default and what a first-time visitor sees anyway. */
+    script.onerror = () => { clearTimeout(timer); finish(null); };
+    document.head.appendChild(script);
   });
+  return clerkPromise;
 }
 
 // Resolves to the visitor's real plan state once Clerk hydrates. `loading`
@@ -52,7 +86,7 @@ function useSubscriptionState() {
     let cancelled = false;
     (async () => {
       try {
-        const clerk = await waitForClerk();
+        const clerk = await loadClerk();
         if (!clerk) { if (!cancelled) setState({ loading: false, tier: null, active: false }); return; }
         await clerk.load();
         if (cancelled) return;
