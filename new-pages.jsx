@@ -318,13 +318,33 @@ function SelectionPanel({ keys, total, onClear, sub }) {
           </span>
         </div>
 
-        {/* the comparison, said out loud the moment it starts to matter */}
+        {/* The comparison, said out loud the moment it starts to matter —
+            and only ever said in the direction that is true.
+
+            This was two branches, and the second read "the full licence
+            costs less than this" for every gap <= 0. At a gap of exactly 0
+            that is false: the licence costs the SAME. It is reachable, not a
+            corner case — two of the sixty-four possible selections total
+            exactly the licence price (Active Warmup + Neurocommenting +
+            both Parsers, and Neurocommenting + Mass Reactions + both
+            Parsers), so a customer who picked either was told the cheaper
+            option was cheaper when it was not.
+
+            Three states now, one per sign of the gap. Below the licence
+            price nothing is claimed about which is cheaper, because nothing
+            true can be — the nudge there states a fact (what the difference
+            buys) and stops. */}
         {total > 0 && gap > 0 && gap <= 40 && (
           <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: `rgba(${GREEN_RGB},0.85)`, lineHeight: 1.55, marginTop: 12 }}>
             {eur(gap)} more buys all {PRICED_MODULES.length}, below.
           </p>
         )}
-        {total > 0 && gap <= 0 && (
+        {total > 0 && gap === 0 && (
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: `rgba(${GREEN_RGB},0.85)`, lineHeight: 1.55, marginTop: 12 }}>
+            The full licence is the same price — and includes every module.
+          </p>
+        )}
+        {total > 0 && gap < 0 && (
           <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: `rgba(${GREEN_RGB},0.85)`, lineHeight: 1.55, marginTop: 12 }}>
             The full licence costs less than this — and includes every module.
           </p>
