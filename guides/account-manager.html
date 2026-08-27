@@ -406,6 +406,19 @@
     .quiet-link-dim { color: rgba(255,255,255,0.34); font-weight: 500; }
     .quiet-link-dim:hover { color: var(--g); }
 
+    /* A 0.62rem mono caption is 13px tall, which a cursor hits and a
+       fingertip does not — every one of these is a page-to-page hop, so
+       missing it costs a navigation. The padding is what grows, never
+       the ink: the link draws no background and no border, so the box
+       getting 30px taller is invisible and only the tap area moves.
+       Overlaying a transparent ::after instead would leave the layout
+       untouched, but several of these sit in wrapping flex rows where
+       two links land 16px apart and the overlays would then eat each
+       other. Left alone above the breakpoint, where 13px is fine. */
+    @media (max-width: 640px) {
+      .quiet-link { padding: 16px 0; }
+    }
+
     /* ── Social links (Telegram / YouTube) ──
        Navbar + footer treatment. The navbar version is a bare glyph that
        sits at nav-link weight until hovered, so it never competes with
@@ -428,6 +441,19 @@
     }
     .footer-social { transition: color 0.2s ease; }
     .footer-social:hover { color: var(--g); }
+
+    /* The footer columns are 17px-tall lines stacked 12px apart — on a
+       phone that is a 17px target with a 12px moat, and the mailto in
+       particular is the one link a visitor reaches for when the form
+       has not worked. Each line takes 14px of padding and the column
+       gives its gap up in exchange, so the ink lands where it always
+       did and the row either side of it becomes tappable. The gap is an
+       inline style on the flex container in shared.jsx, hence the
+       !important — same trick the section-rhythm rules use below. */
+    @media (max-width: 640px) {
+      .footer-links { gap: 0 !important; }
+      .footer-links > *, .footer-link { padding: 14px 0; }
+    }
 
     /* ── Pipeline: the "how it runs" sequence on the home page ──
        The rail fill tracks the active stage; a node lights when it's the
@@ -587,6 +613,36 @@
        stack, so a wide row of marks stays attached to its label. ── */
     .cmp-row { transition: background 0.16s ease; }
     .cmp-row:hover { background: rgba(0,217,255,0.035); }
+
+    /* On a phone the table is 660px inside a ~336px frame, so two of the
+       five columns are off-screen and the feature name scrolls away with
+       them — you end up looking at a column of ticks with nothing saying
+       what they are ticks for. Pinning the label column inside the
+       scroller keeps the question next to the answer.
+
+       The sticky cell has to paint its own surface, because the marks
+       now pass underneath it, and .panel's is translucent — this is that
+       surface flattened against the page behind it. The one thing it
+       cannot reproduce is the panel's vertical gradient, which is why
+       the flat value is only ever used at this width; the neighbouring
+       column is the tinted ATREOX one, so nothing sits close enough to
+       read as a seam.
+
+       The fade hangs off the panel, not the scroller: an absolutely
+       positioned box inside an overflow container is anchored to the
+       content, so on the scroller it would slide out of view the moment
+       it was needed. */
+    @media (max-width: 640px) {
+      .cmp-first {
+        position: sticky; left: 0; z-index: 1;
+        background: linear-gradient(rgba(4,10,16,0.66), rgba(4,10,16,0.66)), var(--bg);
+      }
+      .cmp-frame::after {
+        content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 46px;
+        pointer-events: none;
+        background: linear-gradient(90deg, rgba(2,4,3,0), rgba(2,4,3,0.85));
+      }
+    }
 
     /* ── Guides: the tiles drift.
        The float lives on a wrapper and the hover lift on the card
@@ -1274,6 +1330,108 @@
       50%      { box-shadow: 0 0 54px rgba(0,217,255,0.17); }
     }
     .featured-pulse { animation: featured-pulse 4s ease-in-out infinite; }
+
+    /* ── Pricing: the running total, docked ──
+       Beside the module grid the selection panel is a sticky rail and
+       the price is never more than a glance away. Below this width the
+       row wraps and the rail lands under the whole module list — you
+       pick six modules and the total, and the button that acts on it,
+       are 1500px further down than the last thing you tapped. So the
+       panel leaves the flow and becomes a bar across the bottom of the
+       viewport carrying the two things worth interrupting for, and
+       opens back into the panel it already is when tapped.
+
+       All of it is scoped to the media query and the bar is display:none
+       by default, so above the breakpoint the panel renders as a plain
+       block in the rail exactly as before. */
+    .sel-dock-bar { display: none; }
+
+    @media (max-width: 640px) {
+      .sel-dock {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+        /* the page scrolls behind it, so unlike .panel this surface
+           cannot be translucent */
+        background: linear-gradient(rgba(4,10,16,0.94), rgba(4,10,16,0.94)), var(--bg);
+        border-top: 1px solid var(--g-22);
+        /* bar first in the markup so it is first in the tap order;
+           reversed here so the panel opens above it */
+        display: flex; flex-direction: column-reverse;
+      }
+      .sel-dock-bar { display: flex; align-items: center; gap: 10px; padding: 8px 14px; }
+      /* stacked, not on one line: at 360px the total, the count and a
+         "Continue · €48/mo" side by side are ~30px wider than the bar */
+      .sel-dock-peek {
+        display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+        flex: 1; min-width: 0; padding: 6px 0;
+        background: none; border: none; text-align: left;
+      }
+      .sel-dock-line { display: flex; align-items: center; gap: 6px; }
+      .sel-dock-total {
+        font-family: var(--serif); font-weight: 500; font-size: 1.4rem; line-height: 1;
+        color: var(--g); text-shadow: 0 0 20px rgba(0,217,255,0.28);
+      }
+      .sel-dock-total.is-empty { color: rgba(255,255,255,0.28); text-shadow: none; }
+      .sel-dock-count {
+        max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        font-family: var(--mono); font-weight: 400; font-size: 0.55rem; line-height: 1.4;
+        letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.4);
+      }
+      /* the chevron ships pointing right; up is "this opens upward",
+         down is "this shuts" */
+      .sel-dock-caret {
+        display: inline-flex; color: rgba(255,255,255,0.4);
+        transform: rotate(-90deg); transition: transform 0.18s ease;
+      }
+      .sel-dock-open .sel-dock-caret { transform: rotate(90deg); }
+      .sel-dock-cta { flex-shrink: 0; }
+      /* open, the panel below carries the same button — two of it in
+         one bar is the kind of thing that gets tapped twice */
+      .sel-dock-open .sel-dock-cta { display: none; }
+
+      .sel-dock-panel { display: none; }
+      .sel-dock-open .sel-dock-panel {
+        display: block;
+        /* it is ~600px of panel on a 640px screen; leave the page
+           visible above it so the sheet reads as a sheet */
+        max-height: 62vh; overflow-y: auto;
+        border: none; border-radius: 0;
+        border-bottom: 1px solid var(--g-14);
+      }
+
+      /* "OR" separated the two ways to buy. With the selection panel
+         lifted into the bar it separates the licence card from nothing. */
+      .sel-or { display: none; }
+
+      /* the bar is fixed, so the footer needs somewhere to end */
+      .pricing-page { padding-bottom: 72px; }
+    }
+
+    /* The monthly/annual segments are 31px tall. Growing them is the
+       obvious fix and the wrong one — the lit segment is a filled block,
+       so any extra padding is extra paint and the control stops looking
+       like the one on the mockups. The tap area grows instead: a
+       transparent ::after reaching 7px past each edge into the margins
+       that are already there, which is enough for 45px and touches
+       nothing, since the only other control in the card is 18px away
+       under a heading. */
+    @media (max-width: 640px) {
+      .term-opt { position: relative; }
+      .term-opt::after {
+        content: ''; position: absolute; left: 0; right: 0;
+        top: 50%; height: 45px; transform: translateY(-50%);
+      }
+    }
+
+    /* ── Forms ──
+       Mobile Safari zooms the viewport in on any control it focuses that
+       is under 16px, and never zooms back out: one tap on the name field
+       and the rest of the form is off-screen for the rest of the visit.
+       The fields are styled inline in contact-page.jsx, so this has to
+       out-rank a style attribute. 16px only below the breakpoint — above
+       it the 0.92rem the form was designed at still applies. */
+    @media (max-width: 640px) {
+      .contact-field { font-size: 16px !important; }
+    }
 
     /* ═══════════════ Splash / boot screen ═══════════════ */
     #splash {
