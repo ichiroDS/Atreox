@@ -449,6 +449,7 @@ const STATIC_PAGES = [
   ['/contact', '0.4'],
   ['/privacy', '0.3'],
   ['/terms', '0.3'],
+  ['/refund', '0.3'],
 ];
 
 function sitemap(guides) {

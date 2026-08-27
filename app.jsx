@@ -31,6 +31,7 @@ const PATH_TO_PAGE = {
   '/guides':    'guides',
   '/privacy':   'privacy',
   '/terms':     'terms',
+  '/refund':    'refund',
   '/referral-program': 'referral',
   '/contact':   'contact',
 };
@@ -42,6 +43,7 @@ const PAGE_TO_PATH = {
   'guides':    '/guides',
   'privacy':   '/privacy',
   'terms':     '/terms',
+  'refund':    '/refund',
   'referral':  '/referral-program',
   'contact':   '/contact',
 };
@@ -146,6 +148,7 @@ function App() {
       case 'guides':    return <GuidesPage    setPage={navigate} />;
       case 'privacy':   return <PrivacyPage   setPage={navigate} />;
       case 'terms':     return <TermsPage     setPage={navigate} />;
+      case 'refund':    return <RefundPage    setPage={navigate} />;
       case 'contact':   return <ContactPage   setPage={navigate} />;
       case 'referral':  return <ReferralPage  setPage={navigate} />;
       default:          return <HomePage      setPage={navigate} />;
