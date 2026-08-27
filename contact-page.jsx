@@ -53,8 +53,40 @@ const fieldStyle = {
   border: '1px solid rgba(255,255,255,0.12)',
   borderRadius: 3, padding: '12px 14px',
   fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.92rem',
+  // An explicit line box, so <input> and <select> come out the same height.
+  // With line-height:normal the two disagree - each browser derives a
+  // select's content height from the font's own metrics rather than from
+  // the line box - which left the topic control 42px tall between two 44px
+  // inputs, i.e. one box in the column visibly shorter than the rest. 18px
+  // is what the inputs already computed to, so this moves the select and
+  // changes nothing else. The textarea re-declares lineHeight after this
+  // spread and keeps its own 1.6.
+  lineHeight: '18px',
   color: 'white', outline: 'none',
   transition: 'border-color 0.2s',
+};
+
+/* appearance:none strips the native dropdown arrow, and nothing was drawn
+   in its place: the topic control rendered as a plain bordered box, pixel
+   for pixel a text input, with no sign that it opens a list. The arrow is
+   an inline SVG data URI rather than a pseudo-element because a <select>
+   cannot carry ::after, and inline rather than a file so it costs no
+   request. Colour is the label grey, so it reads as chrome and not as
+   content; padding-right clears it so a long option never runs underneath. */
+const CHEVRON = encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="7" viewBox="0 0 11 7">' +
+  '<path d="M1 1l4.5 4.5L10 1" fill="none" stroke="rgba(255,255,255,0.45)" ' +
+  'stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+);
+
+const selectStyle = {
+  ...fieldStyle,
+  appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none',
+  cursor: 'pointer',
+  backgroundImage: `url("data:image/svg+xml,${CHEVRON}")`,
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'right 14px center',
+  paddingRight: 38,
 };
 
 function Field({ id, label, error, children }) {
@@ -233,7 +265,7 @@ function ContactForm() {
 
       <Field id="contact-topic" label="What is this about?" error={errors.topic}>
         <select id="contact-topic" name="topic" className="contact-field"
-          style={{ ...fieldStyle, appearance: 'none', cursor: 'pointer' }}
+          style={selectStyle}
           value={values.topic} onChange={e => set('topic', e.target.value)} disabled={busy}>
           <option value="" style={{ background: '#0b0b0d' }}>Choose one…</option>
           {TOPICS.map(([id, label]) => (
