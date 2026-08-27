@@ -1193,7 +1193,7 @@ function VideoSection({ setPage }) {
         initial={{ opacity: 0, y: 26 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.08 }}
         style={{ maxWidth: 940, margin: '0 auto' }}>
         <LiteVideo
-          id={null}
+          id="om_LYTdDs3E"
           title="What ATREOX does"
           poster="/public/video/home-clip.jpg"
           note="Plays from YouTube · nothing is loaded from Google until you press play"

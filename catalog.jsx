@@ -1997,7 +1997,7 @@ const GUIDES = [
              `poster` is a file in this repo on purpose — see LiteVideo in
              shared.jsx. Do not point it at i.ytimg.com. */
           ['video', {
-            id: null,
+            id: 'r6n9zkgLmtU',
             title: 'Setting up Neurocommenting',
             poster: '/public/video/neurocommenting-guide.jpg',
             caption: 'Full walkthrough — pool, channels, delays, persona, first comment.',
