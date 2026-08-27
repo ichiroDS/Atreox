@@ -44,7 +44,13 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ORIGIN = 'https://www.atreoxai.com';
 const OG_FALLBACK = ORIGIN + '/public/apple-touch-icon.png';
 
-const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8');
+/* LF, for the same reason build-app.mjs normalises: the prerendered pages
+   are built by splicing index.html, and a CRLF working copy would otherwise
+   put the builder's line endings into committed output. Line endings alone
+   are masked by the build-currency check, so this one is hygiene rather than
+   a live bug — but a build whose output depends on the machine is worth
+   closing on both sides, not one. */
+const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8').replace(/\r\n/g, '\n');
 const write = (p, s) => {
   const full = path.join(ROOT, p);
   fs.mkdirSync(path.dirname(full), { recursive: true });

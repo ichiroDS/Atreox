@@ -55,7 +55,19 @@ const VENDOR = [
 function buildOnce() {
   const t0 = Date.now();
   const parts = APP_FILES.map(f => {
-    const src = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    /* LF, whatever the checkout did. Git stores these sources with LF and
+       hands a Windows working copy CRLF, and esbuild does not discard the
+       difference: newlines inside a template literal survive minification as
+       ESCAPES, so a CRLF source bakes a literal \r\n into public/app.js where
+       an LF source bakes \n. The committed bundle then matched whoever built
+       it and no one else - it carried 11 such escapes, which is why CI, on a
+       Linux LF checkout, correctly reported public/app.js as not being what
+       the sources produce.
+
+       Normalising here rather than with .gitattributes because this makes the
+       BUILD deterministic, independent of how any particular clone is
+       configured, which is the property a committed artifact needs. */
+    const src = fs.readFileSync(path.join(ROOT, f), 'utf8').replace(/\r\n/g, '\n');
     /* Wrap before minifying: inside a function scope esbuild can mangle
        every local name safely; at top level it could not. */
     const wrapped = `(function () {\n${src}\n})();`;
