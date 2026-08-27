@@ -1,0 +1,30 @@
+# The enforcement half of the build-currency check.
+name: build is current
+
+# The pre-commit hook (.githooks/pre-commit) is the fast feedback and can be
+# skipped: --no-verify, or simply never having run `npm install`. This job
+# cannot be skipped, which is why both exist. It runs the identical script, so
+# there is one definition of "current" and no chance of the two drifting.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # ci, not install: the build output has to be reproduced from the exact
+      # dependency versions in the lockfile. esbuild and the React UMD builds
+      # are copied verbatim into the output, so a floating minor version would
+      # show up as a spurious "stale build" on an unrelated PR.
+      - run: npm ci
+
+      - run: node scripts/verify-build-current.mjs

@@ -1,0 +1,27 @@
+#!/bin/sh
+# Blocks a commit whose generated files do not match its sources.
+#
+# The two mistakes this catches are described in full at the top of
+# scripts/verify-build-current.mjs: editing a source without rebuilding, and
+# editing a generated file directly. Both shipped to production undetected
+# before this hook existed.
+#
+# Installed by `npm install` via scripts/install-hooks.mjs, which points
+# core.hooksPath here.
+#
+# The hook is the fast feedback, not the enforcement: it can be skipped with
+# --no-verify and it is absent until someone runs npm install, which is why
+# .github/workflows/build-current.yml runs the same check on every push. If
+# this is slow or in the way, skip it — CI will still catch it.
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "pre-commit: node not found, skipping the build-currency check" >&2
+  exit 0
+fi
+
+node scripts/verify-build-current.mjs || {
+  echo ""
+  echo "pre-commit: commit blocked. Fix the above, or re-run with --no-verify"
+  echo "            if you know what you are doing (CI will still check)."
+  exit 1
+}
