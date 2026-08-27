@@ -8,10 +8,11 @@
 ══════════════════════════════════════════════════════════════════ */
 
 const React = window.React;
+const ReactDOM = window.ReactDOM;
 const { useRef, useState, useEffect } = React;
 const {
   motion, useInView,
-  ArrowUpRight, Check, BookOpen, Layers,
+  ArrowUpRight, Check, BookOpen, Layers, ChevronRight,
   FooterBar, CrossLinks,
   PageHero, PageSection, SectionLockup, Pill, MONO, SERIF,
   MODULES, PRICED_MODULES, MODULE_BY_KEY, INCLUDED_MODULES,
@@ -146,6 +147,7 @@ function TermToggle({ term, setTerm }) {
     return (
       <button
         key={value} type="button" role="radio" aria-checked={on}
+        className="term-opt"
         onClick={() => setTerm(value)}
         style={{
           flex: 1, padding: '9px 10px', border: 'none', borderRadius: 2,
@@ -222,62 +224,125 @@ function LicenceCard({ term, setTerm, sub }) {
   );
 }
 
-/* ─── running total, stacked straight above the licence price ─── */
+/* Has to be the same width as .sel-dock's media query in index.html:
+   one side pins the panel to the viewport, the other moves it somewhere
+   it can be pinned, and if they disagree the panel is either fixed
+   inside the rail or portalled out of it with nothing holding it. */
+const DOCK_QUERY = '(max-width: 640px)';
+
+function useDocked() {
+  const [docked, setDocked] = useState(() => window.matchMedia(DOCK_QUERY).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(DOCK_QUERY);
+    const onChange = () => setDocked(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  return docked;
+}
+
+/* ─── running total, stacked straight above the licence price ───
+
+   On a phone the rail wraps below the module grid, which puts this
+   panel under the whole module list — the total lands about 1500px
+   further down than the tap that changed it, so nobody choosing
+   modules ever sees what they add up to. Below the breakpoint the
+   panel is therefore docked: a bar across the bottom of the viewport
+   with the total and the button, opening back into this same panel
+   when tapped. The look of all that is CSS (.sel-dock in index.html);
+   what lives here is the bar's markup, whether it is open, and the one
+   thing CSS cannot do on its own — see the portal below. ─── */
 function SelectionPanel({ keys, total, onClear, sub }) {
   const n = keys.length;
   const gap = FULL_MONTHLY - total;
   const cta = billingCTA(sub, `Continue · ${eur(total)}/mo`);
+  const [open, setOpen] = useState(false);
+  const docked = useDocked();
 
-  return (
-    <div className="panel" style={{ padding: '22px 26px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
-        <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.64rem', color: `rgba(${GREEN_RGB},0.75)`, letterSpacing: '0.24em', textTransform: 'uppercase' }}>{'// '}Your selection</span>
-        {n > 0 && (
-          <button type="button" onClick={onClear} style={{
-            background: 'none', border: 'none', padding: 0,
-            fontFamily: MONO, fontWeight: 400, fontSize: '0.6rem', letterSpacing: '0.14em',
-            textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)',
-          }}>Clear</button>
-        )}
-      </div>
+  /* The bar and the panel offer the same button, and the empty state is
+     the half worth keeping identical: with nothing picked the total is
+     €0, so Continue is dead rather than absent — the row keeps its
+     shape and the reason is written on it. */
+  const action = (className, style) => (total === 0
+    ? (
+      <button type="button" disabled className={className}
+        style={{ justifyContent: 'center', opacity: 0.4, cursor: 'not-allowed', ...style }}>
+        Select modules
+      </button>
+    ) : (
+      <a href={cta.href} target="_self" className={className}
+        style={{ justifyContent: 'center', ...style }}>
+        {cta.label} <ArrowUpRight size={14} />
+      </a>
+    ));
 
-      {/* count rides the total's baseline rather than taking a line of its own —
-          the rail has to stay short enough to sit beside the licence on one screen */}
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-        <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '2.9rem', color: total ? GREEN : 'rgba(255,255,255,0.28)', lineHeight: 1, textShadow: total ? `0 0 28px rgba(${GREEN_RGB},0.28)` : 'none', transition: 'color 0.2s ease' }}>
-          {eur(total)}
-        </span>
-        <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>/ month</span>
-        <span style={{ marginLeft: 'auto', fontFamily: MONO, fontWeight: 400, fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>
-          {n === 0 ? 'none selected' : `${n} of ${PRICED_MODULES.length}`}
-        </span>
-      </div>
-
-      {/* the comparison, said out loud the moment it starts to matter */}
-      {total > 0 && gap > 0 && gap <= 40 && (
-        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: `rgba(${GREEN_RGB},0.85)`, lineHeight: 1.55, marginTop: 12 }}>
-          {eur(gap)} more buys all {PRICED_MODULES.length}, below.
-        </p>
-      )}
-      {total > 0 && gap <= 0 && (
-        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: `rgba(${GREEN_RGB},0.85)`, lineHeight: 1.55, marginTop: 12 }}>
-          The full licence costs less than this — and includes every module.
-        </p>
-      )}
-
-      {total === 0 ? (
-        <button type="button" disabled className="btn-outline"
-          style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '0.76rem', marginTop: 16, opacity: 0.4, cursor: 'not-allowed' }}>
-          Select modules
+  const dock = (
+    <div className={'sel-dock' + (open ? ' sel-dock-open' : '')}>
+      {/* First in the markup so a tap lands on the handle before the
+          sheet it opens; CSS reverses the column so it draws below. */}
+      <div className="sel-dock-bar">
+        <button type="button" className="sel-dock-peek"
+          aria-expanded={open} onClick={() => setOpen(o => !o)}>
+          <span className="sel-dock-line">
+            <span className={'sel-dock-total' + (total ? '' : ' is-empty')}>{eur(total)}</span>
+            <span className="sel-dock-caret" aria-hidden="true"><ChevronRight size={13} /></span>
+          </span>
+          <span className="sel-dock-count">
+            / mo · {n === 0 ? 'none selected' : `${n} of ${PRICED_MODULES.length}`}
+          </span>
         </button>
-      ) : (
-        <a href={cta.href} target="_self" className="btn-outline"
-          style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '0.76rem', marginTop: 16 }}>
-          {cta.label} <ArrowUpRight size={14} />
-        </a>
-      )}
+        {action('btn-outline sel-dock-cta', { padding: '14px', fontSize: '0.66rem', whiteSpace: 'nowrap' })}
+      </div>
+
+      <div className="panel sel-dock-panel" style={{ padding: '22px 26px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
+          <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.64rem', color: `rgba(${GREEN_RGB},0.75)`, letterSpacing: '0.24em', textTransform: 'uppercase' }}>{'// '}Your selection</span>
+          {n > 0 && (
+            <button type="button" onClick={onClear} style={{
+              background: 'none', border: 'none', padding: 0,
+              fontFamily: MONO, fontWeight: 400, fontSize: '0.6rem', letterSpacing: '0.14em',
+              textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)',
+            }}>Clear</button>
+          )}
+        </div>
+
+        {/* count rides the total's baseline rather than taking a line of its own —
+            the rail has to stay short enough to sit beside the licence on one screen */}
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '2.9rem', color: total ? GREEN : 'rgba(255,255,255,0.28)', lineHeight: 1, textShadow: total ? `0 0 28px rgba(${GREEN_RGB},0.28)` : 'none', transition: 'color 0.2s ease' }}>
+            {eur(total)}
+          </span>
+          <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>/ month</span>
+          <span style={{ marginLeft: 'auto', fontFamily: MONO, fontWeight: 400, fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>
+            {n === 0 ? 'none selected' : `${n} of ${PRICED_MODULES.length}`}
+          </span>
+        </div>
+
+        {/* the comparison, said out loud the moment it starts to matter */}
+        {total > 0 && gap > 0 && gap <= 40 && (
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: `rgba(${GREEN_RGB},0.85)`, lineHeight: 1.55, marginTop: 12 }}>
+            {eur(gap)} more buys all {PRICED_MODULES.length}, below.
+          </p>
+        )}
+        {total > 0 && gap <= 0 && (
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: `rgba(${GREEN_RGB},0.85)`, lineHeight: 1.55, marginTop: 12 }}>
+            The full licence costs less than this — and includes every module.
+          </p>
+        )}
+
+        {action('btn-outline', { width: '100%', padding: '14px', fontSize: '0.76rem', marginTop: 16 })}
+      </div>
     </div>
   );
+
+  /* The one part CSS could not do alone. PageSection renders its
+     children inside the FramerMotion shim's motion.div, which always
+     carries will-change: transform — and a transformed ancestor becomes
+     the containing block for position: fixed, so the bar would pin
+     itself to the bottom of the pricing section rather than the screen
+     and never be seen. On <body> nothing is transformed. Above the
+     breakpoint it stays in the rail, where it has always been. */
+  return docked ? ReactDOM.createPortal(dock, document.body) : dock;
 }
 
 /* ─── the two exits from the picker: what a module is, and how to run it ─── */
@@ -386,7 +451,7 @@ function PricingPage({ setPage }) {
   const total = picked.reduce((sum, k) => sum + MODULE_BY_KEY[k].price, 0);
 
   return (
-    <div>
+    <div className="pricing-page">
       <PageHero
         badge="Pricing"
         title="Pay for what you run."
@@ -432,7 +497,10 @@ function PricingPage({ setPage }) {
           }}>
             <SelectionPanel keys={picked} total={total} onClear={() => setPicked([])} sub={sub} />
 
-            <div aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {/* hidden on a phone, where the selection panel has been
+                docked to the bottom of the viewport and this would
+                separate the licence card from nothing */}
+            <div aria-hidden="true" className="sel-or" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <span style={{ flex: 1, height: 1, background: `rgba(${GREEN_RGB},0.14)` }} />
               <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', letterSpacing: '0.24em', color: 'rgba(255,255,255,0.45)' }}>OR</span>
               <span style={{ flex: 1, height: 1, background: `rgba(${GREEN_RGB},0.14)` }} />

@@ -558,7 +558,7 @@ function FooterBar({ setPage }) {
         </div>
         <div style={{ flex: '0 0 auto' }}>
           <h5 style={colHead}>Navigation</h5>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className="footer-links" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {navLinks.map(link => (
               <span key={link.id} onClick={() => setPage(link.id)}
                 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', transition: 'color 0.2s' }}
@@ -570,7 +570,7 @@ function FooterBar({ setPage }) {
         </div>
         <div style={{ flex: '0 0 auto' }}>
           <h5 style={colHead}>Legal</h5>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className="footer-links" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {[['referral','Referral Program'],['privacy','Privacy Policy'],['terms','Terms of Service']].map(([id, label]) => (
               <span key={id} onClick={() => setPage(id)}
                 style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.52)', cursor: 'pointer', transition: 'color 0.2s' }}
@@ -582,18 +582,18 @@ function FooterBar({ setPage }) {
         </div>
         <div style={{ flex: '0 0 auto' }}>
           <h5 style={colHead}>Contact</h5>
-          <span onClick={() => setPage('contact')}
+          <span className="footer-link" onClick={() => setPage('contact')}
             style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', display: 'block', marginBottom: 10, transition: 'color 0.2s' }}
             onMouseEnter={e => e.target.style.color = ACCENT}
             onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.6)'}
           >Contact form</span>
-          <a href="mailto:hello@atreoxai.com" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.8rem', color: 'rgba(255,255,255,0.62)', textDecoration: 'none', display: 'block', marginBottom: 10 }}>hello@atreoxai.com</a>
+          <a href="mailto:hello@atreoxai.com" className="footer-link" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.8rem', color: 'rgba(255,255,255,0.62)', textDecoration: 'none', display: 'block', marginBottom: 10 }}>hello@atreoxai.com</a>
           <span style={{ display: 'block', fontFamily: "'JetBrains Mono', monospace", fontWeight: 500, fontSize: '0.68rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: `rgba(${ACCENT_RGB},0.7)`, marginBottom: 5 }}>Mon–Fri · 08:00–20:00 CET</span>
           <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>Weekend messages are answered Monday</span>
         </div>
         <div style={{ flex: '0 0 auto' }}>
           <h5 style={colHead}>Follow</h5>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className="footer-links" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {SOCIAL_LINKS.map(({ key, label, icon: Icon, href }) => (
               <a key={key} href={href} target="_blank" rel="noopener noreferrer"
                 className="footer-social"

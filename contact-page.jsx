@@ -210,25 +210,29 @@ function ContactForm() {
           nobody can land in it by accident and get silently dropped. */}
       <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, overflow: 'hidden' }}>
         <label htmlFor={HONEYPOT_FIELD}>Company website</label>
-        <input ref={honeypotRef} id={HONEYPOT_FIELD} name={HONEYPOT_FIELD}
+        {/* carries contact-field with the real ones — it can never be
+            focused, so nothing zooms on it, but a honeypot that is the
+            only field in the form styled differently is a honeypot
+            worth telling apart */}
+        <input ref={honeypotRef} id={HONEYPOT_FIELD} name={HONEYPOT_FIELD} className="contact-field"
           type="text" tabIndex="-1" autoComplete="off" defaultValue="" />
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0 20px' }}>
         <Field id="contact-name" label="Your name" error={errors.name}>
-          <input id="contact-name" name="name" type="text" style={fieldStyle}
+          <input id="contact-name" name="name" type="text" className="contact-field" style={fieldStyle}
             value={values.name} onChange={e => set('name', e.target.value)}
             maxLength={100} disabled={busy} autoComplete="name" />
         </Field>
         <Field id="contact-email" label="Email" error={errors.email}>
-          <input id="contact-email" name="email" type="email" style={fieldStyle}
+          <input id="contact-email" name="email" type="email" className="contact-field" style={fieldStyle}
             value={values.email} onChange={e => set('email', e.target.value)}
             maxLength={200} disabled={busy} autoComplete="email" />
         </Field>
       </div>
 
       <Field id="contact-topic" label="What is this about?" error={errors.topic}>
-        <select id="contact-topic" name="topic"
+        <select id="contact-topic" name="topic" className="contact-field"
           style={{ ...fieldStyle, appearance: 'none', cursor: 'pointer' }}
           value={values.topic} onChange={e => set('topic', e.target.value)} disabled={busy}>
           <option value="" style={{ background: '#0b0b0d' }}>Choose one…</option>
@@ -239,7 +243,7 @@ function ContactForm() {
       </Field>
 
       <Field id="contact-message" label="Message" error={errors.message}>
-        <textarea id="contact-message" name="message" rows={7}
+        <textarea id="contact-message" name="message" rows={7} className="contact-field"
           style={{ ...fieldStyle, resize: 'vertical', minHeight: 150, lineHeight: 1.6 }}
           value={values.message} onChange={e => set('message', e.target.value)}
           maxLength={5000} disabled={busy} />
