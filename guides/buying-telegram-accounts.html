@@ -1474,6 +1474,14 @@
        order by scripts/build-app.mjs. Edit the sources, then
        `npm run build:app` (or `npm run watch`); never this file's output. -->
   <script src="/public/bg-animation.js"></script>
+  <!-- Public runtime config, set BEFORE the bundle: contact-page.jsx reads
+       window.TURNSTILE_SITE_KEY when its module is evaluated, so assigning
+       it afterwards would be too late and the page would fall back to
+       showing the email address instead of the form.
+       A Turnstile site key is public by design - it identifies the widget
+       in the page. The matching secret lives only in the Vercel
+       environment variable TURNSTILE_SECRET_KEY and never ships here. -->
+  <script>window.TURNSTILE_SITE_KEY = '0x4AAAAAAEdQNXkwlP0AGAIs';</script>
   <script src="/public/app.js"></script>
 </body>
 </html>
