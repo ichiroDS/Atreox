@@ -52,7 +52,7 @@
       ]
     },
     {
-      "source": "/public/(video|og|screenshots)/(.*)",
+      "source": "/public/og/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -61,7 +61,34 @@
       ]
     },
     {
-      "source": "/public/(app.js|vendor/(.*))",
+      "source": "/public/video/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/public/screenshots/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/public/app.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/public/vendor/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
