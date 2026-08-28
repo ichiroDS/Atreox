@@ -385,6 +385,195 @@ function headFor(guide, mod, ogImage) {
   });
 }
 
+/* ── The pages the router owns ─────────────────────────────────────
+   Everything under here is a client-side route: one index.html served
+   at nine addresses. That is fine for a reader and was quietly fatal
+   for search — every one of them shipped the SAME title, the same
+   description and, worse, the same canonical pointing at "/". The
+   sitemap asked Google to index nine pages while each page said "I am
+   really the home page", and canonical wins that argument. Eight pages
+   were excluded from the index by our own markup, /pricing among them.
+
+   So each route now gets its own prerendered shell with its own head.
+   The BODY is still rendered by React - these pages are interactive and
+   prerendering them is a different job - but the head is what decides
+   whether a page is indexed at all, and it no longer lies.
+─────────────────────────────────────────────────────────────────── */
+const SITE_PAGES = [
+  {
+    file: 'functions.html', route: '/functions', kicker: 'MODULES',
+    title: 'What each module does — ATREOX',
+    heading: 'Eight modules',
+    short: 'Comments, DMs, reactions, discovery',
+    desc: 'Eight Telegram automation modules, one panel: comment generation, DM replies, account warming, reactions, and channel and group discovery. What each does, and what it costs.',
+  },
+  {
+    file: 'pricing.html', route: '/pricing', kicker: 'PRICING',
+    title: 'Pricing — pick the modules you need — ATREOX',
+    heading: 'What it costs',
+    short: 'Per module, or the full licence',
+    desc: 'Modules are priced one at a time from EUR 20/month, or take all of them on one licence for EUR 120. Monthly or annual, cancel any time, no free trial.',
+  },
+  {
+    file: 'guides.html', route: '/guides', kicker: 'GUIDES',
+    title: 'Telegram automation guides — setup, limits and safety — ATREOX',
+    heading: 'Guides',
+    short: 'Ten walkthroughs, end to end',
+    desc: 'Ten walkthroughs: buying Telegram accounts, matching proxies, warming accounts safely, finding channels worth commenting in, and every control in the panel.',
+  },
+  {
+    file: 'contact.html', route: '/contact', kicker: 'CONTACT',
+    title: 'Contact ATREOX — one form, one inbox',
+    heading: 'Get in touch',
+    short: 'Billing, bugs, refunds',
+    desc: 'Billing, something broken, a refund, or anything else. One form that lands in one inbox, answered Mon-Fri 08:00-20:00 CET.',
+  },
+  {
+    file: 'privacy.html', route: '/privacy', kicker: 'LEGAL',
+    title: 'Privacy Policy — ATREOX',
+    heading: 'Privacy Policy',
+    short: 'What we hold, and why',
+    desc: 'What ATREOX holds as controller, what it processes on your behalf, how long each kind of record is kept, and the rights you have over any of it.',
+  },
+  {
+    file: 'terms.html', route: '/terms', kicker: 'LEGAL',
+    title: 'Terms of Service — ATREOX',
+    heading: 'Terms of Service',
+    short: 'What you agree to',
+    desc: 'The terms for using ATREOX: the accounts you supply and what you are responsible for, acceptable use, billing and module changes, and the referral programme.',
+  },
+  {
+    file: 'refund.html', route: '/refund', kicker: 'LEGAL',
+    title: 'Refund Policy — ATREOX',
+    heading: 'Refund Policy',
+    short: 'What you can get back',
+    desc: 'Cancel a new subscription within 14 days and get your money back, no reason needed. What is refundable, what is not, and how to ask.',
+  },
+];
+
+/* The home page keeps index.html, so it is described here rather than
+   generated: same table, one row, so the copy lives in one place. */
+const HOME_PAGE = {
+  route: '/', kicker: 'ATREOX', heading: 'Telegram growth', short: 'Eight modules, one panel',
+  title: 'ATREOX — Telegram automation: comments, DMs, warming, discovery',
+  desc: 'Run a network of Telegram accounts from one panel: AI comments on the channels your audience reads, DM replies, account warming, reactions, and channel discovery. Eight modules, priced separately.',
+};
+
+/* ── Structured data ───────────────────────────────────────────────
+   There was none anywhere. Three kinds, each only where it is true:
+
+   Organization + WebSite on every page - who publishes this, and what
+   the site is called, so a search result can show the brand rather
+   than guessing it from the domain.
+
+   SoftwareApplication with real offers, on /pricing only. The prices
+   are read from the catalog, not typed here, so they cannot drift from
+   what the page itself renders.
+
+   Article + BreadcrumbList on each guide. The breadcrumb is what turns
+   a result into "atreoxai.com > Guides > Buying Telegram accounts"
+   instead of a bare URL.
+
+   No FAQPage and no Review: Google stopped showing FAQ rich results for
+   most sites, and there are no reviews to mark up. Marking up something
+   we do not have is how a site earns a manual action.
+─────────────────────────────────────────────────────────────────── */
+const jsonLd = (obj) =>
+  `  <script type="application/ld+json">${JSON.stringify(obj)}</script>`;
+
+const ORG_ID = ORIGIN + '/#organization';
+
+function orgAndSiteLd() {
+  return jsonLd({
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': ORG_ID,
+        name: 'ATREOX',
+        url: ORIGIN + '/',
+        logo: ORIGIN + '/public/apple-touch-icon.png',
+        email: 'hello@atreoxai.com',
+        sameAs: ['https://t.me/atreoxai'],
+      },
+      {
+        '@type': 'WebSite',
+        '@id': ORIGIN + '/#website',
+        url: ORIGIN + '/',
+        name: 'ATREOX',
+        publisher: { '@id': ORG_ID },
+        inLanguage: 'en',
+      },
+    ],
+  });
+}
+
+function pricingLd(modules) {
+  const priced = modules.filter(m => !m.included && m.price > 0);
+  return jsonLd({
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'ATREOX',
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    url: ORIGIN + '/pricing',
+    publisher: { '@id': ORG_ID },
+    offers: priced.map(m => ({
+      '@type': 'Offer',
+      name: m.name,
+      price: String(m.price),
+      priceCurrency: 'EUR',
+      category: 'subscription',
+      url: ORIGIN + '/pricing',
+    })),
+  });
+}
+
+function guideLd(guide, ogImage) {
+  const url = `${ORIGIN}/guides/${guide.url}`;
+  return [
+    jsonLd({
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: guide.seoTitle || guide.title,
+      description: guide.seoDescription || guide.summary,
+      image: ogImage,
+      mainEntityOfPage: url,
+      author: { '@id': ORG_ID },
+      publisher: { '@id': ORG_ID },
+      inLanguage: 'en',
+    }),
+    jsonLd({
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Guides', item: ORIGIN + '/guides' },
+        { '@type': 'ListItem', position: 2, name: guide.title, item: url },
+      ],
+    }),
+  ].join('\n');
+}
+
+/* index.html is BOTH the shell every other page is cut from and a page in
+   its own right, so anything written outside the HEAD:META markers is read
+   back in as part of the shell on the next build and written again. The
+   first version of this appended the JSON-LD after the closing marker and
+   grew a fresh copy of Organization+WebSite on every single build - three
+   of them after three builds. Splicing it INSIDE the markers means the same
+   replacement that rewrites the meta also replaces the last run's LD. */
+const withLd = (meta, ...blocks) =>
+  meta.replace(
+    '  <!-- /HEAD:META -->',
+    blocks.filter(Boolean).join('\n') + '\n' + '  <!-- /HEAD:META -->',
+  );
+
+function headForPage(page, ogImage) {
+  return metaBlock({
+    url: page.route === '/' ? ORIGIN + '/' : ORIGIN + page.route,
+    title: page.title, desc: page.desc, ogImage, type: 'website',
+  });
+}
+
 function headForReferral() {
   return metaBlock({
     url: `${ORIGIN}/referral-program`,
@@ -408,9 +597,13 @@ function headForReferral() {
 const OG_FONTS = ['PlayfairDisplay-Medium.ttf', 'JetBrainsMono-Medium.ttf', 'Marcellus-Regular.ttf']
   .map(f => path.join(ROOT, 'scripts', 'og-fonts', f));
 
-function ogSvg(guide, mod) {
-  const kicker = mod ? mod.name.toUpperCase() : 'BEFORE YOU START';
-  const words = guide.title.split(' ');
+/* Takes {kicker, heading, short} rather than a guide, so the site pages
+   get real 1200x630 cards too. The home page and every router route used
+   apple-touch-icon.png - a 180x180 app icon - which is why sharing the
+   pricing page produced a thumbnail the size of a postage stamp. */
+function ogSvg(card) {
+  const kicker = card.kicker;
+  const words = card.heading.split(' ');
   const lines = [];
   let cur = '';
   for (const w of words) {
@@ -419,7 +612,7 @@ function ogSvg(guide, mod) {
   }
   if (cur.trim()) lines.push(cur.trim());
 
-  const sub = guide.short;
+  const sub = card.short;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
 <rect width="1200" height="630" fill="#020403"/>
 <rect x="0" y="0" width="1200" height="4" fill="#00d9ff"/>
@@ -431,7 +624,7 @@ function ogSvg(guide, mod) {
 ${lines.map((l, i) => `<text x="80" y="${250 + i * 78}" font-family="Playfair Display" font-weight="500" font-size="70" fill="#ffffff">${esc(l)}</text>`).join('\n')}
 <text x="80" y="${276 + lines.length * 78}" font-family="JetBrains Mono" font-size="27" fill="#ffffff" opacity="0.55">${esc(sub)}</text>
 <text x="80" y="560" font-family="Marcellus" font-size="26" letter-spacing="9" fill="#00d9ff" opacity="0.9">ATREOX</text>
-<text x="1120" y="560" text-anchor="end" font-family="JetBrains Mono" font-size="20" fill="#ffffff" opacity="0.35">atreoxai.com/guides</text>
+<text x="1120" y="560" text-anchor="end" font-family="JetBrains Mono" font-size="20" fill="#ffffff" opacity="0.35">${esc(card.footer || 'atreoxai.com')}</text>
 </svg>`;
 }
 
@@ -444,19 +637,28 @@ async function buildOgImages(guides, moduleByKey) {
   }
 
   const out = {};
-  for (const g of guides) {
-    const mod = g.module ? moduleByKey[g.module] : null;
-    const svg = ogSvg(g, mod);
+  const render = (name, card) => {
     try {
-      const png = new Resvg(svg, {
+      const png = new Resvg(ogSvg(card), {
         fitTo: { mode: 'width', value: 1200 },
         font: { loadSystemFonts: false, fontFiles: OG_FONTS, defaultFontFamily: 'Playfair Display' },
       }).render().asPng();
-      write(`public/og/${g.url}.png`, png);
-      out[g.url] = `${ORIGIN}/public/og/${g.url}.png`;
+      write(`public/og/${name}.png`, png);
+      out[name] = `${ORIGIN}/public/og/${name}.png`;
     } catch (e) {
-      console.warn(`[prerender] og image for ${g.url} failed: ${e.message}`);
+      console.warn(`[prerender] og image for ${name} failed: ${e.message}`);
     }
+  };
+
+  for (const g of guides) {
+    const mod = g.module ? moduleByKey[g.module] : null;
+    render(g.url, {
+      kicker: mod ? mod.name.toUpperCase() : 'BEFORE YOU START',
+      heading: g.title, short: g.short, footer: 'atreoxai.com/guides',
+    });
+  }
+  for (const page of [HOME_PAGE, ...SITE_PAGES]) {
+    render(page.route === '/' ? 'home' : page.route.slice(1), page);
   }
   return out;
 }
@@ -520,7 +722,6 @@ if (!SLUG_MAP_RE.test(shell)) {
 }
 const slugMap = JSON.stringify(Object.fromEntries(GUIDES.map(g => [g.slug, g.url])));
 shell = shell.replace(SLUG_MAP_RE, () => `/* SLUG-MAP */${slugMap}/* /SLUG-MAP */`);
-write('index.html', shell);
 
 if (!/<!-- HEAD:META -->[\s\S]*?<!-- \/HEAD:META -->/.test(shell)) {
   throw new Error('index.html has no HEAD:META markers — guide pages would ship the site-wide title');
@@ -530,12 +731,31 @@ if (!shell.includes('<div id="root"></div>')) {
 }
 
 const ogImages = await buildOgImages(GUIDES, MODULE_BY_KEY);
+const MODULES_LIST = Object.values(MODULE_BY_KEY);
+
+const HEAD_RE = /<!-- HEAD:META -->[\s\S]*?<!-- \/HEAD:META -->/;
+
+/* index.html is both the shell every other page is cut from and the home
+   page itself, so its head is written last - after the shell has been used
+   to stamp the others, and with the home page's own title rather than the
+   one the shell happened to carry. */
+write('index.html', shell.replace(HEAD_RE, () =>
+  withLd(headForPage(HOME_PAGE, ogImages.home || OG_FALLBACK), orgAndSiteLd())));
+
+for (const page of SITE_PAGES) {
+  const name = page.route.slice(1);
+  const extra = page.route === '/pricing' ? pricingLd(MODULES_LIST) : null;
+  write(page.file, shell.replace(HEAD_RE, () =>
+    withLd(headForPage(page, ogImages[name] || OG_FALLBACK), orgAndSiteLd(), extra)));
+}
 
 for (const guide of GUIDES) {
   const mod = guide.module ? MODULE_BY_KEY[guide.module] : null;
   const html = shell
-    .replace(/<!-- HEAD:META -->[\s\S]*?<!-- \/HEAD:META -->/,
-      () => headFor(guide, mod, ogImages[guide.url] || OG_FALLBACK))
+    .replace(HEAD_RE, () => {
+      const og = ogImages[guide.url] || OG_FALLBACK;
+      return withLd(headFor(guide, mod, og), orgAndSiteLd(), guideLd(guide, og));
+    })
     .replace('<div id="root"></div>',
       () => `${renderGuide(guide, GUIDES, mod)}\n  <div id="root"></div>`);
   write(`guides/${guide.url}.html`, html);
@@ -544,7 +764,7 @@ for (const guide of GUIDES) {
 /* One page, same shell-swap trick as every guide above. */
 {
   const html = shell
-    .replace(/<!-- HEAD:META -->[\s\S]*?<!-- \/HEAD:META -->/, () => headForReferral())
+    .replace(HEAD_RE, () => withLd(headForReferral(), orgAndSiteLd()))
     .replace('<div id="root"></div>', () => `${renderReferral()}\n  <div id="root"></div>`);
   write('referral-program.html', html);
 }
