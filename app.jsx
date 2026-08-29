@@ -6,6 +6,7 @@ const {
   HomePage,
   FunctionsPage, PricingPage, GuidesPage,
   PrivacyPage, TermsPage, ReferralPage, ContactPage,
+  ProxyCheckerPage,
   guideHref, guideFromPath,
 } = window;
 
@@ -34,6 +35,7 @@ const PATH_TO_PAGE = {
   '/refund':    'refund',
   '/referral-program': 'referral',
   '/contact':   'contact',
+  '/tools/proxy-checker': 'proxy-checker',
 };
 
 const PAGE_TO_PATH = {
@@ -46,6 +48,7 @@ const PAGE_TO_PATH = {
   'refund':    '/refund',
   'referral':  '/referral-program',
   'contact':   '/contact',
+  'proxy-checker': '/tools/proxy-checker',
 };
 
 /* Scroll to an anchor once the incoming page has actually rendered.
@@ -151,6 +154,7 @@ function App() {
       case 'refund':    return <RefundPage    setPage={navigate} />;
       case 'contact':   return <ContactPage   setPage={navigate} />;
       case 'referral':  return <ReferralPage  setPage={navigate} />;
+      case 'proxy-checker': return <ProxyCheckerPage setPage={navigate} />;
       default:          return <HomePage      setPage={navigate} />;
     }
   };
