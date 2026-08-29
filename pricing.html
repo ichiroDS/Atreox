@@ -45,7 +45,7 @@
       /* slug -> address, written from catalog.jsx by prerender.mjs.
          An unknown slug is left alone: the index is a better landing
          than a 404 on a guide that does not exist. */
-      var moved = /* SLUG-MAP */{"buying-accounts":"buying-telegram-accounts","proxies":"proxies-for-telegram-accounts","account-manager":"account-manager","profile-templates":"profile-templates","active-warmup":"active-warmup","channel-parser":"channel-parser","group-parser":"group-parser","neurocommenting":"neurocommenting","neurodialogs":"neurodialogs","mass-reactions":"mass-reactions"}/* /SLUG-MAP */;
+      var moved = /* SLUG-MAP */{"buying-accounts":"buying-telegram-accounts","proxies":"proxies-for-telegram-accounts","billing":"billing","account-manager":"account-manager","profile-templates":"profile-templates","active-warmup":"active-warmup","channel-parser":"channel-parser","group-parser":"group-parser","neurocommenting":"neurocommenting","neurodialogs":"neurodialogs","mass-reactions":"mass-reactions"}/* /SLUG-MAP */;
       if (!moved[slug]) return;
       location.replace('/guides/' + moved[slug]);
     } catch (_) {}

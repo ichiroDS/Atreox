@@ -791,6 +791,133 @@ const GUIDES = [
     ],
   },
   {
+    slug: 'billing',
+    url: 'billing',
+    group: 'setup',
+    title: 'Billing, plans and cancelling',
+    short: 'What you pay and how to stop',
+    summary:
+      'What you are on, what it costs, when the next charge lands, where the receipts are, and how to cancel without losing the time you have paid for.',
+    seoTitle: 'ATREOX billing: plans, invoices and cancelling',
+    seoDescription:
+      'Modules or a full licence, what a grandfathered price means, where to find receipts, and how cancelling at the end of a paid period actually works.',
+    module: null,
+    video: null,
+    body: [
+      {
+        id: 'what-it-is',
+        title: 'What this page is',
+        blocks: [
+          ['p', 'Everything about money lives on one page: what you are subscribed to, what card pays for it, every invoice we have raised, and the way out. Nothing here needs support to action - cancelling included.'],
+          ['p', 'There are two ways to buy, and they are alternatives rather than tiers. Either you pick individual modules and pay for those, or you take the full licence and get every module including anything released while it is active. Two things - the Channel Parser and the Group Parser - come with any purchase at all.'],
+          ['callout', [
+            'A subscription is not a licence to a fixed set of features. When a module is added to the product, a full licence covers it the day it ships, with no migration and no repurchase. That is the difference you are paying for above a couple of modules.',
+          ]],
+        ],
+      },
+      {
+        id: 'summary',
+        title: 'The line at the top',
+        blocks: [
+          ['p', 'Three facts, in one row: what you are on, what it costs per period, and the date of the next charge. If a cancellation is pending, the same row says the date access ends instead, in amber.'],
+          ['controls', [
+            {
+              id: 'bl-plan', name: 'Plan name', where: 'Billing, top', kind: 'field', value: 'Legacy Starter plan',
+              rows: [
+                ['What it shows', 'Full licence, a legacy plan, or a count of the modules you hold.'],
+                ['Where it comes from', 'What your subscription actually grants in Stripe, expanded the same way the access check expands it - not a label stored separately that could disagree with your access.'],
+              ],
+            },
+            {
+              id: 'bl-amount', name: 'The amount', where: 'Billing, top right', kind: 'field', value: '29 EUR / month',
+              rows: [
+                ['What it shows', 'What your subscription actually bills per period, read from Stripe.'],
+                ['Not the list price', 'Deliberately. If you are on an older price, the figure here is yours, not the one on the pricing page. Showing you the current catalogue price would be showing you somebody else\'s bill.'],
+                ['If it is missing', 'A subscription set up before we started recording the amount shows no figure until its next renewal, rather than a guess. The plan and the date are still shown.'],
+                ['More than one line', 'Stripe allows a single billing interval per subscription, so an annual licence cannot sit on the same subscription as monthly modules. When you hold both, each is listed with its own amount and its own date - adding a yearly figure to a monthly one would be arithmetic on different units.'],
+              ],
+            },
+            {
+              id: 'bl-locked', name: 'Your price is locked in', where: 'Billing, under the amount', kind: 'button', value: 'Shown on older plans',
+              rows: [
+                ['Who sees it', 'Anyone on a plan from before modules were sold separately.'],
+                ['What it promises', 'The price you signed up at does not change when the public pricing does, and you are not moved onto a new plan unless you choose to move.'],
+                ['What it does not do', 'It does not freeze the product. A grandfathered plan keeps everything it always covered and keeps getting fixes; it just does not automatically gain modules that were carved out after it.'],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'payment-method',
+        title: 'The card',
+        blocks: [
+          ['p', 'The card that will be charged at the next renewal, shown by brand and last four digits. It is read straight from Stripe every time the page loads rather than cached, because a card can change through Stripe\'s own surfaces without telling us - and a stale card here would be somebody believing they had fixed a payment problem when they had not.'],
+          ['p', 'It is deliberately read-only. Card details never pass through this application; payment always goes through Stripe\'s own form. A button here that could not actually work would be worse than no button.'],
+          ['callout', [
+            'If the card has expired, the page says so before the renewal fails rather than after. An expired card fails silently at renewal time, and the first thing you would otherwise notice is your access stopping - which is the worst possible moment to find out and the hardest to explain.',
+          ]],
+        ],
+      },
+      {
+        id: 'history',
+        title: 'Payment history',
+        blocks: [
+          ['p', 'Every invoice we have raised, newest first, with the amount and a link to the Stripe-hosted receipt. The receipt is the point of the section: what was taken and when is answerable from the row above, but something an accountant will accept is not.'],
+          ['p', 'The history outlives the subscription. If your plan lapses, the receipts stay reachable - somebody whose plan ended still has a bookkeeper, and dropping their invoices the day access stopped would turn every past payment into a support request.'],
+        ],
+      },
+      {
+        id: 'cancelling',
+        title: 'Cancelling',
+        blocks: [
+          ['p', 'Cancelling stops the next charge. It does not stop your access: you keep everything until the end of the period you have already paid for, and the confirmation names that date before you commit to anything.'],
+          ['controls', [
+            {
+              id: 'bl-cancel', name: 'Cancel subscription', where: 'Billing, last section', kind: 'button', value: 'Cancel subscription',
+              rows: [
+                ['What it does', 'Marks every active subscription to end when its paid period does. Nothing is charged after that.'],
+                ['What you keep until then', 'Everything. The modules keep running, the engine keeps posting, and the date is stated in the dialog and again on the page afterwards.'],
+                ['No refund for the remainder', 'And no charge for the next period either. It is the same policy module removal follows.'],
+                ['Your data', 'Untouched. Accounts, channels, personas and history stay exactly as they are.'],
+                ['What we do not do', 'Offer you a discount, ask why, or put a survey in the way. The dialog states the date and the consequence and gets out of the way.'],
+              ],
+            },
+            {
+              id: 'bl-resume', name: 'Keep my subscription', where: 'Billing, after cancelling', kind: 'button', value: 'Keep my subscription',
+              rows: [
+                ['What it does', 'Undoes a pending cancellation while the period is still running. The subscription renews as normal and nothing is scheduled to end.'],
+                ['Why it is not in the cancel dialog', 'Because offering it while you are deciding would be pressure wearing a different hat. It is here for the day after, so changing your mind does not require emailing us.'],
+                ['After the period ends', 'There is nothing left to resume - the subscription is closed and buying again is a fresh purchase.'],
+              ],
+            },
+          ]],
+          ['note', 'Cancelling is the last section on the page rather than the first, and it is a heading like any other - not hidden behind an extra click, not competing with the rest. A cancel button somebody has to hunt for becomes a support ticket; one at the top is a page that keeps suggesting it.'],
+        ],
+      },
+      {
+        id: 'changing',
+        title: 'Adding and removing modules',
+        blocks: [
+          ['p', 'A module added mid-period is charged the prorated difference on the card already on file, and unlocks as soon as the payment lands - usually without leaving the page.'],
+          ['p', 'A module removed mid-period is scheduled to drop at the end of the paid period, not immediately. You keep it until then, you are not charged for it again, and there is no refund for the days remaining. A pending removal can be cancelled from the same card while it is still pending.'],
+          ['callout', [
+            'A module that came as part of a licence or an older bundle cannot be removed on its own - there is no separate line item to remove. The card says so rather than offering a button that would fail.',
+          ]],
+        ],
+      },
+      {
+        id: 'trouble',
+        title: 'When something looks wrong',
+        blocks: [
+          ['p', 'Right after a payment the page waits on Stripe confirming it to us, which normally takes a moment. If it takes more than a minute you get a way out rather than a spinner: a button to check again, a way back to the rest of the page, and an address to write to. Your payment went through in that situation - what has not finished is our side of the setup.'],
+          ['p', 'If the page says you have no subscription while you believe you do, that is worth reporting rather than working around. Our own access check is deliberately built to fail in your favour: when we cannot reach the record, your access keeps working rather than being revoked.'],
+          ['linkout', { href: '/contact', label: 'Contact us about a billing question' }],
+        ],
+      },
+    ],
+  },
+  {
     slug: 'account-manager',
     url: 'account-manager',
     group: 'module',
@@ -1698,6 +1825,7 @@ const GUIDES = [
               rows: [
                 ['Depth 1', 'Direct recommendations for each source channel only.'],
                 ['Depth 2', 'Also searches channels similar to what depth 1 found. More results, longer runtime, more Telegram calls.'],
+                ['If it finds nothing', 'A similar-channels run reporting zero is usually telling the truth about a pool you have already worked. Every candidate it surfaces that you previously added or rejected is skipped as already reviewed, and on a mature list that is most of them. The run says so now: the log names each skipped candidate with its reason, and the finished task carries the breakdown, so a zero is distinguishable from a search that did nothing.'],
                 ['What bounds depth 2', 'Only the highest-scoring thirty of the accepted depth-1 channels are recursed into. Without that cap a fifty-source run could turn into hundreds of extra requests.'],
                 ['Pacing', 'Depth 2 is paced more slowly than depth 1, because it stacks a second wave of requests onto the same account session inside one run.'],
               ],
@@ -1745,10 +1873,25 @@ const GUIDES = [
             head: ['Check', 'What it rejects'],
             rows: [
               ['Public channel', 'Anything without a public username. There is nothing to point an account at otherwise.'],
-              ['Comments open', 'Any channel with no linked discussion group. Measured on real candidates, this one alone rejects around three quarters of them — by far the most destructive step in the pipeline, and the reason a search that found plenty returns little.'],
+              ['Comments open', 'Any channel with no linked discussion group. Measured across 2,841 real candidates on this deployment, this one alone rejects 66 per cent of everything considered — by far the most destructive step in the pipeline, and the reason a search that found plenty returns little.'],
               ['Posts per week', 'A channel with fewer than five posts in the last seven days. Not adjustable from the panel.'],
             ],
           }],
+          ['p', 'The whole funnel, measured rather than estimated. Across 2,841 candidates this deployment has actually put through the filters, 54 survived - 1.9 per cent. Where the other 2,787 went, each counted against the first filter that rejected it:'],
+          ['table', {
+            head: ['Rejected by', 'Share of all candidates'],
+            rows: [
+              ['Comments open', '66.1 per cent'],
+              ['Members out of range', '15.1 per cent'],
+              ['Comments on last post too low', '9.5 per cent'],
+              ['Posts per week too low', '5.6 per cent'],
+              ['Language mismatch', '1.8 per cent'],
+              ['Passed everything', '1.9 per cent'],
+            ],
+          }],
+          ['callout', [
+            'Two readings of that table are both correct and worth holding together. A 1.9 per cent survival rate is not the parser working badly - it is what an honest set of filters does to an open recommendation feed. But it also means the single most effective thing you could change is the comments-open requirement, and that one is not adjustable: a channel with no discussion group has nowhere to put a comment.',
+          ]],
         ],
       },
       {
@@ -1795,7 +1938,7 @@ const GUIDES = [
             "Start with three or four keywords and no endings. It costs little and tells you whether the filters are anywhere near right before you spend a long run on them.",
             "Leave the members range alone at first; lower the floor rather than raising the ceiling if too little comes back.",
             "Set Min comments on last post to what you actually need. Five is the default and it is not a low bar — a channel that clears it has a live comment section.",
-            "Read the run rather than waiting for it. The live log names each candidate and why it was rejected, and it is usually obvious within a minute which filter is doing the damage.",
+            "Read the run rather than waiting for it. The live log names each candidate and why it was rejected - in both modes now; until recently the similar-channels log named the sources it worked through but not the candidates they produced - and it is usually obvious within a minute which filter is doing the damage.",
             "Once the filters look right, add endings and re-run. That is where the volume comes from.",
             "Copy the links of the rows worth having and paste them into Add channel(s) on the Neurocommenting page.",
           ]],
@@ -2015,7 +2158,7 @@ const GUIDES = [
         title: 'What this page is',
         blocks: [
           ['p', "Neurocommenting is the module that actually posts. Everything else feeds it: accounts come from Account Manager, targets from the two parsers, a face from Profile Templates. This page is where the engine is started, and where the behaviour of every comment it writes is set."],
-          ['p', "It is one page with seven regions and a jump-nav across the top in this order. Nothing here is a separate screen — the dialogs are the only things that open on top."],
+          ['p', "It is one page with nine regions and a jump-nav across the top in this order. Nothing here is a separate screen — the dialogs are the only things that open on top."],
           ['callout', [
             "Start is not a switch that stays on. The engine caps a single session at ten hours by default: at the top of the round where that is reached it stops itself cleanly, exactly as if you had pressed Stop, and it does not come back on its own — not on the next round, and not when the service restarts. Nothing in the panel says this, so the honest expectation is that a long run ends by itself and you press Start again.",
           ]],
@@ -2032,6 +2175,8 @@ const GUIDES = [
             { name: 'Comments', holds: 'Every comment that went out, filterable, with the full text and the post it answered behind each row.' },
             { name: 'Channels', holds: 'The monitored channel list — what the engine watches — plus the presets that save a list and reload it later.' },
             { name: 'Blacklist', holds: 'Account-and-channel pairs the engine has taken out of circulation on its own, grouped by reason, with Prune unresolvable and Clear blacklist above them.' },
+            { name: 'Skipped', holds: 'Channels the model almost never writes about, what each has produced, and a way to take them out of the pool.' },
+            { name: 'Model', holds: 'Which of the five models writes your comments, what each costs relative to the others, and what our own safety measurements found.' },
             { name: 'Persona', holds: 'The prompt presets, which one is active, and the sensitive-content filter.' },
           ]],
         ],
@@ -2171,6 +2316,65 @@ const GUIDES = [
         ],
       },
       {
+        id: 'model',
+        title: 'Choosing the model',
+        blocks: [
+          ['p', "Five models can write your comments, and the choice is yours per module - Neurocommenting and NeuroDialogs are set separately. What follows is not a feature table. Every number here comes from our own probe against the live providers: 34 sensitive posts, each put to each model three times, 102 calls per model, through the real prompt path a comment actually takes. None of it comes from a vendor's description of its own model."],
+          ['callout', [
+            'Read a clean result as a ceiling, not a guarantee. A model that declined all 102 has a leak rate somewhere under about 3 per cent - that is what 102 clean draws support. It does not mean zero, and one of the five leaked exactly once. What 102 draws can settle is a difference of the size we found: 22.5 per cent against under 3 per cent is not a matter of luck.',
+          ]],
+          ['p', 'Leaked, throughout, means one thing: the model wrote a publishable comment under a post about death, war, crime, a disaster, a memorial or an election, with the sensitive-content rule in its prompt telling it not to.'],
+          ['controls', [
+            {
+              id: 'mdl-grok', name: 'Grok 4.3', where: 'xAI - the default', kind: 'button', value: 'Grok 4.3',
+              rows: [
+                ['Why it is the default', 'It declined all 102 sensitive posts, and it is what every account on this deployment now uses. Chosen on that measurement, not on price - it is not the cheapest slot.'],
+                ['What you give up', "Length. It writes the shortest comments of the five: a median of 89 characters against Claude's 137. If you want remarks with some substance, that is the trade."],
+                ['One quirk', 'It stayed silent on an ordinary post it should have answered. Expect the occasional paid call that produces nothing.'],
+                ['Price', '8.3x the old default on input, 4.2x on output.'],
+              ],
+            },
+            {
+              id: 'mdl-openai', name: 'GPT-4o mini', where: 'OpenAI - cheapest, and why we left it', kind: 'button', value: 'GPT-4o mini',
+              rows: [
+                ['The number', 'It wrote a comment on 23 of 102 sensitive posts. Not one in a hundred - closer to one in four.'],
+                ['Worse than the average suggests', 'Eight distinct posts got through, and six of those it commented on every single time it was asked. That is not bad luck on a borderline case; it is a blind spot you can reproduce on demand.'],
+                ['What it commented on', 'Mostly elections and politics - an opinion poll, a candidate withdrawing, an impeachment motion, a mayoral runoff. Also a court case and a four-hour air-raid alarm.'],
+                ['So why is it still offered', 'It is genuinely the cheapest, and for a pool where nothing sensitive is ever posted the difference does not arise. If you cannot say that of your channels, the saving is not what you are choosing.'],
+                ['Price', 'The baseline the other four are measured against.'],
+              ],
+            },
+            {
+              id: 'mdl-gemini', name: 'Gemini 3.5 Flash-Lite', where: 'Google - the cheapest one that held', kind: 'button', value: 'Gemini 3.5 Flash-Lite',
+              rows: [
+                ['Result', 'Declined all 102. Leak rate under about 3 per cent.'],
+                ['Why you would pick it', "The cheapest way off GPT-4o mini: 2x on input and 4.2x on output, against Grok's 8.3x input."],
+                ['An old caveat, now gone', 'An earlier run of ours hit a free-tier rate limit on this account and the result was unusable. The account is on a paid tier now and the full run completed with no throttling.'],
+              ],
+            },
+            {
+              id: 'mdl-claude', name: 'Claude Haiku 4.5', where: 'Anthropic - the longest comments', kind: 'button', value: 'Claude Haiku 4.5',
+              rows: [
+                ['Result', 'Wrote a comment on 1 of 102 - the only leak any model but GPT-4o mini produced, and on the mildest post in the set: a mayoral debate about transport reform.'],
+                ['Why you would pick it', "It writes the longest comments of the five, a median of 137 characters against Grok's 89. That is the reason to pay more than Grok, and the only one."],
+                ['Price', '6.7x on input, 8.3x on output. The dearest of the five per token.'],
+              ],
+            },
+            {
+              id: 'mdl-kimi', name: 'Kimi K2.6', where: 'Moonshot - read the price twice', kind: 'button', value: 'Kimi K2.6',
+              rows: [
+                ['Result', 'Declined all 102.'],
+                ['The catch', 'It reasons before it answers, and that reasoning is billed as output: a measured 1206 output tokens per comment, where the others spend about 32. Its per-token rate says 6.7x; the actual bill is around 70x the old default per comment.'],
+                ['Also slow', '45 to 50 seconds per call, against one or two for the rest.'],
+                ['Who it is for', 'Someone who specifically wants this model and accepts both. The card in the panel prints the per-comment multiple next to the rates for exactly this reason.'],
+              ],
+            },
+          ]],
+          ['note', 'The model is not your safety layer. Before any of them is asked to write, a separate check decides whether the post is one we will write about at all - see the sensitive-content filter and the pre-generation check under Persona. That check does not use the model you pick here, so choosing a cheaper model is not choosing a weaker guard.'],
+          ['p', 'Switching takes effect on the next comment. Nothing restarts, nothing already queued is rewritten, and the choice is stored per owner - changing it here does not change what NeuroDialogs uses for replies.'],
+        ],
+      },
+      {
         id: 'persona',
         title: 'Persona',
         blocks: [
@@ -2201,11 +2405,25 @@ const GUIDES = [
             {
               id: 'ctl-sensitive', name: 'Sensitive content filter', where: 'Persona', kind: 'toggle', on: true,
               rows: [
-                ['What it does', 'Appends a rule to the end of every prompt, above whatever the persona says: do not comment on posts about death, murder or violent crime, war or mobilisation, terrorism, disasters, mourning, or partisan politics and elections. Such a post is skipped instead.'],
+                ['What it does', 'Appends a rule to the end of every prompt, above whatever the persona says: do not comment on posts about death, murder or violent crime, war or mobilisation, terrorism, disasters, mourning, or partisan politics, elections and election campaigns — including opinion polls, candidate ratings and campaign coverage. Such a post is skipped instead.'],
                 ['Default', 'On.'],
-                ['Turning it off', 'Asks for confirmation first — the only switch on this page that does. Turning it back on does not.'],
-                ['In the numbers', 'A comment skipped this way is recorded under its own reason rather than folded in with ordinary skips, so it stays visible as a distinct outcome.'],
+                ['Turning it off lasts a week', 'It is no longer permanent. A switch-off expires after seven days and the filter comes back on by itself. The row tells you the date while it is off, and you can turn it back on sooner from the same control.'],
+                ['Why it expires', 'Because a switch set once and forgotten is not a decision anyone is still making. On this deployment three accounts had it off, and between them they accounted for 87% of every comment the product had ever published.'],
+                ['Turning it off', 'Asks for confirmation first — the only switch on this page that does — and the confirmation shows three real comments this product published from accounts with the filter off, under posts about people being killed. Turning it back on asks nothing.'],
+                ['What it does not control', 'The pre-generation check below. This switch decides whether the model is also told to decline; it does not decide what the product is willing to write about at all.'],
+                ['In the numbers', 'Two distinct reasons, not one. sensitive_content is the model declining; sensitive_precheck is the check below stopping the post before any model was asked. Both stay visible separately from ordinary skips.'],
                 ['Loud at start', 'While it is off, the engine writes a warning into the log every time it starts.'],
+              ],
+            },
+            {
+              id: 'ctl-precheck', name: 'The check before generation', where: 'No control — it always runs', kind: 'button', value: 'Always on',
+              rows: [
+                ['What it does', 'Before your persona is assembled and before your chosen model is asked for anything, a separate call decides whether the post is about one of the sensitive topics. If it is, the post is dropped and no comment is generated.'],
+                ['Why a second layer', 'Because the prompt rule rides on a persona that argues with it — be a real person, react to the detail — and we measured what that conflict costs: the old default model answered anyway on 23 of 102 sensitive posts. This check has no persona to lose to.'],
+                ['It is not switchable', 'Deliberately. The filter above is a setting; this is a floor. Measured against our own history, it would have stopped 393 comments published from accounts that had the filter switched off.'],
+                ['It is not your model', 'It runs on its own slot, so picking a cheaper model for writing does not pick a weaker guard.'],
+                ['What it costs', 'About three hundredths of a cent per post, and a fraction of a second. A stopped post costs that instead of a full generation.'],
+                ['If it cannot answer', 'The post goes back in the queue — not dropped, not published. A guard that cannot reach a verdict stops the line rather than opening it, and the engine logs why.'],
               ],
             },
           ]],
@@ -2289,6 +2507,35 @@ const GUIDES = [
           ['callout', [
             "An entry here is a record of what happened, not the thing keeping an account out. The exclusion itself is a separate 24-hour block on that one account for that one channel, held elsewhere and not shown on this page — it expires on its own, and deleting the blacklist entry does not lift it early. Clearing the blacklist tidies the history and the ranking; it does not give an account back a channel it is currently blocked from.",
           ]],
+        ],
+      },
+      {
+        id: 'quiet-channels',
+        title: 'Channels it almost always skips',
+        blocks: [
+          ['p', 'Some channels post almost nothing your persona can answer. The engine still reads every post on them and still pays for a decision on each one - it just decides no, over and over. This section names those channels and lets you take them out of the pool.'],
+          ['p', 'A channel appears here once it has at least ten processed posts and the model has declined at least half of them. Both thresholds come from the engine, and the section states the rule it applied rather than keeping a second copy of it.'],
+          ['callout', [
+            'Nothing here is removed automatically. The pool is yours, and a product that quietly shrank it would show up a week later as an unexplained drop in output. The list is shown, the numbers are shown, and the button does what you tick.',
+          ]],
+          ['controls', [
+            {
+              id: 'ctl-never-commented', name: 'Never produced a comment', where: 'Skipped', kind: 'button', value: 'Ticked already',
+              rows: [
+                ['What it means', 'Enough history to judge, and not one published comment in all of it. You are paying for a model call on every post and receiving nothing back.'],
+                ['Why they are pre-ticked', 'Because there is nothing to weigh up. Removing one costs you no output at all - that is the whole content of the group.'],
+              ],
+            },
+            {
+              id: 'ctl-mostly-skipped', name: 'Mostly skipped, but does publish', where: 'Skipped', kind: 'button', value: 'Not ticked',
+              rows: [
+                ['What it means', 'Over the threshold, but it does produce comments. Each row states how many.'],
+                ['Why they start unticked', 'Removing one of these costs you real output, so it is a judgement rather than a cleanup. The count is on the row so you can make it with the number in front of you.'],
+              ],
+            },
+          ]],
+          ['p', 'Under the button, both halves of the trade are stated together - how many declined posts stop costing you model calls, and how many published comments you give up. A control that showed only the gain would be an argument rather than a control.'],
+          ['p', 'The same channels are marked in the Channels list itself, so you can see which ones they are without coming back here.'],
         ],
       },
       {
@@ -2500,6 +2747,59 @@ const GUIDES = [
           ]],
           ['note', "Deleting a knowledge file that a preset still points at does not fail quietly. The preset stops assembling, and the module refuses to start until it is fixed — which is better than accounts confidently answering questions with nothing behind the answer.",
           ],
+        ],
+      },
+      {
+        id: 'model',
+        title: 'Choosing the model',
+        blocks: [
+          ['p', 'The same five models are available here as in Neurocommenting, and the setting is separate - this one decides who writes your direct-message replies, and changing it does not touch what writes your comments.'],
+          ['p', 'The measurements below come from the commenting side: 34 sensitive posts, three draws each, 102 live calls per model. Be clear about what that does and does not tell you here. It measures how a model behaves when a persona prompt pushes it to be chatty and a safety rule tells it not to - the same tension a DM reply is written under, so it transfers. It was not measured on conversations, so treat it as strong evidence about the model rather than a measurement of this module.'],
+          ['callout', [
+            'One difference matters more here than on the commenting side: the pre-generation check that guards comments does NOT run on replies. A conversation is not a post about a subject, so there is nothing to classify before it starts. In DMs the model\'s own judgement, your prompt, and the Safety group below are the whole of it - which makes the choice of model count for more, not less.',
+          ]],
+          ['controls', [
+            {
+              id: 'nd-mdl-grok', name: 'Grok 4.3', where: 'The default', kind: 'button', value: 'Grok 4.3',
+              rows: [
+                ['Result', 'Declined all 102 sensitive posts - a leak rate under about 3 per cent, which is the strongest statement 102 clean draws support.'],
+                ['Character', 'The shortest writer of the five, a median of 89 characters. In a conversation that reads as terse; whether it suits you depends on what your accounts are meant to sound like.'],
+                ['Price', '8.3x GPT-4o mini on input, 4.2x on output.'],
+              ],
+            },
+            {
+              id: 'nd-mdl-claude', name: 'Claude Haiku 4.5', where: 'The longest replies', kind: 'button', value: 'Claude Haiku 4.5',
+              rows: [
+                ['Result', 'One leak in 102, on the mildest post in the set.'],
+                ['Character', 'The longest writer, a median of 137 characters. For DMs this is the most substantive of the five, and the usual reason to pay above Grok.'],
+                ['Price', 'The dearest per token: 6.7x on input, 8.3x on output.'],
+              ],
+            },
+            {
+              id: 'nd-mdl-gemini', name: 'Gemini 3.5 Flash-Lite', where: 'Cheapest that held', kind: 'button', value: 'Gemini 3.5 Flash-Lite',
+              rows: [
+                ['Result', 'Declined all 102.'],
+                ['Why you would pick it', "The cheapest way off GPT-4o mini - 2x on input against Grok's 8.3x - without giving up the safety result."],
+              ],
+            },
+            {
+              id: 'nd-mdl-openai', name: 'GPT-4o mini', where: 'Cheapest, and not our default any more', kind: 'button', value: 'GPT-4o mini',
+              rows: [
+                ['Result', 'Wrote a comment on 23 of 102 sensitive posts, and on six of them every single time it was asked.'],
+                ['Why that matters more in DMs', 'There is no pre-generation check on this path to catch what the model lets through. Whatever the model decides is what your account says.'],
+                ['When it is still fine', 'Conversations that never go near death, war, crime or politics. If you cannot promise that of your inbox, the saving is not what you are choosing.'],
+              ],
+            },
+            {
+              id: 'nd-mdl-kimi', name: 'Kimi K2.6', where: 'Works, but read the price twice', kind: 'button', value: 'Kimi K2.6',
+              rows: [
+                ['Result', 'Declined all 102.'],
+                ['The catch', 'It reasons before answering and is billed for the reasoning: about 1206 output tokens per reply against 32 for the others - roughly 70x GPT-4o mini per reply, not the 6.7x its rate suggests. It also takes 45 to 50 seconds a call.'],
+                ['In a conversation', 'That delay is not neutral. A reply that lands a minute late reads differently from one that lands in two seconds.'],
+              ],
+            },
+          ]],
+          ['p', 'There is a daily spend ceiling on this module, and it is checked against the real per-token cost of whichever model you picked - so a dearer model does not silently buy you more spending, it reaches the same ceiling sooner. Switching takes effect on the next reply; nothing restarts and no session boundary is waited for.'],
         ],
       },
       {
