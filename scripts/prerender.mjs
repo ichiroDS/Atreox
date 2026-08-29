@@ -29,12 +29,15 @@
    worse than a build that stops.
 ══════════════════════════════════════════════════════════════════ */
 
-import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { optimizeImages } from './optimize-images.mjs';
+import {
+  HEAD_RE, LASTMOD_FILE, SLUG_MAP_RE,
+  diffManifest, driftMessage, readManifest, resolveDates, shellFingerprint,
+} from './lastmod.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 /* The host that answers 200. Vercel has www as the project's primary
@@ -692,87 +695,10 @@ function headForReferral() {
    paragraph is, so there is exactly one block renderer to keep honest.
 ══════════════════════════════════════════════════════════════════ */
 
-/* ── lastmod, and why it is not `new Date()` ──────────────────────
-   Every URL in the sitemap used to carry today's date, rewritten on
-   every build. That is not a small inaccuracy: a sitemap that claims
-   the whole site changed today, every day, teaches a crawler that
-   lastmod on this domain means nothing — and the cost lands hardest on
-   exactly the pages where it would have helped, the new articles.
-
-   Four ways to get a real date, and what each costs:
-
-     a) a hand-kept `updated` field per guide. Free to build; the
-        failure mode is the discipline it depends on. Edit the prose,
-        forget the field, and the date now lies STALE, which a crawler
-        acts on (it stops re-reading the page) rather than merely
-        discounting.
-     b) the git time of catalog.jsx. All eleven guides live in that one
-        file, so every guide's date moves whenever any guide is
-        touched: right once, wrong ten times.
-     c) `git log -L` over each guide's line range. Precise, and three
-        problems: it needs real git history at build time, which a
-        shallow CI clone may not have; it is eleven history walks per
-        build; and the line range has to be located by parsing the
-        catalog, so a reformat silently relocates it.
-     d) file mtime. Meaningless in CI — a fresh checkout is always now.
-
-   So: (e), a committed manifest keyed by a hash of the content itself.
-   The build hashes each guide's own data, and only when that hash
-   differs from the manifest does the date move to today. No git, no
-   discipline, identical on a laptop and on Vercel, and stable across
-   rebuilds — which matters because verify-build-current.mjs reruns the
-   build and compares, so a date that moved on every run would make
-   that check flap forever.
-
-   The manifest is tracked, and forgetting to commit it after a content
-   change is caught by verify-build-current.mjs like any other generated
-   file. The first build stamps today for everything, once: we do not
-   know when these were last edited, and today is when we started
-   keeping track.
-─────────────────────────────────────────────────────────────────── */
-const LASTMOD_FILE = 'content-lastmod.json';
-
-function contentHash(value) {
-  /* JSON.stringify over a literal is stable here: the objects come from
-     source literals, so key order is the order they are written in, and
-     it only has to be consistent between two runs of the same file. */
-  return crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex').slice(0, 16);
-}
-
-function resolveLastmod(entries, today) {
-  let previous = {};
-  try {
-    previous = JSON.parse(fs.readFileSync(path.join(ROOT, LASTMOD_FILE), 'utf8'));
-  } catch (_) {
-    /* Missing or unreadable: everything is stamped today and the file is
-       written. Deliberately not an error - a fresh clone that has not
-       committed it yet should build, not fail. */
-  }
-
-  const next = {};
-  const dates = {};
-  for (const [id, value] of entries) {
-    const hash = contentHash(value);
-    const before = previous[id];
-    const date = before && before.hash === hash ? before.date : today;
-    next[id] = { hash, date };
-    dates[id] = date;
-  }
-
-  /* Which entries actually MOVED, as opposed to which are merely new.
-     Only used for the drift warning on articles: a post whose text
-     changed while its author-set `updated` field did not is the one
-     case where an editorial date can quietly start lying, and a first
-     build (where every entry is new) must not warn about all of them. */
-  const changed = new Set(
-    Object.keys(next).filter(id => previous[id] && previous[id].hash !== next[id].hash),
-  );
-
-  if (JSON.stringify(next) !== JSON.stringify(previous)) {
-    write(LASTMOD_FILE, JSON.stringify(next, null, 2) + '\n');
-  }
-  return { dates, changed };
-}
+/* lastmod lives in ./lastmod.mjs: the content-hash manifest, the three
+   states it can be in, and why a disagreement between it and the
+   content is a build failure rather than something this build quietly
+   rewrites. */
 
 /* ── One article ──────────────────────────────────────────────────── */
 const CRUMB = "font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.6rem;letter-spacing:0.16em;text-transform:uppercase;text-decoration:none";
@@ -1090,9 +1016,6 @@ const robots = () => [
 ].join('\n');
 
 /* ── Run ───────────────────────────────────────────────────────── */
-const imgResult = await optimizeImages(path.join(ROOT, 'public', 'screenshots'));
-if (imgResult.processed) console.log(`[optimize-images] ${imgResult.processed} image(s) optimized, ${imgResult.skipped} already small`);
-
 const {
   GUIDES, MODULE_BY_KEY,
   POSTS, BLOG_CATEGORIES, TOOL_BY_ID, BLOCK_KINDS,
@@ -1102,7 +1025,6 @@ const {
 /* The slug -> address map the legacy-anchor redirect in index.html
    uses, refreshed from the catalog so the two cannot drift. */
 let shell = read('index.html');
-const SLUG_MAP_RE = /\/\* SLUG-MAP \*\/[\s\S]*?\/\* \/SLUG-MAP \*\//;
 if (!SLUG_MAP_RE.test(shell)) {
   throw new Error('index.html has no SLUG-MAP markers — the legacy #guide- redirect would go stale');
 }
@@ -1129,12 +1051,129 @@ const BLOG_INDEX = {
   short: 'Written for the questions people search',
 };
 
+/* ── lastmod: resolved AND ENFORCED before a single file is written ──
+   Deliberately the first thing the run does, ahead of image
+   optimisation and every write below it, so `--check-lastmod` can
+   answer and exit without touching the working tree. A check that has
+   to write files to tell you something is a check nobody can run on a
+   dirty branch.
+─────────────────────────────────────────────────────────────────── */
+const MODE =
+  process.argv.includes('--update-lastmod') ? 'update' :
+  process.argv.includes('--check-lastmod') ? 'check' : 'build';
+
+const TODAY = new Date().toISOString().slice(0, 10);
+const SHELL_FINGERPRINT = shellFingerprint(read('index.html'));
+
+/* What each address's date is derived from. An entry's VALUE is
+   whatever, if changed, means that address now serves different bytes. */
+const LASTMOD_ENTRIES = [
+  /* A router page's served HTML is its head plus the shell; its body is
+     React and not something this build can hash. So the hash covers
+     what the build DOES own, and a shell change legitimately moves all
+     of them — the bytes those addresses serve really did change. */
+  ...[HOME_PAGE, ...SITE_PAGES].map(page =>
+    [`page:${page.route}`, { page, shell: SHELL_FINGERPRINT }]),
+  ['page:/referral-program', { page: 'referral', shell: SHELL_FINGERPRINT }],
+  ['page:/blog', { posts: ALL_POSTS.map(p => p.slug), shell: SHELL_FINGERPRINT }],
+  ...BLOG_CATEGORIES.map(c => [`blogcat:${c.slug}`, {
+    category: c,
+    posts: postsForList({ category: c.slug }).items.map(p => p.slug),
+    shell: SHELL_FINGERPRINT,
+  }]),
+  ...GUIDES.map(g => [`guide:${g.url}`, g]),
+  /* Articles are hashed too, but NOT to date them — their dates are
+     editorial and belong to the author. The hash is only so the drift
+     warning below can fire. */
+  ...ALL_POSTS.map(p => [`post:${p.slug}`, p]),
+];
+
+const SEED_NOTICE =
+  `[lastmod] ${LASTMOD_FILE} was missing — seeding every entry with today's date.\n` +
+  `[lastmod] COMMIT IT. Until it is in the repository, a deploy builds from a\n` +
+  `[lastmod] clean checkout, finds it missing again, and re-stamps today on\n` +
+  `[lastmod] every single deploy — which is what the manifest exists to stop.`;
+
+const committed = readManifest(ROOT);
+
+/* --check-lastmod: answer, write nothing, exit. This is the mode the
+   verify script drives, so it must be safe to run against a working
+   tree somebody is in the middle of editing. */
+if (MODE === 'check') {
+  if (committed === null) {
+    console.warn(SEED_NOTICE);
+    process.exit(0);
+  }
+  const diff = diffManifest(LASTMOD_ENTRIES, committed);
+  if (!diff.clean) {
+    console.error(driftMessage(diff));
+    process.exit(1);
+  }
+  console.log(`[lastmod] ${LASTMOD_FILE} matches the content (${LASTMOD_ENTRIES.length} entries).`);
+  process.exit(0);
+}
+
+let manifest;
+if (committed === null) {
+  /* Seeding. NOT a failure: a checkout that has never had a manifest
+     must still build, and "today" is the honest answer on the day you
+     start keeping track. It happens once — the next build reads the
+     committed file and every hash matches, so nothing is rewritten. */
+  manifest = resolveDates(LASTMOD_ENTRIES, null, TODAY).next;
+  write(LASTMOD_FILE, JSON.stringify(manifest, null, 2) + '\n');
+  console.warn(SEED_NOTICE);
+} else {
+  const diff = diffManifest(LASTMOD_ENTRIES, committed);
+  if (diff.clean) {
+    manifest = committed;
+    if (MODE === 'update') {
+      console.log(`[lastmod] ${LASTMOD_FILE} is already up to date — nothing written.`);
+    }
+  } else if (MODE === 'update') {
+    manifest = resolveDates(LASTMOD_ENTRIES, committed, TODAY).next;
+    write(LASTMOD_FILE, JSON.stringify(manifest, null, 2) + '\n');
+    const moved = [...diff.changed, ...diff.added];
+    console.log(
+      `[lastmod] rewrote ${LASTMOD_FILE}: ${diff.changed.length} changed, ` +
+      `${diff.added.length} added, ${diff.removed.length} removed.`);
+    for (const id of moved) console.log(`[lastmod]   ${id} -> ${TODAY}`);
+    console.log('[lastmod] Commit it with the content change.');
+  } else {
+    /* The whole point. This build cannot fix it — a deploy throws its
+       own writes away — so the only useful thing it can do is refuse. */
+    console.error(driftMessage(diff));
+    process.exit(1);
+  }
+}
+
+const { dates: LASTMOD, changed: CONTENT_CHANGED } =
+  resolveDates(LASTMOD_ENTRIES, manifest, TODAY);
+
+/* An article whose text changed while its `updated` field did not. Not
+   an error: the author may be fixing a typo, and forcing a date bump
+   for that would make `updated` meaningless in the other direction. It
+   fires during `npm run lastmod`, which is exactly the moment somebody
+   is looking at the change and can decide. */
+for (const post of ALL_POSTS) {
+  if (CONTENT_CHANGED.has(`post:${post.slug}`) && post.updated !== TODAY) {
+    console.warn(
+      `[lastmod] "${post.slug}" changed but its updated date is ` +
+      `${post.updated || '(unset)'} — set updated: '${TODAY}' if this was a revision`,
+    );
+  }
+}
+
+const postLastmod = p => p.updated || p.published;
+
+/* Writing starts here. Everything above only reads. */
+const imgResult = await optimizeImages(path.join(ROOT, 'public', 'screenshots'));
+if (imgResult.processed) console.log(`[optimize-images] ${imgResult.processed} image(s) optimized, ${imgResult.skipped} already small`);
+
 const ogImages = await buildOgImages(
   GUIDES, MODULE_BY_KEY, ALL_POSTS, BLOG_CATEGORIES, BLOG_INDEX,
 );
 const MODULES_LIST = Object.values(MODULE_BY_KEY);
 
-const HEAD_RE = /<!-- HEAD:META -->[\s\S]*?<!-- \/HEAD:META -->/;
 
 /* index.html is both the shell every other page is cut from and the home
    page itself, so its head is written last - after the shell has been used
@@ -1282,55 +1321,6 @@ for (const f of fs.readdirSync(path.join(ROOT, 'guides'))) {
   }
 }
 
-/* ── lastmod, resolved once for everything the build owns ────────── */
-const TODAY = new Date().toISOString().slice(0, 10);
-
-/* The shell, minus the two regions this build rewrites on every run.
-   Without stripping them the shell's hash would change every time the
-   catalog did, and every router page would claim to have changed with
-   it — the same "everything moved today" noise, one level down. */
-const SHELL_FINGERPRINT = contentHash(
-  read('index.html')
-    .replace(SLUG_MAP_RE, '')
-    .replace(HEAD_RE, ''),
-);
-
-const { dates: LASTMOD, changed: CONTENT_CHANGED } = resolveLastmod([
-  /* A router page's served HTML is its head plus the shell; its body is
-     React and not something this build can hash. So the hash covers
-     what the build DOES own, and a shell change legitimately moves all
-     of them — the bytes those addresses serve really did change. */
-  ...[HOME_PAGE, ...SITE_PAGES].map(page =>
-    [`page:${page.route}`, { page, shell: SHELL_FINGERPRINT }]),
-  ['page:/referral-program', { page: 'referral', shell: SHELL_FINGERPRINT }],
-  ['page:/blog', { posts: ALL_POSTS.map(p => p.slug), shell: SHELL_FINGERPRINT }],
-  ...BLOG_CATEGORIES.map(c => [`blogcat:${c.slug}`, {
-    category: c,
-    posts: postsForList({ category: c.slug }).items.map(p => p.slug),
-    shell: SHELL_FINGERPRINT,
-  }]),
-  ...GUIDES.map(g => [`guide:${g.url}`, g]),
-  /* Articles are hashed too, but NOT to date them — their dates are
-     editorial and belong to the author. This is only so the warning
-     below can fire. */
-  ...ALL_POSTS.map(p => [`post:${p.slug}`, p]),
-], TODAY);
-
-/* An article whose text changed while its `updated` field did not. Not
-   an error: the author may be fixing a typo, and forcing a date bump
-   for that would make `updated` meaningless in the other direction. But
-   it is the one case where an author-controlled date starts lying
-   silently, so it is said out loud once per build. */
-for (const post of ALL_POSTS) {
-  if (CONTENT_CHANGED.has(`post:${post.slug}`) && post.updated !== TODAY) {
-    console.warn(
-      `[prerender] "${post.slug}" changed but its updated date is ` +
-      `${post.updated || '(unset)'} — set updated: '${TODAY}' if this was a revision`,
-    );
-  }
-}
-
-const postLastmod = p => p.updated || p.published;
 
 write('sitemap.xml', sitemap([
   ...STATIC_PAGES.map(([loc, priority]) => [loc, priority, LASTMOD[`page:${loc}`] || TODAY]),
