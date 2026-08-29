@@ -6,7 +6,7 @@ const {
   HomePage,
   FunctionsPage, PricingPage, GuidesPage,
   PrivacyPage, TermsPage, ReferralPage, ContactPage,
-  ProxyCheckerPage,
+  ProxyCheckerPage, BlogPage,
   guideHref, guideFromPath,
 } = window;
 
@@ -36,6 +36,7 @@ const PATH_TO_PAGE = {
   '/referral-program': 'referral',
   '/contact':   'contact',
   '/tools/proxy-checker': 'proxy-checker',
+  '/blog': 'blog',
 };
 
 const PAGE_TO_PATH = {
@@ -49,6 +50,7 @@ const PAGE_TO_PATH = {
   'referral':  '/referral-program',
   'contact':   '/contact',
   'proxy-checker': '/tools/proxy-checker',
+  'blog': '/blog',
 };
 
 /* Scroll to an anchor once the incoming page has actually rendered.
@@ -71,6 +73,10 @@ function scrollToAnchor(id) {
    reads the last segment itself to decide which guide is open. */
 function pageFromPath(pathname) {
   if (pathname === '/guides' || pathname.indexOf('/guides/') === 0) return 'guides';
+  /* Same rule for the blog: the index, every category and every article
+     are one page that reads the path itself, so /blog/anything lands
+     here rather than falling through to the home page. */
+  if (pathname === '/blog' || pathname.indexOf('/blog/') === 0) return 'blog';
   return PATH_TO_PAGE[pathname] || 'home';
 }
 
@@ -155,6 +161,7 @@ function App() {
       case 'contact':   return <ContactPage   setPage={navigate} />;
       case 'referral':  return <ReferralPage  setPage={navigate} />;
       case 'proxy-checker': return <ProxyCheckerPage setPage={navigate} />;
+      case 'blog':      return <BlogPage      setPage={navigate} />;
       default:          return <HomePage      setPage={navigate} />;
     }
   };

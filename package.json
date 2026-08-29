@@ -5,11 +5,13 @@
     "node": ">=18"
   },
   "scripts": {
-    "build": "node scripts/build-app.mjs && node scripts/prerender.mjs",
+    "build": "node scripts/build-app.mjs && node scripts/prerender.mjs && node scripts/verify-blocks.mjs && node scripts/verify-seo.mjs",
     "verify:build": "node scripts/verify-build-current.mjs",
     "prepare": "node scripts/install-hooks.mjs",
     "build:app": "node scripts/build-app.mjs",
-    "watch": "node scripts/build-app.mjs --watch"
+    "watch": "node scripts/build-app.mjs --watch",
+    "verify:blocks": "node scripts/verify-blocks.mjs",
+    "verify:seo": "node scripts/verify-seo.mjs"
   },
   "dependencies": {
     "stripe": "^16.0.0"

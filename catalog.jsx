@@ -3407,6 +3407,53 @@ const GUIDES = [
   },
 ];
 
+/* ── The free tools, and the one place their addresses are spelled ──
+   A `toolcta` block names a tool by ID, never by URL. That is the whole
+   point of this table: the block sits in the middle and at the end of
+   most articles, so an address typed into the blocks themselves would
+   be spelled dozens of times and would have to be found in all of them
+   the day a tool moves. Adding the account checker is one row here.
+
+   `page`  the marketing page on this site, which explains the tool.
+   `panel` where the tool actually runs, behind sign-in.
+
+   Both are here because an article links to the panel — the reader
+   came to use the thing, not to read a second page about it — while
+   the site's own navigation links to the page. An unknown ID is a
+   build error, not an empty block; see renderBlocks in prerender.mjs.
+─────────────────────────────────────────────────────────────────── */
+const TOOLS = [
+  {
+    id: 'proxy-checker',
+    name: 'Telegram proxy checker',
+    blurb:
+      'Check a proxy against Telegram itself: whether it connects, the country and data centre Telegram reports through it, and the real exit IP with its network and type.',
+    cta: 'Open the proxy checker',
+    page: '/tools/proxy-checker',
+    panel: 'https://app.atreoxai.com/tools/proxy-checker',
+  },
+];
+
+const TOOL_BY_ID = Object.fromEntries(TOOLS.map(t => [t.id, t]));
+
+/* ── Every block kind both renderers must know ──────────────────────
+   This used to be a sentence in the comment above GUIDES, which is a
+   fine place for a list nobody can check. It is a constant now because
+   the two renderers fail DIFFERENTLY on a kind they do not know:
+   prerender.mjs throws, so a missing case there fails the deploy, while
+   ReaderBlocks in guides.jsx returns null, so a missing case there just
+   deletes the block from the page with nothing to notice.
+
+   scripts/verify-blocks.mjs reads this list and asserts both renderers
+   handle every entry, and that nothing in the content uses a kind not
+   listed here. That check is what makes the two renderers one renderer.
+─────────────────────────────────────────────────────────────────── */
+const BLOCK_KINDS = [
+  'p', 'callout', 'steps', 'card', 'cards', 'options', 'kv', 'stat',
+  'faq', 'map', 'controls', 'figure', 'video', 'plates', 'table',
+  'checklist', 'note', 'bullets', 'linkout', 'toolcta',
+];
+
 const GUIDE_BY_SLUG = Object.fromEntries(GUIDES.map(g => [g.slug, g]));
 const GUIDE_BY_URL  = Object.fromEntries(GUIDES.map(g => [g.url, g]));
 const GUIDE_BY_MODULE = Object.fromEntries(
@@ -3438,4 +3485,5 @@ Object.assign(window, {
   PIPELINE,
   GUIDES, GUIDE_BY_SLUG, GUIDE_BY_URL, GUIDE_BY_MODULE,
   guideHref, guideFromPath,
+  TOOLS, TOOL_BY_ID, BLOCK_KINDS,
 });

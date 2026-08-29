@@ -2012,6 +2012,109 @@
       .splash-log span { animation: none; opacity: 1; }
       .btn-solid::after { display: none; }
     }
+
+    /* ══════════════════════════════════════════════════════════════
+       The blog: the tool call-to-action, the dates, and the list cards.
+
+       Every rule below is NEW. Nothing above it is edited, which is the
+       point: the guides and the articles share one block renderer and
+       one stylesheet, so a change to an existing .g-* rule would move
+       eleven guide pages at the same time as it moved the blog. The
+       only class the two share by design is the block vocabulary
+       itself — .g-p, .g-card, .g-toc and the rest — and those are
+       untouched.
+    ══════════════════════════════════════════════════════════════ */
+
+    /* ── The tool block ──
+       Louder than a .g-card and quieter than the page, because it
+       stands in the middle of an article and has to read as an offer
+       without interrupting the sentence the reader is in. Solid left
+       edge rather than a full border: it belongs to the column of text
+       it sits in. */
+    .g-toolcta {
+      display: block; margin: 26px 0; padding: 22px 24px;
+      max-width: var(--gcol);
+      border: 1px solid var(--g-22); border-left: 2px solid var(--g);
+      border-radius: 4px;
+      background: linear-gradient(90deg, rgba(0,217,255,0.06), rgba(0,217,255,0.015));
+    }
+    .g-toolcta-kicker {
+      display: block; font-family: var(--mono); font-weight: 600; font-size: 0.58rem;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--g); margin: 0 0 9px;
+    }
+    .g-toolcta-name {
+      display: block; font-family: var(--serif); font-weight: 500;
+      font-size: 1.28rem; line-height: 1.25; color: #fff; margin: 0 0 10px;
+    }
+    .g-toolcta-text { margin: 0 0 16px !important; font-size: 0.94rem; }
+    .g-toolcta-cta {
+      display: inline-flex; align-items: center; gap: 7px;
+      border: 1px solid var(--g-40); border-radius: 3px;
+      background: rgba(0,217,255,0.10); padding: 10px 17px;
+      font-family: var(--mono); font-weight: 600; font-size: 0.63rem;
+      letter-spacing: 0.16em; text-transform: uppercase; color: var(--g);
+      text-decoration: none; transition: background 0.18s ease, border-color 0.18s ease;
+    }
+    .g-toolcta-cta:hover { background: rgba(0,217,255,0.18); border-color: var(--g); }
+    .g-toolcta-cta:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+
+    /* ── Article dates ──
+       "Updated" is a second <time>, and it only exists in the markup
+       when the article has genuinely been revised — see postDates in
+       prerender.mjs. So this rule never has to hide anything: there is
+       nothing to hide on an article nobody has revised. */
+    .g-postmeta {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 0;
+      font-family: var(--mono); font-weight: 500; font-size: 0.63rem;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: rgba(255,255,255,0.42); margin: 0 0 20px;
+    }
+    .g-postmeta-sep { padding: 0 10px; color: rgba(255,255,255,0.22); }
+
+    /* ── The list ──
+       One row per article, the same hairline-separated stack the
+       chapter list uses, so the index reads as part of the same site
+       rather than as a card wall borrowed from somewhere else. */
+    .g-postcard {
+      display: block; padding: 20px 22px;
+      border: 1px solid var(--g-14); border-radius: 4px;
+      background: rgba(0,217,255,0.02); text-decoration: none;
+      transition: background 0.18s ease, border-color 0.18s ease;
+    }
+    .g-postcard:hover { background: rgba(0,217,255,0.06); border-color: var(--g-40); }
+    .g-postcard:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+    .g-postcard-cat {
+      display: block; font-family: var(--mono); font-weight: 500; font-size: 0.58rem;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--g); margin: 0 0 9px;
+    }
+    .g-postcard-title {
+      display: block; font-family: var(--serif); font-weight: 500;
+      font-size: 1.32rem; line-height: 1.25; color: #fff; margin: 0 0 8px;
+    }
+    .g-postcard-sum {
+      display: block; font-family: 'Barlow', sans-serif; font-weight: 300;
+      font-size: 0.92rem; line-height: 1.7; color: rgba(255,255,255,0.58);
+    }
+    .g-postcard-date {
+      display: block; margin-top: 12px;
+      font-family: var(--mono); font-weight: 500; font-size: 0.6rem;
+      letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.34);
+    }
+    .g-postcat {
+      display: inline-flex; align-items: center;
+      border: 1px solid var(--g-22); border-radius: 3px; padding: 7px 13px;
+      font-family: var(--mono); font-weight: 500; font-size: 0.6rem;
+      letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.62);
+      text-decoration: none; transition: color 0.18s ease, border-color 0.18s ease;
+    }
+    .g-postcat:hover { color: var(--g); border-color: var(--g-40); }
+    .g-postcat:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+    .g-postcat[aria-current] { color: var(--g); border-color: var(--g-40); background: rgba(0,217,255,0.08); }
+
+    @media (max-width: 768px) {
+      .g-toolcta { padding: 18px 16px; }
+      .g-postcard { padding: 16px 16px; }
+    }
   </style>
   <!-- Vercel Web Analytics. Served from our own origin (/_vercel/...),
        so no third-party host appears in the network log or in the privacy
@@ -2079,16 +2182,16 @@
 <p style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:#00d9ff;margin:0 0 12px">Included with everything</p>
 <h1 style="font-family:'Playfair Display',Georgia,serif;font-weight:500;font-size:2.6rem;line-height:1.1;letter-spacing:-0.015em;color:#fff;margin:0 0 18px">Setting up Telegram profiles in bulk</h1>
 <p style="font-family:Barlow,sans-serif;font-weight:300;font-size:1rem;line-height:1.8;color:rgba(255,255,255,0.72);margin:0 0 14px;font-size:1.05rem;color:rgba(255,255,255,0.78)">What a template holds, what applying one actually does to an account, and the cooldowns that pace a rollout across a pool.</p>
-<h2 style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px">In this guide</h2>
+<h2 style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px">In this guide</h2>
 <div class="g-toc panel" style="padding:16px 18px"><a href="#what-it-is"><span class="g-toc-n">01</span><span class="g-toc-t">What this module is</span></a><a href="#map"><span class="g-toc-n">02</span><span class="g-toc-t">Map of the page</span></a><a href="#building-one"><span class="g-toc-n">03</span><span class="g-toc-t">Building a template</span></a><a href="#applying"><span class="g-toc-n">04</span><span class="g-toc-t">Applying one to a batch</span></a><a href="#pacing"><span class="g-toc-n">05</span><span class="g-toc-t">How a rollout is paced</span></a><a href="#first-run"><span class="g-toc-n">06</span><span class="g-toc-t">First run</span></a></div>
-<h2 id="what-it-is" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">01</span>What this module is</h2>
+<h2 id="what-it-is" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">01</span>What this module is</h2>
 <p class="g-p">The profile is what someone sees after clicking the name on a comment. An account with no picture, no bio and a default name reads as exactly what it is. A template is that profile built once and applied across a batch: name, surname, bio and avatar, stored as one reusable object.</p>
 <p class="g-p">It is included with any purchase, and it is the smallest of the modules — one page holding a grid of templates, plus the Apply template action over on the Accounts page. Everything expensive about it happens on the engine side, in the pacing.</p>
 <div class="g-callout"><p class="g-p">A template applies identically to every account it touches. The same first name, the same surname, the same bio, the same picture. There is no per-account variation built into this — if you want a batch that does not look like one batch, that is several templates applied to several groups, not one template with randomness in it.</p></div>
-<h2 id="map" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">02</span>Map of the page</h2>
+<h2 id="map" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">02</span>Map of the page</h2>
 <p class="g-p">Two places, not one. The templates themselves live on their own page; applying them happens where the accounts are.</p>
 <ol class="g-map"><li><span class="g-map-n">01</span><span class="g-map-body"><span class="g-map-name">Templates page — toolbar</span><span class="g-map-holds">A single New template button, top right.</span></span></li><li><span class="g-map-n">02</span><span class="g-map-body"><span class="g-map-name">Templates page — grid</span><span class="g-map-holds">One card per template, three across on a wide screen. Clicking a card opens it for editing; each card also carries its own delete button. With no templates yet, an empty state stands in with the same create button.</span></span></li><li><span class="g-map-n">03</span><span class="g-map-body"><span class="g-map-name">Create / Edit dialog</span><span class="g-map-holds">Template name, Name, Surname, Description, Avatar. The same dialog for both, with the title and wording changing.</span></span></li><li><span class="g-map-n">04</span><span class="g-map-body"><span class="g-map-name">Accounts page — Apply template</span><span class="g-map-holds">In the bulk actions bar. Pick a template, apply it to the current selection, watch a progress step report per-account results.</span></span></li></ol>
-<h2 id="building-one" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">03</span>Building a template</h2>
+<h2 id="building-one" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">03</span>Building a template</h2>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
 <details class="g-ctl-item" id="ctl-template-name"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-field">Western tech enthusiasts</span></span><span class="g-ctl-label"><span class="g-ctl-name">Template name</span><span class="g-ctl-where">Create / Edit dialog</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Names the template inside ATREOX. It is a label for you — never applied to any account.</dd></div><div><dt>Required</dt><dd>Yes. It is the only required field; the Save button stays disabled while it is empty.</dd></div></dl></details>
@@ -2097,7 +2200,7 @@
 <details class="g-ctl-item" id="ctl-description"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-field">hi, I'm {first_name} — into crypto and AI</span></span><span class="g-ctl-label"><span class="g-ctl-name">Description</span><span class="g-ctl-where">Create / Edit dialog</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>The account bio. This is the one field with room for a call to action, since it is what a reader sees after clicking through from a comment.</dd></div><div><dt>The token</dt><dd>{first_name} is replaced with the template’s own Name field. It does not vary per account — it is a convenience for writing the bio once, not a source of variation.</dd></div><div><dt>Two limits</dt><dd>The dialog counts twice: the raw text against 200 characters, and the text after substitution against 70. Both must pass or Save stays disabled.</dd></div><div><dt>Why 70</dt><dd>That is the length that actually reaches Telegram after the token is filled in. A long token and a short-looking template can still overflow it, which is why the second counter exists.</dd></div></dl></details>
 <details class="g-ctl-item" id="ctl-avatar"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn t-plain">Choose file</span></span><span class="g-ctl-label"><span class="g-ctl-name">Avatar</span><span class="g-ctl-where">Create / Edit dialog</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>One image, shared by every account the template is applied to.</dd></div><div><dt>Formats</dt><dd>PNG or JPEG.</dd></div><div><dt>Size</dt><dd>Up to 5 MB.</dd></div><div><dt>Optional</dt><dd>Yes. Leave it out and the template applies names and bio only, touching no picture.</dd></div><div><dt>On edit</dt><dd>Choosing a new file replaces the current avatar for the template; accounts pick it up the next time it is applied.</dd></div></dl></details>
 </div>
-<h2 id="applying" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">04</span>Applying one to a batch</h2>
+<h2 id="applying" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">04</span>Applying one to a batch</h2>
 <p class="g-p">Applying happens on the Accounts page, not here. Select the accounts, press Apply template in the bulk actions bar, choose which template, and the rollout starts as a background task with a progress readout.</p>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
@@ -2106,11 +2209,11 @@
 <p class="g-p">Three things can make an individual account come back unchanged, and all three are reported per account rather than failing the batch:</p>
 <div class="g-tablewrap panel"><table class="g-table"><thead><tr><th scope="col">Reason</th><th scope="col">What it means</th><th scope="col">What to do</th></tr></thead><tbody><tr><td data-label="Reason">Resting</td><td data-label="What it means">The account is inside the 72-hour lockout that Auto-Warmup applies on the Accounts page. Template application is blocked for the whole window, and the message says how many hours are left.</td><td data-label="What to do">Wait it out, or apply to the rest of the batch and come back.</td></tr><tr><td data-label="Reason">Rate limited</td><td data-label="What it means">This account had a profile change less than an hour ago. The message says roughly how many minutes remain.</td><td data-label="What to do">Retry after the hour. This is per account, not pool-wide.</td></tr><tr><td data-label="Reason">Floodwait</td><td data-label="What it means">Telegram asked the engine to slow down. Three of these in a row pauses the run for 30 minutes.</td><td data-label="What to do">Nothing — it resumes on its own.</td></tr></tbody></table></div>
 <p class="g-p">Note the asymmetry in the resting rule: the 72-hour lockout blocks the bulk template path only. Editing one account's profile by hand on the Accounts page is deliberately still allowed during rest.</p>
-<h2 id="pacing" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">05</span>How a rollout is paced</h2>
+<h2 id="pacing" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">05</span>How a rollout is paced</h2>
 <p class="g-p">Nothing here is configurable — the pacing is fixed in the engine, and it is the reason a template applied across a hundred accounts is not a hundred simultaneous profile writes.</p>
 <div class="g-tablewrap panel"><table class="g-table"><thead><tr><th scope="col">Rule</th><th scope="col">Value</th><th scope="col">Scope</th></tr></thead><tbody><tr><td data-label="Rule">Profile change cooldown</td><td data-label="Value">One change per hour</td><td data-label="Scope">Per account</td></tr><tr><td data-label="Rule">Username change cooldown</td><td data-label="Value">One change per 48 hours</td><td data-label="Scope">Per account</td></tr><tr><td data-label="Rule">Gap between accounts in a rollout</td><td data-label="Value">30 to 90 seconds, randomised</td><td data-label="Scope">Per run</td></tr><tr><td data-label="Rule">Floodwait tolerance</td><td data-label="Value">3 in a row pauses the run for 30 minutes</td><td data-label="Scope">Per run</td></tr><tr><td data-label="Rule">Connections</td><td data-label="Value">One account connected at a time, then disconnected</td><td data-label="Scope">Whole module</td></tr></tbody></table></div>
 <p class="g-p">The username cooldown is deliberately slower than the others. A username is the most visible and searchable thing on a profile, so it is worth changing far less often than a bio — and it is counted per account, so rolling a change across a pool scales with the pool rather than queueing behind one shared timer.</p>
-<h2 id="first-run" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">06</span>First run</h2>
+<h2 id="first-run" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">06</span>First run</h2>
 <ol class="g-steps"><li><p class="g-p">Create one template. Name it for the audience it is meant to read as, not for the batch it will go on — you will reuse it.</p></li><li><p class="g-p">Fill in Name and, if you want one, Surname. Both go on every account identically.</p></li><li><p class="g-p">Write the bio and watch the second counter, the interpolated one, not the first. That is the number Telegram sees.</p></li><li><p class="g-p">Add an avatar if you have one. It is optional, and a template with no picture still applies names and bio.</p></li><li><p class="g-p">Go to the Accounts page, select a batch that is past its 72-hour rest, and use Apply template.</p></li></ol>
 <p class="g-p">If you are running more than one niche, build more than one template. One template across the whole pool gives every account the same face, which is fine for a small batch and obvious on a large one.</p>
 <p class="g-note">Templates are also used by Active Warmup. Its Gradual profile updates action re-applies an account’s assigned template on a schedule, through this same pipeline and these same cooldowns — which is why that action stays switched off until a template exists to apply.</p>

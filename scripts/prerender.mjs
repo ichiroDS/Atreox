@@ -29,6 +29,7 @@
    worse than a build that stops.
 ══════════════════════════════════════════════════════════════════ */
 
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -82,7 +83,13 @@ function loadCatalog() {
     has: () => true,
   });
   const ctx = vm.createContext({ window: win, console });
-  new vm.Script(read('catalog.jsx'), { filename: 'catalog.jsx' }).runInContext(ctx);
+  /* Both content files, into the SAME box and in this order: the blog
+     reads nothing from the catalog today, but it shares the block
+     vocabulary and the tool registry, and a box built the other way
+     round would work until the first time it did. */
+  for (const file of ['catalog.jsx', 'blog-catalog.jsx']) {
+    new vm.Script(read(file), { filename: file }).runInContext(ctx);
+  }
 
   const { GUIDES, MODULE_BY_KEY } = box;
   if (!Array.isArray(GUIDES) || !GUIDES.length) throw new Error('catalog.jsx exposed no GUIDES');
@@ -95,7 +102,67 @@ function loadCatalog() {
     if (seen.has(g.url)) throw new Error(`two guides share the address /guides/${g.url}`);
     seen.add(g.url);
   }
-  return { GUIDES, MODULE_BY_KEY };
+
+  const { POSTS, BLOG_CATEGORIES, BLOG_CATEGORY_BY_SLUG, BLOG_RESERVED_SLUGS,
+          TOOL_BY_ID, BLOCK_KINDS, postsForList, relatedPosts,
+          formatPostDate, postWasUpdated } = box;
+  if (!Array.isArray(POSTS)) throw new Error('blog-catalog.jsx exposed no POSTS');
+  if (!Array.isArray(BLOG_CATEGORIES) || !BLOG_CATEGORIES.length) {
+    throw new Error('blog-catalog.jsx exposed no BLOG_CATEGORIES');
+  }
+
+  const postSlugs = new Set();
+  for (const post of POSTS) {
+    if (!post.slug) throw new Error(`a post ("${post.title}") has no slug`);
+    if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(post.slug)) {
+      throw new Error(`post slug "${post.slug}" is not a clean path segment`);
+    }
+    /* /blog/category/<slug> and /blog/<slug> share a namespace, so a
+       post slugged "category" would make one of them unreachable. Caught
+       here rather than found later as a 404. */
+    if (BLOG_RESERVED_SLUGS.includes(post.slug)) {
+      throw new Error(`post slug "${post.slug}" is reserved under /blog`);
+    }
+    if (postSlugs.has(post.slug)) throw new Error(`two posts share the address /blog/${post.slug}`);
+    postSlugs.add(post.slug);
+    if (!BLOG_CATEGORY_BY_SLUG[post.category]) {
+      throw new Error(`post "${post.slug}" is in unknown category "${post.category}"`);
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(post.published || '')) {
+      throw new Error(`post "${post.slug}" needs a published date as YYYY-MM-DD`);
+    }
+    if (post.updated !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(post.updated)) {
+      throw new Error(`post "${post.slug}" has an updated date that is not YYYY-MM-DD`);
+    }
+    if (post.updated && post.updated < post.published) {
+      throw new Error(`post "${post.slug}" was updated before it was published`);
+    }
+    if (!Array.isArray(post.body) || !post.body.length) {
+      throw new Error(`post "${post.slug}" has no body`);
+    }
+    const anchors = new Set();
+    for (const sec of post.body) {
+      if (!sec.id) throw new Error(`a section of "${post.slug}" has no id to anchor`);
+      if (anchors.has(sec.id)) throw new Error(`post "${post.slug}" repeats the anchor #${sec.id}`);
+      anchors.add(sec.id);
+    }
+  }
+
+  /* A guide address and a post address cannot collide - they live under
+     different prefixes - but their OG images did, because those are
+     keyed into one flat map. Posts are namespaced under blog/ for that
+     reason; this asserts the namespacing is actually doing its job. */
+  for (const c of BLOG_CATEGORIES) {
+    if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(c.slug)) {
+      throw new Error(`category slug "${c.slug}" is not a clean path segment`);
+    }
+  }
+
+  return {
+    GUIDES, MODULE_BY_KEY,
+    POSTS, BLOG_CATEGORIES, TOOL_BY_ID, BLOCK_KINDS,
+    postsForList, relatedPosts, formatPostDate, postWasUpdated,
+  };
 }
 
 /* ── HTML ──────────────────────────────────────────────────────── */
@@ -109,8 +176,8 @@ const esc = s => String(s)
    Styling leans on the classes already in index.html so the seconds
    before React takes over don't look broken. */
 const P = 'font-family:Barlow,sans-serif;font-weight:300;font-size:1rem;line-height:1.8;color:rgba(255,255,255,0.72);margin:0 0 14px';
-const H2 = 'font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px';
-const H3 = 'font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:#fff;margin:0 0 6px';
+const H2 = "font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px";
+const H3 = "font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:#fff;margin:0 0 6px";
 
 const section = (title, inner) => `<h2 style="${H2}">${esc(title)}</h2>\n${inner}`;
 
@@ -119,7 +186,7 @@ const section = (title, inner) => `<h2 style="${H2}">${esc(title)}</h2>\n${inner
    class names, and those classes are defined once in index.html. So
    this is not a second design of the guide — it is the same design,
    rendered without React for whoever arrives without it. */
-const NUM = 'display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle';
+const NUM = "display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle";
 
 /* Mirror of ControlReplica in guides.jsx — same shapes, same classes.
    Inert by construction: these are spans with CSS, not inputs, so there
@@ -247,8 +314,22 @@ ${v.map(c => `<details class="g-ctl-item"${c.id ? ` id="${esc(c.id)}"` : ''}><su
       case 'linkout':
         return `<a href="${esc(v.href)}" class="quiet-link" style="margin-bottom:16px">${esc(v.label)} →</a>`;
 
+      /* Mirror of ReaderBlocks' 'toolcta'. Unlike the reader, an
+         unknown tool id THROWS: the reader is the copy a visitor sees
+         after React mounts, this is the copy a crawler sees, and a
+         silently missing call-to-action in the crawled page is a hole
+         in the one thing the blog exists to do. Failing the build is
+         the cheaper end of that trade. */
+      case 'toolcta': {
+        const tool = TOOL_BY_ID[v.tool];
+        if (!tool) {
+          throw new Error(`unknown tool "${v.tool}" in a toolcta block — add it to TOOLS in catalog.jsx`);
+        }
+        return `<aside class="g-toolcta"><span class="g-toolcta-kicker">Free tool</span><span class="g-toolcta-name">${esc(tool.name)}</span><p class="g-p g-toolcta-text">${esc(v.angle || tool.blurb)}</p><a class="g-toolcta-cta" href="${esc(tool.panel)}" rel="noopener">${esc(tool.cta)} →</a></aside>`;
+      }
+
       default:
-        throw new Error(`unknown guide block "${kind}" — prerender and guides.jsx have drifted`);
+        throw new Error(`unknown block kind "${kind}" — prerender.mjs and guides.jsx have drifted`);
     }
   }).join('\n');
 }
@@ -600,6 +681,259 @@ function headForReferral() {
   });
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   The blog: one page per article, one per category, and the index.
+
+   Everything below reuses renderBlocks — the same function the guides
+   go through, with the same block kinds and the same g-* classes. What
+   is new here is only the frame around a body: breadcrumbs, the two
+   dates, the contents rail and the read-next block. That split is the
+   point: an article and a guide differ in their frame, not in what a
+   paragraph is, so there is exactly one block renderer to keep honest.
+══════════════════════════════════════════════════════════════════ */
+
+/* ── lastmod, and why it is not `new Date()` ──────────────────────
+   Every URL in the sitemap used to carry today's date, rewritten on
+   every build. That is not a small inaccuracy: a sitemap that claims
+   the whole site changed today, every day, teaches a crawler that
+   lastmod on this domain means nothing — and the cost lands hardest on
+   exactly the pages where it would have helped, the new articles.
+
+   Four ways to get a real date, and what each costs:
+
+     a) a hand-kept `updated` field per guide. Free to build; the
+        failure mode is the discipline it depends on. Edit the prose,
+        forget the field, and the date now lies STALE, which a crawler
+        acts on (it stops re-reading the page) rather than merely
+        discounting.
+     b) the git time of catalog.jsx. All eleven guides live in that one
+        file, so every guide's date moves whenever any guide is
+        touched: right once, wrong ten times.
+     c) `git log -L` over each guide's line range. Precise, and three
+        problems: it needs real git history at build time, which a
+        shallow CI clone may not have; it is eleven history walks per
+        build; and the line range has to be located by parsing the
+        catalog, so a reformat silently relocates it.
+     d) file mtime. Meaningless in CI — a fresh checkout is always now.
+
+   So: (e), a committed manifest keyed by a hash of the content itself.
+   The build hashes each guide's own data, and only when that hash
+   differs from the manifest does the date move to today. No git, no
+   discipline, identical on a laptop and on Vercel, and stable across
+   rebuilds — which matters because verify-build-current.mjs reruns the
+   build and compares, so a date that moved on every run would make
+   that check flap forever.
+
+   The manifest is tracked, and forgetting to commit it after a content
+   change is caught by verify-build-current.mjs like any other generated
+   file. The first build stamps today for everything, once: we do not
+   know when these were last edited, and today is when we started
+   keeping track.
+─────────────────────────────────────────────────────────────────── */
+const LASTMOD_FILE = 'content-lastmod.json';
+
+function contentHash(value) {
+  /* JSON.stringify over a literal is stable here: the objects come from
+     source literals, so key order is the order they are written in, and
+     it only has to be consistent between two runs of the same file. */
+  return crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex').slice(0, 16);
+}
+
+function resolveLastmod(entries, today) {
+  let previous = {};
+  try {
+    previous = JSON.parse(fs.readFileSync(path.join(ROOT, LASTMOD_FILE), 'utf8'));
+  } catch (_) {
+    /* Missing or unreadable: everything is stamped today and the file is
+       written. Deliberately not an error - a fresh clone that has not
+       committed it yet should build, not fail. */
+  }
+
+  const next = {};
+  const dates = {};
+  for (const [id, value] of entries) {
+    const hash = contentHash(value);
+    const before = previous[id];
+    const date = before && before.hash === hash ? before.date : today;
+    next[id] = { hash, date };
+    dates[id] = date;
+  }
+
+  /* Which entries actually MOVED, as opposed to which are merely new.
+     Only used for the drift warning on articles: a post whose text
+     changed while its author-set `updated` field did not is the one
+     case where an editorial date can quietly start lying, and a first
+     build (where every entry is new) must not warn about all of them. */
+  const changed = new Set(
+    Object.keys(next).filter(id => previous[id] && previous[id].hash !== next[id].hash),
+  );
+
+  if (JSON.stringify(next) !== JSON.stringify(previous)) {
+    write(LASTMOD_FILE, JSON.stringify(next, null, 2) + '\n');
+  }
+  return { dates, changed };
+}
+
+/* ── One article ──────────────────────────────────────────────────── */
+const CRUMB = "font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.6rem;letter-spacing:0.16em;text-transform:uppercase;text-decoration:none";
+
+function breadcrumbs(trail) {
+  const items = trail.map((c, i) => {
+    const last = i === trail.length - 1;
+    const inner = last
+      ? `<span style="${CRUMB};color:rgba(255,255,255,0.5)" aria-current="page">${esc(c.name)}</span>`
+      : `<a href="${esc(c.href)}" style="${CRUMB};color:#00d9ff">${esc(c.name)}</a>`;
+    return `<li style="display:inline">${inner}${last ? '' : `<span aria-hidden="true" style="${CRUMB};color:rgba(255,255,255,0.28);padding:0 8px">/</span>`}</li>`;
+  }).join('');
+  return `<nav aria-label="Breadcrumb" style="margin-bottom:22px"><ol style="list-style:none;margin:0;padding:0">${items}</ol></nav>`;
+}
+
+/* Published always, Updated only when the article has genuinely been
+   revised. An "Updated" line on the day of publication says nothing and
+   trains a reader to stop reading the one place it will eventually
+   matter - which is why blog-catalog.jsx leaves `updated` absent rather
+   than defaulting it to the publication date. */
+function postDates(post) {
+  const parts = [
+    `<time datetime="${esc(post.published)}">Published ${esc(formatPostDate(post.published))}</time>`,
+  ];
+  if (postWasUpdated(post)) {
+    parts.push(`<time datetime="${esc(post.updated)}">Updated ${esc(formatPostDate(post.updated))}</time>`);
+  }
+  return `<p class="g-postmeta">${parts.join('<span aria-hidden="true" class="g-postmeta-sep">·</span>')}</p>`;
+}
+
+function renderPost(post, category, related) {
+  const parts = [];
+
+  parts.push(breadcrumbs([
+    { name: 'Blog', href: '/blog' },
+    { name: category.name, href: `/blog/category/${category.slug}` },
+    { name: post.title },
+  ]));
+
+  parts.push(`<h1 style="font-family:'Playfair Display',Georgia,serif;font-weight:500;font-size:2.6rem;line-height:1.1;letter-spacing:-0.015em;color:#fff;margin:0 0 16px">${esc(post.title)}</h1>`);
+  parts.push(postDates(post));
+  parts.push(`<p style="${P};font-size:1.05rem;color:rgba(255,255,255,0.78)">${esc(post.summary)}</p>`);
+
+  /* The contents, as real anchors: a search result deep-linking to a
+     section lands on it before a line of JavaScript has run. Same
+     markup and the same classes as a guide's chapter list. */
+  parts.push(section('In this article',
+    `<div class="g-toc panel" style="padding:16px 18px">${post.body
+      .map((s, i) => `<a href="#${esc(s.id)}"><span class="g-toc-n">${String(i + 1).padStart(2, '0')}</span><span class="g-toc-t">${esc(s.title)}</span></a>`)
+      .join('')}</div>`));
+
+  for (const [i, s] of post.body.entries()) {
+    parts.push(`<h2 id="${esc(s.id)}" style="${H2}"><span style="${NUM}">${String(i + 1).padStart(2, '0')}</span>${esc(s.title)}</h2>\n${renderBlocks(s.blocks)}`);
+  }
+
+  if (related.length) {
+    parts.push(section('Read next',
+      `<div class="g-toc panel" style="padding:16px 18px">${related
+        .map(r => `<a href="/blog/${esc(r.slug)}"><span class="g-toc-t">${esc(r.title)}</span></a>`)
+        .join('')}</div>`));
+  }
+
+  return `<div id="prerendered" style="max-width:1340px;margin:0 auto;padding:128px 6% 88px">
+<article id="post-${esc(post.slug)}" style="max-width:860px;margin:0 auto">
+${parts.join('\n')}
+</article>
+</div>`;
+}
+
+/* ── The index and the category pages ─────────────────────────────
+   Given real prerendered bodies rather than the head-only treatment
+   /guides and /pricing get, and for one reason: those two are reachable
+   from every guide page's rail, so a crawler finds them and what they
+   link to either way. A young blog has no such web - the index and the
+   category pages ARE the internal linking, and a page whose HTML holds
+   no links to the articles leaves the sitemap as the only way in.
+─────────────────────────────────────────────────────────────────── */
+function postCard(post, category) {
+  return `<li style="margin:0 0 2px"><a href="/blog/${esc(post.slug)}" class="g-postcard">
+<span class="g-postcard-cat">${esc(category.name)}</span>
+<span class="g-postcard-title">${esc(post.title)}</span>
+<span class="g-postcard-sum">${esc(post.summary)}</span>
+<time class="g-postcard-date" datetime="${esc(post.published)}">${esc(formatPostDate(post.published))}</time>
+</a></li>`;
+}
+
+function renderPostList({ heading, lead, posts, categoryBySlug, crumbs, categories }) {
+  const cards = posts.length
+    ? `<ul style="list-style:none;margin:0;padding:0">${posts.map(p => postCard(p, categoryBySlug[p.category])).join('\n')}</ul>`
+    : `<p style="${P}">Nothing here yet.</p>`;
+
+  /* The category rail is on the index AND on every category page, so
+     any one of them reaches all the others in one hop. */
+  const rail = categories.length > 1 || crumbs.length > 1
+    ? `<nav aria-label="Categories" style="margin:0 0 30px"><ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px">${
+        categories.map(c => `<li><a href="/blog/category/${esc(c.slug)}" class="g-postcat">${esc(c.name)}</a></li>`).join('')
+      }</ul></nav>`
+    : '';
+
+  return `<div id="prerendered" style="max-width:1340px;margin:0 auto;padding:128px 6% 88px">
+<div style="max-width:860px;margin:0 auto">
+${crumbs.length > 1 ? breadcrumbs(crumbs) : ''}
+<h1 style="font-family:'Playfair Display',Georgia,serif;font-weight:500;font-size:2.6rem;line-height:1.1;letter-spacing:-0.015em;color:#fff;margin:0 0 16px">${esc(heading)}</h1>
+<p style="${P};font-size:1.05rem;color:rgba(255,255,255,0.78);margin-bottom:30px">${esc(lead)}</p>
+${rail}
+${cards}
+</div>
+</div>`;
+}
+
+/* ── Structured data ──────────────────────────────────────────────
+   Article and BreadcrumbList, and deliberately NOT FAQPage even for an
+   article that carries an faq block. Google has restricted FAQ rich
+   results to government and health sites since 2023, so the markup buys
+   no snippet; Article and BreadcrumbList are what actually describe the
+   page. An faq block is still an faq block - it just carries no schema.
+
+   dateModified falls back to datePublished: the field has to be present
+   for the markup to be complete, and an article that has never been
+   revised was last modified when it was written. Nothing on the page
+   claims a revision that did not happen - see postDates above.
+─────────────────────────────────────────────────────────────────── */
+function postLd(post, category, ogImage) {
+  const url = `${ORIGIN}/blog/${post.slug}`;
+  return [
+    jsonLd({
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: post.seoTitle || post.title,
+      description: post.seoDescription || post.summary,
+      image: ogImage,
+      mainEntityOfPage: url,
+      datePublished: post.published,
+      dateModified: post.updated || post.published,
+      author: { '@id': ORG_ID },
+      publisher: { '@id': ORG_ID },
+      inLanguage: 'en',
+      articleSection: category.name,
+    }),
+    jsonLd({
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Blog', item: ORIGIN + '/blog' },
+        { '@type': 'ListItem', position: 2, name: category.name, item: `${ORIGIN}/blog/category/${category.slug}` },
+        { '@type': 'ListItem', position: 3, name: post.title, item: url },
+      ],
+    }),
+  ].join('\n');
+}
+
+function blogListLd(crumbs) {
+  return jsonLd({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map((c, i) => ({
+      '@type': 'ListItem', position: i + 1, name: c.name, item: ORIGIN + c.href,
+    })),
+  });
+}
+
 /* ── Open Graph cards ──────────────────────────────────────────────
    One card per guide so a shared link is not ten identical thumbnails.
    Drawn as SVG here and rasterised only if @resvg/resvg-js is present:
@@ -645,7 +979,7 @@ ${lines.map((l, i) => `<text x="80" y="${250 + i * 78}" font-family="Playfair Di
 </svg>`;
 }
 
-async function buildOgImages(guides, moduleByKey) {
+async function buildOgImages(guides, moduleByKey, posts, categories, blogIndexCard) {
   let Resvg = null;
   try { ({ Resvg } = await import('@resvg/resvg-js')); }
   catch (_) {
@@ -677,6 +1011,27 @@ async function buildOgImages(guides, moduleByKey) {
   for (const page of [HOME_PAGE, ...SITE_PAGES]) {
     render(page.route === '/' ? 'home' : page.route.slice(1), page);
   }
+
+  /* The blog's cards are keyed under blog/ rather than by bare slug.
+     `out` is one flat map, so an article slugged the same as a guide's
+     url would otherwise overwrite that guide's card - the two live at
+     different addresses and could never collide as pages, which is
+     exactly what makes the collision easy to miss. */
+  render('blog', blogIndexCard);
+  for (const c of categories) {
+    render(`blog/category/${c.slug}`, {
+      kicker: 'BLOG', heading: c.name, short: c.blurb.split('.')[0],
+      footer: 'atreoxai.com/blog',
+    });
+  }
+  for (const p of posts) {
+    const cat = categories.find(c => c.slug === p.category);
+    render(`blog/${p.slug}`, {
+      kicker: cat ? cat.name.toUpperCase() : 'BLOG',
+      heading: p.title, short: p.summary.split('.')[0],
+      footer: 'atreoxai.com/blog',
+    });
+  }
   return out;
 }
 
@@ -697,15 +1052,21 @@ const STATIC_PAGES = [
   ['/refund', '0.3'],
 ];
 
-function sitemap(guides) {
-  const today = new Date().toISOString().slice(0, 10);
-  const url = (loc, priority) =>
-    `  <url>\n    <loc>${ORIGIN}${loc}</loc>\n    <lastmod>${today}</lastmod>\n    <priority>${priority}</priority>\n  </url>`;
-  const rows = [
-    ...STATIC_PAGES.map(([loc, p]) => url(loc, p)),
-    ...guides.map(g => url(`/guides/${g.url}`, '0.7')),
-  ];
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${rows.join('\n')}\n</urlset>\n`;
+/* Every row carries the date its OWN content last changed, not the date
+   of the build. That distinction is the whole point of resolveLastmod
+   above: a sitemap claiming the entire site changed today, every day,
+   teaches a crawler that lastmod means nothing on this domain — and the
+   pages that lose most from being ignored are the newest ones, which is
+   exactly the blog.
+
+   Takes rows of [loc, priority, lastmod] rather than building them, so
+   the three content types can each decide their own date: guides and
+   router pages from the content hash, articles from what their author
+   actually wrote. */
+function sitemap(rows) {
+  const body = rows.map(([loc, priority, lastmod]) =>
+    `  <url>\n    <loc>${ORIGIN}${loc}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <priority>${priority}</priority>\n  </url>`);
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body.join('\n')}\n</urlset>\n`;
 }
 
 /* Nothing is disallowed, and the AI crawlers are named explicitly so
@@ -732,7 +1093,11 @@ const robots = () => [
 const imgResult = await optimizeImages(path.join(ROOT, 'public', 'screenshots'));
 if (imgResult.processed) console.log(`[optimize-images] ${imgResult.processed} image(s) optimized, ${imgResult.skipped} already small`);
 
-const { GUIDES, MODULE_BY_KEY } = loadCatalog();
+const {
+  GUIDES, MODULE_BY_KEY,
+  POSTS, BLOG_CATEGORIES, TOOL_BY_ID, BLOCK_KINDS,
+  postsForList, relatedPosts, formatPostDate, postWasUpdated,
+} = loadCatalog();
 
 /* The slug -> address map the legacy-anchor redirect in index.html
    uses, refreshed from the catalog so the two cannot drift. */
@@ -751,7 +1116,22 @@ if (!shell.includes('<div id="root"></div>')) {
   throw new Error('index.html has no <div id="root"></div> to prerender in front of');
 }
 
-const ogImages = await buildOgImages(GUIDES, MODULE_BY_KEY);
+const BLOG_CATEGORY_BY_SLUG = Object.fromEntries(BLOG_CATEGORIES.map(c => [c.slug, c]));
+const ALL_POSTS = postsForList().items;
+
+const BLOG_INDEX = {
+  route: '/blog',
+  title: 'Telegram automation blog — ATREOX',
+  desc: 'Articles on running Telegram accounts at scale: buying and checking accounts, matching proxies, warming safely, and finding channels worth commenting in.',
+  heading: 'Blog',
+  lead: 'What we have learned running Telegram accounts at scale, written for the questions people actually search for.',
+  kicker: 'BLOG',
+  short: 'Written for the questions people search',
+};
+
+const ogImages = await buildOgImages(
+  GUIDES, MODULE_BY_KEY, ALL_POSTS, BLOG_CATEGORIES, BLOG_INDEX,
+);
 const MODULES_LIST = Object.values(MODULE_BY_KEY);
 
 const HEAD_RE = /<!-- HEAD:META -->[\s\S]*?<!-- \/HEAD:META -->/;
@@ -790,6 +1170,107 @@ for (const guide of GUIDES) {
   write('referral-program.html', html);
 }
 
+/* ── The blog's own pages ────────────────────────────────────────
+   Three kinds, all cut from the same shell as everything else, each
+   with its own head from metaBlock — which is what keeps the canonical
+   honest. The bug this site already had (nine routes serving one head,
+   all of them claiming to be "/") could only happen to a page that had
+   no head of its own; every page below has one, and verify-seo.mjs
+   asserts that for every generated file rather than trusting it.
+─────────────────────────────────────────────────────────────────── */
+/* /blog */
+{
+  const html = shell
+    .replace(HEAD_RE, () => withLd(
+      metaBlock({
+        url: ORIGIN + '/blog',
+        title: BLOG_INDEX.title, desc: BLOG_INDEX.desc,
+        ogImage: ogImages['blog'] || OG_FALLBACK, type: 'website',
+      }),
+      orgAndSiteLd(),
+      blogListLd([{ name: 'Blog', href: '/blog' }]),
+    ))
+    .replace('<div id="root"></div>', () => `${renderPostList({
+      heading: BLOG_INDEX.heading,
+      lead: BLOG_INDEX.lead,
+      posts: ALL_POSTS,
+      categoryBySlug: BLOG_CATEGORY_BY_SLUG,
+      crumbs: [{ name: 'Blog', href: '/blog' }],
+      categories: BLOG_CATEGORIES,
+    })}\n  <div id="root"></div>`);
+  write('blog.html', html);
+}
+
+/* /blog/category/<slug> */
+for (const category of BLOG_CATEGORIES) {
+  const crumbs = [
+    { name: 'Blog', href: '/blog' },
+    { name: category.name, href: `/blog/category/${category.slug}` },
+  ];
+  const html = shell
+    .replace(HEAD_RE, () => withLd(
+      metaBlock({
+        url: `${ORIGIN}/blog/category/${category.slug}`,
+        title: category.seoTitle || `${category.name} — ATREOX blog`,
+        desc: category.seoDescription || category.blurb,
+        ogImage: ogImages[`blog/category/${category.slug}`] || OG_FALLBACK,
+        type: 'website',
+      }),
+      orgAndSiteLd(),
+      blogListLd(crumbs),
+    ))
+    .replace('<div id="root"></div>', () => `${renderPostList({
+      heading: category.name,
+      lead: category.blurb,
+      posts: postsForList({ category: category.slug }).items,
+      categoryBySlug: BLOG_CATEGORY_BY_SLUG,
+      crumbs,
+      categories: BLOG_CATEGORIES,
+    })}\n  <div id="root"></div>`);
+  write(`blog/category/${category.slug}.html`, html);
+}
+
+/* /blog/<slug> */
+for (const post of ALL_POSTS) {
+  const category = BLOG_CATEGORY_BY_SLUG[post.category];
+  const og = ogImages[`blog/${post.slug}`] || OG_FALLBACK;
+  const html = shell
+    .replace(HEAD_RE, () => withLd(
+      metaBlock({
+        url: `${ORIGIN}/blog/${post.slug}`,
+        title: post.seoTitle || post.title,
+        desc: post.seoDescription || post.summary,
+        ogImage: og, type: 'article',
+      }),
+      orgAndSiteLd(),
+      postLd(post, category, og),
+    ))
+    .replace('<div id="root"></div>',
+      () => `${renderPost(post, category, relatedPosts(post))}\n  <div id="root"></div>`);
+  write(`blog/${post.slug}.html`, html);
+}
+
+/* A post renamed in the catalog leaves its old file behind, and the
+   deploy serves whatever is in the directory — so the address would go
+   on answering with a page nothing links to any more. The guides have
+   their own sweep over their own directory; these are separate on
+   purpose, each with its own wanted-set, so neither can ever delete the
+   other's pages. */
+const wantedPosts = new Set(ALL_POSTS.map(p => p.slug + '.html'));
+for (const f of fs.readdirSync(path.join(ROOT, 'blog'))) {
+  if (f.endsWith('.html') && !wantedPosts.has(f)) {
+    fs.unlinkSync(path.join(ROOT, 'blog', f));
+    console.log(`[prerender] removed stale blog/${f}`);
+  }
+}
+const wantedCategories = new Set(BLOG_CATEGORIES.map(c => c.slug + '.html'));
+for (const f of fs.readdirSync(path.join(ROOT, 'blog', 'category'))) {
+  if (f.endsWith('.html') && !wantedCategories.has(f)) {
+    fs.unlinkSync(path.join(ROOT, 'blog', 'category', f));
+    console.log(`[prerender] removed stale blog/category/${f}`);
+  }
+}
+
 /* A guide renamed in the catalog leaves its old file behind, and the
    deploy serves whatever is in the directory — so the address would go
    on answering with a page nothing links to any more. Sweep it. */
@@ -801,9 +1282,65 @@ for (const f of fs.readdirSync(path.join(ROOT, 'guides'))) {
   }
 }
 
-write('sitemap.xml', sitemap(GUIDES));
+/* ── lastmod, resolved once for everything the build owns ────────── */
+const TODAY = new Date().toISOString().slice(0, 10);
+
+/* The shell, minus the two regions this build rewrites on every run.
+   Without stripping them the shell's hash would change every time the
+   catalog did, and every router page would claim to have changed with
+   it — the same "everything moved today" noise, one level down. */
+const SHELL_FINGERPRINT = contentHash(
+  read('index.html')
+    .replace(SLUG_MAP_RE, '')
+    .replace(HEAD_RE, ''),
+);
+
+const { dates: LASTMOD, changed: CONTENT_CHANGED } = resolveLastmod([
+  /* A router page's served HTML is its head plus the shell; its body is
+     React and not something this build can hash. So the hash covers
+     what the build DOES own, and a shell change legitimately moves all
+     of them — the bytes those addresses serve really did change. */
+  ...[HOME_PAGE, ...SITE_PAGES].map(page =>
+    [`page:${page.route}`, { page, shell: SHELL_FINGERPRINT }]),
+  ['page:/referral-program', { page: 'referral', shell: SHELL_FINGERPRINT }],
+  ['page:/blog', { posts: ALL_POSTS.map(p => p.slug), shell: SHELL_FINGERPRINT }],
+  ...BLOG_CATEGORIES.map(c => [`blogcat:${c.slug}`, {
+    category: c,
+    posts: postsForList({ category: c.slug }).items.map(p => p.slug),
+    shell: SHELL_FINGERPRINT,
+  }]),
+  ...GUIDES.map(g => [`guide:${g.url}`, g]),
+  /* Articles are hashed too, but NOT to date them — their dates are
+     editorial and belong to the author. This is only so the warning
+     below can fire. */
+  ...ALL_POSTS.map(p => [`post:${p.slug}`, p]),
+], TODAY);
+
+/* An article whose text changed while its `updated` field did not. Not
+   an error: the author may be fixing a typo, and forcing a date bump
+   for that would make `updated` meaningless in the other direction. But
+   it is the one case where an author-controlled date starts lying
+   silently, so it is said out loud once per build. */
+for (const post of ALL_POSTS) {
+  if (CONTENT_CHANGED.has(`post:${post.slug}`) && post.updated !== TODAY) {
+    console.warn(
+      `[prerender] "${post.slug}" changed but its updated date is ` +
+      `${post.updated || '(unset)'} — set updated: '${TODAY}' if this was a revision`,
+    );
+  }
+}
+
+const postLastmod = p => p.updated || p.published;
+
+write('sitemap.xml', sitemap([
+  ...STATIC_PAGES.map(([loc, priority]) => [loc, priority, LASTMOD[`page:${loc}`] || TODAY]),
+  ['/blog', '0.8', LASTMOD['page:/blog']],
+  ...BLOG_CATEGORIES.map(c => [`/blog/category/${c.slug}`, '0.5', LASTMOD[`blogcat:${c.slug}`]]),
+  ...ALL_POSTS.map(p => [`/blog/${p.slug}`, '0.7', postLastmod(p)]),
+  ...GUIDES.map(g => [`/guides/${g.url}`, '0.7', LASTMOD[`guide:${g.url}`]]),
+]));
 write('robots.txt', robots());
 
-console.log(`[prerender] ${GUIDES.length} guide pages, 1 referral page, sitemap.xml, robots.txt`);
+console.log(`[prerender] ${GUIDES.length} guide pages, ${ALL_POSTS.length} article(s), ${BLOG_CATEGORIES.length} category page(s), 1 referral page, sitemap.xml, robots.txt`);
 for (const g of GUIDES) console.log(`  /guides/${g.url}`);
 console.log('  /referral-program');

@@ -51,6 +51,21 @@
     <priority>0.3</priority>
   </url>
   <url>
+    <loc>https://www.atreoxai.com/blog</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.atreoxai.com/blog/category/accounts-and-proxies</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.atreoxai.com/blog/how-to-check-telegram-account-before-buying</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.atreoxai.com/guides/buying-telegram-accounts</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.7</priority>

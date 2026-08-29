@@ -320,6 +320,11 @@ function Navbar({ currentPage, setPage }) {
     { id: 'functions', label: 'Functions' },
     { id: 'pricing',   label: 'Pricing' },
     { id: 'guides',    label: 'Guides' },
+    /* Guides teach a customer; the blog is written for people who are
+       not customers yet, so it needs its own way in - a section
+       reachable only from a sitemap is a section nobody on the site can
+       find. */
+    { id: 'blog',      label: 'Blog' },
   ];
 
   const handleNav = (id) => { setPage(id); setMenuOpen(false); };
@@ -543,6 +548,7 @@ function FooterBar({ setPage }) {
     { id: 'functions', label: 'Functions' },
     { id: 'pricing',   label: 'Pricing' },
     { id: 'guides',    label: 'Guides' },
+    { id: 'blog',      label: 'Blog' },
   ];
   const colHead = { fontFamily: "'JetBrains Mono', monospace", fontWeight: 500, fontSize: '0.6rem', color: `rgba(${ACCENT_RGB},0.55)`, letterSpacing: '0.24em', textTransform: 'uppercase', marginBottom: 18 };
   return (
