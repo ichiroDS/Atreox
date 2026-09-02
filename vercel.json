@@ -37,6 +37,10 @@
       "destination": "/tools/proxy-checker.html"
     },
     {
+      "source": "/tools/account-checker",
+      "destination": "/tools/account-checker.html"
+    },
+    {
       "source": "/referral-program",
       "destination": "/referral-program.html"
     },

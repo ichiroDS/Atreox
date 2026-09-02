@@ -6,7 +6,7 @@ const {
   HomePage,
   FunctionsPage, PricingPage, GuidesPage,
   PrivacyPage, TermsPage, ReferralPage, ContactPage,
-  ProxyCheckerPage, BlogPage,
+  ProxyCheckerPage, AccountCheckerPage, BlogPage,
   guideHref, guideFromPath,
 } = window;
 
@@ -36,6 +36,7 @@ const PATH_TO_PAGE = {
   '/referral-program': 'referral',
   '/contact':   'contact',
   '/tools/proxy-checker': 'proxy-checker',
+  '/tools/account-checker': 'account-checker',
   '/blog': 'blog',
 };
 
@@ -50,6 +51,7 @@ const PAGE_TO_PATH = {
   'referral':  '/referral-program',
   'contact':   '/contact',
   'proxy-checker': '/tools/proxy-checker',
+  'account-checker': '/tools/account-checker',
   'blog': '/blog',
 };
 
@@ -161,6 +163,7 @@ function App() {
       case 'contact':   return <ContactPage   setPage={navigate} />;
       case 'referral':  return <ReferralPage  setPage={navigate} />;
       case 'proxy-checker': return <ProxyCheckerPage setPage={navigate} />;
+      case 'account-checker': return <AccountCheckerPage setPage={navigate} />;
       case 'blog':      return <BlogPage      setPage={navigate} />;
       default:          return <HomePage      setPage={navigate} />;
     }

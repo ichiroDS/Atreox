@@ -20,8 +20,12 @@
     "date": "2026-08-29"
   },
   "page:/tools/proxy-checker": {
-    "hash": "47a0a07f902127e6",
-    "date": "2026-08-29"
+    "hash": "e7cb8c20fa688581",
+    "date": "2026-09-02"
+  },
+  "page:/tools/account-checker": {
+    "hash": "c54a48d5ad28114c",
+    "date": "2026-09-02"
   },
   "page:/privacy": {
     "hash": "e60340d89f55e187",

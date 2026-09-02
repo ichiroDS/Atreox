@@ -46,7 +46,9 @@ const APP_FILES = [
   'legal-pages.jsx',
   'referral-page.jsx',
   'contact-page.jsx',
+  'tool-checker.jsx',
   'tools-page.jsx',
+  'account-checker-page.jsx',
   'app.jsx',
 ];
 

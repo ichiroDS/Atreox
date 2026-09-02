@@ -21,6 +21,7 @@ const {
   ArrowUpRight, Globe, Server, Shield, Zap,
   FooterBar, CrossLinks,
   PageHero, PageSection, SectionLockup, Pill, MONO, SERIF,
+  ProxyCheckerWidget,
 } = window;
 
 const ACCENT = window.ACCENT;
@@ -56,7 +57,7 @@ const FACTS = [
   ['No account needed', 'The checker never asks for a Telegram account, a session or a phone number. It cannot: it only ever opens an unauthenticated connection.'],
   ['SOCKS5, HTTP and MTProto', 'MTProto proxies tunnel only Telegram, so for those the exit IP cannot be read at all — the tool says that outright rather than reporting a blank.'],
   ['Nothing sensitive is stored', 'The login and password are never written to our database, our logs, or any error message. The address is not stored either — only a keyed digest of it, so repeat checks of the same proxy can be recognised without keeping the proxy.'],
-  ['Free with any account', 'No subscription and no module. 60 checks an hour.'],
+  ['Free, right here', 'Three checks an hour, no account. Need a whole pack at once, with no limit and a saved history? That’s the panel, included with any module.'],
 ];
 
 function CtaButton({ children }) {
@@ -86,10 +87,15 @@ function ProxyCheckerPage({ setPage }) {
       />
 
       <PageSection>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'center', marginBottom: 40 }}>
-          <CtaButton>Open the checker</CtaButton>
-          <Pill dot>Free with any account</Pill>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBottom: 22 }}>
+          <Pill dot>Free — 3 checks/hour, no account</Pill>
           <Pill muted>SOCKS5 · HTTP · MTProto</Pill>
+        </div>
+
+        {/* The working tool, first: a searcher who lands here can use it
+            without reading a word below. */}
+        <div style={{ marginBottom: 52 }}>
+          <ProxyCheckerWidget />
         </div>
 
         <SectionLockup title="What it tells you">
@@ -134,7 +140,7 @@ function ProxyCheckerPage({ setPage }) {
         </div>
 
         <div style={{ marginTop: 40 }}>
-          <CtaButton>Check a proxy</CtaButton>
+          <CtaButton>Go unlimited in the panel</CtaButton>
         </div>
       </PageSection>
 
