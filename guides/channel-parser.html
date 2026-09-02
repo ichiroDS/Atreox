@@ -2012,6 +2012,109 @@
       .splash-log span { animation: none; opacity: 1; }
       .btn-solid::after { display: none; }
     }
+
+    /* ══════════════════════════════════════════════════════════════
+       The blog: the tool call-to-action, the dates, and the list cards.
+
+       Every rule below is NEW. Nothing above it is edited, which is the
+       point: the guides and the articles share one block renderer and
+       one stylesheet, so a change to an existing .g-* rule would move
+       eleven guide pages at the same time as it moved the blog. The
+       only class the two share by design is the block vocabulary
+       itself — .g-p, .g-card, .g-toc and the rest — and those are
+       untouched.
+    ══════════════════════════════════════════════════════════════ */
+
+    /* ── The tool block ──
+       Louder than a .g-card and quieter than the page, because it
+       stands in the middle of an article and has to read as an offer
+       without interrupting the sentence the reader is in. Solid left
+       edge rather than a full border: it belongs to the column of text
+       it sits in. */
+    .g-toolcta {
+      display: block; margin: 26px 0; padding: 22px 24px;
+      max-width: var(--gcol);
+      border: 1px solid var(--g-22); border-left: 2px solid var(--g);
+      border-radius: 4px;
+      background: linear-gradient(90deg, rgba(0,217,255,0.06), rgba(0,217,255,0.015));
+    }
+    .g-toolcta-kicker {
+      display: block; font-family: var(--mono); font-weight: 600; font-size: 0.58rem;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--g); margin: 0 0 9px;
+    }
+    .g-toolcta-name {
+      display: block; font-family: var(--serif); font-weight: 500;
+      font-size: 1.28rem; line-height: 1.25; color: #fff; margin: 0 0 10px;
+    }
+    .g-toolcta-text { margin: 0 0 16px !important; font-size: 0.94rem; }
+    .g-toolcta-cta {
+      display: inline-flex; align-items: center; gap: 7px;
+      border: 1px solid var(--g-40); border-radius: 3px;
+      background: rgba(0,217,255,0.10); padding: 10px 17px;
+      font-family: var(--mono); font-weight: 600; font-size: 0.63rem;
+      letter-spacing: 0.16em; text-transform: uppercase; color: var(--g);
+      text-decoration: none; transition: background 0.18s ease, border-color 0.18s ease;
+    }
+    .g-toolcta-cta:hover { background: rgba(0,217,255,0.18); border-color: var(--g); }
+    .g-toolcta-cta:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+
+    /* ── Article dates ──
+       "Updated" is a second <time>, and it only exists in the markup
+       when the article has genuinely been revised — see postDates in
+       prerender.mjs. So this rule never has to hide anything: there is
+       nothing to hide on an article nobody has revised. */
+    .g-postmeta {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 0;
+      font-family: var(--mono); font-weight: 500; font-size: 0.63rem;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: rgba(255,255,255,0.42); margin: 0 0 20px;
+    }
+    .g-postmeta-sep { padding: 0 10px; color: rgba(255,255,255,0.22); }
+
+    /* ── The list ──
+       One row per article, the same hairline-separated stack the
+       chapter list uses, so the index reads as part of the same site
+       rather than as a card wall borrowed from somewhere else. */
+    .g-postcard {
+      display: block; padding: 20px 22px;
+      border: 1px solid var(--g-14); border-radius: 4px;
+      background: rgba(0,217,255,0.02); text-decoration: none;
+      transition: background 0.18s ease, border-color 0.18s ease;
+    }
+    .g-postcard:hover { background: rgba(0,217,255,0.06); border-color: var(--g-40); }
+    .g-postcard:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+    .g-postcard-cat {
+      display: block; font-family: var(--mono); font-weight: 500; font-size: 0.58rem;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--g); margin: 0 0 9px;
+    }
+    .g-postcard-title {
+      display: block; font-family: var(--serif); font-weight: 500;
+      font-size: 1.32rem; line-height: 1.25; color: #fff; margin: 0 0 8px;
+    }
+    .g-postcard-sum {
+      display: block; font-family: 'Barlow', sans-serif; font-weight: 300;
+      font-size: 0.92rem; line-height: 1.7; color: rgba(255,255,255,0.58);
+    }
+    .g-postcard-date {
+      display: block; margin-top: 12px;
+      font-family: var(--mono); font-weight: 500; font-size: 0.6rem;
+      letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.34);
+    }
+    .g-postcat {
+      display: inline-flex; align-items: center;
+      border: 1px solid var(--g-22); border-radius: 3px; padding: 7px 13px;
+      font-family: var(--mono); font-weight: 500; font-size: 0.6rem;
+      letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.62);
+      text-decoration: none; transition: color 0.18s ease, border-color 0.18s ease;
+    }
+    .g-postcat:hover { color: var(--g); border-color: var(--g-40); }
+    .g-postcat:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+    .g-postcat[aria-current] { color: var(--g); border-color: var(--g-40); background: rgba(0,217,255,0.08); }
+
+    @media (max-width: 768px) {
+      .g-toolcta { padding: 18px 16px; }
+      .g-postcard { padding: 16px 16px; }
+    }
   </style>
   <!-- Vercel Web Analytics. Served from our own origin (/_vercel/...),
        so no third-party host appears in the network log or in the privacy
@@ -2079,15 +2182,15 @@
 <p style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:#00d9ff;margin:0 0 12px">Where your audience already is</p>
 <h1 style="font-family:'Playfair Display',Georgia,serif;font-weight:500;font-size:2.6rem;line-height:1.1;letter-spacing:-0.015em;color:#fff;margin:0 0 18px">Finding Telegram channels by keyword</h1>
 <p style="font-family:Barlow,sans-serif;font-weight:300;font-size:1rem;line-height:1.8;color:rgba(255,255,255,0.72);margin:0 0 14px;font-size:1.05rem;color:rgba(255,255,255,0.78)">Finding channels worth commenting into — the two search modes, the filters that decide what survives, and what the score means.</p>
-<h2 style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px">In this guide</h2>
+<h2 style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px">In this guide</h2>
 <div class="g-toc panel" style="padding:16px 18px"><a href="#what-it-is"><span class="g-toc-n">01</span><span class="g-toc-t">What this page is</span></a><a href="#map"><span class="g-toc-n">02</span><span class="g-toc-t">Map of the page</span></a><a href="#keyword-search"><span class="g-toc-n">03</span><span class="g-toc-t">Keyword search</span></a><a href="#similar"><span class="g-toc-n">04</span><span class="g-toc-t">Similar channels</span></a><a href="#filters"><span class="g-toc-n">05</span><span class="g-toc-t">The filters</span></a><a href="#results"><span class="g-toc-n">06</span><span class="g-toc-t">Reading the results</span></a><a href="#first-run"><span class="g-toc-n">07</span><span class="g-toc-t">First run</span></a></div>
-<h2 id="what-it-is" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">01</span>What this page is</h2>
+<h2 id="what-it-is" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">01</span>What this page is</h2>
 <p class="g-p">Channel Parser searches Telegram for channels you could comment into, checks each candidate against your filters, scores the survivors and lists them. It is a research tool: nothing it finds starts being commented on until you put it in the Neurocommenting channel list yourself.</p>
 <p class="g-p">It shares its page with Group Parser. A pair of tabs at the top switches between them — Channel parser and Group parser — and each has its own form, its own results and its own history.</p>
 <div class="g-callout"><p class="g-p">Searching uses your own accounts, and it uses them heavily: every candidate channel costs several Telegram requests to inspect. An account running a search is reserved and cannot be in the commenting pool at the same time. Run searches when the accounts can spare the calls, not alongside a full commenting run.</p></div>
-<h2 id="map" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">02</span>Map of the page</h2>
+<h2 id="map" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">02</span>Map of the page</h2>
 <ol class="g-map"><li><span class="g-map-n">01</span><span class="g-map-body"><span class="g-map-name">Parser tabs</span><span class="g-map-holds">Channel parser · Group parser. The top-level switch between two different tools sharing one address.</span></span></li><li><span class="g-map-n">02</span><span class="g-map-body"><span class="g-map-name">Search control</span><span class="g-map-holds">The run state, the Search button, and Cancel run while one is going.</span></span></li><li><span class="g-map-n">03</span><span class="g-map-body"><span class="g-map-name">Mode tabs</span><span class="g-map-holds">Keyword search · Similar channels. Two ways of producing candidates, sharing every filter below.</span></span></li><li><span class="g-map-n">04</span><span class="g-map-body"><span class="g-map-name">The form</span><span class="g-map-holds">Keywords and optional endings, accounts, members range, languages, minimum comments on the last post, and how many results to stop at.</span></span></li><li><span class="g-map-n">05</span><span class="g-map-body"><span class="g-map-name">Progress</span><span class="g-map-holds">While a run is going: which chunk it is on, and a live log of what each account is deciding.</span></span></li><li><span class="g-map-n">06</span><span class="g-map-body"><span class="g-map-name">Results</span><span class="g-map-holds">Four tabs — All, Pending, Promoted, Rejected — with Copy Links and Clear above them.</span></span></li></ol>
-<h2 id="keyword-search" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">03</span>Keyword search</h2>
+<h2 id="keyword-search" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">03</span>Keyword search</h2>
 <p class="g-p">You give it words; it searches Telegram for each one and inspects what comes back. The endings field is a multiplier on that: every keyword is combined with every ending, so five keywords and four endings is twenty searches.</p>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
@@ -2097,14 +2200,14 @@
 <details class="g-ctl-item" id="ctl-cp-max-results"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn t-plain">500</span></span><span class="g-ctl-label"><span class="g-ctl-name">Max results</span><span class="g-ctl-where">The form</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Stops the run once this many channels have been accepted.</dd></div><div><dt>Default</dt><dd>500. Unlimited is offered, and is capped at 5000 by the engine regardless.</dd></div><div><dt>Custom values</dt><dd>Anything from 1 to 5000.</dd></div></dl></details>
 </div>
 <p class="g-p">A run can be cancelled while it goes. Cancelling stops the chunks that have not started; everything already found stays.</p>
-<h2 id="similar" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">04</span>Similar channels</h2>
+<h2 id="similar" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">04</span>Similar channels</h2>
 <p class="g-p">The other mode. Instead of words you give it channels, and it asks Telegram what is similar to them. Every filter below applies the same way.</p>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
 <details class="g-ctl-item" id="ctl-cp-sources"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-field">@somechannel</span></span><span class="g-ctl-label"><span class="g-ctl-name">Source channels</span><span class="g-ctl-where">Similar channels</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>The channels to find neighbours of. One per line, as @username, a t.me link or a bare name.</dd></div><div><dt>What is refused</dt><dd>Private invite links. They name no public channel, so there is nothing to ask about.</dd></div><div><dt>When this beats keywords</dt><dd>When you already know two or three channels your audience reads. It skips the guessing about names entirely.</dd></div></dl></details>
 <details class="g-ctl-item" id="ctl-cp-depth"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-select"><span class="g-r-select-v">1</span><span class="g-r-caret"></span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Depth</span><span class="g-ctl-where">Similar channels</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>Depth 1</dt><dd>Direct recommendations for each source channel only.</dd></div><div><dt>Depth 2</dt><dd>Also searches channels similar to what depth 1 found. More results, longer runtime, more Telegram calls.</dd></div><div><dt>If it finds nothing</dt><dd>A similar-channels run reporting zero is usually telling the truth about a pool you have already worked. Every candidate it surfaces that you previously added or rejected is skipped as already reviewed, and on a mature list that is most of them. The run says so now: the log names each skipped candidate with its reason, and the finished task carries the breakdown, so a zero is distinguishable from a search that did nothing.</dd></div><div><dt>What bounds depth 2</dt><dd>Only the highest-scoring thirty of the accepted depth-1 channels are recursed into. Without that cap a fifty-source run could turn into hundreds of extra requests.</dd></div><div><dt>Pacing</dt><dd>Depth 2 is paced more slowly than depth 1, because it stacks a second wave of requests onto the same account session inside one run.</dd></div></dl></details>
 </div>
-<h2 id="filters" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">05</span>The filters</h2>
+<h2 id="filters" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">05</span>The filters</h2>
 <p class="g-p">Every candidate goes through the same pipeline in the same order, and the first failure ends it. Three of the steps are yours to set; three are not.</p>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
@@ -2117,7 +2220,7 @@
 <p class="g-p">The whole funnel, measured rather than estimated. Across 2,841 candidates this deployment has actually put through the filters, 54 survived - 1.9 per cent. Where the other 2,787 went, each counted against the first filter that rejected it:</p>
 <div class="g-tablewrap panel"><table class="g-table"><thead><tr><th scope="col">Rejected by</th><th scope="col">Share of all candidates</th></tr></thead><tbody><tr><td data-label="Rejected by">Comments open</td><td data-label="Share of all candidates">66.1 per cent</td></tr><tr><td data-label="Rejected by">Members out of range</td><td data-label="Share of all candidates">15.1 per cent</td></tr><tr><td data-label="Rejected by">Comments on last post too low</td><td data-label="Share of all candidates">9.5 per cent</td></tr><tr><td data-label="Rejected by">Posts per week too low</td><td data-label="Share of all candidates">5.6 per cent</td></tr><tr><td data-label="Rejected by">Language mismatch</td><td data-label="Share of all candidates">1.8 per cent</td></tr><tr><td data-label="Rejected by">Passed everything</td><td data-label="Share of all candidates">1.9 per cent</td></tr></tbody></table></div>
 <div class="g-callout"><p class="g-p">Two readings of that table are both correct and worth holding together. A 1.9 per cent survival rate is not the parser working badly - it is what an honest set of filters does to an open recommendation feed. But it also means the single most effective thing you could change is the comments-open requirement, and that one is not adjustable: a channel with no discussion group has nowhere to put a comment.</p></div>
-<h2 id="results" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">06</span>Reading the results</h2>
+<h2 id="results" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">06</span>Reading the results</h2>
 <p class="g-p">One row per surviving channel: username, title, members, language, comments on the last post, and a score. The score bands are coloured the same way in both parsers, so a 72 never reads as good on one and neutral on the other.</p>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
@@ -2126,7 +2229,7 @@
 <details class="g-ctl-item" id="ctl-cp-clear"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn t-bad">Clear</span></span><span class="g-ctl-label"><span class="g-ctl-name">Clear</span><span class="g-ctl-where">Results</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Deletes the stored results.</dd></div><div><dt>What comes back</dt><dd>A later search can surface the same channels again — nothing here records that you have already seen and dismissed one.</dd></div></dl></details>
 </div>
 <div class="g-callout"><p class="g-p">The four result tabs read as a workflow that is not there. All, Pending, Promoted and Rejected are real statuses the engine keeps, and promoting a channel would add it to the monitored list in one step while rejecting it would stop it resurfacing on a re-scan — but this table offers no way to do either. Every row stays Pending forever, and the only route into the commenting list is Copy Links and a paste into the Neurocommenting page, which does not change the row's status. The Group Parser tab beside it does have the two buttons.</p></div>
-<h2 id="first-run" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">07</span>First run</h2>
+<h2 id="first-run" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">07</span>First run</h2>
 <ol class="g-steps"><li><p class="g-p">Start with three or four keywords and no endings. It costs little and tells you whether the filters are anywhere near right before you spend a long run on them.</p></li><li><p class="g-p">Leave the members range alone at first; lower the floor rather than raising the ceiling if too little comes back.</p></li><li><p class="g-p">Set Min comments on last post to what you actually need. Five is the default and it is not a low bar — a channel that clears it has a live comment section.</p></li><li><p class="g-p">Read the run rather than waiting for it. The live log names each candidate and why it was rejected - in both modes now; until recently the similar-channels log named the sources it worked through but not the candidates they produced - and it is usually obvious within a minute which filter is doing the damage.</p></li><li><p class="g-p">Once the filters look right, add endings and re-run. That is where the volume comes from.</p></li><li><p class="g-p">Copy the links of the rows worth having and paste them into Add channel(s) on the Neurocommenting page.</p></li></ol>
 <p class="g-note">Very little coming back is the normal first experience, and it is usually not the keywords. Roughly three quarters of real candidates are rejected for having no comment section at all, before any filter you set is even reached.</p>
 <a href="/guides/neurocommenting" class="quiet-link" style="margin-bottom:16px">Next: point the commenting engine at them →</a>

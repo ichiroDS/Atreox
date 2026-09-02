@@ -33,6 +33,7 @@ const {
   ArrowUpRight, Play, BookOpen, ChevronRight, Shield, Zap, X,
   PageHero, PageSection, SectionLockup, Pill, CrossLinks, FooterBar,
   MONO, SERIF, GUIDES, MODULE_BY_KEY, eur, REDUCED_MOTION,
+  TOOL_BY_ID,
   guideHref, guideFromPath, GUIDE_BY_SLUG, LiteVideo,
 } = window;
 
@@ -565,6 +566,36 @@ function ReaderBlocks({ blocks, onOpen }) {
         );
       }
 
+      /* The block the blog's conversion runs through, and the reason
+         it takes a tool ID rather than a URL: it stands in the middle
+         and at the end of most articles, so an address written into
+         the blocks themselves would be spelled dozens of times.
+         TOOLS in catalog.jsx is the one place it lives.
+
+         An unknown id renders nothing HERE and throws in the
+         prerenderer, which is the same asymmetry every other kind has
+         (see BLOCK_KINDS) - the build is what catches it, before a
+         reader ever meets the gap.
+
+         The link goes to the PANEL, not to the tool's marketing page:
+         a reader who has just met the problem wants the thing, not a
+         second page about it. It is a plain external href with no
+         onClick, because it leaves this site. */
+      case 'toolcta': {
+        const tool = TOOL_BY_ID[v.tool];
+        if (!tool) return null;
+        return (
+          <aside key={i} className="g-toolcta">
+            <span className="g-toolcta-kicker">Free tool</span>
+            <span className="g-toolcta-name">{tool.name}</span>
+            <p className="g-p g-toolcta-text">{v.angle || tool.blurb}</p>
+            <a className="g-toolcta-cta" href={tool.panel} rel="noopener">
+              {tool.cta} <ArrowUpRight size={13} />
+            </a>
+          </aside>
+        );
+      }
+
       default:
         return null;
     }
@@ -904,4 +935,11 @@ function GuidesPage({ setPage }) {
   );
 }
 
-Object.assign(window, { GuidesPage });
+/* ReaderBlocks and ChapterNav are exported, not moved.
+   blog.jsx renders the same block kinds and the same contents rail, and
+   the cheapest way to guarantee it renders them IDENTICALLY is for it
+   to use the same function object rather than a copy in a shared file.
+   Moving them would read tidier and would produce a diff that nothing
+   can verify behaviourally - the prerendered HTML this repo does check
+   comes from prerender.mjs, not from these components. */
+Object.assign(window, { GuidesPage, ReaderBlocks, ChapterNav, ReaderHeading });

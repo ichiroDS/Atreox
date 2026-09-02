@@ -2012,6 +2012,109 @@
       .splash-log span { animation: none; opacity: 1; }
       .btn-solid::after { display: none; }
     }
+
+    /* ══════════════════════════════════════════════════════════════
+       The blog: the tool call-to-action, the dates, and the list cards.
+
+       Every rule below is NEW. Nothing above it is edited, which is the
+       point: the guides and the articles share one block renderer and
+       one stylesheet, so a change to an existing .g-* rule would move
+       eleven guide pages at the same time as it moved the blog. The
+       only class the two share by design is the block vocabulary
+       itself — .g-p, .g-card, .g-toc and the rest — and those are
+       untouched.
+    ══════════════════════════════════════════════════════════════ */
+
+    /* ── The tool block ──
+       Louder than a .g-card and quieter than the page, because it
+       stands in the middle of an article and has to read as an offer
+       without interrupting the sentence the reader is in. Solid left
+       edge rather than a full border: it belongs to the column of text
+       it sits in. */
+    .g-toolcta {
+      display: block; margin: 26px 0; padding: 22px 24px;
+      max-width: var(--gcol);
+      border: 1px solid var(--g-22); border-left: 2px solid var(--g);
+      border-radius: 4px;
+      background: linear-gradient(90deg, rgba(0,217,255,0.06), rgba(0,217,255,0.015));
+    }
+    .g-toolcta-kicker {
+      display: block; font-family: var(--mono); font-weight: 600; font-size: 0.58rem;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--g); margin: 0 0 9px;
+    }
+    .g-toolcta-name {
+      display: block; font-family: var(--serif); font-weight: 500;
+      font-size: 1.28rem; line-height: 1.25; color: #fff; margin: 0 0 10px;
+    }
+    .g-toolcta-text { margin: 0 0 16px !important; font-size: 0.94rem; }
+    .g-toolcta-cta {
+      display: inline-flex; align-items: center; gap: 7px;
+      border: 1px solid var(--g-40); border-radius: 3px;
+      background: rgba(0,217,255,0.10); padding: 10px 17px;
+      font-family: var(--mono); font-weight: 600; font-size: 0.63rem;
+      letter-spacing: 0.16em; text-transform: uppercase; color: var(--g);
+      text-decoration: none; transition: background 0.18s ease, border-color 0.18s ease;
+    }
+    .g-toolcta-cta:hover { background: rgba(0,217,255,0.18); border-color: var(--g); }
+    .g-toolcta-cta:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+
+    /* ── Article dates ──
+       "Updated" is a second <time>, and it only exists in the markup
+       when the article has genuinely been revised — see postDates in
+       prerender.mjs. So this rule never has to hide anything: there is
+       nothing to hide on an article nobody has revised. */
+    .g-postmeta {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 0;
+      font-family: var(--mono); font-weight: 500; font-size: 0.63rem;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: rgba(255,255,255,0.42); margin: 0 0 20px;
+    }
+    .g-postmeta-sep { padding: 0 10px; color: rgba(255,255,255,0.22); }
+
+    /* ── The list ──
+       One row per article, the same hairline-separated stack the
+       chapter list uses, so the index reads as part of the same site
+       rather than as a card wall borrowed from somewhere else. */
+    .g-postcard {
+      display: block; padding: 20px 22px;
+      border: 1px solid var(--g-14); border-radius: 4px;
+      background: rgba(0,217,255,0.02); text-decoration: none;
+      transition: background 0.18s ease, border-color 0.18s ease;
+    }
+    .g-postcard:hover { background: rgba(0,217,255,0.06); border-color: var(--g-40); }
+    .g-postcard:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+    .g-postcard-cat {
+      display: block; font-family: var(--mono); font-weight: 500; font-size: 0.58rem;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--g); margin: 0 0 9px;
+    }
+    .g-postcard-title {
+      display: block; font-family: var(--serif); font-weight: 500;
+      font-size: 1.32rem; line-height: 1.25; color: #fff; margin: 0 0 8px;
+    }
+    .g-postcard-sum {
+      display: block; font-family: 'Barlow', sans-serif; font-weight: 300;
+      font-size: 0.92rem; line-height: 1.7; color: rgba(255,255,255,0.58);
+    }
+    .g-postcard-date {
+      display: block; margin-top: 12px;
+      font-family: var(--mono); font-weight: 500; font-size: 0.6rem;
+      letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.34);
+    }
+    .g-postcat {
+      display: inline-flex; align-items: center;
+      border: 1px solid var(--g-22); border-radius: 3px; padding: 7px 13px;
+      font-family: var(--mono); font-weight: 500; font-size: 0.6rem;
+      letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.62);
+      text-decoration: none; transition: color 0.18s ease, border-color 0.18s ease;
+    }
+    .g-postcat:hover { color: var(--g); border-color: var(--g-40); }
+    .g-postcat:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+    .g-postcat[aria-current] { color: var(--g); border-color: var(--g-40); background: rgba(0,217,255,0.08); }
+
+    @media (max-width: 768px) {
+      .g-toolcta { padding: 18px 16px; }
+      .g-postcard { padding: 16px 16px; }
+    }
   </style>
   <!-- Vercel Web Analytics. Served from our own origin (/_vercel/...),
        so no third-party host appears in the network log or in the privacy
@@ -2079,20 +2182,20 @@
 <p style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:#00d9ff;margin:0 0 12px">Rooms, not broadcasts</p>
 <h1 style="font-family:'Playfair Display',Georgia,serif;font-weight:500;font-size:2.6rem;line-height:1.1;letter-spacing:-0.015em;color:#fff;margin:0 0 18px">Finding active Telegram groups</h1>
 <p style="font-family:Barlow,sans-serif;font-weight:300;font-size:1rem;line-height:1.8;color:rgba(255,255,255,0.72);margin:0 0 14px;font-size:1.05rem;color:rgba(255,255,255,0.78)">Finding groups that are actually alive and that you can actually post in — the filters, the score, and where a promoted group goes.</p>
-<h2 style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px">In this guide</h2>
+<h2 style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px">In this guide</h2>
 <div class="g-toc panel" style="padding:16px 18px"><a href="#what-it-is"><span class="g-toc-n">01</span><span class="g-toc-t">What this page is</span></a><a href="#map"><span class="g-toc-n">02</span><span class="g-toc-t">Map of the page</span></a><a href="#how-it-searches"><span class="g-toc-n">03</span><span class="g-toc-t">How it finds candidates</span></a><a href="#filters"><span class="g-toc-n">04</span><span class="g-toc-t">The filters</span></a><a href="#results"><span class="g-toc-n">05</span><span class="g-toc-t">Reading a row</span></a><a href="#first-run"><span class="g-toc-n">06</span><span class="g-toc-t">First run</span></a></div>
-<h2 id="what-it-is" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">01</span>What this page is</h2>
+<h2 id="what-it-is" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">01</span>What this page is</h2>
 <p class="g-p">Group Parser finds public groups — the rooms where people talk to each other, rather than channels where one account broadcasts. It lives on the same page as Channel Parser, behind the second of the two tabs at the top.</p>
 <p class="g-p">It looks similar to its neighbour and behaves differently in every place that matters, because what makes a group worth having is not what makes a channel worth having.</p>
 <div class="g-callout"><p class="g-p">The channel pipeline's most destructive filter simply does not exist here. A channel is rejected outright if it has no linked discussion group to comment in — measured on real candidates, that alone removes about three quarters of them. A group is the discussion surface, so there is nothing to link to and nothing to reject for. Expect a group search to return far more than a channel search on the same effort.</p></div>
-<h2 id="map" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">02</span>Map of the page</h2>
+<h2 id="map" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">02</span>Map of the page</h2>
 <ol class="g-map"><li><span class="g-map-n">01</span><span class="g-map-body"><span class="g-map-name">Parser tabs</span><span class="g-map-holds">Channel parser · Group parser, at the very top. This guide is the second one.</span></span></li><li><span class="g-map-n">02</span><span class="g-map-body"><span class="g-map-name">Search</span><span class="g-map-holds">Keywords and endings, accounts, members range, languages, the two activity floors, the two access switches, and how many results to stop at.</span></span></li><li><span class="g-map-n">03</span><span class="g-map-body"><span class="g-map-name">Progress</span><span class="g-map-holds">While a run is going: the chunk it is on, and the live log of what each account decided about each candidate.</span></span></li><li><span class="g-map-n">04</span><span class="g-map-body"><span class="g-map-name">Results</span><span class="g-map-holds">The table, with Export CSV above it and status tabs across it — and, unlike the channel table, a Promote and a Reject on every row.</span></span></li></ol>
-<h2 id="how-it-searches" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">03</span>How it finds candidates</h2>
+<h2 id="how-it-searches" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">03</span>How it finds candidates</h2>
 <p class="g-p">Two different Telegram searches are run for every keyword and their results are merged. They were both kept because measurement said to: on a live test the two found different groups and the overlap between them was zero.</p>
 <div class="g-tablewrap panel"><table class="g-table"><thead><tr><th scope="col">Search</th><th scope="col">What it matches</th></tr></thead><tbody><tr><td data-label="Search">By name</td><td data-label="What it matches">The group’s own name. The same call the channel parser makes — Telegram returns channels and groups in one list and only a flag separates them.</td></tr><tr><td data-label="Search">By message text</td><td data-label="What it matches">What people are actually saying, returning the groups those messages live in. A group only surfaces if it has a recent on-topic message, so this applies an activity test at the source rather than after four requests of inspection.</td></tr></tbody></table></div>
 <p class="g-p">The second one also pages, which is where the volume comes from — the name search has a hard ceiling of roughly ten results per query however many you ask for. Three pages are taken per keyword: enough for several times that ceiling, while staying a small, bounded number of requests.</p>
 <p class="g-p">Keywords, endings, account selection and the maximum-results picker work exactly as they do on the channel tab, including the ten-per-request batching and the confirmation before a long run.</p>
-<h2 id="filters" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">04</span>The filters</h2>
+<h2 id="filters" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">04</span>The filters</h2>
 <p class="g-p">Members and languages mean the same thing here as on the channel tab. Everything else is different, because a group has no posts and no comments to count.</p>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
@@ -2102,7 +2205,7 @@
 <details class="g-ctl-item" id="ctl-gp-can-post"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-toggle is-on"></span></span><span class="g-ctl-label"><span class="g-ctl-name">Only groups members can post in</span><span class="g-ctl-where">Search → Access</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Skips read-only groups where new members cannot send messages.</dd></div><div><dt>Default</dt><dd>On.</dd></div><div><dt>Why on</dt><dd>A group nobody may post in cannot be commented in, whatever else is true about it.</dd></div></dl></details>
 </div>
 <p class="g-p">Two more checks run before any of those: the group has to be public — with a username to point an account at — and it has to actually be a group rather than a broadcast channel that arrived in the same result list.</p>
-<h2 id="results" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">05</span>Reading a row</h2>
+<h2 id="results" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">05</span>Reading a row</h2>
 <p class="g-p">The table carries more than the channel one, because more of what decides a group is visible up front: members, messages in the last seven days, distinct senders, slow mode, how joining works, language, where the search found it, and a score.</p>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
@@ -2113,7 +2216,7 @@
 <details class="g-ctl-item" id="ctl-gp-reject"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn t-bad">Reject</span></span><span class="g-ctl-label"><span class="g-ctl-name">Reject</span><span class="g-ctl-where">Results → a row</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Marks the group rejected so it does not resurface on a later scan.</dd></div><div><dt>Why it is worth using</dt><dd>It is the only thing that remembers a decision. Without it the same unsuitable group comes back on every re-run of the same keywords.</dd></div></dl></details>
 <details class="g-ctl-item" id="ctl-gp-export"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn t-plain">Export CSV</span></span><span class="g-ctl-label"><span class="g-ctl-name">Export CSV</span><span class="g-ctl-where">Results</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Exports every row matching the current tab and filters — not just the page on screen, unlike the comment history on the Neurocommenting page.</dd></div></dl></details>
 </div>
-<h2 id="first-run" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">06</span>First run</h2>
+<h2 id="first-run" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">06</span>First run</h2>
 <ol class="g-steps"><li><p class="g-p">Search a few keywords with both access switches left on. Everything they exclude is something an account could not have used anyway.</p></li><li><p class="g-p">Sort your attention by senders rather than by members. A group with 800 members and 30 people talking is worth more than one with 40,000 and four.</p></li><li><p class="g-p">Look at slow mode before committing. A minute or more between messages changes what an account can do there, and the score already docks it.</p></li><li><p class="g-p">Reject the ones that are wrong, rather than ignoring them. It is the only way they stop coming back.</p></li><li><p class="g-p">Promote the ones worth having — remembering that this hands them to NeuroDialogs to mention in conversation, not to the commenting engine.</p></li></ol>
 <p class="g-note">Searching shares its account budget with the channel tab. A channel search and a group search running at once cannot together exceed the same owner-wide worker cap, so running both in parallel does not get through the work any faster — it just splits the same accounts between them.</p>
 <a href="/guides/neurodialogs" class="quiet-link" style="margin-bottom:16px">Next: answer the DMs those groups bring in →</a>

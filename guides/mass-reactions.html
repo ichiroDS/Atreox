@@ -2012,6 +2012,109 @@
       .splash-log span { animation: none; opacity: 1; }
       .btn-solid::after { display: none; }
     }
+
+    /* ══════════════════════════════════════════════════════════════
+       The blog: the tool call-to-action, the dates, and the list cards.
+
+       Every rule below is NEW. Nothing above it is edited, which is the
+       point: the guides and the articles share one block renderer and
+       one stylesheet, so a change to an existing .g-* rule would move
+       eleven guide pages at the same time as it moved the blog. The
+       only class the two share by design is the block vocabulary
+       itself — .g-p, .g-card, .g-toc and the rest — and those are
+       untouched.
+    ══════════════════════════════════════════════════════════════ */
+
+    /* ── The tool block ──
+       Louder than a .g-card and quieter than the page, because it
+       stands in the middle of an article and has to read as an offer
+       without interrupting the sentence the reader is in. Solid left
+       edge rather than a full border: it belongs to the column of text
+       it sits in. */
+    .g-toolcta {
+      display: block; margin: 26px 0; padding: 22px 24px;
+      max-width: var(--gcol);
+      border: 1px solid var(--g-22); border-left: 2px solid var(--g);
+      border-radius: 4px;
+      background: linear-gradient(90deg, rgba(0,217,255,0.06), rgba(0,217,255,0.015));
+    }
+    .g-toolcta-kicker {
+      display: block; font-family: var(--mono); font-weight: 600; font-size: 0.58rem;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--g); margin: 0 0 9px;
+    }
+    .g-toolcta-name {
+      display: block; font-family: var(--serif); font-weight: 500;
+      font-size: 1.28rem; line-height: 1.25; color: #fff; margin: 0 0 10px;
+    }
+    .g-toolcta-text { margin: 0 0 16px !important; font-size: 0.94rem; }
+    .g-toolcta-cta {
+      display: inline-flex; align-items: center; gap: 7px;
+      border: 1px solid var(--g-40); border-radius: 3px;
+      background: rgba(0,217,255,0.10); padding: 10px 17px;
+      font-family: var(--mono); font-weight: 600; font-size: 0.63rem;
+      letter-spacing: 0.16em; text-transform: uppercase; color: var(--g);
+      text-decoration: none; transition: background 0.18s ease, border-color 0.18s ease;
+    }
+    .g-toolcta-cta:hover { background: rgba(0,217,255,0.18); border-color: var(--g); }
+    .g-toolcta-cta:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+
+    /* ── Article dates ──
+       "Updated" is a second <time>, and it only exists in the markup
+       when the article has genuinely been revised — see postDates in
+       prerender.mjs. So this rule never has to hide anything: there is
+       nothing to hide on an article nobody has revised. */
+    .g-postmeta {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 0;
+      font-family: var(--mono); font-weight: 500; font-size: 0.63rem;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: rgba(255,255,255,0.42); margin: 0 0 20px;
+    }
+    .g-postmeta-sep { padding: 0 10px; color: rgba(255,255,255,0.22); }
+
+    /* ── The list ──
+       One row per article, the same hairline-separated stack the
+       chapter list uses, so the index reads as part of the same site
+       rather than as a card wall borrowed from somewhere else. */
+    .g-postcard {
+      display: block; padding: 20px 22px;
+      border: 1px solid var(--g-14); border-radius: 4px;
+      background: rgba(0,217,255,0.02); text-decoration: none;
+      transition: background 0.18s ease, border-color 0.18s ease;
+    }
+    .g-postcard:hover { background: rgba(0,217,255,0.06); border-color: var(--g-40); }
+    .g-postcard:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+    .g-postcard-cat {
+      display: block; font-family: var(--mono); font-weight: 500; font-size: 0.58rem;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--g); margin: 0 0 9px;
+    }
+    .g-postcard-title {
+      display: block; font-family: var(--serif); font-weight: 500;
+      font-size: 1.32rem; line-height: 1.25; color: #fff; margin: 0 0 8px;
+    }
+    .g-postcard-sum {
+      display: block; font-family: 'Barlow', sans-serif; font-weight: 300;
+      font-size: 0.92rem; line-height: 1.7; color: rgba(255,255,255,0.58);
+    }
+    .g-postcard-date {
+      display: block; margin-top: 12px;
+      font-family: var(--mono); font-weight: 500; font-size: 0.6rem;
+      letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.34);
+    }
+    .g-postcat {
+      display: inline-flex; align-items: center;
+      border: 1px solid var(--g-22); border-radius: 3px; padding: 7px 13px;
+      font-family: var(--mono); font-weight: 500; font-size: 0.6rem;
+      letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.62);
+      text-decoration: none; transition: color 0.18s ease, border-color 0.18s ease;
+    }
+    .g-postcat:hover { color: var(--g); border-color: var(--g-40); }
+    .g-postcat:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+    .g-postcat[aria-current] { color: var(--g); border-color: var(--g-40); background: rgba(0,217,255,0.08); }
+
+    @media (max-width: 768px) {
+      .g-toolcta { padding: 18px 16px; }
+      .g-postcard { padding: 16px 16px; }
+    }
   </style>
   <!-- Vercel Web Analytics. Served from our own origin (/_vercel/...),
        so no third-party host appears in the network log or in the privacy
@@ -2079,16 +2182,16 @@
 <p style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:#00d9ff;margin:0 0 12px">The first hour decides</p>
 <h1 style="font-family:'Playfair Display',Georgia,serif;font-weight:500;font-size:2.6rem;line-height:1.1;letter-spacing:-0.015em;color:#fff;margin:0 0 18px">Adding reactions to Telegram posts</h1>
 <p style="font-family:Barlow,sans-serif;font-weight:300;font-size:1rem;line-height:1.8;color:rgba(255,255,255,0.72);margin:0 0 14px;font-size:1.05rem;color:rgba(255,255,255,0.78)">Reactions that arrive like an audience instead of a switch being flipped — every setting on the page, and the numbers behind it.</p>
-<h2 style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px">In this guide</h2>
+<h2 style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px">In this guide</h2>
 <div class="g-toc panel" style="padding:16px 18px"><a href="#what-it-is"><span class="g-toc-n">01</span><span class="g-toc-t">What this page is</span></a><a href="#map"><span class="g-toc-n">02</span><span class="g-toc-t">Map of the page</span></a><a href="#targets"><span class="g-toc-n">03</span><span class="g-toc-t">Targets</span></a><a href="#what-to-react-to"><span class="g-toc-n">04</span><span class="g-toc-t">What to react to</span></a><a href="#emoji"><span class="g-toc-n">05</span><span class="g-toc-t">Emoji</span></a><a href="#limits"><span class="g-toc-n">06</span><span class="g-toc-t">Limits</span></a><a href="#pacing"><span class="g-toc-n">07</span><span class="g-toc-t">Pacing</span></a><a href="#joining"><span class="g-toc-n">08</span><span class="g-toc-t">Joining</span></a><a href="#reading-it"><span class="g-toc-n">09</span><span class="g-toc-t">Reading the run</span></a><a href="#first-run"><span class="g-toc-n">10</span><span class="g-toc-t">First run</span></a></div>
-<h2 id="what-it-is" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">01</span>What this page is</h2>
+<h2 id="what-it-is" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">01</span>What this page is</h2>
 <p class="g-p">Mass Reactions places reactions on new posts, or on the comments under them, using a pool of your accounts. It watches for posts as they appear and plans a fan-out for each one.</p>
 <p class="g-p">By default it aims at comments rather than at the post. That is the product intent: a post with a lot of reactions is worth less than a post whose comment section looks alive.</p>
 <div class="g-callout"><p class="g-p">Dry run is on when you first arrive, and it stays on until you switch it off. In dry run the module does everything except the send — it catches posts, plans which account reacts with what and when, and writes all of it down. So the first thing a new owner gets is an inspectable plan rather than live traffic, and the honest first step on this page is to run it that way for a while and read the result.</p></div>
-<h2 id="map" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">02</span>Map of the page</h2>
+<h2 id="map" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">02</span>Map of the page</h2>
 <p class="g-p">Nine regions, with a jump-nav across the top in this order.</p>
 <ol class="g-map"><li><span class="g-map-n">01</span><span class="g-map-body"><span class="g-map-name">Control</span><span class="g-map-holds">Start and Stop, the Dry run switch, six counters, and one row per account with what it has placed today.</span></span></li><li><span class="g-map-n">02</span><span class="g-map-body"><span class="g-map-name">Reactions Pool</span><span class="g-map-holds">Two columns of accounts, the same shape and the same one-module-at-a-time rule as the other pools.</span></span></li><li><span class="g-map-n">03</span><span class="g-map-body"><span class="g-map-name">Stats</span><span class="g-map-holds">Attempts, successful, unsuccessful and the rate between them.</span></span></li><li><span class="g-map-n">04</span><span class="g-map-body"><span class="g-map-name">Channels</span><span class="g-map-holds">The target channels, each tile showing whether its comments can actually be reacted to, plus the paste box and the discussion-group check.</span></span></li><li><span class="g-map-n">05</span><span class="g-map-body"><span class="g-map-name">What to react to</span><span class="g-map-holds">Comments or channel posts, and how many comments under each post.</span></span></li><li><span class="g-map-n">06</span><span class="g-map-body"><span class="g-map-name">Emoji</span><span class="g-map-holds">Which reactions accounts place, in what order, and which of them every probed target accepts.</span></span></li><li><span class="g-map-n">07</span><span class="g-map-body"><span class="g-map-name">Limits</span><span class="g-map-holds">Per-account rate caps, the chance a message is covered at all, and the share of the pool that covers it.</span></span></li><li><span class="g-map-n">08</span><span class="g-map-body"><span class="g-map-name">Pacing</span><span class="g-map-holds">How soon the first reaction lands, how the rest are spread behind it, the arrival curve, and the floodwait policy.</span></span></li><li><span class="g-map-n">09</span><span class="g-map-body"><span class="g-map-name">Joining</span><span class="g-map-holds">One switch that explains why there is nothing to configure.</span></span></li></ol>
-<h2 id="targets" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">03</span>Targets</h2>
+<h2 id="targets" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">03</span>Targets</h2>
 <p class="g-p">Targets are their own list, deliberately not the channel list from Neurocommenting. That one means channels you comment on; these are usually your own channels, and overloading one list with both would be confusing.</p>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
@@ -2096,20 +2199,20 @@
 <details class="g-ctl-item" id="ctl-mr-probe"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn t-plain">Check discussion groups</span></span><span class="g-ctl-label"><span class="g-ctl-name">Check discussion groups</span><span class="g-ctl-where">Channels</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Asks each target for its linked discussion group and what reactions that group allows.</dd></div><div><dt>The three answers</dt><dd>Not checked yet — never probed. No comments — the channel has no linked discussion group, so comment mode has nothing to aim at. Reactions off — the group accepts no reactions at all, and this is a setting on the group, not on the channel.</dd></div><div><dt>Why it matters before starting</dt><dd>Both failing states are permanent until someone changes the group. Sending into them is a guaranteed failure per attempt.</dd></div><div><dt>What else it collects</dt><dd>The list of reactions the group actually allows, which is what the Emoji section checks your set against.</dd></div></dl></details>
 <details class="g-ctl-item" id="ctl-mr-foreign"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-badge t-warn">not your channel</span></span><span class="g-ctl-label"><span class="g-ctl-name">A channel you do not administer</span><span class="g-ctl-where">Channels → a tile</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What the marker means</dt><dd>The channel is not one you administer. Its admins can open a message and see exactly which accounts reacted.</dd></div><div><dt>What the engine does about it</dt><dd>Uses a smaller share of your pool per message on that target — no more than 35%, whatever the coverage band below is set to.</dd></div><div><dt>Why</dt><dd>The reactor list on someone else’s channel is an enumerable list of your accounts. A smaller slice per message is less of the pool exposed in one place.</dd></div><div><dt>The safest targets</dt><dd>Your own channels, where nobody but you can enumerate who reacted.</dd></div></dl></details>
 </div>
-<h2 id="what-to-react-to" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">04</span>What to react to</h2>
+<h2 id="what-to-react-to" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">04</span>What to react to</h2>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
 <details class="g-ctl-item" id="ctl-mr-target-mode"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn">Comments</span></span><span class="g-ctl-label"><span class="g-ctl-name">Target</span><span class="g-ctl-where">What to react to</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>The two choices</dt><dd>Comments — reactions land on comments in the channel’s linked discussion group. Channel posts — they land on the post itself.</dd></div><div><dt>Default</dt><dd>Comments.</dd></div><div><dt>What comments cost</dt><dd>Membership. A reaction in a discussion group requires the account to be in that group, so accounts have to join first.</dd></div><div><dt>What posts cost</dt><dd>Nothing extra — no joining needed. But a lively comment section is what makes a post look read, which is why the default is the other way.</dd></div></dl></details>
 <details class="g-ctl-item" id="ctl-mr-comments-per-post"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-slider"><span class="g-r-slider-fill" style="width:30%"></span><span class="g-r-slider-thumb" style="left:30%"></span></span></span><span class="g-ctl-label"><span class="g-ctl-name">First comments per post</span><span class="g-ctl-where">What to react to</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>How many comments under each post get reacted to, taken in the order they were written — the top of the thread, where a reader actually looks. Whoever wrote them.</dd></div><div><dt>Default</dt><dd>3.</dd></div><div><dt>A count of comments, not of reactions</dt><dd>Each selected comment is then fanned out across the pool on its own. The reactions under one post are therefore this number multiplied by a share of the pool, not this number.</dd></div><div><dt>How deep it looks</dt><dd>The first fifty comments of a thread are scanned to choose from, so the choice comes from a real window rather than whatever one page happened to hold, and a thread with thousands of comments is never walked.</dd></div><div><dt>In post mode</dt><dd>Inert. The slider is only shown while the target is comments.</dd></div></dl></details>
 </div>
-<h2 id="emoji" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">05</span>Emoji</h2>
+<h2 id="emoji" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">05</span>Emoji</h2>
 <p class="g-p">A discussion group sets its own list of allowed reactions. Sending one outside that list is a guaranteed failure, which is why the section checks your set against what the probe found.</p>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
 <details class="g-ctl-item" id="ctl-mr-emoji-set"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-badge t-plain">👍 ❤ 🔥 👏</span></span><span class="g-ctl-label"><span class="g-ctl-name">The emoji set</span><span class="g-ctl-where">Emoji</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>Default</dt><dd>Four: thumbs up, heart, fire, applause. Deliberately the most universally enabled ones — a wide default set is the fastest way to collect failures on a channel with a restricted list.</dd></div><div><dt>The warning</dt><dd>An emoji that some probed target does not accept is flagged. A target nobody has probed makes no claim either way, and the section says so rather than implying the set is safe.</dd></div></dl></details>
 <details class="g-ctl-item" id="ctl-mr-emoji-mode"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn t-plain">Random</span></span><span class="g-ctl-label"><span class="g-ctl-name">Pick order</span><span class="g-ctl-where">Emoji</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>The two choices</dt><dd>Random, or sequential through the list.</dd></div><div><dt>Default</dt><dd>Random.</dd></div></dl></details>
 </div>
-<h2 id="limits" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">06</span>Limits</h2>
+<h2 id="limits" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">06</span>Limits</h2>
 <p class="g-p">Two different things live here. Four rate caps bound what one account does; two more decide how much of the pool shows up on any given message. They deliberately do not multiply together.</p>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
@@ -2121,7 +2224,7 @@
 <details class="g-ctl-item" id="ctl-mr-coverage"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-slider"><span class="g-r-slider-fill" style="width:50%"></span><span class="g-r-slider-thumb" style="left:50%"></span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Share of the pool per covered message</span><span class="g-ctl-where">Limits</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Given that a message is covered, how much of the eligible pool takes part.</dd></div><div><dt>Default</dt><dd>35% to 65%.</dd></div><div><dt>Drawn fresh</dt><dd>A new value inside the band for every message, so the counts vary instead of landing on the same number every time.</dd></div><div><dt>Does not multiply</dt><dd>This and the chance above are separate on purpose: one decides whether, the other decides how many. An earlier design multiplied them and made the real share unpredictable.</dd></div><div><dt>Overridden where</dt><dd>On a channel you do not administer the share is capped at 35% however the band is set.</dd></div></dl></details>
 <details class="g-ctl-item" id="ctl-mr-skip-reacted"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-toggle"></span></span><span class="g-ctl-label"><span class="g-ctl-name">Skip already-reacted messages</span><span class="g-ctl-where">Limits</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Leaves alone any message that already carries more than the number you set.</dd></div><div><dt>Default</dt><dd>Off.</dd></div><div><dt>Zero</dt><dd>React only to messages with no reactions at all.</dd></div><div><dt>What it costs</dt><dd>Nothing. The existing count arrives with the message, so this needs no extra request.</dd></div></dl></details>
 </div>
-<h2 id="pacing" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">07</span>Pacing</h2>
+<h2 id="pacing" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">07</span>Pacing</h2>
 <p class="g-p">Three separate timings, each answering a different question: when the first reaction may land, how the rest are spread behind it, and how fast one account is allowed to work through its own queue.</p>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
@@ -2133,7 +2236,7 @@
 <details class="g-ctl-item" id="ctl-mr-floodwait-streak"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-field">3</span></span><span class="g-ctl-label"><span class="g-ctl-name">FloodWaits before quarantine</span><span class="g-ctl-where">Pacing</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>After this many floodwaits in a row, the account stops and stays stopped until you clear it.</dd></div><div><dt>Default</dt><dd>3.</dd></div><div><dt>Why a streak</dt><dd>One floodwait is ordinary. Three in a row is the account telling you it is being throttled specifically.</dd></div></dl></details>
 </div>
 <p class="g-note">One timing is not on this page: a planned reaction is cancelled rather than sent if the post it belongs to has aged past four hours by the time its turn comes. A reaction landing on a post that old reads as a bot catching up rather than as a reader, so a job delayed by a floodwait or a restart is dropped instead of arriving late.</p>
-<h2 id="joining" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">08</span>Joining</h2>
+<h2 id="joining" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">08</span>Joining</h2>
 <p class="g-p">There is one switch here and it cannot be turned on. That is the honest state of things rather than an oversight.</p>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
@@ -2141,14 +2244,14 @@
 </div>
 <p class="g-p">Joining itself is paced by the engine’s existing channel-join limits, not by a second set here: at most one join per pass, then a wait of three to ten minutes before the next. An account already in the group is skipped without a join being issued at all.</p>
 <div class="g-callout"><p class="g-p">This is the slowest part of starting the module, and it is meant to be. Forty accounts entering one discussion group inside a minute is a textbook pattern — so a pool of forty accounts takes hours to finish joining a new target, and reactions in comment mode ramp up as that finishes rather than all being available at once.</p></div>
-<h2 id="reading-it" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">09</span>Reading the run</h2>
+<h2 id="reading-it" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">09</span>Reading the run</h2>
 <p class="g-p">Control carries six counters: accounts, targets, posts queued, reactions queued, sent and failed. Below them, one row per account with what it has placed today.</p>
 <p class="g-p">Statistics has the same four tiles as the commenting page — attempts, successful, unsuccessful and the rate — and the same caveat applies to them: the panel subtracts what the totals were when Start was last pressed, and that subtraction is held in the browser tab, so reloading the page silently turns them back into all-time numbers.</p>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
 <details class="g-ctl-item" id="ctl-mr-dry-run"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-toggle is-on"></span></span><span class="g-ctl-label"><span class="g-ctl-name">Dry run</span><span class="g-ctl-where">Control, beside Start</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Everything except the send. Posts are caught, jobs are planned and logged, and nothing reaches Telegram.</dd></div><div><dt>Default</dt><dd>On, for a new owner.</dd></div><div><dt>What it is for</dt><dd>Reading a plan before it becomes traffic — which accounts, which emoji, how many per message, and how the arrival is spread.</dd></div><div><dt>Switching it off</dt><dd>Takes effect immediately. There is no separate confirmation, so the toast saying reactions will now actually be sent is the whole warning.</dd></div></dl></details>
 </div>
-<h2 id="first-run" style="font-family:"JetBrains Mono",monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:"JetBrains Mono",monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">10</span>First run</h2>
+<h2 id="first-run" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">10</span>First run</h2>
 <p class="g-p">The defaults are the conservative end of every range. The order below matters more than the numbers.</p>
 <ol class="g-steps"><li><p class="g-p">Put accounts in the reactions pool. The one-module rule holds: anything commenting or answering DMs has to leave that pool first.</p></li><li><p class="g-p">Add your targets and press Check discussion groups. A channel that comes back as no comments or reactions off cannot be used in comment mode at all, and it is better to learn that now.</p></li><li><p class="g-p">Leave Dry run on. Press Start and let it plan for a while.</p></li><li><p class="g-p">Read the plan. What you are looking for is whether the reaction counts per message look like an audience, and whether the arrival is spread rather than bunched.</p></li><li><p class="g-p">If comments are the target, expect the joining to take hours before the pool is fully useful. That is the join pacing working, not a fault.</p></li><li><p class="g-p">Only then switch Dry run off.</p></li></ol>
 <p class="g-p">Two numbers are worth watching afterwards: failures on a target, which usually means an emoji outside that group's allowed list, and the floodwait streak, which is the account asking to be slowed down.</p>

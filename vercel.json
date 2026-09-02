@@ -1,5 +1,5 @@
 {
-  "buildCommand": "node scripts/build-app.mjs && node scripts/prerender.mjs",
+  "buildCommand": "node scripts/build-app.mjs && node scripts/prerender.mjs && node scripts/verify-blocks.mjs && node scripts/verify-seo.mjs && node scripts/verify-lastmod.mjs",
   "outputDirectory": ".",
   "framework": null,
   "trailingSlash": false,
@@ -19,6 +19,18 @@
     {
       "source": "/guides/:slug",
       "destination": "/guides/:slug.html"
+    },
+    {
+      "source": "/blog",
+      "destination": "/blog.html"
+    },
+    {
+      "source": "/blog/category/:slug",
+      "destination": "/blog/category/:slug.html"
+    },
+    {
+      "source": "/blog/:slug",
+      "destination": "/blog/:slug.html"
     },
     {
       "source": "/tools/proxy-checker",

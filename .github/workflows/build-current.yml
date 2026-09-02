@@ -1,4 +1,4 @@
-# The enforcement half of the build-currency check.
+# The enforcement half of the build-currency and lastmod checks.
 name: build is current
 
 # The pre-commit hook (.githooks/pre-commit) is the fast feedback and can be
@@ -33,3 +33,11 @@ jobs:
       - run: npm ci
 
       - run: node scripts/verify-build-current.mjs
+
+      # The lastmod manifest is tracked, and a Vercel build cannot write it
+      # back into the repository - so a content edit whose manifest was never
+      # regenerated silently re-stamps that page's date on every deploy. The
+      # deploy already refuses to build on it; this makes the PR refuse
+      # first, where somebody can still act on it. Same script the build
+      # runs, so there is one definition of "in sync".
+      - run: node scripts/verify-lastmod.mjs
