@@ -21,6 +21,10 @@
       "destination": "/guides/:slug.html"
     },
     {
+      "source": "/tools/proxy-checker",
+      "destination": "/tools/proxy-checker.html"
+    },
+    {
       "source": "/referral-program",
       "destination": "/referral-program.html"
     },

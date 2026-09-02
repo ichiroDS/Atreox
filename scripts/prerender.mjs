@@ -429,6 +429,23 @@ const SITE_PAGES = [
     desc: 'Billing, something broken, a refund, or anything else. One form that lands in one inbox, answered Mon-Fri 08:00-20:00 CET.',
   },
   {
+    /* The first of the free tools, and the entry point of the tools
+       funnel: search finds this page, the page explains what the
+       checker reports that a generic uptime checker cannot, and its
+       button lands in the panel where an account is required.
+
+       Head-only, like every other row here - the body is rendered by
+       React. Worth naming as a deliberate limit rather than an
+       oversight: this is a page written to be found in search, so it
+       is a candidate for a real prerendered body the day the guides'
+       block renderer is generalised. */
+    file: 'tools/proxy-checker.html', route: '/tools/proxy-checker', kicker: 'FREE TOOL',
+    title: 'Free Telegram proxy checker — country, DC and exit IP — ATREOX',
+    heading: 'Proxy checker',
+    short: 'What Telegram sees through it',
+    desc: 'Check a SOCKS5, HTTP or MTProto proxy against Telegram: the country and nearest data centre Telegram itself reports through it, the real exit IP, its network and type, and both latencies. Free with any account.',
+  },
+  {
     file: 'privacy.html', route: '/privacy', kicker: 'LEGAL',
     title: 'Privacy Policy — ATREOX',
     heading: 'Privacy Policy',
@@ -669,6 +686,10 @@ const STATIC_PAGES = [
   ['/functions', '0.9'],
   ['/pricing', '0.9'],
   ['/guides', '0.8'],
+  /* A search-entry page for its own query ("telegram proxy checker"),
+     which is why it sits above the referral page rather than with the
+     legal tail. */
+  ['/tools/proxy-checker', '0.8'],
   ['/referral-program', '0.5'],
   ['/contact', '0.4'],
   ['/privacy', '0.3'],
