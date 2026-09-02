@@ -602,6 +602,17 @@ function PricingPage({ setPage }) {
             competes with the decision the cards are asking for. */}
         <div style={{ textAlign: 'center', marginTop: 44, display: 'flex', flexDirection: 'column', gap: 10 }}>
           <p style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.7rem', letterSpacing: '0.04em', color: 'rgba(255,255,255,0.38)' }}>
+            Free proxy &amp; account checkers — three checks an hour, no account. Any module lifts the
+            limit and adds batch checks and history in the panel. <a href="/tools/proxy-checker"
+              onClick={e => {
+                if (e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                  e.preventDefault();
+                  setPage('proxy-checker');
+                }
+              }}
+              style={{ color: GREEN, textDecoration: 'none' }}>Try them</a>.
+          </p>
+          <p style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.7rem', letterSpacing: '0.04em', color: 'rgba(255,255,255,0.38)' }}>
             Running something bigger, or need a module that isn't here? <a href="mailto:hello@atreoxai.com" style={{ color: GREEN, textDecoration: 'none' }}>Get in touch</a>.
           </p>
           <p style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.7rem', letterSpacing: '0.04em', color: 'rgba(255,255,255,0.38)' }}>

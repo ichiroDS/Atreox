@@ -527,7 +527,14 @@ const SITE_PAGES = [
     title: 'Free Telegram proxy checker — country, DC and exit IP — ATREOX',
     heading: 'Proxy checker',
     short: 'What Telegram sees through it',
-    desc: 'Check a SOCKS5, HTTP or MTProto proxy against Telegram: the country and nearest data centre Telegram itself reports through it, the real exit IP, its network and type, and both latencies. Free with any account.',
+    desc: 'Check a SOCKS5, HTTP or MTProto proxy against Telegram: the country and nearest data centre Telegram itself reports through it, the real exit IP, its network and type, and both latencies. Free, three checks an hour, no account.',
+  },
+  {
+    file: 'tools/account-checker.html', route: '/tools/account-checker', kicker: 'FREE TOOL',
+    title: 'Free Telegram account checker — can it post, age, DC, device — ATREOX',
+    heading: 'Account checker',
+    short: 'What Telegram reports about it',
+    desc: 'Upload a Telegram session and see the facts Telegram reports: whether the account can post, its approximate age, home data centre and device. No score. Free, three checks an hour, no account; the session is deleted immediately.',
   },
   {
     file: 'privacy.html', route: '/privacy', kicker: 'LEGAL',
@@ -971,6 +978,7 @@ const STATIC_PAGES = [
      which is why it sits above the referral page rather than with the
      legal tail. */
   ['/tools/proxy-checker', '0.8'],
+  ['/tools/account-checker', '0.8'],
   ['/referral-program', '0.5'],
   ['/contact', '0.4'],
   ['/privacy', '0.3'],

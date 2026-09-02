@@ -264,6 +264,13 @@ function PrivacyPage({ setPage }) {
       ],
     },
     {
+      heading: 'Account checker — uploaded sessions',
+      body: [
+        'The free account checker lets you upload a Telegram session file to check one of your own accounts. That file is a live credential and we treat it as one: it is used only for the check you asked for and deleted the moment it finishes — always, including if the check fails — with a background sweep removing anything a failed check might leave behind. We never write the session, its contents, your phone number, or your account’s numeric ID to our database, our logs, or any error message. We keep only anonymised facts about the account (whether it can post, its approximate age, data centre and device) and a one-way fingerprint that lets your own history line up over time — never anything that identifies the account or you.',
+        'The public checker keeps what it does on your account to the minimum needed to answer “can this account post”: a single typing signal that creates no message and leaves no trace in any chat. It does nothing else on your behalf — in particular it does not message @SpamBot — so the spam-limit status is available only in the panel, on your own accounts.',
+      ],
+    },
+    {
       heading: 'People who are not our customers',
       body: 'The Service interacts with Telegram users who have no relationship with us — people who send direct messages that NeuroDialogs answers, and people whose public activity the parsers record. For that data the customer is the controller and is responsible for having a lawful basis for it. That is the position the Terms take, and it is stated here plainly rather than left implied.',
     },
