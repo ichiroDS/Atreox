@@ -577,10 +577,13 @@ function ReaderBlocks({ blocks, onOpen }) {
          (see BLOCK_KINDS) - the build is what catches it, before a
          reader ever meets the gap.
 
-         The link goes to the PANEL, not to the tool's marketing page:
-         a reader who has just met the problem wants the thing, not a
-         second page about it. It is a plain external href with no
-         onClick, because it leaves this site. */
+         The link goes to the tool's PAGE on this site, not to the
+         panel: a reader mid-article does not yet know what the tool
+         is, and the panel opens on a sign-in screen, which asks for an
+         account before anything has explained why. The page explains
+         and leads on to the panel itself. A plain href with no
+         onClick: the page is outside the reader, so this is a real
+         navigation, not a slug the reader can open in place. */
       case 'toolcta': {
         const tool = TOOL_BY_ID[v.tool];
         if (!tool) return null;
@@ -589,7 +592,7 @@ function ReaderBlocks({ blocks, onOpen }) {
             <span className="g-toolcta-kicker">Free tool</span>
             <span className="g-toolcta-name">{tool.name}</span>
             <p className="g-p g-toolcta-text">{v.angle || tool.blurb}</p>
-            <a className="g-toolcta-cta" href={tool.panel} rel="noopener">
+            <a className="g-toolcta-cta" href={tool.page}>
               {tool.cta} <ArrowUpRight size={13} />
             </a>
           </aside>

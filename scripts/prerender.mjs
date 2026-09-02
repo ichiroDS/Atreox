@@ -328,7 +328,7 @@ ${v.map(c => `<details class="g-ctl-item"${c.id ? ` id="${esc(c.id)}"` : ''}><su
         if (!tool) {
           throw new Error(`unknown tool "${v.tool}" in a toolcta block — add it to TOOLS in catalog.jsx`);
         }
-        return `<aside class="g-toolcta"><span class="g-toolcta-kicker">Free tool</span><span class="g-toolcta-name">${esc(tool.name)}</span><p class="g-p g-toolcta-text">${esc(v.angle || tool.blurb)}</p><a class="g-toolcta-cta" href="${esc(tool.panel)}" rel="noopener">${esc(tool.cta)} →</a></aside>`;
+        return `<aside class="g-toolcta"><span class="g-toolcta-kicker">Free tool</span><span class="g-toolcta-name">${esc(tool.name)}</span><p class="g-p g-toolcta-text">${esc(v.angle || tool.blurb)}</p><a class="g-toolcta-cta" href="${esc(tool.page)}">${esc(tool.cta)} →</a></aside>`;
       }
 
       default:

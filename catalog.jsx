@@ -3417,10 +3417,13 @@ const GUIDES = [
    `page`  the marketing page on this site, which explains the tool.
    `panel` where the tool actually runs, behind sign-in.
 
-   Both are here because an article links to the panel — the reader
-   came to use the thing, not to read a second page about it — while
-   the site's own navigation links to the page. An unknown ID is a
-   build error, not an empty block; see renderBlocks in prerender.mjs.
+   An article's toolcta links to the PAGE, not the panel: a reader
+   mid-article does not yet know what the tool is, and the panel opens
+   on Clerk's sign-in screen, which asks for an account before anything
+   has explained why. The page explains, and its own button leads to
+   the panel. `panel` stays here because that page reads it. An
+   unknown ID is a build error, not an empty block; see renderBlocks
+   in prerender.mjs.
 ─────────────────────────────────────────────────────────────────── */
 const TOOLS = [
   {
