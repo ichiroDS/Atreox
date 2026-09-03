@@ -35,6 +35,7 @@ const PATH_TO_PAGE = {
   '/refund':    'refund',
   '/referral-program': 'referral',
   '/contact':   'contact',
+  '/tools': 'tools',
   '/tools/proxy-checker': 'proxy-checker',
   '/tools/account-checker': 'account-checker',
   '/blog': 'blog',
@@ -50,6 +51,7 @@ const PAGE_TO_PATH = {
   'refund':    '/refund',
   'referral':  '/referral-program',
   'contact':   '/contact',
+  'tools': '/tools',
   'proxy-checker': '/tools/proxy-checker',
   'account-checker': '/tools/account-checker',
   'blog': '/blog',
@@ -162,6 +164,7 @@ function App() {
       case 'refund':    return <RefundPage    setPage={navigate} />;
       case 'contact':   return <ContactPage   setPage={navigate} />;
       case 'referral':  return <ReferralPage  setPage={navigate} />;
+      case 'tools':     return <ToolsHubPage    setPage={navigate} />;
       case 'proxy-checker': return <ProxyCheckerPage setPage={navigate} />;
       case 'account-checker': return <AccountCheckerPage setPage={navigate} />;
       case 'blog':      return <BlogPage      setPage={navigate} />;

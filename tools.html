@@ -1,0 +1,2192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#020403">
+  <!-- ── Page identity: everything between the two HEAD:META markers ──
+       scripts/prerender.mjs replaces this whole block on each of the ten
+       /guides/... pages it writes, so a guide carries its own title,
+       description, canonical and social cards rather than the site's.
+       Keep the block contiguous and keep the markers where they are.
+       (No tag names spelled out in here — a comment that contains one
+       is a comment something eventually parses by mistake.) -->
+  <!-- HEAD:META -->
+  <title>Free Telegram tools — account and proxy checkers — ATREOX</title>
+  <meta name="description" content="Two free checkers for the two things a batch of Telegram accounts can be wrong about: whether the accounts can actually post, and whether Telegram accepts the proxies. No account, three checks an hour each.">
+  <link rel="canonical" href="https://www.atreoxai.com/tools">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.atreoxai.com/tools">
+  <meta property="og:site_name" content="ATREOX">
+  <meta property="og:title" content="Free Telegram tools — account and proxy checkers — ATREOX">
+  <meta property="og:description" content="Two free checkers for the two things a batch of Telegram accounts can be wrong about: whether the accounts can actually post, and whether Telegram accepts the proxies. No account, three checks an hour each.">
+  <meta property="og:image" content="https://www.atreoxai.com/public/og/tools.png">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Free Telegram tools — account and proxy checkers — ATREOX">
+  <meta name="twitter:description" content="Two free checkers for the two things a batch of Telegram accounts can be wrong about: whether the accounts can actually post, and whether Telegram accepts the proxies. No account, three checks an hour each.">
+  <meta name="twitter:image" content="https://www.atreoxai.com/public/og/tools.png">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://www.atreoxai.com/#organization","name":"ATREOX","url":"https://www.atreoxai.com/","logo":"https://www.atreoxai.com/public/apple-touch-icon.png","email":"hello@atreoxai.com","sameAs":["https://t.me/atreoxai"]},{"@type":"WebSite","@id":"https://www.atreoxai.com/#website","url":"https://www.atreoxai.com/","name":"ATREOX","publisher":{"@id":"https://www.atreoxai.com/#organization"},"inLanguage":"en"}]}</script>
+  <!-- /HEAD:META -->
+
+  <!-- Guides used to live at /guides#guide-<slug>. Those links are out in
+       the world and a fragment never reaches the server, so the hop to the
+       guide's real page has to happen here — before the app boots, and with
+       replace() so the dead address leaves the history. -->
+  <script>
+  (function () {
+    try {
+      if (location.pathname !== '/guides' && location.pathname !== '/guides/') return;
+      var h = location.hash;
+      if (h.indexOf('#guide-') !== 0) return;
+      var slug = h.slice(7);
+      /* slug -> address, written from catalog.jsx by prerender.mjs.
+         An unknown slug is left alone: the index is a better landing
+         than a 404 on a guide that does not exist. */
+      var moved = /* SLUG-MAP */{"buying-accounts":"buying-telegram-accounts","proxies":"proxies-for-telegram-accounts","billing":"billing","account-manager":"account-manager","profile-templates":"profile-templates","active-warmup":"active-warmup","channel-parser":"channel-parser","group-parser":"group-parser","neurocommenting":"neurocommenting","neurodialogs":"neurodialogs","mass-reactions":"mass-reactions"}/* /SLUG-MAP */;
+      if (!moved[slug]) return;
+      location.replace('/guides/' + moved[slug]);
+    } catch (_) {}
+  })();
+  </script>
+
+  <link rel="icon" href="/public/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/public/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/public/apple-touch-icon.png">
+  <link rel="stylesheet" href="/public/bg-animation.css">
+
+  <!-- Referral capture: ?ref=CODE -> localStorage (90d), strips the param.
+       Plain JS, runs before the Babel/React app scripts so window.withReferral
+       exists by the time any CTA renders. See /public/referral.js. -->
+  <script src="/public/referral.js"></script>
+
+  <!-- ── Fonts, served from this origin ──
+       These used to be three tags pointing at fonts.googleapis.com and
+       fonts.gstatic.com. That meant every visitor's browser announced
+       itself to Google on every page load, including the guide pages a
+       crawler reads and the legal pages that say this site contacts no
+       third party. It set no cookies, so the "no consent banner" claim
+       survived — but the IP did leave, on every request, and the Privacy
+       Policy did not mention it. Self-hosting removes the question
+       rather than answering it.
+
+       All 48 faces Google served are here, not a hand-picked subset.
+       unicode-range means the browser downloads only the subsets a page
+       actually uses — today that is latin alone — so carrying cyrillic,
+       greek and vietnamese costs nothing at runtime and means a Russian
+       word added to a guide next month renders in Barlow instead of
+       falling back to a system font. 706 KB on disk, near-zero on the
+       wire.
+
+       The four preloads are the faces every page uses above the fold.
+       Self-hosted fonts are discovered a round-trip later than they were
+       with a preconnect, and these four are what that delay would be
+       visible on. -->
+  <link rel="preload" href="/public/fonts/barlow-300-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/public/fonts/playfair-display-500-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/public/fonts/jetbrains-mono-500-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/public/fonts/marcellus-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+    @font-face {
+      font-family: 'Barlow';
+      font-style: normal;
+      font-weight: 300;
+      font-display: swap;
+      src: url('/public/fonts/barlow-300-vietnamese.woff2') format('woff2');
+      unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+    }
+    @font-face {
+      font-family: 'Barlow';
+      font-style: normal;
+      font-weight: 300;
+      font-display: swap;
+      src: url('/public/fonts/barlow-300-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    @font-face {
+      font-family: 'Barlow';
+      font-style: normal;
+      font-weight: 300;
+      font-display: swap;
+      src: url('/public/fonts/barlow-300-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'Barlow';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/public/fonts/barlow-400-vietnamese.woff2') format('woff2');
+      unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+    }
+    @font-face {
+      font-family: 'Barlow';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/public/fonts/barlow-400-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    @font-face {
+      font-family: 'Barlow';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/public/fonts/barlow-400-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'Barlow';
+      font-style: normal;
+      font-weight: 500;
+      font-display: swap;
+      src: url('/public/fonts/barlow-500-vietnamese.woff2') format('woff2');
+      unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+    }
+    @font-face {
+      font-family: 'Barlow';
+      font-style: normal;
+      font-weight: 500;
+      font-display: swap;
+      src: url('/public/fonts/barlow-500-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    @font-face {
+      font-family: 'Barlow';
+      font-style: normal;
+      font-weight: 500;
+      font-display: swap;
+      src: url('/public/fonts/barlow-500-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'Barlow';
+      font-style: normal;
+      font-weight: 600;
+      font-display: swap;
+      src: url('/public/fonts/barlow-600-vietnamese.woff2') format('woff2');
+      unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+    }
+    @font-face {
+      font-family: 'Barlow';
+      font-style: normal;
+      font-weight: 600;
+      font-display: swap;
+      src: url('/public/fonts/barlow-600-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    @font-face {
+      font-family: 'Barlow';
+      font-style: normal;
+      font-weight: 600;
+      font-display: swap;
+      src: url('/public/fonts/barlow-600-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/public/fonts/jetbrains-mono-400-cyrillic-ext.woff2') format('woff2');
+      unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/public/fonts/jetbrains-mono-400-cyrillic.woff2') format('woff2');
+      unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/public/fonts/jetbrains-mono-400-greek.woff2') format('woff2');
+      unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/public/fonts/jetbrains-mono-400-vietnamese.woff2') format('woff2');
+      unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/public/fonts/jetbrains-mono-400-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/public/fonts/jetbrains-mono-400-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      font-style: normal;
+      font-weight: 500;
+      font-display: swap;
+      src: url('/public/fonts/jetbrains-mono-500-cyrillic-ext.woff2') format('woff2');
+      unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      font-style: normal;
+      font-weight: 500;
+      font-display: swap;
+      src: url('/public/fonts/jetbrains-mono-500-cyrillic.woff2') format('woff2');
+      unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      font-style: normal;
+      font-weight: 500;
+      font-display: swap;
+      src: url('/public/fonts/jetbrains-mono-500-greek.woff2') format('woff2');
+      unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      font-style: normal;
+      font-weight: 500;
+      font-display: swap;
+      src: url('/public/fonts/jetbrains-mono-500-vietnamese.woff2') format('woff2');
+      unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      font-style: normal;
+      font-weight: 500;
+      font-display: swap;
+      src: url('/public/fonts/jetbrains-mono-500-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      font-style: normal;
+      font-weight: 500;
+      font-display: swap;
+      src: url('/public/fonts/jetbrains-mono-500-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      font-style: normal;
+      font-weight: 600;
+      font-display: swap;
+      src: url('/public/fonts/jetbrains-mono-600-cyrillic-ext.woff2') format('woff2');
+      unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      font-style: normal;
+      font-weight: 600;
+      font-display: swap;
+      src: url('/public/fonts/jetbrains-mono-600-cyrillic.woff2') format('woff2');
+      unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      font-style: normal;
+      font-weight: 600;
+      font-display: swap;
+      src: url('/public/fonts/jetbrains-mono-600-greek.woff2') format('woff2');
+      unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      font-style: normal;
+      font-weight: 600;
+      font-display: swap;
+      src: url('/public/fonts/jetbrains-mono-600-vietnamese.woff2') format('woff2');
+      unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      font-style: normal;
+      font-weight: 600;
+      font-display: swap;
+      src: url('/public/fonts/jetbrains-mono-600-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      font-style: normal;
+      font-weight: 600;
+      font-display: swap;
+      src: url('/public/fonts/jetbrains-mono-600-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'Marcellus';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/public/fonts/marcellus-400-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    @font-face {
+      font-family: 'Marcellus';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/public/fonts/marcellus-400-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'Playfair Display';
+      font-style: italic;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/public/fonts/playfair-display-400-italic-cyrillic.woff2') format('woff2');
+      unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+    }
+    @font-face {
+      font-family: 'Playfair Display';
+      font-style: italic;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/public/fonts/playfair-display-400-italic-vietnamese.woff2') format('woff2');
+      unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+    }
+    @font-face {
+      font-family: 'Playfair Display';
+      font-style: italic;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/public/fonts/playfair-display-400-italic-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    @font-face {
+      font-family: 'Playfair Display';
+      font-style: italic;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/public/fonts/playfair-display-400-italic-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'Playfair Display';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/public/fonts/playfair-display-400-cyrillic.woff2') format('woff2');
+      unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+    }
+    @font-face {
+      font-family: 'Playfair Display';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/public/fonts/playfair-display-400-vietnamese.woff2') format('woff2');
+      unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+    }
+    @font-face {
+      font-family: 'Playfair Display';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/public/fonts/playfair-display-400-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    @font-face {
+      font-family: 'Playfair Display';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/public/fonts/playfair-display-400-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'Playfair Display';
+      font-style: normal;
+      font-weight: 500;
+      font-display: swap;
+      src: url('/public/fonts/playfair-display-500-cyrillic.woff2') format('woff2');
+      unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+    }
+    @font-face {
+      font-family: 'Playfair Display';
+      font-style: normal;
+      font-weight: 500;
+      font-display: swap;
+      src: url('/public/fonts/playfair-display-500-vietnamese.woff2') format('woff2');
+      unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+    }
+    @font-face {
+      font-family: 'Playfair Display';
+      font-style: normal;
+      font-weight: 500;
+      font-display: swap;
+      src: url('/public/fonts/playfair-display-500-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    @font-face {
+      font-family: 'Playfair Display';
+      font-style: normal;
+      font-weight: 500;
+      font-display: swap;
+      src: url('/public/fonts/playfair-display-500-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'Playfair Display';
+      font-style: normal;
+      font-weight: 600;
+      font-display: swap;
+      src: url('/public/fonts/playfair-display-600-cyrillic.woff2') format('woff2');
+      unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+    }
+    @font-face {
+      font-family: 'Playfair Display';
+      font-style: normal;
+      font-weight: 600;
+      font-display: swap;
+      src: url('/public/fonts/playfair-display-600-vietnamese.woff2') format('woff2');
+      unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+    }
+    @font-face {
+      font-family: 'Playfair Display';
+      font-style: normal;
+      font-weight: 600;
+      font-display: swap;
+      src: url('/public/fonts/playfair-display-600-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    @font-face {
+      font-family: 'Playfair Display';
+      font-style: normal;
+      font-weight: 600;
+      font-display: swap;
+      src: url('/public/fonts/playfair-display-600-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'Barlow';
+      font-style: normal;
+      font-weight: 700;
+      font-display: swap;
+      src: url('/public/fonts/barlow-700-vietnamese.woff2') format('woff2');
+      unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+    }
+
+    @font-face {
+      font-family: 'Barlow';
+      font-style: normal;
+      font-weight: 700;
+      font-display: swap;
+      src: url('/public/fonts/barlow-700-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+
+    @font-face {
+      font-family: 'Barlow';
+      font-style: normal;
+      font-weight: 700;
+      font-display: swap;
+      src: url('/public/fonts/barlow-700-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+  </style>
+
+  <!-- React 18.3.1 production UMD, vendored by scripts/build-app.mjs —
+       served same-origin, so no CDN in the critical path. The app itself
+       arrives precompiled as /public/app.js (see the foot of <body>);
+       nothing transpiles in the browser any more. -->
+  <script src="/public/vendor/react.production.min.js"></script>
+  <script src="/public/vendor/react-dom.production.min.js"></script>
+  <!-- Clerk is NOT loaded here any more. It used to be a defer script in this
+       head, which meant every page pulled it: the home page, all ten guides a
+       crawler reads, and the legal pages that describe which third parties
+       this site contacts. Its only consumer is the Pricing page, where the
+       signed-in state decides whether a button says "Get the full licence" or
+       "Manage in panel" — so it is now injected on demand by loadClerk() in
+       new-pages.jsx, and nowhere else. The publishable key and the custom
+       Frontend API domain moved there with it. -->
+  <!-- Lightweight motion shim — no CDN needed -->
+  <script>
+  window.FramerMotion = (() => {
+    const R = window.React;
+    const { useState, useEffect, useRef } = R;
+
+    function useInView(ref, { once = false, amount = 0 } = {}) {
+      const [inView, setInView] = useState(false);
+      useEffect(() => {
+        try {
+          const el = ref.current;
+          if (!el) return;
+          const obs = new IntersectionObserver(([e]) => {
+            try {
+              if (e.isIntersecting) { setInView(true); if (once) obs.disconnect(); }
+              else if (!once) setInView(false);
+            } catch(_) {}
+          }, { threshold: amount });
+          obs.observe(el);
+          return () => { try { obs.disconnect(); } catch(_) {} };
+        } catch(_) {}
+      }, []);
+      return inView;
+    }
+
+    function stateToStyle(s) {
+      if (!s) return {};
+      const css = {};
+      if (s.opacity !== undefined) css.opacity = s.opacity;
+      const t = [];
+      if (s.y !== undefined) t.push(`translateY(${s.y}px)`);
+      if (s.x !== undefined) t.push(`translateX(${s.x}px)`);
+      if (s.scale !== undefined) t.push(`scale(${s.scale})`);
+      if (t.length) css.transform = t.join(' ');
+      if (s.filter !== undefined) css.filter = s.filter;
+      return css;
+    }
+
+    function makeMotion(tag) {
+      return function MotEl({ initial, animate, transition = {}, whileHover, children, style, ...rest }) {
+        const [cur, setCur] = useState(initial || {});
+        const [hov, setHov] = useState(false);
+        const animStr = JSON.stringify(animate);
+        useEffect(() => {
+          try {
+            const target = (hov && whileHover) ? whileHover : (animate || {});
+            const ms = (transition.delay || 0) * 1000;
+            const t = setTimeout(() => { try { setCur(target); } catch(_) {} }, ms);
+            return () => clearTimeout(t);
+          } catch(_) {}
+        }, [animStr, hov]);
+        const dur = transition.duration || 0.4;
+        const finalStyle = {
+          transition: `all ${dur}s cubic-bezier(0.16,1,0.3,1)`,
+          willChange: 'transform,opacity,filter',
+          ...stateToStyle(cur), ...style
+        };
+        const hProps = whileHover ? { onMouseEnter:()=>setHov(true), onMouseLeave:()=>setHov(false) } : {};
+        return R.createElement(tag, { style: finalStyle, ...hProps, ...rest }, children);
+      };
+    }
+
+    /* MotEl is a plain function component, NOT a forwardRef — putting a
+       `ref` on any of these silently does nothing and logs a React
+       warning. Attach refs (useInView etc.) to a plain wrapper element
+       instead; that's the convention throughout the .jsx files. */
+    const motion = {
+      div: makeMotion('div'), p: makeMotion('p'), span: makeMotion('span'),
+      h1: makeMotion('h1'), h2: makeMotion('h2'), section: makeMotion('section'),
+      button: makeMotion('button'), a: makeMotion('a'),
+    };
+
+    function AnimatePresence({ children }) { return children; }
+
+    return { motion, AnimatePresence, useInView };
+  })();
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ═══════════════════════════════════════════════
+       ATREOX design system — "terminal luxe"
+       black chassis · phosphor green · serif display
+    ═══════════════════════════════════════════════ */
+    :root {
+      --g:        #00d9ff;
+      --g-bright: #7de9ff;
+      --g-ink:    #00141c;   /* text-on-accent */
+      --g-06:     rgba(0,217,255,0.06);
+      --g-10:     rgba(0,217,255,0.10);
+      --g-14:     rgba(0,217,255,0.14);
+      --g-22:     rgba(0,217,255,0.22);
+      --g-40:     rgba(0,217,255,0.40);
+      --bg:       #020403;
+      --panel:    rgba(4,10,16,0.66);
+      --serif:    'Playfair Display', Georgia, serif;
+      --logotype: 'Marcellus', 'Playfair Display', Georgia, serif;
+      --sans:     'Barlow', sans-serif;
+      --mono:     'JetBrains Mono', ui-monospace, 'Cascadia Mono', monospace;
+
+      /* guide body: the measure a paragraph may reach, and the two
+         verdict colours the checklist and the review plates read in.
+         --gcol pairs with COLUMN in guides.jsx. */
+      --gcol:     790px;
+      --ok:       #3fd68c;
+      --bad:      #ff6161;
+    }
+
+    html { scroll-behavior: smooth; background: var(--bg); }
+
+    body {
+      background: transparent;
+      color: #fff;
+      font-family: var(--sans);
+      font-weight: 300;
+      overflow-x: hidden;
+    }
+
+    button { cursor: pointer; font: inherit; }
+
+    ::selection { background: var(--g); color: var(--g-ink); }
+
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: #0d1f2e; border: 2px solid var(--bg); }
+    ::-webkit-scrollbar-thumb:hover { background: #1a4a66; }
+
+    /* ── Panels: sharp near-black surfaces, hairline green borders ── */
+    .panel {
+      position: relative;
+      background:
+        linear-gradient(180deg, rgba(0,217,255,0.045) 0%, rgba(0,217,255,0.012) 40%, rgba(0,0,0,0.25) 100%),
+        var(--panel);
+      border: 1px solid var(--g-14);
+      border-radius: 6px;
+    }
+    .panel-hover {
+      transition: border-color 0.18s ease, box-shadow 0.18s ease,
+                  transform 0.18s cubic-bezier(0.2, 0.9, 0.3, 1);
+    }
+    .panel-hover:hover {
+      border-color: var(--g-40);
+      box-shadow: 0 0 0 1px var(--g-10), 0 0 34px rgba(0,217,255,0.08),
+                  0 24px 48px rgba(0,0,0,0.55);
+      transform: translateY(-3px);
+    }
+
+    /* ── Corner ticks: blueprint-style register marks ── */
+    .ticks::before, .ticks::after {
+      content: '';
+      position: absolute;
+      width: 12px; height: 12px;
+      pointer-events: none;
+      transition: width 0.18s ease, height 0.18s ease, opacity 0.18s ease;
+      opacity: 0.55;
+      z-index: 1;
+    }
+    .ticks::before { top: -1px; left: -1px; border-top: 1px solid var(--g); border-left: 1px solid var(--g); }
+    .ticks::after  { bottom: -1px; right: -1px; border-bottom: 1px solid var(--g); border-right: 1px solid var(--g); }
+    .panel-hover.ticks:hover::before, .panel-hover.ticks:hover::after {
+      width: 22px; height: 22px; opacity: 1;
+    }
+
+    /* ── Buttons ── */
+    .btn-solid {
+      position: relative;
+      overflow: hidden;
+      background: var(--g);
+      color: var(--g-ink);
+      font-family: var(--mono);
+      font-weight: 600;
+      font-size: 0.76rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 4px;
+      padding: 13px 24px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: box-shadow 0.16s ease, transform 0.16s ease, background 0.16s ease;
+    }
+    /* shine sweep across the solid button on hover */
+    .btn-solid::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -60%;
+      width: 40%; height: 100%;
+      background: linear-gradient(105deg, transparent, rgba(255,255,255,0.4), transparent);
+      transform: skewX(-20deg);
+      transition: left 0.45s ease;
+      pointer-events: none;
+    }
+    .btn-solid:hover::after { left: 130%; }
+    .btn-solid:hover {
+      background: var(--g-bright);
+      box-shadow: 0 0 30px rgba(0,217,255,0.45), 0 4px 14px rgba(0,0,0,0.4);
+      transform: translateY(-1px);
+    }
+    .btn-solid:active { transform: scale(0.97); }
+
+    .btn-outline {
+      background: var(--g-06);
+      color: #d9f5ff;
+      font-family: var(--mono);
+      font-weight: 500;
+      font-size: 0.76rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      border: 1px solid rgba(0,217,255,0.32);
+      border-radius: 4px;
+      padding: 12px 22px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: border-color 0.16s ease, box-shadow 0.16s ease,
+                  background 0.16s ease, transform 0.16s ease;
+    }
+    .btn-outline:hover {
+      border-color: var(--g);
+      background: var(--g-10);
+      box-shadow: 0 0 22px rgba(0,217,255,0.16);
+      transform: translateY(-1px);
+    }
+    .btn-outline:active { transform: scale(0.97); }
+
+    /* ── Glitch CTA: sharp corners and a rare tear ──
+       Worn by the navbar's Enter panel only. The idle run is one ~0.35s
+       slice-tear every 9 seconds — rare enough to register as a signal
+       rather than a tic; hovering plays the tear once, immediately.
+       steps(1) is what makes it a glitch: the clip states jump instead
+       of morphing into each other. ── */
+    .btn-glitch { border-radius: 0; animation: btn-tear 9s steps(1) 4s infinite; }
+    @keyframes btn-tear {
+      0%, 100% { clip-path: inset(0); transform: none; }
+      1%   { clip-path: inset(12% 0 58% 0); transform: translateX(-2px); }
+      2%   { clip-path: inset(62% 0 8% 0);  transform: translateX(2px); }
+      3%   { clip-path: inset(30% 0 38% 0); transform: translateX(-1px); }
+      3.9% { clip-path: inset(0); transform: none; }
+    }
+    .btn-glitch:hover { animation: btn-tear-hover 0.4s steps(1) 1; }
+    @keyframes btn-tear-hover {
+      0%, 100% { clip-path: inset(0); transform: none; }
+      18% { clip-path: inset(12% 0 58% 0); transform: translateX(-2px); }
+      42% { clip-path: inset(62% 0 8% 0);  transform: translateX(2px); }
+      68% { clip-path: inset(30% 0 38% 0); transform: translateX(-1px); }
+      82% { clip-path: inset(0); transform: none; }
+    }
+
+    /* ── Module tile: the icon jolts once as the cursor arrives ── */
+    .mod-tile-icon { display: inline-flex; }
+    .mod-tile:hover .mod-tile-icon { animation: icon-jolt 0.28s linear 1; }
+    @keyframes icon-jolt {
+      0%   { transform: translate(0, 0);      opacity: 1; }
+      20%  { transform: translate(-2px, 1px); opacity: 0.5; }
+      40%  { transform: translate(2px, -1px); opacity: 0.85; }
+      60%  { transform: translate(-1px, 0);   opacity: 0.6; }
+      80%  { transform: translate(1px, 1px);  opacity: 1; }
+      100% { transform: translate(0, 0); }
+    }
+
+    /* ── Section band: a full-bleed darker plate behind a core section,
+       so a long page reads as alternating blocks rather than one pour.
+       Worn by How-it-runs and the comparison table on home. ── */
+    .section-band {
+      background: rgba(3,9,14,0.52);
+      border-top: 1px solid rgba(0,217,255,0.07);
+      border-bottom: 1px solid rgba(0,217,255,0.07);
+    }
+
+    /* ── Crosshair cursor over the hero. Interactive elements inside
+       keep their own pointer, so the crosshair reads as "this surface
+       is instrumented", not as a broken cursor. ── */
+    .hero-crosshair {
+      cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'><g stroke='%2300d9ff' stroke-width='1' opacity='0.9'><line x1='11' y1='0' x2='11' y2='7'/><line x1='11' y1='15' x2='11' y2='22'/><line x1='0' y1='11' x2='7' y2='11'/><line x1='15' y1='11' x2='22' y2='11'/></g><circle cx='11' cy='11' r='1.6' fill='%2300d9ff'/></svg>") 11 11, auto;
+    }
+
+    /* ── Mono overline label:  // SECTION ── */
+    .overline {
+      font-family: var(--mono);
+      font-weight: 500;
+      font-size: 0.66rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--g);
+      opacity: 0.9;
+    }
+
+    /* ── Section header hairline: extends a section title to the block edge.
+       Same rule the dashboard's SectionHeader uses, so a section is named the
+       same way in both places. ── */
+    .section-rule {
+      height: 1px;
+      background: linear-gradient(90deg,
+        rgba(0,217,255,0.32), rgba(0,217,255,0.07) 55%, transparent);
+    }
+
+    /* ── Quiet inline link: the cyan mono affordance used to hop between
+       Functions / Guides / Pricing without leaving the card it sits in. ── */
+    .quiet-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: none;
+      border: none;
+      padding: 0;
+      font-family: var(--mono);
+      font-weight: 600;
+      font-size: 0.62rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--g);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.15s ease, opacity 0.15s ease;
+    }
+    .quiet-link:hover { color: var(--g-bright); }
+    .quiet-link-dim { color: rgba(255,255,255,0.34); font-weight: 500; }
+    .quiet-link-dim:hover { color: var(--g); }
+
+    /* A 0.62rem mono caption is 13px tall, which a cursor hits and a
+       fingertip does not — every one of these is a page-to-page hop, so
+       missing it costs a navigation. The padding is what grows, never
+       the ink: the link draws no background and no border, so the box
+       getting 30px taller is invisible and only the tap area moves.
+       Overlaying a transparent ::after instead would leave the layout
+       untouched, but several of these sit in wrapping flex rows where
+       two links land 16px apart and the overlays would then eat each
+       other. Left alone above the breakpoint, where 13px is fine. */
+    @media (max-width: 640px) {
+      .quiet-link { padding: 16px 0; }
+    }
+
+    /* ── Social links (Telegram / YouTube) ──
+       Navbar + footer treatment. The navbar version is a bare glyph that
+       sits at nav-link weight until hovered, so it never competes with
+       "Enter panel" beside it. */
+    .social-dot {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 30px; height: 30px; border-radius: 4px;
+      color: rgba(255,255,255,0.42);
+      border: 1px solid transparent;
+      transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+    }
+    .social-dot:hover {
+      color: var(--g-bright);
+      background: var(--g-06);
+      border-color: var(--g-22);
+    }
+    .social-dot:focus-visible {
+      outline: none; color: var(--g-bright);
+      border-color: var(--g-40);
+    }
+    .footer-social { transition: color 0.2s ease; }
+    .footer-social:hover { color: var(--g); }
+
+    /* The footer columns are 17px-tall lines stacked 12px apart — on a
+       phone that is a 17px target with a 12px moat, and the mailto in
+       particular is the one link a visitor reaches for when the form
+       has not worked. Each line takes 14px of padding and the column
+       gives its gap up in exchange, so the ink lands where it always
+       did and the row either side of it becomes tappable. The gap is an
+       inline style on the flex container in shared.jsx, hence the
+       !important — same trick the section-rhythm rules use below. */
+    @media (max-width: 640px) {
+      .footer-links { gap: 0 !important; }
+      .footer-links > *, .footer-link { padding: 14px 0; }
+    }
+
+    /* ── Pipeline: the "how it runs" sequence on the home page ──
+       The rail fill tracks the active stage; a node lights when it's the
+       one being shown. Kept in CSS so stepping never re-renders the rail. */
+    .pipe-node {
+      position: relative;
+      background: none;
+      border: none;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      text-align: left;
+      flex: 1 1 0;
+      min-width: 128px;
+      cursor: pointer;
+    }
+    .pipe-dot {
+      width: 13px; height: 13px;
+      border: 1px solid var(--g-40);
+      background: var(--bg);
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition: background 0.25s ease, border-color 0.25s ease,
+                  box-shadow 0.25s ease, transform 0.25s ease;
+    }
+    .pipe-node[aria-selected="true"] .pipe-dot {
+      background: var(--g);
+      border-color: var(--g);
+      box-shadow: 0 0 0 4px rgba(0,217,255,0.12), 0 0 18px rgba(0,217,255,0.7);
+      transform: scale(1.15);
+    }
+    .pipe-node[aria-selected="false"]:hover .pipe-dot {
+      border-color: var(--g);
+      box-shadow: 0 0 12px rgba(0,217,255,0.3);
+    }
+    .pipe-verb {
+      font-family: var(--serif);
+      font-weight: 500;
+      font-size: 1.02rem;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      color: rgba(255,255,255,0.42);
+      transition: color 0.25s ease;
+    }
+    .pipe-node[aria-selected="true"] .pipe-verb { color: #fff; }
+    .pipe-node:hover .pipe-verb { color: rgba(255,255,255,0.8); }
+    .pipe-idx {
+      font-family: var(--mono);
+      font-weight: 500;
+      font-size: 0.56rem;
+      letter-spacing: 0.2em;
+      color: rgba(255,255,255,0.24);
+      transition: color 0.25s ease;
+    }
+    .pipe-node[aria-selected="true"] .pipe-idx { color: var(--g); }
+
+    /* stage body swaps in place — a short fade so the sequence reads as
+       one thing changing rather than five things stacked */
+    @keyframes stage-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .stage-body { animation: stage-in 0.34s cubic-bezier(0.16,1,0.3,1) both; }
+
+    /* mini bar used inside the warmup mock */
+    .mini-bar { height: 3px; background: rgba(0,217,255,0.1); border-radius: 2px; overflow: hidden; }
+    .mini-bar > i {
+      display: block; height: 100%;
+      background: linear-gradient(90deg, rgba(0,217,255,0.7), var(--g-bright));
+      box-shadow: 0 0 8px rgba(0,217,255,0.45);
+    }
+
+    /* ── Nav links ── */
+    .nav-link {
+      font-family: var(--mono);
+      font-weight: 500;
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.48);
+      padding: 8px 2px;
+      position: relative;
+      transition: color 0.15s ease;
+    }
+    .nav-link:hover { color: #fff; }
+    .nav-link.active { color: var(--g); }
+    .nav-link.active::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 1px;
+      background: var(--g);
+      box-shadow: 0 0 8px var(--g);
+    }
+
+    /* ── Blinking terminal cursor ── */
+    @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+    .cursor {
+      display: inline-block;
+      width: 7px; height: 0.85em;
+      background: var(--g);
+      margin-left: 9px;
+      vertical-align: -0.08em;
+      animation: blink 1.1s steps(1) infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 0.35; transform: scale(1); }
+      50%      { opacity: 1;    transform: scale(1.35); }
+    }
+
+    /* ── FAQ accordion ── */
+    @keyframes accordion-in {
+      from { opacity: 0; transform: translateY(-5px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .faq-answer { animation: accordion-in 0.22s ease forwards; }
+
+    /* ── Steady phosphor glow for accent words in headlines ──
+       Used to breathe on its own 3.6s cycle; with the CTA halo and the
+       featured price card each pulsing at their own rate, the page read
+       as everything shimmering at once. The pulse audit left breathing
+       to those two — an accent word just glows. ── */
+    .glow-word { color: var(--g); text-shadow: 0 0 24px rgba(0,217,255,0.45), 0 0 56px rgba(0,217,255,0.14); }
+
+    /* ── Soft breathing halo for the primary hero CTA ── */
+    @keyframes cta-breathe {
+      0%, 100% { box-shadow: 0 0 14px rgba(0,217,255,0.18); }
+      50%      { box-shadow: 0 0 30px rgba(0,217,255,0.42); }
+    }
+    .cta-breathe { animation: cta-breathe 3s ease-in-out infinite; }
+
+    /* ── Hero engine grid: five module demos in one card ──
+       The tile's own lit/dim states are inline (they follow which module
+       has focus); what lives here is the chrome that CSS does better —
+       the focus ring, the parser's scan sweep, and the bar that shows
+       how long the pipeline will hold this stage before moving on. ── */
+    .eg-cell { -webkit-tap-highlight-color: transparent; }
+    .eg-cell:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+
+    @keyframes eg-scan {
+      0%   { top: -8%;  opacity: 0; }
+      15%  { opacity: 0.9; }
+      85%  { opacity: 0.9; }
+      100% { top: 104%; opacity: 0; }
+    }
+    .eg-scan { animation: eg-scan 2.6s cubic-bezier(0.4,0,0.6,1) infinite; }
+
+    @keyframes eg-dwell { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    .eg-dwell { transform-origin: left center; animation-name: eg-dwell; animation-timing-function: linear; animation-fill-mode: forwards; }
+
+    /* ── Comparison table: the row under the cursor lifts out of the
+       stack, so a wide row of marks stays attached to its label. ── */
+    .cmp-row { transition: background 0.16s ease; }
+    .cmp-row:hover { background: rgba(0,217,255,0.035); }
+
+    /* On a phone the table is 660px inside a ~336px frame, so two of the
+       five columns are off-screen and the feature name scrolls away with
+       them — you end up looking at a column of ticks with nothing saying
+       what they are ticks for. Pinning the label column inside the
+       scroller keeps the question next to the answer.
+
+       The sticky cell has to paint its own surface, because the marks
+       now pass underneath it, and .panel's is translucent — this is that
+       surface flattened against the page behind it. The one thing it
+       cannot reproduce is the panel's vertical gradient, which is why
+       the flat value is only ever used at this width; the neighbouring
+       column is the tinted ATREOX one, so nothing sits close enough to
+       read as a seam.
+
+       The fade hangs off the panel, not the scroller: an absolutely
+       positioned box inside an overflow container is anchored to the
+       content, so on the scroller it would slide out of view the moment
+       it was needed. */
+    @media (max-width: 640px) {
+      .cmp-first {
+        position: sticky; left: 0; z-index: 1;
+        background: linear-gradient(rgba(4,10,16,0.66), rgba(4,10,16,0.66)), var(--bg);
+      }
+      .cmp-frame::after {
+        content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 46px;
+        pointer-events: none;
+        background: linear-gradient(90deg, rgba(2,4,3,0), rgba(2,4,3,0.85));
+      }
+    }
+
+    /* ── Guides: the tiles drift.
+       The float lives on a wrapper and the hover lift on the card
+       inside it — one element cannot carry both, since a running
+       animation owns `transform` outright. ── */
+    @keyframes guide-float {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-7px); }
+    }
+    .float-wrap {
+      animation: guide-float 6.5s ease-in-out infinite;
+      display: flex;
+    }
+    .float-wrap:hover { animation-play-state: paused; }
+    .guide-tile { min-height: 100%; }
+    .guide-tile .guide-tile-chip { transition: transform 0.25s cubic-bezier(0.2,0.9,0.3,1), box-shadow 0.25s ease; }
+    .guide-tile:hover .guide-tile-chip {
+      transform: scale(1.08) rotate(-3deg);
+      box-shadow: 0 0 32px rgba(0,217,255,0.28);
+    }
+
+    /* guide reader: the rail of every other guide */
+    .guide-nav-item {
+      background: none;
+      cursor: pointer;
+      transition: background 0.16s ease, border-color 0.16s ease;
+    }
+    .guide-nav-item:hover { background: rgba(0,217,255,0.07); }
+    .guide-nav-item:focus-visible { outline: 1px solid var(--g); outline-offset: 1px; }
+
+    /* The narrow-screen guide picker: the list collapsed down to the
+       one name that matters, sized as a thumb target rather than a
+       row of text. Opening it pushes the article down; it never
+       covers what you were reading. */
+    .guide-picker {
+      display: flex; align-items: center; gap: 12px;
+      width: 100%; padding: 13px 14px; border-radius: 6px;
+      background: rgba(0,217,255,0.04); text-align: left;
+      transition: border-color 0.16s ease, background 0.16s ease;
+    }
+    .guide-picker:hover, .guide-picker[aria-expanded="true"] {
+      border-color: var(--g-40); background: rgba(0,217,255,0.07);
+    }
+    .guide-picker:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+    .guide-picker-label { flex: 1; min-width: 0; display: block; }
+    .guide-picker-kicker {
+      display: block; font-family: var(--mono); font-weight: 500; font-size: 0.54rem;
+      letter-spacing: 0.2em; text-transform: uppercase; color: rgba(0,217,255,0.7);
+      margin-bottom: 3px;
+    }
+    .guide-picker-name {
+      display: block; font-family: var(--sans); font-weight: 500; font-size: 1rem;
+      line-height: 1.25; color: #fff;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .guide-picker-chevron {
+      display: inline-flex; flex-shrink: 0; color: var(--g);
+      transform: rotate(90deg); transition: transform 0.18s ease;
+    }
+    .guide-picker-chevron.is-open { transform: rotate(-90deg); }
+
+    /* ══ Guide body ══════════════════════════════════════════════
+       The blocks a written guide is built from. One stylesheet, two
+       renderers: the React reader and scripts/prerender.mjs both emit
+       these exact class names, so the page a crawler downloads and the
+       page a reader ends up looking at are the same page — no second
+       set of styles to keep in step.
+
+       --gcol is the measure a paragraph is allowed to reach. The guide
+       column itself is wider (READER_MAX in guides.jsx) and the screens,
+       tables and checklists use all of it; sentences do not, because
+       past roughly 80 characters the eye loses the next line's start. */
+    .g-p {
+      font-family: var(--sans); font-weight: 300; font-size: 1.2rem;
+      line-height: 1.75; color: #fff;
+      max-width: var(--gcol); margin: 0 0 17px;
+    }
+    .g-p:last-child { margin-bottom: 0; }
+    .g-p b, .g-p strong { font-weight: 500; color: rgba(255,255,255,0.92); }
+
+    /* the chapter list, which is also the way into the chapters.
+       .g-toc-side is the sticky sidebar cut: one column, narrower, worn
+       by the same links — a bare `a` has no color of its own in this
+       stylesheet, so before .g-toc-t existed on every renderer the
+       titles fell back to the browser's own link blue on a near-black
+       panel, which is the "unreadable" bug this replaced. */
+    .g-toc { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr)); gap: 1px; }
+    .g-toc-side { display: flex; flex-direction: column; gap: 1px; }
+    .g-toc a {
+      display: flex; gap: 11px; align-items: baseline;
+      padding: 9px 11px; border-radius: 4px; text-decoration: none;
+      border: 1px solid transparent;
+      transition: background 0.16s ease, border-color 0.16s ease;
+    }
+    .g-toc a:hover { background: rgba(0,217,255,0.07); }
+    .g-toc a:focus-visible { outline: 1px solid var(--g); outline-offset: 1px; }
+    .g-toc a[aria-current] { background: rgba(0,217,255,0.1); border-color: var(--g-40); }
+    .g-toc-t {
+      font-family: var(--sans); font-weight: 300; font-size: 0.95rem;
+      line-height: 1.5; color: rgba(255,255,255,0.82);
+      transition: color 0.16s ease;
+    }
+    .g-toc a:hover .g-toc-t,
+    .g-toc a[aria-current] .g-toc-t { color: var(--g-bright); }
+    .g-toc-n {
+      font-family: var(--mono); font-weight: 500; font-size: 0.62rem;
+      color: rgba(0,217,255,0.6); flex-shrink: 0;
+    }
+    .g-toc a[aria-current] .g-toc-n { color: var(--g-bright); }
+
+    /* the paragraph the whole guide turns on */
+    .g-callout {
+      max-width: var(--gcol); margin: 0 0 20px; padding: 22px 26px;
+      border: 1px solid var(--g-22); border-left: 2px solid var(--g);
+      border-radius: 6px;
+      background: linear-gradient(180deg, rgba(0,217,255,0.06), rgba(0,217,255,0.015));
+    }
+    .g-callout .g-p { color: #fff; }
+
+    /* a protocol, as the sequence it is */
+    .g-steps { list-style: none; margin: 0 0 20px; padding: 0; max-width: var(--gcol); counter-reset: g-step; }
+    .g-steps li { position: relative; counter-increment: g-step; padding: 0 0 18px 46px; }
+    .g-steps li::before {
+      content: counter(g-step, decimal-leading-zero);
+      position: absolute; left: 0; top: 0;
+      width: 28px; height: 28px; box-sizing: border-box;
+      border: 1px solid rgba(0,217,255,0.34); background: rgba(0,217,255,0.07);
+      border-radius: 3px; display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-weight: 600; font-size: 0.62rem; color: var(--g);
+    }
+    .g-steps li::after {
+      content: ''; position: absolute; left: 14px; top: 34px; bottom: 2px; width: 1px;
+      background: linear-gradient(180deg, rgba(0,217,255,0.3), rgba(0,217,255,0.05));
+    }
+    .g-steps li:last-child { padding-bottom: 0; }
+    .g-steps li:last-child::after { display: none; }
+    .g-steps .g-p { margin: 0; padding-top: 4px; }
+
+    /* a plain list — things that are all true at once, not a sequence */
+    .g-bullets { list-style: none; margin: 0 0 16px; padding: 0; max-width: var(--gcol); }
+    .g-bullets li {
+      position: relative; padding: 0 0 10px 20px;
+      font-family: var(--sans); font-weight: 300; font-size: 1.2rem;
+      line-height: 1.7; color: #fff;
+    }
+    .g-bullets li::before {
+      content: ''; position: absolute; left: 2px; top: 0.7em;
+      width: 5px; height: 5px; border-radius: 50%; background: var(--g);
+    }
+    .g-bullets li:last-child { padding-bottom: 0; }
+
+    /* a card holding an alternative to whatever precedes it */
+    .g-card {
+      margin: 0 0 20px; padding: 20px 22px;
+      border: 1px dashed var(--g-22); border-radius: 6px;
+      background: rgba(0,217,255,0.02);
+    }
+    .g-card > :last-child { margin-bottom: 0; }
+    .g-kicker {
+      display: block; font-family: var(--mono); font-weight: 500; font-size: 0.6rem;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--g); margin: 0 0 13px;
+    }
+
+    /* several cards side by side — the grid supplies the spacing the
+       lone .g-card margin would otherwise double up on */
+    .g-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 16px; margin: 0 0 20px; }
+    .g-cards .g-card { margin: 0; }
+
+    /* a short row of equal, neutral choices */
+    .g-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 14px; margin: 0 0 20px; }
+    .g-option { padding: 18px 20px; border: 1px solid var(--g-14); border-radius: 6px; background: rgba(0,217,255,0.02); }
+    .g-option-badge {
+      display: inline-block; margin-bottom: 10px; padding: 3px 9px; border-radius: 3px;
+      border: 1px solid var(--g-40); background: rgba(0,217,255,0.1);
+      font-family: var(--mono); font-weight: 600; font-size: 0.56rem;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--g-bright);
+    }
+
+    /* parameter — value, value set in monospace since it's usually
+       something you type in literally, somewhere else */
+    .g-kv { margin: 0 0 20px; max-width: var(--gcol); }
+    .g-kv-row {
+      display: flex; gap: 16px; padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-family: var(--sans); font-size: 0.94rem; line-height: 1.6;
+    }
+    .g-kv-row:last-child { border-bottom: none; }
+    .g-kv-row dt { width: 150px; flex-shrink: 0; font-weight: 500; color: rgba(255,255,255,0.62); margin: 0; }
+    .g-kv-row dd { margin: 0; font-family: var(--mono); font-weight: 400; color: #fff; }
+
+    /* the one number a section turns on */
+    .g-stat {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      text-align: center; margin: 0 0 20px; padding: 30px 26px;
+      border: 1px solid var(--g-22); border-radius: 6px;
+      background: linear-gradient(180deg, rgba(0,217,255,0.06), rgba(0,217,255,0.015));
+    }
+    .g-stat-value {
+      font-family: var(--serif); font-weight: 500; font-size: 2.4rem; line-height: 1;
+      color: var(--g); text-shadow: 0 0 26px rgba(0,217,255,0.3);
+    }
+    .g-stat .g-p { max-width: 480px; color: #fff; }
+
+    /* native <details> — no script needed, so the prerendered page and
+       the reader accordion the exact same way */
+    .g-faq { margin: 0 0 20px; border-top: 1px solid var(--g-14); }
+    .g-faq details { border-bottom: 1px solid var(--g-14); padding: 16px 0; }
+    .g-faq summary {
+      cursor: pointer; list-style: none; position: relative;
+      padding-right: 26px; font-family: var(--sans); font-weight: 500;
+      font-size: 0.98rem; color: #fff; line-height: 1.5;
+    }
+    .g-faq summary::-webkit-details-marker { display: none; }
+    .g-faq summary::after {
+      content: '+'; position: absolute; right: 2px; top: -2px;
+      font-family: var(--mono); font-size: 1.1rem; color: var(--g); line-height: 1.5;
+      transition: transform 0.15s ease;
+    }
+    .g-faq details[open] summary::after { content: '−'; }
+    .g-faq details[open] summary { color: var(--g-bright); }
+    .g-faq .g-p { margin-top: 12px; margin-bottom: 0; }
+
+    /* a Pros/Cons list riding inside a table cell */
+    .g-td-list { list-style: none; margin: 0; padding: 0; }
+    .g-td-list li { position: relative; padding-left: 14px; margin-bottom: 4px; }
+    .g-td-list li:last-child { margin-bottom: 0; }
+    .g-td-list li::before { content: '–'; position: absolute; left: 0; color: rgba(255,255,255,0.35); }
+
+    /* screens. width/height sit on the img so the column never jumps.
+       picture has no layout box of its own by default — it only
+       exists so the browser can pick a source — so it needs telling to
+       behave like the block its img already is. */
+    .g-fig { margin: 22px 0; }
+    .g-fig picture { display: block; }
+    .g-fig img {
+      display: block; width: 100%; height: auto;
+      border: 1px solid var(--g-14); border-radius: 6px; background: #05090d;
+    }
+    .g-fig figcaption {
+      margin-top: 11px; font-family: var(--mono); font-weight: 400; font-size: 0.62rem;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      color: rgba(255,255,255,0.4); line-height: 1.7;
+    }
+
+    /* ── Video: a facade, not an embed ──
+       The player is NOT on the page. Until somebody clicks, this is a
+       self-hosted poster, a button and a line of text — no iframe, no
+       script, and not one request to a Google host. That is what keeps
+       the "no cookies, no consent banner" claim in the Privacy Policy
+       true, and it is why the poster is served from /public/video/
+       rather than from i.ytimg.com, which would be a Google request on
+       every page load and would defeat the whole arrangement.
+
+       On click the iframe is created pointing at youtube-nocookie.com.
+       The class names live here, once, because guides.jsx and
+       scripts/prerender.mjs both emit them and must not drift. */
+    .g-video { margin: 22px 0; }
+    .g-video-frame {
+      position: relative; display: block; width: 100%;
+      aspect-ratio: 16 / 9; overflow: hidden;
+      border: 1px solid var(--g-14); border-radius: 6px;
+      background: #05090d; padding: 0; cursor: pointer;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+    .g-video-frame:hover, .g-video-frame:focus-visible {
+      border-color: var(--g-40);
+      box-shadow: 0 0 0 1px var(--g-10), 0 0 34px rgba(0,217,255,0.10);
+    }
+    .g-video-frame img {
+      display: block; width: 100%; height: 100%; object-fit: cover;
+      /* Slightly held back so the play button and the label on top of it
+         stay legible whatever frame ends up here. */
+      opacity: 0.72; transition: opacity 0.18s ease, transform 0.35s ease;
+    }
+    .g-video-frame:hover img { opacity: 0.84; transform: scale(1.012); }
+    .g-video-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
+
+    /* The play target. 68px is comfortably past the 44px minimum on a
+       phone, and it is the whole button — the frame is clickable too. */
+    .g-video-play {
+      position: absolute; inset: 0; margin: auto;
+      width: 68px; height: 68px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,217,255,0.14); border: 1px solid var(--g-40);
+      box-shadow: 0 0 28px rgba(0,217,255,0.22);
+      backdrop-filter: blur(2px);
+      transition: background 0.18s ease, transform 0.18s ease;
+    }
+    .g-video-frame:hover .g-video-play { background: rgba(0,217,255,0.24); transform: scale(1.06); }
+    .g-video-play::after {
+      content: ''; margin-left: 4px;
+      border-style: solid; border-width: 11px 0 11px 18px;
+      border-color: transparent transparent transparent var(--g);
+    }
+
+    /* Sits on the poster so the consequence of clicking is readable
+       BEFORE the click, which is what makes the click consent rather
+       than a surprise. */
+    .g-video-note {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      padding: 10px 14px;
+      background: linear-gradient(0deg, rgba(2,4,3,0.92), rgba(2,4,3,0));
+      font-family: var(--mono); font-weight: 400; font-size: 0.6rem;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      color: rgba(255,255,255,0.52); text-align: left;
+    }
+    .g-video figcaption {
+      margin-top: 11px; font-family: var(--mono); font-weight: 400; font-size: 0.62rem;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      color: rgba(255,255,255,0.4); line-height: 1.7;
+    }
+
+    @media (max-width: 640px) {
+      .g-video-play { width: 58px; height: 58px; }
+      .g-video-play::after { border-width: 9px 0 9px 15px; }
+      .g-video-note { font-size: 0.55rem; padding: 9px 11px; }
+      /* The label under the clip is long; at 320px the button's own
+         padding is what pushes it past the column. */
+      .g-video-cta { padding: 13px 16px !important; }
+    }
+
+    /* two verdicts, read at a glance */
+    .g-plates { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(258px, 100%), 1fr)); gap: 14px; margin: 0 0 20px; }
+    .g-plate { padding: 18px 20px; border-radius: 6px; border: 1px solid; }
+    .g-plate .g-p { margin: 0; max-width: none; font-size: 0.93rem; line-height: 1.7; color: #fff; }
+    .g-plate-label {
+      display: flex; align-items: center; gap: 9px;
+      font-family: var(--mono); font-weight: 600; font-size: 0.72rem;
+      letter-spacing: 0.14em; text-transform: uppercase; margin: 0 0 11px;
+    }
+    .g-plate-label::before { content: ''; width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .g-ok { border-color: rgba(63,214,140,0.32); background: rgba(63,214,140,0.055); }
+    .g-ok .g-plate-label, .g-ok .g-list-h { color: var(--ok); }
+    .g-ok .g-plate-label::before, .g-ok .g-list-h::before { background: var(--ok); box-shadow: 0 0 12px rgba(63,214,140,0.6); }
+    .g-bad { border-color: rgba(255,97,97,0.32); background: rgba(255,97,97,0.055); }
+    .g-bad .g-plate-label, .g-bad .g-list-h { color: var(--bad); }
+    .g-bad .g-plate-label::before, .g-bad .g-list-h::before { background: var(--bad); box-shadow: 0 0 12px rgba(255,97,97,0.55); }
+
+    /* a table that scrolls itself rather than the page */
+    .g-tablewrap { margin: 0 0 20px; overflow-x: auto; }
+    .g-table { width: 100%; border-collapse: collapse; font-family: var(--sans); }
+    .g-table th {
+      text-align: left; padding: 10px 16px;
+      font-family: var(--mono); font-weight: 500; font-size: 0.58rem;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(255,255,255,0.42); border-bottom: 1px solid var(--g-14); white-space: nowrap;
+    }
+    .g-table td {
+      padding: 14px 16px; font-weight: 300; font-size: 0.94rem; line-height: 1.6;
+      color: #fff; border-bottom: 1px solid rgba(255,255,255,0.055);
+      vertical-align: top;
+    }
+    .g-table tbody tr { transition: background 0.16s ease; }
+    .g-table tbody tr:hover { background: rgba(0,217,255,0.035); }
+    .g-table tbody tr:last-child td { border-bottom: none; }
+    .g-table td:first-child { font-weight: 500; color: #fff; white-space: nowrap; }
+
+    /* Below this, a wide table (five columns of prose, say) stops being
+       a thing you scroll sideways through forever and becomes a stack
+       of cards instead — one per row, each cell labelled from its own
+       column header via the data-label both renderers write. */
+    @media (max-width: 640px) {
+      .g-tablewrap { overflow-x: visible; }
+      .g-table, .g-table tbody, .g-table tr, .g-table td { display: block; width: 100%; }
+      .g-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+      .g-table tr {
+        margin-bottom: 14px; padding: 4px 16px; border: 1px solid var(--g-14); border-radius: 6px;
+        background: rgba(0,217,255,0.02);
+      }
+      .g-table tr:last-child { margin-bottom: 0; }
+      .g-table td {
+        padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); white-space: normal;
+      }
+      .g-table td:last-child { border-bottom: none; }
+      .g-table td::before {
+        content: attr(data-label); display: block; margin-bottom: 4px;
+        font-family: var(--mono); font-weight: 500; font-size: 0.56rem;
+        letter-spacing: 0.14em; text-transform: uppercase; color: rgba(0,217,255,0.7);
+      }
+    }
+
+    /* the checklist: tickable, and deliberately not remembered — it is
+       a pass over one batch, not a document */
+    .g-lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(298px, 100%), 1fr)); gap: 16px; margin: 0 0 20px; }
+    .g-list { padding: 20px 22px; border-radius: 6px; border: 1px solid; }
+    .g-list-h {
+      display: flex; align-items: center; gap: 9px;
+      font-family: var(--mono); font-weight: 600; font-size: 0.68rem;
+      letter-spacing: 0.13em; text-transform: uppercase; margin: 0 0 16px;
+    }
+    .g-list-h::before { content: ''; width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .g-list ul { list-style: none; margin: 0; padding: 0; }
+    .g-list li { margin-bottom: 14px; }
+    .g-list li:last-child { margin-bottom: 0; }
+    .g-check { display: flex; gap: 11px; align-items: flex-start; cursor: pointer; }
+    .g-check input {
+      appearance: none; -webkit-appearance: none;
+      margin: 4px 0 0; width: 16px; height: 16px; flex-shrink: 0;
+      border-radius: 3px; border: 1px solid rgba(255,255,255,0.26);
+      background: rgba(255,255,255,0.03); cursor: pointer; position: relative;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .g-check:hover input { border-color: rgba(255,255,255,0.48); }
+    .g-check input:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+    .g-check input::after {
+      content: ''; position: absolute; left: 4px; top: 0;
+      width: 5px; height: 10px; border: solid transparent; border-width: 0 2px 2px 0;
+      transform: rotate(43deg);
+    }
+    .g-check input:checked::after { border-color: #020403; }
+    .g-ok .g-check input:checked { background: var(--ok); border-color: var(--ok); }
+    .g-bad .g-check input:checked { background: var(--bad); border-color: var(--bad); }
+    .g-check-t {
+      font-family: var(--sans); font-weight: 300; font-size: 0.92rem; line-height: 1.6;
+      color: #fff; transition: opacity 0.15s ease;
+    }
+    .g-check-t b { font-weight: 500; color: #fff; }
+    .g-check input:checked ~ .g-check-t { opacity: 0.4; }
+
+
+    /* ── Module map: the panel's regions drawn as a floor plan ──
+       Each region is a wireframe window — a titled box, the way the
+       panel itself draws one — hung off a numbered spine that runs the
+       length of the block, because the catalog's order IS the order on
+       screen. Same markup both renderers always emitted; the plan is
+       entirely these rules. */
+    .g-map { list-style: none; margin: 4px 0 24px; padding: 0 0 0 40px; position: relative; max-width: var(--gcol); }
+    .g-map::before {
+      content: ''; position: absolute; left: 12px; top: 9px; bottom: 26px; width: 1px;
+      background: linear-gradient(180deg, rgba(0,217,255,0.35), rgba(0,217,255,0.14) 62%, transparent);
+    }
+    .g-map li {
+      position: relative; margin-bottom: 10px;
+      border: 1px solid var(--g-14); border-radius: 6px;
+      background: linear-gradient(180deg, rgba(0,217,255,0.025), rgba(0,0,0,0.22)), rgba(4,10,16,0.5);
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+    .g-map li:last-child { margin-bottom: 0; }
+    .g-map li:hover { border-color: var(--g-40); box-shadow: 0 0 22px rgba(0,217,255,0.07); }
+    .g-map-n {
+      position: absolute; left: -40px; top: 8px;
+      display: flex; align-items: center; justify-content: center;
+      width: 24px; height: 24px; border-radius: 3px;
+      border: 1px solid rgba(0,217,255,0.32);
+      background: linear-gradient(rgba(0,217,255,0.07), rgba(0,217,255,0.07)), var(--bg);
+      font-family: var(--mono); font-weight: 600; font-size: 0.58rem; line-height: 1;
+      color: var(--g);
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+    /* the stub that hangs the box on the spine */
+    .g-map-n::after {
+      content: ''; position: absolute; left: 100%; top: 50%; width: 16px; height: 1px;
+      background: var(--g-22);
+    }
+    .g-map li:hover .g-map-n { border-color: var(--g); box-shadow: 0 0 14px rgba(0,217,255,0.35); }
+    .g-map-body { display: block; min-width: 0; }
+    .g-map-name {
+      display: block; padding: 10px 16px 9px;
+      border-bottom: 1px solid var(--g-10); border-radius: 5px 5px 0 0;
+      background: linear-gradient(180deg, rgba(0,217,255,0.05), transparent);
+      font-family: var(--sans); font-weight: 500; font-size: 0.97rem; color: #fff;
+    }
+    .g-map-holds {
+      display: block; padding: 10px 16px 12px;
+      font-family: var(--sans); font-weight: 300;
+      font-size: 0.9rem; line-height: 1.6; color: rgba(255,255,255,0.62);
+    }
+    @media (max-width: 640px) {
+      .g-map { padding-left: 34px; }
+      .g-map-n { left: -34px; }
+      .g-map-n::after { width: 10px; }
+      .g-map-name { padding: 9px 13px 8px; }
+      .g-map-holds { padding: 9px 13px 11px; }
+    }
+
+    /* ── Control replicas: one console per block ─────────────────────
+       A single framed console, not a stack of boxes. The header bar
+       names it an illustration; each row is [the control, drawn on a
+       dashed graph-paper stage | its name and panel address | +].
+       Everything on a stage is a <span> with CSS — never an <input>,
+       never a handler — because this is an illustration inside a guide
+       and anything that accepted a value would imply it went somewhere.
+       The text under each one is in the markup whether the fold is open
+       or shut, so the static page carries all of it. */
+    .g-ctl {
+      margin: 0 0 24px; border: 1px solid var(--g-14); border-radius: 8px;
+      background: linear-gradient(180deg, rgba(0,217,255,0.03) 0%, rgba(0,0,0,0.28) 100%), rgba(4,10,16,0.55);
+      overflow: hidden;
+    }
+    .g-ctl-warn {
+      display: flex; align-items: flex-start; gap: 10px;
+      margin: 0; padding: 11px 16px;
+      border-bottom: 1px dashed var(--g-22); background: rgba(0,217,255,0.03);
+      font-family: var(--mono); font-weight: 400; font-size: 0.6rem;
+      letter-spacing: 0.05em; line-height: 1.7; color: rgba(255,255,255,0.48);
+    }
+    .g-ctl-warn-badge {
+      flex-shrink: 0; margin-top: 1px; padding: 3px 8px; border-radius: 3px;
+      border: 1px dashed var(--g-40); background: var(--g-06);
+      font-weight: 600; font-size: 0.54rem; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--g); line-height: 1.4;
+    }
+    .g-ctl-warn-text { min-width: 0; }
+
+    .g-ctl-item { scroll-margin-top: 110px; }
+    .g-ctl-item + .g-ctl-item { border-top: 1px solid rgba(0,217,255,0.08); }
+    .g-ctl-item[open] { background: rgba(0,217,255,0.03); box-shadow: inset 2px 0 0 rgba(0,217,255,0.5); }
+    .g-ctl-item > summary {
+      display: grid; grid-template-columns: 216px minmax(0, 1fr) auto;
+      grid-template-areas: "stage label plus";
+      align-items: center; gap: 10px 18px;
+      padding: 12px 16px; cursor: pointer; list-style: none;
+      transition: background-color 0.16s ease;
+    }
+    .g-ctl-item > summary:hover { background: rgba(0,217,255,0.03); }
+    .g-ctl-item > summary::-webkit-details-marker { display: none; }
+    .g-ctl-item > summary:focus-visible { outline: 1px solid var(--g); outline-offset: -2px; border-radius: 4px; }
+
+    /* the stage: where the drawing sits. Dashed edge + graph paper =
+       schematic, not screenshot — the "this is not live" cue itself. */
+    .g-ctl-stage {
+      grid-area: stage; align-self: stretch;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 58px; padding: 11px 10px;
+      border: 1px dashed rgba(0,217,255,0.22); border-radius: 5px;
+      background:
+        linear-gradient(rgba(0,217,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,217,255,0.04) 1px, transparent 1px),
+        radial-gradient(ellipse at center, rgba(0,217,255,0.05), transparent 72%),
+        rgba(2,6,10,0.6);
+      background-size: 11px 11px, 11px 11px, 100% 100%, auto;
+      transition: border-color 0.18s ease;
+    }
+    .g-ctl-item > summary:hover .g-ctl-stage,
+    .g-ctl-item[open] .g-ctl-stage { border-color: var(--g-40); }
+
+    .g-ctl-label { grid-area: label; display: block; min-width: 0; }
+    .g-ctl-name {
+      display: block; font-family: var(--sans); font-weight: 500;
+      font-size: 0.98rem; color: #fff; line-height: 1.35;
+      transition: color 0.16s ease;
+    }
+    .g-ctl-item[open] .g-ctl-name { color: var(--g-bright); }
+    .g-ctl-where {
+      display: block; margin-top: 4px;
+      font-family: var(--mono); font-weight: 400; font-size: 0.57rem;
+      letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.38);
+    }
+    .g-ctl-where::before { content: '// '; color: rgba(0,217,255,0.5); }
+
+    /* the fold affordance: a + that becomes × */
+    .g-ctl-plus {
+      grid-area: plus; position: relative;
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 1px solid var(--g-22);
+      transition: transform 0.22s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+    .g-ctl-plus::before, .g-ctl-plus::after {
+      content: ''; position: absolute; left: 50%; top: 50%; background: var(--g);
+    }
+    .g-ctl-plus::before { width: 10px; height: 1px; transform: translate(-50%, -50%); }
+    .g-ctl-plus::after  { width: 1px; height: 10px; transform: translate(-50%, -50%); }
+    .g-ctl-item > summary:hover .g-ctl-plus { border-color: var(--g); box-shadow: 0 0 12px rgba(0,217,255,0.3); }
+    .g-ctl-item[open] .g-ctl-plus { transform: rotate(45deg); border-color: var(--g-40); }
+
+    .g-ctl-rows { margin: 0 16px; padding: 4px 0 14px; border-top: 1px dashed var(--g-14); }
+    .g-ctl-rows > div { display: flex; gap: 16px; padding: 9px 0; }
+    .g-ctl-rows > div + div { border-top: 1px solid rgba(255,255,255,0.05); }
+    .g-ctl-rows dt {
+      flex: 0 0 145px; margin: 0;
+      font-family: var(--mono); font-weight: 500; font-size: 0.57rem;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: rgba(0,217,255,0.65); padding-top: 3px;
+    }
+    .g-ctl-rows dd {
+      flex: 1; min-width: 0; margin: 0;
+      font-family: var(--sans); font-weight: 300; font-size: 0.94rem;
+      line-height: 1.65; color: #fff;
+    }
+
+    /* the drawings themselves */
+    .g-r-btn, .g-r-field {
+      display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
+      border-radius: 4px; white-space: nowrap;
+      font-family: var(--mono); font-weight: 500;
+    }
+    .g-r-select, .g-r-badge {
+      display: inline-flex; align-items: center; max-width: 100%;
+      border-radius: 4px; white-space: nowrap;
+      font-family: var(--mono); font-weight: 500;
+    }
+    .g-r-btn {
+      padding: 9px 14px; border: 1px solid var(--g-40);
+      background: linear-gradient(180deg, rgba(0,217,255,0.16), rgba(0,217,255,0.07));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 0 14px rgba(0,217,255,0.08);
+      color: var(--g-bright);
+      font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .g-r-btn.t-ok   { border-color: rgba(63,214,140,0.4);  background: linear-gradient(180deg, rgba(63,214,140,0.16), rgba(63,214,140,0.06));  color: var(--ok);  box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 0 14px rgba(63,214,140,0.08); }
+    .g-r-btn.t-bad  { border-color: rgba(255,97,97,0.4);   background: linear-gradient(180deg, rgba(255,97,97,0.16), rgba(255,97,97,0.06));   color: var(--bad); box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 0 14px rgba(255,97,97,0.08); }
+    .g-r-btn.t-warn { border-color: rgba(255,183,77,0.42); background: linear-gradient(180deg, rgba(255,183,77,0.16), rgba(255,183,77,0.06)); color: #ffb74d;    box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 0 14px rgba(255,183,77,0.08); }
+    .g-r-btn.t-plain{ border-color: rgba(255,255,255,0.22); background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03)); color: rgba(255,255,255,0.75); box-shadow: inset 0 1px 0 rgba(255,255,255,0.07); }
+
+    .g-r-select {
+      min-width: 140px; border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(2,6,10,0.7); color: #fff; overflow: hidden;
+      letter-spacing: 0.02em; font-size: 0.66rem;
+    }
+    .g-r-select-v {
+      flex: 1 1 auto; min-width: 0; padding: 8px 10px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .g-r-caret {
+      flex-shrink: 0; align-self: stretch;
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 24px; border-left: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,217,255,0.06);
+    }
+    .g-r-caret::before {
+      content: ''; width: 6px; height: 6px; margin-top: -3px;
+      border-right: 1px solid var(--g); border-bottom: 1px solid var(--g);
+      transform: rotate(45deg);
+    }
+
+    .g-r-field {
+      min-width: 150px; padding: 8px 11px; border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(2,6,10,0.75); box-shadow: inset 0 1px 4px rgba(0,0,0,0.5);
+      color: rgba(255,255,255,0.85);
+      letter-spacing: 0.01em; font-size: 0.64rem;
+    }
+    /* the caret that says "this is an input" — static when motion is off */
+    .g-r-field::after {
+      content: ''; display: inline-block; width: 1px; height: 11px; margin-left: 3px;
+      vertical-align: -2px; background: var(--g); box-shadow: 0 0 6px rgba(0,217,255,0.8);
+    }
+    @keyframes g-caret-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+    @media (prefers-reduced-motion: no-preference) {
+      .g-r-field::after { animation: g-caret-blink 1.15s linear infinite; }
+    }
+
+    .g-r-badge { gap: 7px; padding: 5px 11px; border: 1px solid; border-radius: 999px; font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; }
+    .g-r-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; flex-shrink: 0; }
+    .g-r-badge.t-ok   { border-color: rgba(63,214,140,0.32); background: rgba(63,214,140,0.1); color: var(--ok); }
+    .g-r-badge.t-bad  { border-color: rgba(255,97,97,0.32);  background: rgba(255,97,97,0.1);  color: var(--bad); }
+    .g-r-badge.t-warn { border-color: rgba(255,183,77,0.34); background: rgba(255,183,77,0.1); color: #ffb74d; }
+    .g-r-badge.t-plain{ border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.66); }
+
+    .g-r-toggle {
+      flex-shrink: 0; position: relative; display: inline-block;
+      width: 42px; height: 23px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.22);
+      background: linear-gradient(180deg, rgba(0,0,0,0.5), rgba(255,255,255,0.05));
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+    }
+    .g-r-toggle::after {
+      content: ''; position: absolute; top: 2px; left: 2px;
+      width: 17px; height: 17px; border-radius: 50%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.35));
+      box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
+    .g-r-toggle.is-on {
+      border-color: var(--g-40);
+      background: linear-gradient(180deg, rgba(0,217,255,0.3), rgba(0,217,255,0.14));
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.35), 0 0 12px rgba(0,217,255,0.2);
+    }
+    .g-r-toggle.is-on::after {
+      left: auto; right: 2px;
+      background: linear-gradient(180deg, #8beaff, var(--g));
+      box-shadow: 0 0 10px rgba(0,217,255,0.7), 0 1px 3px rgba(0,0,0,0.4);
+    }
+
+    .g-r-slider {
+      flex-shrink: 0; position: relative; display: inline-block;
+      width: 150px; max-width: 100%; height: 4px; border-radius: 2px;
+      background: rgba(255,255,255,0.14);
+    }
+    .g-r-slider-fill { position: absolute; inset: 0 auto 0 0; border-radius: 2px; background: linear-gradient(90deg, rgba(0,217,255,0.55), var(--g)); }
+    .g-r-slider-thumb {
+      position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 50%;
+      transform: translate(-50%, -50%); background: var(--g);
+      border: 2px solid #06131c;
+      box-shadow: 0 0 10px rgba(0,217,255,0.6);
+    }
+
+    .g-r-tile {
+      flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+      min-width: 64px; padding: 9px 14px; border-radius: 6px;
+      border: 1px solid var(--g-22);
+      background: linear-gradient(180deg, rgba(0,217,255,0.07), rgba(0,217,255,0.015));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+    .g-r-tile-n { font-family: var(--sans); font-weight: 600; font-size: 1.15rem; line-height: 1; color: #fff; text-shadow: 0 0 14px rgba(0,217,255,0.35); }
+    .g-r-tile.t-ok   { border-color: rgba(63,214,140,0.35); background: linear-gradient(180deg, rgba(63,214,140,0.08), rgba(63,214,140,0.015)); }
+    .g-r-tile.t-ok   .g-r-tile-n { color: var(--ok); text-shadow: 0 0 14px rgba(63,214,140,0.4); }
+    .g-r-tile.t-bad  { border-color: rgba(255,97,97,0.35); background: linear-gradient(180deg, rgba(255,97,97,0.08), rgba(255,97,97,0.015)); }
+    .g-r-tile.t-bad  .g-r-tile-n { color: var(--bad); text-shadow: 0 0 14px rgba(255,97,97,0.4); }
+    .g-r-tile.t-warn { border-color: rgba(255,183,77,0.37); background: linear-gradient(180deg, rgba(255,183,77,0.08), rgba(255,183,77,0.015)); }
+    .g-r-tile.t-warn .g-r-tile-n { color: #ffb74d; text-shadow: 0 0 14px rgba(255,183,77,0.4); }
+
+    /* Opening animates where the browser can do it declaratively
+       (Chromium's ::details-content); elsewhere the fold just opens,
+       which is exactly what it did before. */
+    @media (prefers-reduced-motion: no-preference) {
+      :root { interpolate-size: allow-keywords; }
+      .g-ctl-item::details-content {
+        height: 0; overflow: clip; opacity: 0; transform: translateY(-5px);
+        transition: height 0.28s ease, opacity 0.28s ease, transform 0.28s ease,
+                    content-visibility 0.28s allow-discrete;
+      }
+      .g-ctl-item[open]::details-content { height: auto; opacity: 1; transform: none; }
+    }
+
+    @media (max-width: 640px) {
+      .g-ctl-item > summary {
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas: "label plus" "stage stage";
+        gap: 12px 14px; padding: 13px 14px;
+      }
+      .g-ctl-stage { min-height: 54px; }
+      .g-ctl-rows { margin: 0 14px; }
+      .g-ctl-rows > div { flex-direction: column; gap: 4px; }
+      .g-ctl-rows dt { flex: none; padding-top: 0; }
+      .g-r-slider, .g-r-field { width: 100%; max-width: none; }
+    }
+
+    /* the last word, said quietly */
+    .g-note {
+      max-width: var(--gcol); margin: 28px 0 0; padding-left: 16px;
+      border-left: 1px solid var(--g-14);
+      font-family: var(--sans); font-weight: 300; font-size: 0.88rem;
+      line-height: 1.75; color: rgba(255,255,255,0.44);
+    }
+
+    /* Every tinted block in the guide body carries desktop padding that
+       a phone cannot afford: at 375px the article is ~330px wide, so
+       26px a side spends a sixth of the line on empty inset. Pulled in
+       to 14px, which buys back roughly two words per line without the
+       text touching the border. */
+    @media (max-width: 640px) {
+      .g-callout { padding: 18px 14px; }
+      .g-card    { padding: 16px 14px; }
+      .g-option  { padding: 15px 14px; }
+      .g-plate   { padding: 15px 14px; }
+      .g-list    { padding: 16px 14px; }
+      .g-stat    { padding: 22px 14px; }
+      .g-tablewrap .g-table tr { padding: 2px 14px; }
+      .g-note { padding-left: 12px; }
+    }
+
+    /* ── Terminal "listening…" animated ellipsis ── */
+    @keyframes dots {
+      0%   { content: ''; }
+      25%  { content: '.'; }
+      50%  { content: '..'; }
+      75%  { content: '...'; }
+    }
+    .dots::after { content: ''; animation: dots 1.6s steps(1) infinite; }
+
+    /* ── Featured pricing card: slow pulsing halo ── */
+    @keyframes featured-pulse {
+      0%, 100% { box-shadow: 0 0 30px rgba(0,217,255,0.07); }
+      50%      { box-shadow: 0 0 54px rgba(0,217,255,0.17); }
+    }
+    .featured-pulse { animation: featured-pulse 4s ease-in-out infinite; }
+
+    /* ── Pricing: the running total, docked ──
+       Beside the module grid the selection panel is a sticky rail and
+       the price is never more than a glance away. Below this width the
+       row wraps and the rail lands under the whole module list — you
+       pick six modules and the total, and the button that acts on it,
+       are 1500px further down than the last thing you tapped. So the
+       panel leaves the flow and becomes a bar across the bottom of the
+       viewport carrying the two things worth interrupting for, and
+       opens back into the panel it already is when tapped.
+
+       All of it is scoped to the media query and the bar is display:none
+       by default, so above the breakpoint the panel renders as a plain
+       block in the rail exactly as before. */
+    .sel-dock-bar { display: none; }
+
+    @media (max-width: 640px) {
+      .sel-dock {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+        /* the page scrolls behind it, so unlike .panel this surface
+           cannot be translucent */
+        background: linear-gradient(rgba(4,10,16,0.94), rgba(4,10,16,0.94)), var(--bg);
+        border-top: 1px solid var(--g-22);
+        /* bar first in the markup so it is first in the tap order;
+           reversed here so the panel opens above it */
+        display: flex; flex-direction: column-reverse;
+      }
+      .sel-dock-bar { display: flex; align-items: center; gap: 10px; padding: 8px 14px; }
+      /* stacked, not on one line: at 360px the total, the count and a
+         "Continue · €48/mo" side by side are ~30px wider than the bar */
+      .sel-dock-peek {
+        display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+        flex: 1; min-width: 0; padding: 6px 0;
+        background: none; border: none; text-align: left;
+      }
+      .sel-dock-line { display: flex; align-items: center; gap: 6px; }
+      .sel-dock-total {
+        font-family: var(--serif); font-weight: 500; font-size: 1.4rem; line-height: 1;
+        color: var(--g); text-shadow: 0 0 20px rgba(0,217,255,0.28);
+      }
+      .sel-dock-total.is-empty { color: rgba(255,255,255,0.28); text-shadow: none; }
+      .sel-dock-count {
+        max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        font-family: var(--mono); font-weight: 400; font-size: 0.55rem; line-height: 1.4;
+        letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.4);
+      }
+      /* the chevron ships pointing right; up is "this opens upward",
+         down is "this shuts" */
+      .sel-dock-caret {
+        display: inline-flex; color: rgba(255,255,255,0.4);
+        transform: rotate(-90deg); transition: transform 0.18s ease;
+      }
+      .sel-dock-open .sel-dock-caret { transform: rotate(90deg); }
+      .sel-dock-cta { flex-shrink: 0; }
+      /* open, the panel below carries the same button — two of it in
+         one bar is the kind of thing that gets tapped twice */
+      .sel-dock-open .sel-dock-cta { display: none; }
+
+      .sel-dock-panel { display: none; }
+      .sel-dock-open .sel-dock-panel {
+        display: block;
+        /* it is ~600px of panel on a 640px screen; leave the page
+           visible above it so the sheet reads as a sheet */
+        max-height: 62vh; overflow-y: auto;
+        border: none; border-radius: 0;
+        border-bottom: 1px solid var(--g-14);
+      }
+
+      /* "OR" separated the two ways to buy. With the selection panel
+         lifted into the bar it separates the licence card from nothing. */
+      .sel-or { display: none; }
+
+      /* the bar is fixed, so the footer needs somewhere to end */
+      .pricing-page { padding-bottom: 72px; }
+    }
+
+    /* The monthly/annual segments are 31px tall. Growing them is the
+       obvious fix and the wrong one — the lit segment is a filled block,
+       so any extra padding is extra paint and the control stops looking
+       like the one on the mockups. The tap area grows instead: a
+       transparent ::after reaching 7px past each edge into the margins
+       that are already there, which is enough for 45px and touches
+       nothing, since the only other control in the card is 18px away
+       under a heading. */
+    @media (max-width: 640px) {
+      .term-opt { position: relative; }
+      .term-opt::after {
+        content: ''; position: absolute; left: 0; right: 0;
+        top: 50%; height: 45px; transform: translateY(-50%);
+      }
+    }
+
+    /* ── Forms ──
+       Mobile Safari zooms the viewport in on any control it focuses that
+       is under 16px, and never zooms back out: one tap on the name field
+       and the rest of the form is off-screen for the rest of the visit.
+       The fields are styled inline in contact-page.jsx, so this has to
+       out-rank a style attribute. 16px only below the breakpoint — above
+       it the 0.92rem the form was designed at still applies. */
+    @media (max-width: 640px) {
+      .contact-field { font-size: 16px !important; }
+    }
+
+    /* ═══════════════ Splash / boot screen ═══════════════ */
+    #splash {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      transition: opacity 0.55s ease;
+    }
+    #splash.splash-out { opacity: 0; pointer-events: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .splash-ticks { transform-origin: 48px 48px; animation: spin 7s linear infinite; }
+    .splash-sweep { transform-origin: 48px 48px; animation: spin 1.5s linear infinite; }
+    .splash-core  { transform-origin: 48px 48px; animation: pulse-dot 1.5s ease-in-out infinite; }
+    .splash-word {
+      font-family: var(--logotype);
+      font-weight: 400;
+      font-size: 1rem;
+      letter-spacing: 0.42em;
+      padding-left: 0.42em; /* optically recenters the tracked text */
+      text-transform: uppercase;
+      color: rgba(0,217,255,0.85);
+      animation: word-pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes word-pulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+
+    /* boot log: three lines under the mark, timed inside the splash's
+       900ms minimum so the last one lands just before the fade */
+    .splash-log {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      font-family: var(--mono); font-weight: 400; font-size: 0.6rem;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(255,255,255,0.38);
+    }
+    .splash-log span { opacity: 0; animation: splash-line 0.28s ease forwards; }
+    .splash-log span:nth-child(1) { animation-delay: 0.12s; }
+    .splash-log span:nth-child(2) { animation-delay: 0.42s; }
+    .splash-log span:nth-child(3) { animation-delay: 0.7s; }
+    .splash-log .ok { color: rgba(0,217,255,0.8); }
+    @keyframes splash-line {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* ── Section rhythm ── */
+    .section-block { padding-top: 88px; padding-bottom: 88px; }
+
+    @media (max-width: 768px) {
+      .section-block { padding-top: 48px !important; padding-bottom: 48px !important; }
+      h1, h2 { letter-spacing: -0.02em; }
+      [style*="gap: 64px"] { gap: 28px !important; }
+      [style*="gap: 60px"] { gap: 28px !important; }
+      [style*="gap: 48px"] { gap: 24px !important; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .splash-ticks, .splash-sweep, .splash-core, .cursor { animation: none; }
+      .cta-breathe, .dots::after,
+      .eg-scan, .eg-dwell, .float-wrap,
+      .featured-pulse, .stage-body,
+      .btn-glitch, .btn-glitch:hover, .mod-tile:hover .mod-tile-icon { animation: none; }
+      .splash-log span { animation: none; opacity: 1; }
+      .btn-solid::after { display: none; }
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       The blog: the tool call-to-action, the dates, and the list cards.
+
+       Every rule below is NEW. Nothing above it is edited, which is the
+       point: the guides and the articles share one block renderer and
+       one stylesheet, so a change to an existing .g-* rule would move
+       eleven guide pages at the same time as it moved the blog. The
+       only class the two share by design is the block vocabulary
+       itself — .g-p, .g-card, .g-toc and the rest — and those are
+       untouched.
+    ══════════════════════════════════════════════════════════════ */
+
+    /* ── The tool block ──
+       Louder than a .g-card and quieter than the page, because it
+       stands in the middle of an article and has to read as an offer
+       without interrupting the sentence the reader is in. Solid left
+       edge rather than a full border: it belongs to the column of text
+       it sits in. */
+    .g-toolcta {
+      display: block; margin: 26px 0; padding: 22px 24px;
+      max-width: var(--gcol);
+      border: 1px solid var(--g-22); border-left: 2px solid var(--g);
+      border-radius: 4px;
+      background: linear-gradient(90deg, rgba(0,217,255,0.06), rgba(0,217,255,0.015));
+    }
+    .g-toolcta-kicker {
+      display: block; font-family: var(--mono); font-weight: 600; font-size: 0.58rem;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--g); margin: 0 0 9px;
+    }
+    .g-toolcta-name {
+      display: block; font-family: var(--serif); font-weight: 500;
+      font-size: 1.28rem; line-height: 1.25; color: #fff; margin: 0 0 10px;
+    }
+    .g-toolcta-text { margin: 0 0 16px !important; font-size: 0.94rem; }
+    .g-toolcta-cta {
+      display: inline-flex; align-items: center; gap: 7px;
+      border: 1px solid var(--g-40); border-radius: 3px;
+      background: rgba(0,217,255,0.10); padding: 10px 17px;
+      font-family: var(--mono); font-weight: 600; font-size: 0.63rem;
+      letter-spacing: 0.16em; text-transform: uppercase; color: var(--g);
+      text-decoration: none; transition: background 0.18s ease, border-color 0.18s ease;
+    }
+    .g-toolcta-cta:hover { background: rgba(0,217,255,0.18); border-color: var(--g); }
+    .g-toolcta-cta:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+
+    /* ── Article dates ──
+       "Updated" is a second <time>, and it only exists in the markup
+       when the article has genuinely been revised — see postDates in
+       prerender.mjs. So this rule never has to hide anything: there is
+       nothing to hide on an article nobody has revised. */
+    .g-postmeta {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 0;
+      font-family: var(--mono); font-weight: 500; font-size: 0.63rem;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: rgba(255,255,255,0.42); margin: 0 0 20px;
+    }
+    .g-postmeta-sep { padding: 0 10px; color: rgba(255,255,255,0.22); }
+
+    /* ── The list ──
+       One row per article, the same hairline-separated stack the
+       chapter list uses, so the index reads as part of the same site
+       rather than as a card wall borrowed from somewhere else. */
+    .g-postcard {
+      display: block; padding: 20px 22px;
+      border: 1px solid var(--g-14); border-radius: 4px;
+      background: rgba(0,217,255,0.02); text-decoration: none;
+      transition: background 0.18s ease, border-color 0.18s ease;
+    }
+    .g-postcard:hover { background: rgba(0,217,255,0.06); border-color: var(--g-40); }
+    .g-postcard:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+    .g-postcard-cat {
+      display: block; font-family: var(--mono); font-weight: 500; font-size: 0.58rem;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--g); margin: 0 0 9px;
+    }
+    .g-postcard-title {
+      display: block; font-family: var(--serif); font-weight: 500;
+      font-size: 1.32rem; line-height: 1.25; color: #fff; margin: 0 0 8px;
+    }
+    .g-postcard-sum {
+      display: block; font-family: 'Barlow', sans-serif; font-weight: 300;
+      font-size: 0.92rem; line-height: 1.7; color: rgba(255,255,255,0.58);
+    }
+    .g-postcard-date {
+      display: block; margin-top: 12px;
+      font-family: var(--mono); font-weight: 500; font-size: 0.6rem;
+      letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.34);
+    }
+    .g-postcat {
+      display: inline-flex; align-items: center;
+      border: 1px solid var(--g-22); border-radius: 3px; padding: 7px 13px;
+      font-family: var(--mono); font-weight: 500; font-size: 0.6rem;
+      letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.62);
+      text-decoration: none; transition: color 0.18s ease, border-color 0.18s ease;
+    }
+    .g-postcat:hover { color: var(--g); border-color: var(--g-40); }
+    .g-postcat:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+    .g-postcat[aria-current] { color: var(--g); border-color: var(--g-40); background: rgba(0,217,255,0.08); }
+
+    @media (max-width: 768px) {
+      .g-toolcta { padding: 18px 16px; }
+      .g-postcard { padding: 16px 16px; }
+    }
+  </style>
+  <!-- Vercel Web Analytics. Served from our own origin (/_vercel/...),
+       so no third-party host appears in the network log or in the privacy
+       policy, and it sets no cookies - which is what keeps the site free
+       of a consent banner. Aggregate page views and referrers only; the
+       question it exists to answer is whether the guides are read.
+       Requires Analytics to be enabled on the Vercel project; until then
+       the request 404s harmlessly and nothing else is affected.
+       scripts/prerender.mjs uses this file as the shell for every
+       generated page, so this one line covers the guides too. -->
+  <script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+  <!-- ── Boot splash: ring mark spins while JS/fonts initialize ── -->
+  <div id="splash" aria-hidden="true">
+    <svg width="96" height="96" viewBox="0 0 96 96" fill="none">
+      <circle cx="48" cy="48" r="44" stroke="rgba(0,217,255,0.16)" stroke-width="1"/>
+      <g class="splash-ticks">
+        <circle cx="48" cy="48" r="34" stroke="#00d9ff" stroke-width="1.5"
+                stroke-dasharray="2 9.32" stroke-linecap="round" opacity="0.9"/>
+      </g>
+      <g class="splash-sweep">
+        <line x1="48" y1="44" x2="48" y2="12" stroke="url(#splash-swp)" stroke-width="1.5"/>
+      </g>
+      <circle class="splash-core" cx="48" cy="48" r="5" fill="#00d9ff"/>
+      <defs>
+        <linearGradient id="splash-swp" x1="48" y1="44" x2="48" y2="12" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#00d9ff" stop-opacity="0"/>
+          <stop offset="1" stop-color="#00d9ff" stop-opacity="0.9"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <div class="splash-word">ATREOX</div>
+    <div class="splash-log">
+      <span>&gt; init engine</span>
+      <span>&gt; modules 8/8</span>
+      <span class="ok">&gt; network ready</span>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var t0 = Date.now(), MIN_SHOW = 900, hidden = false;
+      function doHide() {
+        var s = document.getElementById('splash');
+        if (!s || hidden) return;
+        hidden = true;
+        s.classList.add('splash-out');
+        setTimeout(function () { try { s.remove(); } catch (_) {} }, 650);
+      }
+      window.__hideSplash = function () {
+        var wait = Math.max(0, MIN_SHOW - (Date.now() - t0));
+        setTimeout(doHide, wait);
+      };
+      /* Failsafe: never trap the user behind the splash */
+      setTimeout(doHide, 7000);
+    })();
+  </script>
+
+  <div id="root"></div>
+  <!-- Root-absolute, not relative: this same file is served at /guides/<url>
+       too (scripts/prerender.mjs writes a copy per guide), and a relative
+       src would look for the app one directory down.
+       app.js is the whole application — every .jsx source compiled in
+       order by scripts/build-app.mjs. Edit the sources, then
+       `npm run build:app` (or `npm run watch`); never this file's output. -->
+  <script src="/public/bg-animation.js"></script>
+  <!-- Public runtime config, set BEFORE the bundle: contact-page.jsx reads
+       window.TURNSTILE_SITE_KEY when its module is evaluated, so assigning
+       it afterwards would be too late and the page would fall back to
+       showing the email address instead of the form.
+       A Turnstile site key is public by design - it identifies the widget
+       in the page. The matching secret lives only in the Vercel
+       environment variable TURNSTILE_SECRET_KEY and never ships here. -->
+  <script>window.TURNSTILE_SITE_KEY = '0x4AAAAAAEdQNXkwlP0AGAIs';</script>
+  <script src="/public/app.js"></script>
+</body>
+</html>

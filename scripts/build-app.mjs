@@ -47,6 +47,7 @@ const APP_FILES = [
   'referral-page.jsx',
   'contact-page.jsx',
   'tool-checker.jsx',
+  'tools-hub.jsx',
   'tools-page.jsx',
   'account-checker-page.jsx',
   'app.jsx',

@@ -523,6 +523,16 @@ const SITE_PAGES = [
        oversight: this is a page written to be found in search, so it
        is a candidate for a real prerendered body the day the guides'
        block renderer is generalised. */
+    /* The hub. /tools was a 404 until 2026-09-04 - the two checkers had
+       their own pages and their own sitemap rows, and the address a person
+       actually guesses had nothing behind it. */
+    file: 'tools.html', route: '/tools', kicker: 'FREE TOOLS',
+    title: 'Free Telegram tools — account and proxy checkers — ATREOX',
+    heading: 'Free tools',
+    short: 'Check it before you buy it',
+    desc: 'Two free checkers for the two things a batch of Telegram accounts can be wrong about: whether the accounts can actually post, and whether Telegram accepts the proxies. No account, three checks an hour each.',
+  },
+  {
     file: 'tools/proxy-checker.html', route: '/tools/proxy-checker', kicker: 'FREE TOOL',
     title: 'Free Telegram proxy checker — country, DC and exit IP — ATREOX',
     heading: 'Proxy checker',
@@ -974,9 +984,13 @@ const STATIC_PAGES = [
   ['/functions', '0.9'],
   ['/pricing', '0.9'],
   ['/guides', '0.8'],
-  /* A search-entry page for its own query ("telegram proxy checker"),
-     which is why it sits above the referral page rather than with the
-     legal tail. */
+  /* The free-tools hub, and the two checkers under it. All three are
+     search-entry pages for their own queries ("telegram proxy checker",
+     "telegram account checker", "telegram tools"), which is why they sit
+     above the referral page rather than with the legal tail. The hub is
+     ranked with /guides: it is a section index, and the two tools it
+     points at are where the query actually lands. */
+  ['/tools', '0.8'],
   ['/tools/proxy-checker', '0.8'],
   ['/tools/account-checker', '0.8'],
   ['/referral-program', '0.5'],

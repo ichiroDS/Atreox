@@ -202,20 +202,72 @@ const REGION = (typeof Intl !== 'undefined' && Intl.DisplayNames) ? new Intl.Dis
 function country(code) { if (!code) return null; try { return REGION ? REGION.of(code) : code; } catch { return code; } }
 function ms(v) { return v == null ? '—' : `${Math.round(v)} ms`; }
 
+/* ── The proxy verdict, in four answers rather than two ──────────────
+   PORTED, NOT SHARED, and that is a compromise worth naming. The panel
+   holds the same rules in lib/proxy-verdict.ts; this is a separate
+   repository with no build step that could import from it, and a
+   published package for three functions would be worse than the
+   duplication. So the two are kept honest by a check instead:
+   scripts/verify-proxy-verdict-parity.mjs reads BOTH files and fails
+   if the four headlines or the tone rule drift apart.
+
+   Why four and not two. "Works / Not usable" collapsed three unrelated
+   situations into one red word: we never reached the proxy, we reached
+   it and TELEGRAM refused, and our own check crashed. The third is the
+   one that cost real trust - a string was passed where python_socks
+   wanted an enum, every socks5 check failed at stage one, and every one
+   of those failures was shown to a visitor as "your proxy does not
+   work", about working hardware. It is amber now and says whose fault
+   it is. ── */
+const PROXY_VERDICT = {
+  ok: { text: 'Works with Telegram', tone: 'ok' },
+  telegram_failed: { text: 'Proxy works, Telegram refused', tone: 'bad' },
+  tcp_failed: { text: 'No connection to the proxy', tone: 'bad' },
+  internal_error: { text: 'Check failed on our side', tone: 'warn' },
+};
+
+function proxyVerdict(r) {
+  return PROXY_VERDICT[r.result] || PROXY_VERDICT.internal_error;
+}
+
+/* The failing stage's own sentence, which already carries the number for
+   a timeout ("did not respond within 6 seconds"). */
+function stageMessage(r) {
+  if (r.result === 'telegram_failed') return r.telegram.message;
+  if (r.result === 'tcp_failed' || r.result === 'internal_error') return r.tcp.message;
+  return null;
+}
+
+/* The furthest stage that produced a number. A working Argentinian
+   mobile exit sits at 1.2-1.5s to Telegram, which reads as "broken"
+   with no number beside it. */
+function pingLabel(r) {
+  const v = r.telegram.latency_ms != null ? r.telegram.latency_ms : r.tcp.latency_ms;
+  if (v == null) return '—';
+  return v >= 1000 ? `${(v / 1000).toFixed(1)} s` : `${Math.round(v)} ms`;
+}
+
 function ProxyResult({ r }) {
   const tg = country(r.telegram.country);
   const ip = country(r.ip.country);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 14 }}>
-        <VerdictPill ok={r.ok}>{r.ok ? 'Works with Telegram' : 'Not usable'}</VerdictPill>
+        <VerdictPill ok={proxyVerdict(r).tone === 'ok'} warn={proxyVerdict(r).tone === 'warn'}>
+          {proxyVerdict(r).text}
+        </VerdictPill>
         <span style={{ fontFamily: BODY, fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)' }}>
           {new Date(r.checked_at).toLocaleString()}
         </span>
       </div>
+      {stageMessage(r) && (
+        <span style={{ fontFamily: BODY, fontSize: '0.9rem', color: 'rgba(255,255,255,0.62)', lineHeight: 1.6 }}>
+          {stageMessage(r)}
+        </span>
+      )}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
+        <StatTile label="Ping" value={pingLabel(r)} />
         <StatTile label="TCP" value={ms(r.tcp.latency_ms)} />
-        <StatTile label="To Telegram" value={ms(r.telegram.latency_ms)} />
         <StatTile label="Telegram sees" value={r.telegram.country || '—'} hint={tg || undefined} />
         <StatTile label="Nearest DC" value={r.telegram.nearest_dc == null ? '—' : `DC${r.telegram.nearest_dc}`} />
       </div>

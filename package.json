@@ -5,7 +5,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "build": "node scripts/build-app.mjs && node scripts/prerender.mjs && node scripts/verify-blocks.mjs && node scripts/verify-seo.mjs && node scripts/verify-lastmod.mjs",
+    "build": "node scripts/build-app.mjs && node scripts/prerender.mjs && node scripts/verify-blocks.mjs && node scripts/verify-seo.mjs && node scripts/verify-lastmod.mjs && node scripts/verify-proxy-verdict-parity.mjs",
     "verify:build": "node scripts/verify-build-current.mjs",
     "prepare": "node scripts/install-hooks.mjs",
     "build:app": "node scripts/build-app.mjs",
