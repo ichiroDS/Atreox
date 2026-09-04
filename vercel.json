@@ -1,5 +1,5 @@
 {
-  "buildCommand": "node scripts/build-app.mjs && node scripts/prerender.mjs && node scripts/verify-blocks.mjs && node scripts/verify-seo.mjs && node scripts/verify-lastmod.mjs",
+  "buildCommand": "node scripts/build-app.mjs && node scripts/prerender.mjs && node scripts/verify-blocks.mjs && node scripts/verify-seo.mjs && node scripts/verify-routes.mjs && node scripts/verify-lastmod.mjs",
   "outputDirectory": ".",
   "framework": null,
   "trailingSlash": false,
@@ -31,6 +31,10 @@
     {
       "source": "/blog/:slug",
       "destination": "/blog/:slug.html"
+    },
+    {
+      "source": "/tools",
+      "destination": "/tools.html"
     },
     {
       "source": "/tools/proxy-checker",
