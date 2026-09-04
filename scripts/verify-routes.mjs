@@ -107,6 +107,116 @@ check(
   isRouted('/tools'),
 );
 
+/* ── The navigation ──────────────────────────────────────────────
+   Every item in the header and the footer must lead somewhere that
+   exists. A nav entry naming a page id nothing renders, or one whose
+   path has no rewrite, is a dead link in the most expensive place on
+   the site - and it looks completely fine in the diff that adds it.
+
+   This is the second half of the /tools story: that page was built,
+   deployed and in the sitemap while the header still pointed at Blog,
+   so the hub nobody could reach was also the hub nobody could see. */
+const shared = fs.readFileSync(path.join(ROOT, 'shared.jsx'), 'utf8');
+const appJsx = fs.readFileSync(path.join(ROOT, 'app.jsx'), 'utf8');
+
+/* PAGE_TO_PATH is the site's own answer to "where does this page id
+   live". Read from it rather than re-deriving, so this cannot disagree
+   with the router. */
+const pageToPath = {};
+const mapBody = appJsx.split('const PAGE_TO_PATH = {')[1]?.split('};')[0] ?? '';
+for (const m of mapBody.matchAll(/'([^']+)':\s*'([^']+)'/g)) pageToPath[m[1]] = m[2];
+
+/* The rendered page ids: `case 'tools': return <ToolsHubPage .../>`.
+   'home' is the switch's `default:` branch and so has no case of its own.
+   That is added explicitly rather than by loosening the rule, because the
+   default branch is exactly what makes a typo dangerous here: any id with no
+   case silently renders the HOME page instead of failing, so a nav item
+   pointing at 'guide' rather than 'guides' would look like a working link
+   that quietly takes you to the front page. Every id except 'home' must have
+   its own case. */
+const hasDefault = /default:\s*return/.test(appJsx);
+const rendered = new Set(
+  [...appJsx.matchAll(/case\s+'([a-z0-9-]+)':\s*return/g)].map((m) => m[1]),
+);
+if (hasDefault) rendered.add('home');
+
+function navIds(source, marker) {
+  const after = source.indexOf(marker);
+  if (after === -1) return [];
+  const body = source.slice(after, after + 1800);
+  const list = body.split('];')[0];
+  return [...list.matchAll(/\{\s*id:\s*'([a-z0-9-]+)'/g)].map((m) => m[1]);
+}
+
+const headerIds = navIds(shared, 'const links = [');
+const footerIds = navIds(shared, 'const navLinks = [');
+
+console.log('\nNavigation: every header and footer item leads somewhere real');
+check('the header nav was found', headerIds.length >= 4, headerIds.join(', '));
+check('the footer nav was found', footerIds.length >= 4, footerIds.join(', '));
+check('PAGE_TO_PATH was parsed', Object.keys(pageToPath).length >= 8,
+  `${Object.keys(pageToPath).length} entries`);
+
+for (const [where, ids] of [['header', headerIds], ['footer', footerIds]]) {
+  for (const id of ids) {
+    const target = pageToPath[id];
+    check(
+      `${where}: "${id}" has a path`,
+      Boolean(target),
+      target ? target : 'not in PAGE_TO_PATH - clicking it goes nowhere',
+    );
+    check(
+      `${where}: "${id}" renders a page`,
+      rendered.has(id),
+      rendered.has(id) ? '' : 'no case in the page switch - blank screen',
+    );
+    if (target) {
+      check(
+        `${where}: "${id}" -> ${target} is served`,
+        isRouted(target),
+        isRouted(target) ? '' : 'no Vercel rewrite - 404',
+      );
+    }
+  }
+}
+
+/* The blog is not in the header any more. It must still be reachable,
+   or "we moved it to the footer" is how a section quietly dies. */
+check(
+  'the blog is still reachable from the footer',
+  footerIds.includes('blog'),
+  footerIds.join(', '),
+);
+check(
+  'and /blog still resolves',
+  isRouted('/blog') && fs.existsSync(path.join(ROOT, 'blog.html')),
+);
+check(
+  'the tools hub is in the header',
+  headerIds.includes('tools'),
+  headerIds.join(', '),
+);
+
+/* NEGATIVE CONTROLS: a nav check that cannot fail is decoration. */
+check(
+  'negative control: an id with no path WOULD be caught',
+  pageToPath['definitely-not-a-page'] === undefined,
+);
+check(
+  'negative control: the page switch was really parsed, not matched empty',
+  rendered.size >= 8 && rendered.has('tools'),
+  `${rendered.size} rendered page(s)`,
+);
+check(
+  "the switch still has a default branch - it is what renders 'home'",
+  hasDefault,
+);
+check(
+  'negative control: a mistyped nav id WOULD be caught rather than silently '
+  + 'rendering the home page',
+  !rendered.has('guide') && rendered.has('guides'),
+);
+
 console.log();
 if (failures) {
   console.log(`FAIL: ${failures} check(s) failed.`);

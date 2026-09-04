@@ -320,11 +320,22 @@ function Navbar({ currentPage, setPage }) {
     { id: 'functions', label: 'Functions' },
     { id: 'pricing',   label: 'Pricing' },
     { id: 'guides',    label: 'Guides' },
-    /* Guides teach a customer; the blog is written for people who are
-       not customers yet, so it needs its own way in - a section
-       reachable only from a sitemap is a section nobody on the site can
-       find. */
-    { id: 'blog',      label: 'Blog' },
+    /* TOOLS, not Blog, and the trade is deliberate. The header has room for
+       five items and both want the fifth.
+
+       The two free checkers are what a stranger searching "telegram proxy
+       checker" lands on, and they answer a question the visitor already has
+       - which is the only reliable way this site turns a search into a
+       person who has used the product. The blog explains what the answer
+       MEANS, which matters after the tool, not before it.
+
+       So the header carries the tools and the /tools page carries the
+       articles: it links the buying guide, the proxy guide and the
+       "how to check an account before buying" post directly. The footer
+       keeps its Blog link too, so the section is never more than one click
+       from anywhere. Nothing about /blog changed - it is still built,
+       still in the sitemap, still reachable. */
+    { id: 'tools',     label: 'Tools' },
   ];
 
   const handleNav = (id) => { setPage(id); setMenuOpen(false); };
