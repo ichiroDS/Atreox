@@ -73,8 +73,22 @@ module.exports = async (req, res) => {
 
   const body = typeof req.body === 'object' && req.body ? req.body : {};
 
+  // ONE function for both shapes. `{lines: [...]}` goes to the batch
+  // endpoint, anything else to the single check. Routed on the body rather
+  // than on a second serverless function because everything around it - the
+  // token, the scope header, the client IP, the burst slow, the verbatim 429
+  // pass-through - is identical, and a second copy of that is a second place
+  // for the public IP to stop being forwarded correctly.
+  //
+  // The lines are NOT parsed here. The engine's src/proxy_parser.py is the
+  // only thing in the system that knows what a proxy line looks like; a copy
+  // of that grammar in JavaScript is exactly the kind of second opinion that
+  // cost us a week. Splitting a textarea on newlines is not a grammar.
+  const isBatch = Array.isArray(body.lines);
+  const path = isBatch ? '/v1/tools/proxy-check/batch' : '/v1/tools/proxy-check';
+
   try {
-    const upstream = await fetch(`${base.replace(/\/$/, '')}/v1/tools/proxy-check`, {
+    const upstream = await fetch(`${base.replace(/\/$/, '')}${path}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,

@@ -294,6 +294,147 @@ function ProxyResult({ r }) {
   );
 }
 
+/* ── The paste box ─────────────────────────────────────────────────
+   Nobody buys one proxy. A visitor arrives from search with the block of
+   lines their provider e-mailed them, and a form that accepts exactly one of
+   them makes them do arithmetic on their own purchase before it will answer a
+   question.
+
+   THREE LINES PER CHECK, AND THE THREE COST ONE CHECK, not three. Charging
+   per line would have been the cautious-looking choice and the wrong one: it
+   prices the tool so that using it properly — comparing three proxies from
+   the same purchase — exhausts the whole free allowance in a single click,
+   which is a worse first impression than no free tool at all.
+
+   NOTHING HERE PARSES A PROXY LINE. The lines go to the engine exactly as
+   typed, and src/proxy_parser.py is the only thing in the system that knows
+   what a proxy line looks like. A copy of that grammar in this file is
+   precisely the kind of second opinion that cost a week: a string where a
+   ProxyType belonged, in the one call site that did not use the shared map,
+   and every working SOCKS5 proxy reported dead by a fully green test suite.
+   Splitting on newlines is not a grammar; splitting on ":" to find a host and
+   a port is, and it does not happen here.
+*/
+const BATCH_MAX_LINES = 3;
+
+function ProxyBatchWidget() {
+  const [text, setText] = useState('');
+  const [state, setState] = useState({ status: 'idle' });
+
+  // Splitting a textarea on newlines. This is the ONLY thing this file does
+  // to a proxy line - trim() also disposes of the \r a Windows paste brings.
+  // Everything past this point is the engine's parser's business.
+  const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
+  const tooMany = lines.length > BATCH_MAX_LINES;
+  const canSubmit = lines.length > 0 && !tooMany;
+
+  async function submit() {
+    if (!canSubmit) return;
+    setState({ status: 'loading' });
+    try {
+      const res = await fetch('/api/tools/proxy-check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lines }),
+      });
+      if (!res.ok) {
+        const e = await readError(res);
+        setState(e.kind === 'limit'
+          ? { status: 'limit', retryMinutes: e.retryMinutes }
+          : { status: 'error', message: e.message });
+        return;
+      }
+      setState({ status: 'result', batch: await res.json() });
+    } catch {
+      setState({ status: 'error', message: 'Could not reach the checker. Try again.' });
+    }
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+      <div className="panel" style={{ padding: '26px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <Field id="pb-lines" label={`Paste up to ${BATCH_MAX_LINES} proxies, one per line`}>
+          <textarea
+            id="pb-lines"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            rows={4}
+            spellCheck={false}
+            autoComplete="off"
+            placeholder={['gw.dataimpulse.com:10000:user:pass', 'socks5://user:pass@1.2.3.4:1080', '1.2.3.4:8080'].join(String.fromCharCode(10))}
+            style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6, fontFamily: MONO, minHeight: 96 }}
+          />
+        </Field>
+
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 14 }}>
+          <PrimaryButton onClick={submit} disabled={!canSubmit || state.status === 'loading'}>
+            {state.status === 'loading'
+              ? <><Spinner /> Checking {lines.length}…</>
+              : `Check ${lines.length || ''} ${lines.length === 1 ? 'proxy' : 'proxies'}`.replace('  ', ' ')}
+          </PrimaryButton>
+          <span style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.85rem', color: tooMany ? ROSE : 'rgba(255,255,255,0.5)' }}>
+            {tooMany
+              ? `That is ${lines.length} lines. Check ${BATCH_MAX_LINES} at a time.`
+              : state.status === 'loading'
+                ? 'Each one connects, then asks Telegram — up to half a minute apiece.'
+                : `All ${BATCH_MAX_LINES} count as one of your free checks. Format is auto-detected.`}
+          </span>
+        </div>
+
+        {/* Said here rather than only in the results, because it is the
+            reason somebody pastes three instead of checking one and giving
+            up. */}
+        <p style={{ margin: 0, fontFamily: BODY, fontWeight: 300, fontSize: '0.84rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.45)' }}>
+          MTProto proxies have no agreed one-line format — check those one at a
+          time above. Nothing about any proxy is stored.
+        </p>
+
+        {state.status === 'error' && (
+          <span style={{ fontFamily: BODY, fontSize: '0.86rem', color: ROSE }}>{state.message}</span>
+        )}
+      </div>
+
+      {state.status === 'limit' && <LimitScreen retryMinutes={state.retryMinutes} tool="proxy" />}
+      {state.status === 'result' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {state.batch.items.map((item) => (
+            <div key={item.line_number} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontFamily: MONO, fontSize: '0.72rem', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)' }}>
+                  LINE {item.line_number}
+                </span>
+                {item.label && (
+                  <span style={{ fontFamily: MONO, fontSize: '0.78rem', color: 'rgba(255,255,255,0.6)' }}>
+                    {item.label}
+                  </span>
+                )}
+              </div>
+              {/* A line that did not parse is an ANSWER, not an error: the
+                  other two still got verdicts, and the message says which
+                  shapes are accepted rather than "invalid input". */}
+              {item.parse_error ? (
+                <div className="panel" style={{ padding: '16px 18px', fontFamily: BODY, fontWeight: 300, fontSize: '0.88rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.62)' }}>
+                  Could not read this line — {item.parse_error}
+                </div>
+              ) : (
+                <ProxyResult r={item.result} />
+              )}
+            </div>
+          ))}
+          {state.batch.checked < state.batch.items.length && (
+            <p style={{ margin: 0, fontFamily: BODY, fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)' }}>
+              {state.batch.items.length - state.batch.checked} line
+              {state.batch.items.length - state.batch.checked === 1 ? '' : 's'} could not be read, so
+              {' '}{state.batch.checked} {state.batch.checked === 1 ? 'proxy was' : 'proxies were'} actually checked.
+              A line we could not read did not cost you anything extra.
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ProxyCheckerWidget() {
   const [type, setType] = useState('socks5');
   const [host, setHost] = useState('');
@@ -597,4 +738,4 @@ function AccountCheckerWidget() {
   );
 }
 
-Object.assign(window, { ProxyCheckerWidget, AccountCheckerWidget });
+Object.assign(window, { ProxyCheckerWidget, ProxyBatchWidget, AccountCheckerWidget });

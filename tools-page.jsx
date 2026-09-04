@@ -22,6 +22,7 @@ const {
   FooterBar, CrossLinks,
   PageHero, PageSection, SectionLockup, Pill, MONO, SERIF,
   ProxyCheckerWidget,
+  ProxyBatchWidget,
 } = window;
 
 const ACCENT = window.ACCENT;
@@ -96,6 +97,22 @@ function ProxyCheckerPage({ setPage }) {
             without reading a word below. */}
         <div style={{ marginBottom: 52 }}>
           <ProxyCheckerWidget />
+        </div>
+
+        {/* The batch, SECOND, and that ordering is deliberate. A searcher who
+            landed on "telegram proxy checker" has one proxy in their
+            clipboard and wants an answer without reading anything; the form
+            above gives them that. The paste box is for the person who came
+            back — they bought a pack, and now the question is whether the
+            pack is consistent. Putting it first would meet the first visitor
+            with an empty textarea and homework. */}
+        <SectionLockup title="Bought a pack? Check three at once">
+          Paste the lines your provider sent, in whatever format they sent
+          them. Three count as one of your free checks, so comparing proxies
+          from the same purchase does not cost you the whole allowance.
+        </SectionLockup>
+        <div style={{ marginTop: 22, marginBottom: 52 }}>
+          <ProxyBatchWidget />
         </div>
 
         <SectionLockup title="What it tells you">
