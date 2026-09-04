@@ -197,7 +197,13 @@ async function readError(res) {
 
 /* ══ PROXY CHECKER ══════════════════════════════════════════════════ */
 
-const IP_TYPE = { datacenter: 'Datacenter', residential: 'Residential', mobile: 'Mobile', unknown: 'Unknown' };
+/* The connection-type label is NOT defined here any more. It was one of five
+   places wording the same value, and the word it printed for the commonest
+   case - 'Residential' - claimed something no database in this system holds:
+   GeoLite2 carries the operator, not the access technology, so a mobile proxy
+   and a home line on one carrier are indistinguishable to us. A visitor
+   checking proxies sold as mobile read 'Residential' and had every reason to
+   think the seller lied. The engine now sends the sentence as ip.type_label. */
 const REGION = (typeof Intl !== 'undefined' && Intl.DisplayNames) ? new Intl.DisplayNames(['en'], { type: 'region' }) : null;
 function country(code) { if (!code) return null; try { return REGION ? REGION.of(code) : code; } catch { return code; } }
 function ms(v) { return v == null ? '—' : `${Math.round(v)} ms`; }
@@ -287,7 +293,7 @@ function ProxyResult({ r }) {
           detail={r.telegram.ok ? [tg, r.telegram.nearest_dc == null ? null : `nearest DC${r.telegram.nearest_dc}`, ms(r.telegram.latency_ms)].filter(Boolean).join(' · ') : null}
           message={r.telegram.message} />
         <StageRow icon={Globe} name="Exit IP" ok={r.ip.ok}
-          detail={r.ip.ok ? [r.ip.address, ip, IP_TYPE[r.ip.type], r.ip.asn == null ? null : `AS${r.ip.asn}`].filter(Boolean).join(' · ') : null}
+          detail={r.ip.ok ? [r.ip.address, ip, r.ip.type_label, r.ip.asn == null ? null : `AS${r.ip.asn}`].filter(Boolean).join(' · ') : null}
           message={r.ip.ok ? r.ip.as_org : r.ip.message} />
       </div>
     </div>
