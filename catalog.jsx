@@ -464,9 +464,10 @@ const GUIDES = [
           ]],
           ['p', "The difference in survival rates between the sellers will usually be massive, instantly showing you who provides the actual quality you can scale with."],
           ['card', {
-            kicker: 'A faster, lighter test',
+            kicker: 'Five to reject, twenty to measure',
             blocks: [
-              ['p', "If you want a faster, lighter approach to testing a new seller, buy just 5 accounts. Import them into ATREOX and immediately run the account checks."],
+              ['p', "Five accounts tell you whether stock is catastrophic, not whether it is good. Nought or one alive out of five rejects a seller with confidence. Five out of five does not accept one - it earns a second, larger test. So: five to reject, twenty from the same listing to measure, and only then fifty. Buy the twenty as one purchase rather than spread over weeks, because stock rotates."],
+              ['p', "For the five-account screen: import them into ATREOX and immediately run the account checks."],
               ['figure', {
                 src: '/public/screenshots/buying-telegram-accounts/02.png',
                 w: 1400, h: 697,
@@ -532,6 +533,9 @@ const GUIDES = [
             "Many Telegram account stores sell phishing or stealer accounts, meaning compromised accounts obtained without the owner's permission. Such accounts are popular among users involved in gray-area Telegram automation because they are inexpensive, available in large quantities, and have already been warmed up through real user activity. However, purchasing and using compromised accounts may violate applicable laws and platform policies.",
           ]],
           ['p', "For more legitimate use cases, buyers typically choose auto-registered accounts created specifically for resale. The account GEO and SpamBlock status are then selected based on the intended purpose. In most cases, users choose Telegram accounts from the same region where they plan to operate, advertise, communicate, or automate activities."],
+          ['callout', [
+            "These are two different questions and they have two different answers. The country of the channels you comment in is set by your audience. The country of the accounts you buy is set by what survives. They do not have to match, and for us they do not: we run Argentine accounts against channels that have nothing to do with Argentina. What must match is the account's country and its proxy's country.",
+          ]],
         ],
       },
       {
@@ -629,10 +633,10 @@ const GUIDES = [
     title: 'Proxies for Telegram accounts',
     short: 'One per account, done right',
     summary:
-      'Fifty accounts on one IP look like a farm to Telegram. The right proxy type, a GEO that matches, and a rotation setting that doesn\'t log you out.',
+      'Fifty accounts on one IP look like a farm to Telegram. The right proxy type, a GEO that matches, and a sticky exit that doesn\'t log you out.',
     seoTitle: 'Proxies for Telegram accounts: which type to buy',
     seoDescription:
-      'Fifty accounts on one IP look like a farm. Datacenter, residential or mobile; static or rotating; GEO matching, and a config that works.',
+      'Fifty accounts on one IP look like a farm. Datacenter, residential or mobile; sticky, never rotating; GEO matching, and a config that works.',
     module: null,
     video: null,
     body: [
@@ -677,7 +681,7 @@ const GUIDES = [
                 'Mobile (4G/5G/LTE)',
                 'Mobile carrier IPs. Shared dynamically among thousands of real cellular users.',
                 'The most "alive" and natural IP possible. Excellent for mimicking mobile app usage, but requires careful GEO management.',
-                ['Maximum natural trust.', 'Easy rotation.', 'Highest survival rate.'],
+                ['Maximum natural trust.', 'Highest survival rate.'],
                 ['Most expensive.', 'Unstable ping.', 'Bad IP/Country jumps cause suspicion.'],
               ],
             ],
@@ -692,13 +696,13 @@ const GUIDES = [
       },
       {
         id: 'rotation-trap',
-        title: 'The Rotation Trap: Static vs. Rotating',
+        title: 'The Rotation Trap: Your Exit IP Must Not Change',
         blocks: [
           ['p', "Telegram automation fundamentally requires the SOCKS5 protocol for stable, persistent connections. However, how that IP behaves over time introduces significant risks."],
-          ['p', "Proxies generally come in two connection types: static (the IP never changes) and rotating (the IP changes periodically)."],
           ['callout', [
-            "Here is a crucial warning: Rotating proxies can cause instant account logouts. If your proxy rotates its IP too frequently, abruptly, or across different regions without proper session anchoring, Telegram's security system flags it as a hijacked session and forcefully deauthorizes the account. Therefore, even premium mobile rotating proxies can perform worse than cheap static ones if you do not configure your session handling correctly. If you use rotating proxies, ensure the rotation interval is stable and always stays within the exact same city or region.",
+            "What matters is that the exit IP does not change underneath a logged-in session. Two things give you that: a sticky session, where a rotating pool holds one IP for the length of your session, and a dedicated static IP. Either is fine. What is not fine is timed rotation - an exit that changes every N seconds or minutes regardless of what your account is doing. Providers call the safe option \"sticky\", so that is the word to look for.",
           ]],
+          ['p', "Timed rotation causes instant account logouts. When the exit IP moves mid-session, Telegram reads it as a hijacked session and forcefully deauthorizes the account. A premium mobile proxy on timed rotation performs worse than a cheap sticky one, because what kills the account is the change itself, not the quality of the address it changes to."],
         ],
       },
       {
@@ -713,9 +717,10 @@ const GUIDES = [
       },
       {
         id: 'dataimpulse-setup',
-        title: 'Buying Mobile Proxies (DataImpulse Setup)',
+        title: 'Buying Mobile Proxies',
         blocks: [
-          ['p', "For reliable mobile proxies, the ATREOX team frequently uses DataImpulse. They offer a pay-as-you-go model billed by bandwidth (GB) with clean SOCKS5 outputs."],
+          ['p', "For reliable mobile proxies, the ATREOX team mostly uses DataImpulse. They offer a pay-as-you-go model billed by bandwidth (GB) with clean SOCKS5 outputs. The settings below are named the way DataImpulse names them, but every provider asks the same questions under labels of its own."],
+          ['p', "A note on providers. DataImpulse is what we use for most geos, but it does not carry every country - Argentina, currently our first recommendation, is not available there at all. We use FloppyData for Argentine proxies. Check that your provider actually offers the country before you buy the accounts."],
           ['p', "The exact settings to use when generating your list:"],
           ['callout', [
             "Type: Sticky. Not rotating.",
@@ -727,9 +732,9 @@ const GUIDES = [
             ['Targeting', 'Target Filters, and select the country there. Default targeting means no country selection at all, so it cannot satisfy the matching rule above.'],
             ['Country', "Must exactly match the account's own country."],
             ['Protocol', 'SOCKS5. Do not use HTTP or HTTPS.'],
+            ['Format', 'login:password@hostname:port or socks5://user:pass@ip:port'],
             ['Quantity', 'One proxy line per account. Two accounts behind one exit is a shared-IP signal, and ATREOX now warns you about it in Account Manager.'],
           ]],
-          ['p', "A note on providers. DataImpulse is what we use for most geos, but it does not carry every country - Argentina, currently our first recommendation, is not available there at all. We use FloppyData for Argentine proxies. Check that your provider actually offers the country before you buy the accounts."],
         ],
       },
       {
@@ -775,7 +780,7 @@ const GUIDES = [
         id: 'bandwidth-budgeting',
         title: 'Bandwidth Consumption and Campaign Budgeting',
         blocks: [
-          ['p', "Unlike static proxies that are rented per monthly slot, mobile proxies are usually billed by traffic consumption. If your available data balance hits zero in the middle of an active campaign, your network connection drops and every running account goes dark simultaneously."],
+          ['p', "Unlike a dedicated static IP that is rented per monthly slot, mobile proxies are usually billed by traffic consumption. If your available data balance hits zero in the middle of an active campaign, your network connection drops and every running account goes dark simultaneously."],
           ['p', "Rule of thumb: Budget approximately 1 GB of data per 100 accounts per full neuro-commenting session."],
           ['stat', { value: '1 GB', label: 'per 100 accounts, per session' }],
           ['p', "Running out of data will not get your accounts banned, but it will instantly freeze your campaign flow until the balance is refilled. Always maintain an adequate traffic buffer."],
@@ -786,9 +791,9 @@ const GUIDES = [
         title: 'Frequently Asked Questions (FAQ)',
         blocks: [
           ['faq', [
-            { q: 'Which proxies are best for Telegram automation?', a: 'For automation, stable proxies with anchored IPs (either static or carefully managed rotating IPs within the same GEO) are best. They provide predictable account behavior and drastically reduce the risk of deauthorization and bans.' },
+            { q: 'Which proxies are best for Telegram automation?', a: 'For automation, sticky proxies with anchored IPs are best. They provide predictable account behavior and drastically reduce the risk of deauthorization and bans.' },
             { q: 'Why is it important to use a separate proxy for every account?', a: 'Sharing a single proxy across multiple accounts links their network footprint. If one account gets flagged for spam, Telegram will instantly ban all other accounts sharing that identical IP address. The rule is absolute: 1 Account = 1 Proxy.' },
-            { q: 'Can I use rotating proxies for Telegram?', a: "Yes, but only with proper configuration. Rapid, uncontrolled IP changes—especially across different cities or countries—will trigger Telegram's security protocols and result in an instant session logout." },
+            { q: 'Can I use rotating proxies for Telegram?', a: "No. What matters is that the exit IP does not change underneath a logged-in session, and timed rotation — an exit that changes every N seconds or minutes regardless of what your account is doing — breaks exactly that: Telegram reads the change as a hijacked session and deauthorizes the account. A sticky session drawn from a rotating pool is fine, because it holds one IP for the length of your session. \"Sticky\" is the word providers use for it, and the one to look for." },
             { q: 'How do proxies impact account security?', a: 'Proxies are the baseline of your operational security. Unstable, "dirty," or rapidly jumping IP addresses will force Telegram to initiate security checks, apply heavy limits, or permanently ban the session.' },
             { q: 'How can I minimize ban risks when using proxies?', a: 'Always match the proxy GEO to the account GEO, strictly use SOCKS5 formats, respect action limits, utilize the Active Warmup module to gradually increase account activity, and never skimp on network quality.' },
           ]],
