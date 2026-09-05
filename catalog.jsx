@@ -580,6 +580,16 @@ const GUIDES = [
             alt: 'ATREOX dashboard Geo benchmark showing best and worst performing account countries by survival rate',
             caption: 'Geo benchmark in the ATREOX dashboard: survival rate by account country',
           }],
+          ['callout', [
+            "Survival rate on its own is the wrong number to buy on.",
+            "What you are actually buying is a surviving account, and its price is what the seller charges divided by the share that lives. A geo that survives at 78% and costs four times more per account is the more expensive choice, not the better one.",
+            "That is why Ukraine and Poland are not our recommendation despite sitting near the top of the chart. They do survive well. They also cost around $2 to $2.50 per account, which is several times what Argentine and Uzbek stock costs for a survival rate that is barely different. The same budget buys you far more working accounts in AR or UZ.",
+          ]],
+          ['p', "So read the chart as one input, not as a ranking to buy from. Two things it does not show, and both matter:"],
+          ['bullets', [
+            "What the stock costs. Divide the price by the survival share before you compare anything.",
+            "How long we have been measuring. Argentina leads on the shortest history of any geo in the table. Its number will move more than the others as we collect more, which is why we publish our own batch results rather than asking you to take the chart on faith.",
+          ]],
         ],
       },
       {
