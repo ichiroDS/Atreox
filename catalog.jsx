@@ -539,7 +539,10 @@ const GUIDES = [
         title: 'Marketplaces, Formats, and GEOs',
         blocks: [
           ['p', "When buying accounts, ATREOX requires the TData format. TData is the local session data Telegram Desktop stores on a computer—a folder containing everything needed to log in without a phone number or SMS code. It ensures zero friction, no re-verification, and higher trust from Telegram."],
-          ['p', "When it comes to selecting a GEO for your accounts, the golden rule is that the account GEO must strictly match the GEO of the proxies you bought or plan to buy. USA accounts are not always the best option. In fact, at the time of writing this guide, the ATREOX team predominantly uses Indonesian accounts paired with Indonesian proxies, which also happen to be significantly cheaper and highly effective compared to American equivalents."],
+          ['p', "When it comes to selecting a GEO for your accounts, the golden rule is that the account GEO must strictly match the GEO of the proxies you bought or plan to buy. USA accounts are not always the best option."],
+          ['p', "The ATREOX team currently buys Argentine accounts first and Uzbek accounts second, each paired with a proxy in the matching country."],
+          ['p', "That is a change from what this guide used to say. We previously recommended Indonesian stock on the grounds that it is cheap. Our own survival data does not support that: Indonesia sits in our worst-performing group, alongside Myanmar, India and Bangladesh. Cheap stock is cheap because it does not last."],
+          ['p', "Treat this as our current best answer rather than a settled one. It comes from survival rates across our whole user base, and Argentina leads on a shorter history than the older geos. We publish our own batch results as they mature, including the ones that go against the recommendation."],
           ['p', "There are many stores, forums, and sellers in Telegram chats offering Telegram accounts for sale, but the following marketplaces are among the most popular:"],
           ['p', "If your primary marketplace is ever down, you need untested backups. Established English-facing marketplaces include:"],
           ['table', {
@@ -704,7 +707,7 @@ const GUIDES = [
         blocks: [
           ['p', "A critical mistake beginners make is purchasing premium accounts from one region and running them through proxies from another."],
           ['callout', [
-            "If you purchase Indonesian accounts, you must run them exclusively through Indonesian mobile proxies. When a Telegram session originally registered on a cellular network in Jakarta suddenly authenticates from a server in Frankfurt, the platform detects an anomalous location jump and flags the account instantly. Always align your account GEO and proxy GEO with strict precision.",
+            "If you purchase Argentine accounts, you must run them exclusively through Argentine mobile proxies. When a Telegram session originally registered on a cellular network in Buenos Aires suddenly authenticates from a server in Frankfurt, the platform detects an anomalous location jump and flags the account instantly. Always align your account GEO and proxy GEO with strict precision.",
           ]],
         ],
       },
@@ -714,15 +717,19 @@ const GUIDES = [
         blocks: [
           ['p', "For reliable mobile proxies, the ATREOX team frequently uses DataImpulse. They offer a pay-as-you-go model billed by bandwidth (GB) with clean SOCKS5 outputs."],
           ['p', "The exact settings to use when generating your list:"],
-          ['kv', [
-            ['Targeting', 'Default'],
-            ['Country', 'MUST exactly match your account GEO.'],
-            ['Rotation Interval', '120s (a safe baseline for background refreshing).'],
-            ['Type', 'Rotating'],
-            ['Protocol', 'SOCKS5 (The most stable format for Telegram; do not use HTTP/HTTPS).'],
-            ['Format', 'login:password@hostname:port or socks5://user:pass@ip:port'],
-            ['Quantity', 'Generate exactly one proxy line per account you own.'],
+          ['callout', [
+            "Type: Sticky. Not rotating.",
+            "This is the most important setting on this page, and an earlier version of this guide got it wrong. A rotating proxy changes its exit IP on a timer, underneath a session that is already logged in. To Telegram that looks like the account moving to a different address mid-session, which is one of the clearest signals it acts on.",
+            "Every proxy the ATREOX team runs is sticky, and every proxy we recommend is sticky. If you are currently running accounts on rotating proxies because of the earlier version of this page, move them to sticky. Any survival results you collected on rotating proxies measured the proxy, not the stock.",
           ]],
+          ['kv', [
+            ['Type', 'Sticky. Not rotating.'],
+            ['Targeting', 'Target Filters, and select the country there. Default targeting means no country selection at all, so it cannot satisfy the matching rule above.'],
+            ['Country', "Must exactly match the account's own country."],
+            ['Protocol', 'SOCKS5. Do not use HTTP or HTTPS.'],
+            ['Quantity', 'One proxy line per account. Two accounts behind one exit is a shared-IP signal, and ATREOX now warns you about it in Account Manager.'],
+          ]],
+          ['p', "A note on providers. DataImpulse is what we use for most geos, but it does not carry every country - Argentina, currently our first recommendation, is not available there at all. We use FloppyData for Argentine proxies. Check that your provider actually offers the country before you buy the accounts."],
         ],
       },
       {
