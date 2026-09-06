@@ -575,12 +575,14 @@ const GUIDES = [
         title: 'Which Telegram Account GEOs Are Best to Use?',
         blocks: [
           ['p', "It is important to understand that GEO really matters."],
-          ['figure', {
-            src: '/public/screenshots/buying-telegram-accounts/geobenchmark.jpg',
-            w: 1280, h: 544,
-            alt: 'ATREOX dashboard Geo benchmark showing best and worst performing account countries by survival rate',
-            caption: 'Geo benchmark in the ATREOX dashboard: survival rate by account country',
-          }],
+          ['callout', [
+            "We do not have geo survival data yet, and we are not going to publish a chart we cannot reproduce.",
+            "An earlier version of this page carried a benchmark ranking countries by survival rate. We have removed it. We could not establish where its numbers came from, and our own system does not hold enough per-country history to have produced them. A ranking you cannot check is worth less than no ranking at all, and we would rather lose the chart than have you spend money on it.",
+          ]],
+          ['p', "What we do have is what we are buying ourselves right now, and why."],
+          ['p', "Argentina first, Uzbekistan second, with the proxy in the matching country. That is our judgement, based on price and on how our own purchases have gone so far. It is not a measured survival table, and you should treat it as our opinion until we can show you numbers."],
+          ['p', "Those numbers are coming, on a date rather than eventually. We imported an Argentine batch and an Uzbek batch on 4 September. Day 7 falls on 11 September and Day 30 on 4 October. We will publish both here, with the sellers named, including if they disappoint us."],
+          ['p', "Until then, the only survival figures worth acting on are the ones you produce yourself: buy five, wait a week, count what is left."],
           ['callout', [
             "Survival rate on its own is the wrong number to buy on.",
             "What you are actually buying is a surviving account, and its price is what the seller charges divided by the share that lives. A geo that survives at 78% and costs four times more per account is the more expensive choice, not the better one.",

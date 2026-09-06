@@ -62,6 +62,37 @@ const ATTRIBUTED_NUMBERS = {
   // '80.0%': 'public_numbers section 3, survival by account country',
 };
 
+/* RULE 2: a claim to HAVE MEASURED survival, with or without a number.
+   Rule 1 above only sees percentages, and the two sentences that survived
+   the removal of the geo benchmark carry no percentage at all - "Indonesia
+   sits in our worst-performing group" is a claim about a table that no
+   longer exists and never reproduced. A number guard cannot see that
+   sentence; this one can.
+
+   Deliberately separated from a PROMISE. "We publish our own batch results
+   as they mature" is a commitment, not evidence, and flagging it would train
+   whoever maintains this to stop reading the output. Measured on the current
+   catalog: 4 sentences match a loose version of this pattern, 2 of them
+   promises; the tightened pattern below matches the 2 claims and neither
+   promise. */
+const MEASUREMENT_CLAIM =
+  /\b(our (?:own )?survival data|our benchmark|in our benchmark|survival rates? across our|our (?:worst|best)-performing|we measured[^.]{0,50}surviv)\b/i;
+
+/* Claims that are in the guides today, are NOT currently supported, and are
+   waiting on an author decision about the replacement wording. The build
+   passes with these listed and prints them every run, so the debt is loud
+   rather than silent - but a NEW unsupported claim fails immediately.
+
+   Both of these derived from the geo benchmark removed on 2026-09-06: the
+   "worst-performing group" is that chart's four lowest rows, and "survival
+   rates across our whole user base" is its subtitle. With the chart gone,
+   nothing stands behind either. They come out of this list the moment the
+   section is rewritten. */
+const PENDING_REWRITE = [
+  'Our own survival data does not support that',
+  'It comes from survival rates across our whole user base',
+];
+
 const SURVIVAL_WORDS = /\b(surviv\w*|alive|died|dies|dying|death|ban rate|burn rate)\b/i;
 const ATTRIBUTION = /\b(our|we|us|ATREOX(?:'s)?|the ATREOX team)\b/i;
 const PERCENT = /\d+(?:\.\d+)?%/g;
@@ -118,6 +149,35 @@ check(
     : 'none found',
 );
 
+/* ── Rule 2 over the same prose ─────────────────────────────────────── */
+const claims = [];
+for (const block of prose) {
+  for (const sentence of sentences(block)) {
+    if (!MEASUREMENT_CLAIM.test(sentence)) continue;
+    const trimmed = sentence.trim();
+    if (PENDING_REWRITE.some((known) => trimmed.startsWith(known))) continue;
+    claims.push(trimmed.slice(0, 150));
+  }
+}
+
+check(
+  'no NEW claim to have measured survival appears without a source',
+  claims.length === 0,
+  claims.length ? claims.join(' | ') : 'none beyond the pending list',
+);
+
+if (PENDING_REWRITE.length) {
+  console.log('');
+  console.log(
+    `  NOTE: ${PENDING_REWRITE.length} unsupported survival claim(s) still in ` +
+    'the guides, listed in PENDING_REWRITE and awaiting a rewrite:',
+  );
+  for (const known of PENDING_REWRITE) console.log(`        - "${known}..."`);
+  console.log('        Both derived from the geo benchmark removed on 2026-09-06.');
+  console.log('        Delete the entry when the sentence is rewritten - it is');
+  console.log('        not a permanent exemption.');
+}
+
 /* NEGATIVE CONTROL. A rule that matches nothing passes for the wrong
    reason, and this one is designed to match nothing most of the time -
    so it is run against a sentence built to trip it, and must trip. The
@@ -154,6 +214,34 @@ check(
   'and a survival claim about somebody else is NOT caught',
   scan('Sellers routinely advertise 95% survival on stock that is nothing of the kind.').length === 0,
   'no first-person attribution',
+);
+
+function scanClaims(text) {
+  return sentences(text).filter(
+    (s) => MEASUREMENT_CLAIM.test(s) &&
+      !PENDING_REWRITE.some((k) => s.trim().startsWith(k)),
+  );
+}
+
+check(
+  'negative control: a NEW measurement claim without a number IS caught',
+  scanClaims('Our own survival data puts Uzbekistan ahead of Poland.').length === 1,
+  'no percentage in that sentence at all - rule 1 cannot see it',
+);
+check(
+  'and a promise to publish is NOT caught',
+  scanClaims('We publish our own batch results as they mature, including the ones that go against the recommendation.').length === 0,
+  'a commitment is not evidence, and flagging it would make this output ignorable',
+);
+check(
+  "and somebody else's claim is NOT caught",
+  scanClaims('Sellers advertise survival rates they have never measured.').length === 0,
+);
+check(
+  'and the pending entries are exempt, but only by exact prefix',
+  scanClaims('Our own survival data does not support that: Indonesia sits in our worst-performing group.').length === 0 &&
+    scanClaims('Our own survival data now supports something else entirely.').length === 1,
+  'a reworded sentence stops being exempt the moment it changes',
 );
 
 console.log();
