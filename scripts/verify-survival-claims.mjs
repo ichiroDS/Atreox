@@ -89,8 +89,9 @@ const MEASUREMENT_CLAIM =
    nothing stands behind either. They come out of this list the moment the
    section is rewritten. */
 const PENDING_REWRITE = [
-  'Our own survival data does not support that',
-  'It comes from survival rates across our whole user base',
+  // Emptied on 2026-09-06: both entries were rewritten in the same commit
+  // that removed the geo benchmark they rested on. An exemption outliving
+  // the sentence it excused is how an allowlist becomes permission.
 ];
 
 const SURVIVAL_WORDS = /\b(surviv\w*|alive|died|dies|dying|death|ban rate|burn rate)\b/i;
@@ -237,11 +238,26 @@ check(
   "and somebody else's claim is NOT caught",
   scanClaims('Sellers advertise survival rates they have never measured.').length === 0,
 );
+/* The exemption mechanism itself, tested against a synthetic list rather
+   than whatever happens to be in PENDING_REWRITE today - the list is empty
+   now and a control that depended on it having entries would break the
+   moment the debt was paid off, which is the wrong way round. */
+function scanWith(text, pending) {
+  return sentences(text).filter(
+    (s) => MEASUREMENT_CLAIM.test(s) && !pending.some((k) => s.trim().startsWith(k)),
+  );
+}
+const FAKE = ['Our own survival data says X'];
 check(
-  'and the pending entries are exempt, but only by exact prefix',
-  scanClaims('Our own survival data does not support that: Indonesia sits in our worst-performing group.').length === 0 &&
-    scanClaims('Our own survival data now supports something else entirely.').length === 1,
+  'an exemption works, and only by exact prefix',
+  scanWith('Our own survival data says X and nothing more.', FAKE).length === 0 &&
+    scanWith('Our own survival data says Y instead.', FAKE).length === 1,
   'a reworded sentence stops being exempt the moment it changes',
+);
+check(
+  'and the live list is empty, so nothing is currently excused',
+  PENDING_REWRITE.length === 0,
+  PENDING_REWRITE.length ? PENDING_REWRITE.join(' | ') : 'no standing exemptions',
 );
 
 console.log();

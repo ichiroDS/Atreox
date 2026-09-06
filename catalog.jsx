@@ -546,8 +546,9 @@ const GUIDES = [
           ['p', "When buying accounts, ATREOX requires the TData format. TData is the local session data Telegram Desktop stores on a computer—a folder containing everything needed to log in without a phone number or SMS code. It ensures zero friction, no re-verification, and higher trust from Telegram."],
           ['p', "When it comes to selecting a GEO for your accounts, the golden rule is that the account GEO must strictly match the GEO of the proxies you bought or plan to buy. USA accounts are not always the best option."],
           ['p', "The ATREOX team currently buys Argentine accounts first and Uzbek accounts second, each paired with a proxy in the matching country."],
-          ['p', "That is a change from what this guide used to say. We previously recommended Indonesian stock on the grounds that it is cheap. Our own survival data does not support that: Indonesia sits in our worst-performing group, alongside Myanmar, India and Bangladesh. Stock bought because it is cheap is the mistake - the price you care about is the price of an account that is still working next month, and Indonesian stock is not cheap by that measure. Argentine and Uzbek stock happens to be inexpensive too, which is not what recommends it; it survives, and section 09 shows how to weigh the two together."],
-          ['p', "Treat this as our current best answer rather than a settled one. It comes from survival rates across our whole user base, and Argentina leads on a shorter history than the older geos. We publish our own batch results as they mature, including the ones that go against the recommendation."],
+          ['p', "That is a change from what this guide used to say. We previously recommended Indonesian stock on the grounds that it is cheap, and we no longer do. We are not going to dress that up as a measurement: we do not have a per-country survival table we can stand behind, and section 09 explains why we took the old one down. What changed our minds was our own buying - Indonesian batches cost us less per account and left us with fewer working accounts than the Argentine and Uzbek ones we buy now. That is one operator's experience over a few months, not a study, and we are telling you which it is."],
+          ['p', "The principle underneath it does survive without the table: stock bought because it is cheap is the mistake. The price you care about is the price of an account still working next month."],
+          ['p', "Treat this as our current best answer rather than a settled one. It rests on our own purchasing, not on a measured survival table - and section 09 says when the first real numbers land."],
           ['p', "There are many stores, forums, and sellers in Telegram chats offering Telegram accounts for sale, but the following marketplaces are among the most popular:"],
           ['p', "If your primary marketplace is ever down, you need untested backups. Established English-facing marketplaces include:"],
           ['table', {
@@ -586,12 +587,12 @@ const GUIDES = [
           ['callout', [
             "Survival rate on its own is the wrong number to buy on.",
             "What you are actually buying is a surviving account, and its price is what the seller charges divided by the share that lives. A geo that survives at 78% and costs four times more per account is the more expensive choice, not the better one.",
-            "That is why Ukraine and Poland are not our recommendation despite sitting near the top of the chart. They do survive well. They also cost around $2 to $2.50 per account, which is several times what Argentine and Uzbek stock costs for a survival rate that is barely different. The same budget buys you far more working accounts in AR or UZ.",
+            "That is why Ukraine and Poland are not our recommendation. They do survive well - that part we are not disputing. They also cost around $2 to $2.50 per account, which is several times what Argentine and Uzbek stock costs, for a survival rate that is barely different. The same budget buys you far more working accounts in AR or UZ.",
           ]],
-          ['p', "So read the chart as one input, not as a ranking to buy from. Two things it does not show, and both matter:"],
+          ['p', "The general point outlives the chart we took down. A survival rate is one input and never a buying order on its own, and there are two things it cannot tell you:"],
           ['bullets', [
             "What the stock costs. Divide the price by the survival share before you compare anything.",
-            "How long we have been measuring. Argentina leads on the shortest history of any geo in the table. Its number will move more than the others as we collect more, which is why we publish our own batch results rather than asking you to take the chart on faith.",
+            "How long anyone has been watching. Our own Argentine batch was imported on 4 September, so it has no history at all yet - a batch that young cannot have died, whatever its numbers look like today. Ask that question of any survival figure you are shown, ours included.",
           ]],
         ],
       },
