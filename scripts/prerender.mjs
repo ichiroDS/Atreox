@@ -641,7 +641,7 @@ const SITE_PAGES = [
     title: 'Modules — Commenting, Warmup, Parsers, Reactions | ATREOX',
     heading: 'Eight modules',
     short: 'Comments, DMs, reactions, discovery',
-    desc: 'Neurocommenting, Active Warmup, NeuroDialogs, Mass Reactions, channel and group parsers, profile templates and account management. What each one does and when to use it.',
+    desc: 'Neurocommenting, Active Warmup, NeuroDialogs, Mass Reactions, channel and group parsers, profile templates. What each module does and when to use it.',
   },
   {
     file: 'pricing.html', route: '/pricing', kicker: 'PRICING',
@@ -655,7 +655,7 @@ const SITE_PAGES = [
     title: 'Guides: Buying Telegram Accounts, Proxies, Warmup | ATREOX',
     heading: 'Guides',
     short: 'Ten walkthroughs, end to end',
-    desc: 'How to buy Telegram accounts that survive, how to set proxies up so they do not get flagged, and what our own purchases actually did. Including the results that went against us.',
+    desc: 'How to buy Telegram accounts that survive and set proxies up so they are not flagged. Plus what our own purchases did, including results that went against us.',
   },
   {
     file: 'contact.html', route: '/contact', kicker: 'CONTACT',
@@ -696,7 +696,7 @@ const SITE_PAGES = [
     title: 'Free Telegram Account Checker — Age, Bans, Data Centre',
     heading: 'Account checker',
     short: 'What Telegram reports about it',
-    desc: 'Upload one account before you buy the batch. Registration age, spam limits, Telegram flags, home data centre, and the oldest session we can actually prove. Free, no login, nothing stored.',
+    desc: 'Upload one account before you buy the batch. Registration age, spam limits, Telegram flags, data centre, and the oldest session we can prove. Free, no login.',
   },
   {
     file: 'privacy.html', route: '/privacy', kicker: 'LEGAL',
