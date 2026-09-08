@@ -271,6 +271,132 @@ check(
   );
 }
 
+/* == The head ====================================================
+   Two pages with the same <title> are two pages Google is entitled to
+   treat as one, and it picks which one to keep. This site has already
+   shipped that fault once in a worse form - nine routes served one
+   head, every one of them claiming to be "/" - and verify-seo.mjs was
+   written to stop the canonical half of it. It checks that each page
+   declares its own ADDRESS. Nothing checked that each page declares
+   its own WORDS, which is the half a reader and a search result
+   actually see.
+
+   So: a title, a description, and no two pages sharing either.
+================================================================== */
+
+/* Entities, decoded. The files store &amp; and &quot;; two pages that
+   differ only in how a quote was escaped are still two pages with the
+   same title, and two that genuinely differ must not be reported as
+   equal because both escaped the same way. Comparing decoded text is
+   the only version of "the same title" a reader would recognise. */
+function decodeEntities(s) {
+  return s
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&');
+}
+
+function headOf(html) {
+  const head = html.slice(0, html.indexOf('</head>') + 1 || html.length);
+  const title = (head.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1] || '';
+  const desc = (head.match(/<meta[^>]+name=["']description["'][^>]*content=["']([\s\S]*?)["']/i) || [])[1] || '';
+  return { title: decodeEntities(title).trim(), desc: decodeEntities(desc).trim() };
+}
+
+/* The whole set at once, not one page at a time: "nobody else has this
+   title" is a question about the set, and a per-page check could not
+   ask it. Taking the pages as an argument is what lets the negative
+   controls below hand it a set they have deliberately broken. */
+function auditHeads(pages) {
+  const bad = [];
+  const byTitle = new Map();
+  const byDesc = new Map();
+  for (const [url, html] of pages) {
+    const { title, desc } = headOf(html);
+    if (!title) bad.push(`${url}: no <title>`);
+    if (!desc) bad.push(`${url}: no meta description`);
+    if (title) {
+      if (byTitle.has(title)) bad.push(`${url} and ${byTitle.get(title)} share the title "${title}"`);
+      else byTitle.set(title, url);
+    }
+    if (desc) {
+      if (byDesc.has(desc)) bad.push(`${url} and ${byDesc.get(desc)} share the description`);
+      else byDesc.set(desc, url);
+    }
+  }
+  return bad;
+}
+
+console.log('\nHead: every advertised URL has its own title and description');
+
+const headTrouble = auditHeads(bodyPages);
+check(
+  `all ${bodyPages.length} advertised pages have a title and a description, and no two share either`,
+  headTrouble.length === 0,
+  headTrouble.length ? headTrouble.slice(0, 6).join('; ') : 'every one unique',
+);
+
+/* Length is reported, NOT asserted. Google truncates a description at
+   roughly 160 characters and shows fewer on a phone; a longer one is
+   not broken, it is a decision about which half of the sentence gets
+   read. That decision belongs to whoever wrote the words, so this
+   prints the overrun and leaves it alone. Failing a build over it
+   would only teach people to write to a character counter. */
+{
+  const LIMIT = 160;
+  const over = bodyPages
+    .map(([url, html]) => [url, [...headOf(html).desc].length])
+    .filter(([, n]) => n > LIMIT)
+    .sort((a, b) => b[1] - a[1]);
+  console.log(over.length
+    ? `         note: ${over.length} description(s) past ~${LIMIT} chars and liable to be cut: `
+      + over.map(([u, n]) => `${u} (${n}, +${n - LIMIT})`).join(', ')
+    : `         note: every description is inside ~${LIMIT} characters`);
+}
+
+/* NEGATIVE CONTROLS. Each one breaks a real page the way it could
+   really break, and runs the same auditHeads the check above uses. */
+{
+  const other = bodyPages.find(([u]) => u !== '/') || bodyPages[1];
+  const home = bodyPages.find(([u]) => u === '/') || bodyPages[0];
+
+  /* The one that matters: the same title on two pages. This is what
+     Google reads as one page published twice, and it is invisible in a
+     diff that only ever touches one of the two files. */
+  const homeTitle = headOf(home[1]).title;
+  const collided = bodyPages.map(([u, html]) => u === other[0]
+    ? [u, html.replace(/<title[^>]*>[\s\S]*?<\/title>/i, `<title>${homeTitle}</title>`)]
+    : [u, html]);
+  check(
+    'negative control: two pages sharing a title ARE reported',
+    auditHeads(collided).some(m => m.includes('share the title')),
+    `copied ${home[0]}'s title onto ${other[0]}`,
+  );
+
+  const dupDesc = bodyPages.map(([u, html]) => u === other[0]
+    ? [u, html.replace(/(<meta name="description" content=")[\s\S]*?(">)/i,
+      `$1${headOf(home[1]).desc.replace(/"/g, '&quot;')}$2`)]
+    : [u, html]);
+  check(
+    'negative control: two pages sharing a description ARE reported',
+    auditHeads(dupDesc).some(m => m.includes('share the description')),
+  );
+  check(
+    'negative control: an empty title IS reported',
+    auditHeads([[other[0], other[1].replace(/<title[^>]*>[\s\S]*?<\/title>/i, '<title></title>')]]).length > 0,
+  );
+  check(
+    'negative control: a missing description IS reported',
+    auditHeads([[other[0], other[1].replace(/<meta name="description"[^>]*>/i, '')]]).length > 0,
+  );
+  check(
+    'negative control: the real set does NOT trip any of the above',
+    auditHeads(bodyPages).length === 0,
+    'if this fails, the checks fire on everything and mean nothing',
+  );
+}
+
+
 /* ── The navigation ──────────────────────────────────────────────
    Every item in the header and the footer must lead somewhere that
    exists. A nav entry naming a page id nothing renders, or one whose

@@ -53,7 +53,7 @@ const FACTS = [
   ['Only your own accounts', 'A session file is a live credential. Never upload one that isn’t yours — the tool acts on the account it is given.'],
   ['Deleted immediately', 'Your session runs this one check and is deleted the instant it finishes — never written to our database, our logs, or any error message. We keep only anonymised facts and a one-way fingerprint.'],
   ['Some checks are panel-only', 'Reading the spam limit means messaging @SpamBot — an action on the account. The free checker takes no action on your behalf, so the spam status is available in the panel, on your own accounts.'],
-  ['Free, right here', 'Three checks an hour, no account. A whole partya at once, with no limit and a saved history, is the panel — included with any module.'],
+  ['Free, right here', 'Three checks an hour, no account. A whole batch at once, with no limit and a saved history, is the panel — included with any module.'],
 ];
 
 /* The hero as data, not as props typed into the JSX: it is the page's

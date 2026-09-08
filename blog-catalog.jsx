@@ -85,7 +85,9 @@ const POSTS = [
       'Placeholder article — the real text is being written. This entry exists so the layout, the dates, the contents rail and the tool block can be seen on a real page.',
     seoTitle: 'How to check a Telegram account before buying',
     seoDescription:
-      'Placeholder description. Replace this with the real one before the article is published.',
+      'What a checker can prove about a Telegram account before you buy the batch, what it '
+      + 'cannot, and why the seller’s age claim and the oldest visible session are two '
+      + 'different things.',
     published: '2026-08-29',
     /* No `updated` key at all, on purpose: this is the case the
        template has to handle, and the only way to see that it does is

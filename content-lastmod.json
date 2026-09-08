@@ -1,46 +1,46 @@
 {
   "page:/": {
-    "hash": "6beb8a078803e0dd",
+    "hash": "93c0f503de36d317",
     "date": "2026-09-08"
   },
   "page:/functions": {
-    "hash": "0e740e13d89bfab8",
+    "hash": "fdf30beb86e86216",
     "date": "2026-09-08"
   },
   "page:/pricing": {
-    "hash": "27c40497d14e0043",
+    "hash": "63cd14d94fd012b2",
     "date": "2026-09-08"
   },
   "page:/guides": {
-    "hash": "6fb3043ddaa92886",
+    "hash": "b8fe6c1b433bee58",
     "date": "2026-09-08"
   },
   "page:/contact": {
-    "hash": "27f10f0ddc89481e",
+    "hash": "08fc7988f55f2557",
     "date": "2026-09-08"
   },
   "page:/tools": {
-    "hash": "a4a0a5888cc46075",
+    "hash": "27fcdee27ad695ba",
     "date": "2026-09-08"
   },
   "page:/tools/proxy-checker": {
-    "hash": "e7cb8c20fa688581",
+    "hash": "ce9bfdfc7b9a647d",
     "date": "2026-09-08"
   },
   "page:/tools/account-checker": {
-    "hash": "c54a48d5ad28114c",
+    "hash": "ef60e88abc0fa4ab",
     "date": "2026-09-08"
   },
   "page:/privacy": {
-    "hash": "e60340d89f55e187",
+    "hash": "28421b75377919e7",
     "date": "2026-09-08"
   },
   "page:/terms": {
-    "hash": "d01f4a05b2e3f943",
+    "hash": "e5b14d84eb0d2706",
     "date": "2026-09-08"
   },
   "page:/refund": {
-    "hash": "1c952fe77a649ac2",
+    "hash": "b386991f761476a5",
     "date": "2026-09-08"
   },
   "page:/referral-program": {
@@ -100,7 +100,7 @@
     "date": "2026-08-29"
   },
   "post:how-to-check-telegram-account-before-buying": {
-    "hash": "4f34f553b4e2d39d",
-    "date": "2026-08-29"
+    "hash": "af34d8b7dd8370c2",
+    "date": "2026-09-08"
   }
 }

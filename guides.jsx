@@ -164,7 +164,7 @@ const HERO = {
 };
 
 const GROUPS = [
-  { key: 'setup', title: 'Before you start', lede: 'The two things you buy elsewhere and bring with you.' },
+  { key: 'setup', title: 'Before you start', lede: 'The things you buy elsewhere and bring with you.' },
   { key: 'module', title: 'Module guides', lede: 'One per module, in the order the pipeline runs them.' },
 ];
 

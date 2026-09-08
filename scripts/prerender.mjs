@@ -638,31 +638,31 @@ function headFor(guide, mod, ogImage) {
 const SITE_PAGES = [
   {
     file: 'functions.html', route: '/functions', kicker: 'MODULES',
-    title: 'What each module does — ATREOX',
+    title: 'Modules — Commenting, Warmup, Parsers, Reactions | ATREOX',
     heading: 'Eight modules',
     short: 'Comments, DMs, reactions, discovery',
-    desc: 'Eight Telegram automation modules, one panel: comment generation, DM replies, account warming, reactions, and channel and group discovery. What each does, and what it costs.',
+    desc: 'Neurocommenting, Active Warmup, NeuroDialogs, Mass Reactions, channel and group parsers, profile templates and account management. What each one does and when to use it.',
   },
   {
     file: 'pricing.html', route: '/pricing', kicker: 'PRICING',
-    title: 'Pricing — pick the modules you need — ATREOX',
+    title: 'Pricing — Pay Per Module From €20/month | ATREOX',
     heading: 'What it costs',
     short: 'Per module, or the full licence',
-    desc: 'Modules are priced one at a time from EUR 20/month, or take all of them on one licence for EUR 120. Monthly or annual, cancel any time, no free trial.',
+    desc: 'Take single modules from €20 a month or the full licence at €120. No setup fee, no minimum term, and a free tier that does not expire.',
   },
   {
     file: 'guides.html', route: '/guides', kicker: 'GUIDES',
-    title: 'Telegram automation guides — setup, limits and safety — ATREOX',
+    title: 'Guides: Buying Telegram Accounts, Proxies, Warmup | ATREOX',
     heading: 'Guides',
     short: 'Ten walkthroughs, end to end',
-    desc: 'Ten walkthroughs: buying Telegram accounts, matching proxies, warming accounts safely, finding channels worth commenting in, and every control in the panel.',
+    desc: 'How to buy Telegram accounts that survive, how to set proxies up so they do not get flagged, and what our own purchases actually did. Including the results that went against us.',
   },
   {
     file: 'contact.html', route: '/contact', kicker: 'CONTACT',
-    title: 'Contact ATREOX — one form, one inbox',
+    title: 'Contact ATREOX',
     heading: 'Get in touch',
     short: 'Billing, bugs, refunds',
-    desc: 'Billing, something broken, a refund, or anything else. One form that lands in one inbox, answered Mon-Fri 08:00-20:00 CET.',
+    desc: 'Questions about accounts, proxies or a module before you buy. We answer with the reason, not just the fix.',
   },
   {
     /* The first of the free tools, and the entry point of the tools
@@ -679,45 +679,45 @@ const SITE_PAGES = [
        their own pages and their own sitemap rows, and the address a person
        actually guesses had nothing behind it. */
     file: 'tools.html', route: '/tools', kicker: 'FREE TOOLS',
-    title: 'Free Telegram tools — account and proxy checkers — ATREOX',
+    title: 'Free Telegram Tools — Proxy Checker and Account Checker',
     heading: 'Free tools',
     short: 'Check it before you buy it',
-    desc: 'Two free checkers for the two things a batch of Telegram accounts can be wrong about: whether the accounts can actually post, and whether Telegram accepts the proxies. No account, three checks an hour each.',
+    desc: 'Check a proxy or an account before you spend money on a batch. Both tools are free, neither needs a login, and neither stores what you upload.',
   },
   {
     file: 'tools/proxy-checker.html', route: '/tools/proxy-checker', kicker: 'FREE TOOL',
-    title: 'Free Telegram proxy checker — country, DC and exit IP — ATREOX',
+    title: 'Free Telegram Proxy Checker — Test SOCKS5 Before You Buy',
     heading: 'Proxy checker',
     short: 'What Telegram sees through it',
-    desc: 'Check a SOCKS5, HTTP or MTProto proxy against Telegram: the country and nearest data centre Telegram itself reports through it, the real exit IP, its network and type, and both latencies. Free, three checks an hour, no account.',
+    desc: 'Paste a proxy line and see whether Telegram actually accepts it: the exit country, the country Telegram sees, and how long the handshake takes. Free, no login.',
   },
   {
     file: 'tools/account-checker.html', route: '/tools/account-checker', kicker: 'FREE TOOL',
-    title: 'Free Telegram account checker — can it post, age, DC, device — ATREOX',
+    title: 'Free Telegram Account Checker — Age, Bans, Data Centre',
     heading: 'Account checker',
     short: 'What Telegram reports about it',
-    desc: 'Upload a Telegram session and see the facts Telegram reports: whether the account can post, its approximate age, home data centre and device. No score. Free, three checks an hour, no account; the session is deleted immediately.',
+    desc: 'Upload one account before you buy the batch. Registration age, spam limits, Telegram flags, home data centre, and the oldest session we can actually prove. Free, no login, nothing stored.',
   },
   {
     file: 'privacy.html', route: '/privacy', kicker: 'LEGAL',
-    title: 'Privacy Policy — ATREOX',
+    title: 'Privacy Policy | ATREOX',
     heading: 'Privacy Policy',
     short: 'What we hold, and why',
-    desc: 'What ATREOX holds as controller, what it processes on your behalf, how long each kind of record is kept, and the rights you have over any of it.',
+    desc: 'What ATREOX stores, what it does not, and how uploaded sessions and account files are handled.',
   },
   {
     file: 'terms.html', route: '/terms', kicker: 'LEGAL',
-    title: 'Terms of Service — ATREOX',
+    title: 'Terms of Service | ATREOX',
     heading: 'Terms of Service',
     short: 'What you agree to',
-    desc: 'The terms for using ATREOX: the accounts you supply and what you are responsible for, acceptable use, billing and module changes, and the referral programme.',
+    desc: 'The terms that apply to ATREOX subscriptions, modules and free tools.',
   },
   {
     file: 'refund.html', route: '/refund', kicker: 'LEGAL',
-    title: 'Refund Policy — ATREOX',
+    title: 'Refund Policy | ATREOX',
     heading: 'Refund Policy',
     short: 'What you can get back',
-    desc: 'Cancel a new subscription within 14 days and get your money back, no reason needed. What is refundable, what is not, and how to ask.',
+    desc: 'When a refund applies, how to request one, and how the 14-day right of withdrawal works.',
   },
 ];
 
@@ -725,8 +725,8 @@ const SITE_PAGES = [
    generated: same table, one row, so the copy lives in one place. */
 const HOME_PAGE = {
   route: '/', kicker: 'ATREOX', heading: 'Telegram growth', short: 'Eight modules, one panel',
-  title: 'ATREOX — Telegram automation: comments, DMs, warming, discovery',
-  desc: 'Run a network of Telegram accounts from one panel: AI comments on the channels your audience reads, DM replies, account warming, reactions, and channel discovery. Eight modules, priced separately.',
+  title: 'Telegram Traffic From Comments, On Autopilot — ATREOX',
+  desc: 'AI accounts comment under posts in the channels your audience already reads, and the traffic comes back to yours. Eight modules, pay only for the ones you use.',
 };
 
 /* ── Structured data ───────────────────────────────────────────────
