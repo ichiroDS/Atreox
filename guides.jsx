@@ -153,28 +153,35 @@ function GuideWall({ guides, offset, onOpen, fill }) {
   );
 }
 
+/* The index's own words at module scope, so scripts/prerender.mjs can
+   put them in the HTML a crawler downloads. Every guide already has a
+   prerendered page of its own; /guides is the hub that links them, and
+   it was shipping an empty body. */
+const HERO = {
+  badge: 'Guides',
+  title: 'Learn it once, then run it.',
+  sub: 'Two things to get right before you start, and one guide per module. Open any of them — each one walks the panel end to end.',
+};
+
+const GROUPS = [
+  { key: 'setup', title: 'Before you start', lede: 'The two things you buy elsewhere and bring with you.' },
+  { key: 'module', title: 'Module guides', lede: 'One per module, in the order the pipeline runs them.' },
+];
+
 function GuideIndex({ onOpen }) {
   const setup = GUIDES.filter(g => g.group === 'setup');
   const modules = GUIDES.filter(g => g.group === 'module');
   return (
     <div>
-      <PageHero
-        badge="Guides"
-        title="Learn it once, then run it."
-        sub="Two things to get right before you start, and one guide per module. Open any of them — each one walks the panel end to end."
-      />
+      <PageHero {...HERO} />
 
       <PageSection style={{ paddingBottom: 30 }}>
-        <SectionLockup title="Before you start">
-          The two things you buy elsewhere and bring with you.
-        </SectionLockup>
+        <SectionLockup title={GROUPS[0].title}>{GROUPS[0].lede}</SectionLockup>
         <GuideWall guides={setup} offset={0} onOpen={onOpen} fill />
       </PageSection>
 
       <PageSection style={{ paddingTop: 0 }}>
-        <SectionLockup title="Module guides">
-          One per module, in the order the pipeline runs them.
-        </SectionLockup>
+        <SectionLockup title={GROUPS[1].title}>{GROUPS[1].lede}</SectionLockup>
         <GuideWall guides={modules} offset={setup.length} onOpen={onOpen} />
       </PageSection>
     </div>
@@ -946,3 +953,26 @@ function GuidesPage({ setPage }) {
    can verify behaviourally - the prerendered HTML this repo does check
    comes from prerender.mjs, not from these components. */
 Object.assign(window, { GuidesPage, ReaderBlocks, ChapterNav, ReaderHeading });
+
+/* ── The same words, as data, for scripts/prerender.mjs ───────────
+   The guide list comes from GUIDES in catalog.jsx, and every address
+   from guideHref — the one place a guide's address is spelled. So the
+   hub's prerendered body cannot list a guide that does not exist or
+   point at one by the wrong path. */
+(window.PAGE_COPY || (window.PAGE_COPY = {}))['/guides'] = {
+  kicker: HERO.badge,
+  h1: HERO.title,
+  lead: HERO.sub,
+  sections: GROUPS.map((g) => ({
+    title: g.title,
+    blocks: [
+      ['p', g.lede],
+      ...GUIDES.filter((x) => x.group === g.key).flatMap((x) => [
+        ['card', { kicker: x.short, blocks: [
+          ['p', x.summary],
+          ['linkout', { href: guideHref(x), label: x.title }],
+        ] }],
+      ]),
+    ],
+  })),
+};

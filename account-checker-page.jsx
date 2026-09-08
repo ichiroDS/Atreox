@@ -56,6 +56,24 @@ const FACTS = [
   ['Free, right here', 'Three checks an hour, no account. A whole partya at once, with no limit and a saved history, is the panel — included with any module.'],
 ];
 
+/* The hero as data, not as props typed into the JSX: it is the page's
+   H1 and opening paragraph, and scripts/prerender.mjs has to read both
+   to put a real body in the HTML a crawler downloads. Mirrors HERO in
+   tools-page.jsx — the two checker pages are the same page twice. */
+const HERO = {
+  badge: 'FREE TOOL',
+  title: 'Telegram account checker',
+  sub:
+    'Upload a session and see what Telegram reports about the account — whether it can ' +
+    'post, its age, data centre and device. No score, no guess. The session is deleted ' +
+    'the instant the check finishes.',
+};
+
+const LEDES = {
+  readings: 'Whether an account is reachable is easy. Whether it can actually do the one thing it was bought for — post — is the question this answers.',
+  facts: 'The things worth knowing up front, rather than after.',
+};
+
 function CtaButton({ children }) {
   return (
     <a href={PANEL_URL}
@@ -76,11 +94,7 @@ function CtaButton({ children }) {
 function AccountCheckerPage({ setPage }) {
   return (
     <div>
-      <PageHero
-        badge="FREE TOOL"
-        title="Telegram account checker"
-        sub="Upload a session and see what Telegram reports about the account — whether it can post, its age, data centre and device. No score, no guess. The session is deleted the instant the check finishes."
-      />
+      <PageHero {...HERO} />
 
       <PageSection>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBottom: 22 }}>
@@ -92,10 +106,7 @@ function AccountCheckerPage({ setPage }) {
           <AccountCheckerWidget />
         </div>
 
-        <SectionLockup title="What it tells you">
-          Whether an account is reachable is easy. Whether it can actually do the
-          one thing it was bought for — post — is the question this answers.
-        </SectionLockup>
+        <SectionLockup title="What it tells you">{LEDES.readings}</SectionLockup>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18 }}>
           {READINGS.map(({ icon: Icon, title, body }) => (
@@ -109,9 +120,7 @@ function AccountCheckerPage({ setPage }) {
       </PageSection>
 
       <PageSection style={{ paddingTop: 0 }}>
-        <SectionLockup title="Before you use it">
-          The things worth knowing up front, rather than after.
-        </SectionLockup>
+        <SectionLockup title="Before you use it">{LEDES.facts}</SectionLockup>
 
         <div style={{ display: 'grid', gap: 0 }}>
           {FACTS.map(([term, detail]) => (
@@ -138,3 +147,20 @@ function AccountCheckerPage({ setPage }) {
 }
 
 Object.assign(window, { AccountCheckerPage });
+
+/* ── The same words, as data, for scripts/prerender.mjs ─────────── */
+(window.PAGE_COPY || (window.PAGE_COPY = {}))['/tools/account-checker'] = {
+  kicker: HERO.badge,
+  h1: HERO.title,
+  lead: HERO.sub,
+  sections: [
+    { title: 'What it tells you', blocks: [['p', LEDES.readings], ['kv', READINGS.map((r) => [r.title, r.body])]] },
+    { title: 'Before you use it', blocks: [['p', LEDES.facts], ['kv', FACTS]] },
+    { title: 'The rest of it', blocks: [
+      ['linkout', { href: '/tools/proxy-checker', label: 'Proxy checker — country, DC and exit IP' }],
+      ['linkout', { href: '/guides/buying-telegram-accounts', label: 'How to buy Telegram accounts: TData, GEO, testing' }],
+      ['linkout', { href: '/blog/how-to-check-telegram-account-before-buying', label: 'How to check a Telegram account before buying' }],
+      ['linkout', { href: '/tools', label: 'All free tools' }],
+    ] },
+  ],
+};

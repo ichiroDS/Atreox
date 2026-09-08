@@ -61,6 +61,24 @@ const FACTS = [
   ['Free, right here', 'Three checks an hour, no account. Need a whole pack at once, with no limit and a saved history? That’s the panel, included with any module.'],
 ];
 
+/* The hero as data, not as props typed into the JSX: it is the page's
+   H1 and opening paragraph, and scripts/prerender.mjs has to read both
+   to put a real body in the HTML a crawler downloads. A string typed
+   inside a component is invisible to that. */
+const HERO = {
+  badge: 'FREE TOOL',
+  title: 'Telegram proxy checker',
+  sub:
+    'Check whether a proxy actually works with Telegram — and see the country and data ' +
+    'centre Telegram reports through it, next to the real exit IP and the network behind it.',
+};
+
+/* The two section headings, for the same reason. */
+const LEDES = {
+  readings: 'A proxy being reachable and a proxy being usable for Telegram are two different questions. This answers the second one.',
+  facts: 'The things worth knowing up front, rather than after.',
+};
+
 function CtaButton({ children }) {
   return (
     <a href={PANEL_URL}
@@ -81,11 +99,7 @@ function CtaButton({ children }) {
 function ProxyCheckerPage({ setPage }) {
   return (
     <div>
-      <PageHero
-        badge="FREE TOOL"
-        title="Telegram proxy checker"
-        sub="Check whether a proxy actually works with Telegram — and see the country and data centre Telegram reports through it, next to the real exit IP and the network behind it."
-      />
+      <PageHero {...HERO} />
 
       <PageSection>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBottom: 22 }}>
@@ -115,10 +129,7 @@ function ProxyCheckerPage({ setPage }) {
           <ProxyBatchWidget />
         </div>
 
-        <SectionLockup title="What it tells you">
-          A proxy being reachable and a proxy being usable for Telegram are two
-          different questions. This answers the second one.
-        </SectionLockup>
+        <SectionLockup title="What it tells you">{LEDES.readings}</SectionLockup>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18 }}>
           {READINGS.map(({ icon: Icon, title, body }) => (
@@ -136,9 +147,7 @@ function ProxyCheckerPage({ setPage }) {
       </PageSection>
 
       <PageSection style={{ paddingTop: 0 }}>
-        <SectionLockup title="Before you use it">
-          The things worth knowing up front, rather than after.
-        </SectionLockup>
+        <SectionLockup title="Before you use it">{LEDES.facts}</SectionLockup>
 
         <div style={{ display: 'grid', gap: 0 }}>
           {FACTS.map(([term, detail]) => (
@@ -169,3 +178,24 @@ function ProxyCheckerPage({ setPage }) {
 }
 
 Object.assign(window, { ProxyCheckerPage });
+
+/* ── The same words, as data, for scripts/prerender.mjs ───────────
+   Built from the constants above, never retyped. The interactive
+   widgets are deliberately absent: the prerendered block is deleted by
+   app.jsx the moment React mounts, so a form in it would be a form
+   nobody can ever use. What a crawler needs from this page is the
+   argument around the tool, and that is what is here. */
+(window.PAGE_COPY || (window.PAGE_COPY = {}))['/tools/proxy-checker'] = {
+  kicker: HERO.badge,
+  h1: HERO.title,
+  lead: HERO.sub,
+  sections: [
+    { title: 'What it tells you', blocks: [['p', LEDES.readings], ['kv', READINGS.map((r) => [r.title, r.body])]] },
+    { title: 'Before you use it', blocks: [['p', LEDES.facts], ['kv', FACTS]] },
+    { title: 'The rest of it', blocks: [
+      ['linkout', { href: '/tools/account-checker', label: 'Account checker — can it post, age, DC, device' }],
+      ['linkout', { href: '/guides/proxies-for-telegram-accounts', label: 'Proxies for Telegram accounts: which type to buy' }],
+      ['linkout', { href: '/tools', label: 'All free tools' }],
+    ] },
+  ],
+};

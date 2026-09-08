@@ -91,17 +91,41 @@ const HONESTY = [
   },
 ];
 
+/* The hero, as data rather than as props typed into the JSX.
+
+   Two reasons. It is the page's H1 and its opening paragraph, so
+   scripts/prerender.mjs needs to read it to put a real body in the
+   HTML a crawler downloads — and a string typed inside a component is
+   invisible to that. And this page was passing `kicker`/`lede` to a
+   PageHero whose signature is `badge`/`title`/`sub`, so the badge and
+   the lede rendered as nothing at all: the hub advertised in search as
+   a landing page has been shipping a bare headline over an empty
+   paragraph. Naming the props once, here, is what makes that kind of
+   mismatch a one-line fix instead of an invisible one. */
+const HERO = {
+  badge: 'FREE TOOLS',
+  title: 'Check it before you buy it',
+  sub:
+    'Two free checkers for the two things a batch of Telegram accounts can be wrong ' +
+    'about: the accounts, and the proxies you plan to run them on. No account needed.',
+};
+
+/* The reading half of the loop, as data for the same reason: these are
+   the only outbound links on the page, and a crawler that arrives here
+   should find them in the HTML rather than after React mounts. */
+const READS = [
+  { href: '/blog/how-to-check-telegram-account-before-buying', page: 'blog',
+    label: 'How to check a Telegram account before buying' },
+  { href: '/guides/buying-telegram-accounts',
+    label: 'The full buying guide: TData, GEO, rest time, testing a seller' },
+  { href: '/guides/proxies-for-telegram-accounts',
+    label: 'Proxies for Telegram accounts: which type, and matching the GEO' },
+];
+
 function ToolsHubPage({ setPage }) {
   return (
     <div>
-      <PageHero
-        kicker="FREE TOOLS"
-        title="Check it before you buy it"
-        lede={
-          'Two free checkers for the two things a batch of Telegram accounts can be wrong ' +
-          'about: the accounts, and the proxies you plan to run them on. No account needed.'
-        }
-      />
+      <PageHero {...HERO} />
 
       <PageSection>
         <SectionLockup
@@ -266,30 +290,22 @@ function ToolsHubPage({ setPage }) {
           title="Working out what the answer means"
         />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 20 }}>
-          <a
-            href="/blog/how-to-check-telegram-account-before-buying"
-            onClick={(e) => {
-              if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
-              e.preventDefault();
-              setPage('blog');
-              window.history.pushState({}, '', '/blog/how-to-check-telegram-account-before-buying');
-            }}
-            style={{ color: ACCENT, textDecoration: 'none', fontSize: '1rem' }}
-          >
-            How to check a Telegram account before buying →
-          </a>
-          <a
-            href="/guides/buying-telegram-accounts"
-            style={{ color: ACCENT, textDecoration: 'none', fontSize: '1rem' }}
-          >
-            The full buying guide: TData, GEO, rest time, testing a seller →
-          </a>
-          <a
-            href="/guides/proxies-for-telegram-accounts"
-            style={{ color: ACCENT, textDecoration: 'none', fontSize: '1rem' }}
-          >
-            Proxies for Telegram accounts: which type, and matching the GEO →
-          </a>
+          {READS.map((read) => (
+            <a
+              key={read.href}
+              href={read.href}
+              onClick={(e) => {
+                if (!read.page) return;
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+                e.preventDefault();
+                setPage(read.page);
+                window.history.pushState({}, '', read.href);
+              }}
+              style={{ color: ACCENT, textDecoration: 'none', fontSize: '1rem' }}
+            >
+              {read.label} &rarr;
+            </a>
+          ))}
         </div>
       </PageSection>
 
@@ -303,3 +319,38 @@ function ToolsHubPage({ setPage }) {
 }
 
 window.ToolsHubPage = ToolsHubPage;
+
+/* ── The same words, as data, for scripts/prerender.mjs ───────────
+   Built from the constants above rather than retyped, so there is one
+   copy of every sentence on this page and the prerendered body cannot
+   drift from what a reader sees. The block kinds are the guides'
+   vocabulary — prerender.mjs already knows how to render them. */
+(window.PAGE_COPY || (window.PAGE_COPY = {}))['/tools'] = {
+  kicker: HERO.badge,
+  h1: HERO.title,
+  lead: HERO.sub,
+  sections: [
+    {
+      title: 'What do you want to check?',
+      blocks: [
+        ['cards', TOOLS.map((t) => ({
+          kicker: t.kicker,
+          blocks: [
+            ['p', t.question],
+            ['p', t.body],
+            ['bullets', t.points],
+            ['linkout', { href: t.href, label: 'Open the ' + t.title.toLowerCase() }],
+          ],
+        }))],
+      ],
+    },
+    {
+      title: 'What free means here',
+      blocks: [['kv', HONESTY.map((h) => [h.title, h.body])]],
+    },
+    {
+      title: 'Working out what the answer means',
+      blocks: READS.map((r) => ['linkout', { href: r.href, label: r.label }]),
+    },
+  ],
+};

@@ -112,8 +112,16 @@ const UPDATED = 'August 27, 2026';
    somebody decides which is intended; and the VAT inclusive/exclusive
    statement in section 6, which depends on the entity.
    ────────────────────────────────────────────────────────────────── */
-function TermsPage({ setPage }) {
-  const sections = [
+/* Lifted out of the component so scripts/prerender.mjs can read it:
+   these are the page's own words, and a crawler has to get them from
+   the HTML rather than after React mounts. LegalPage renders exactly
+   this object, so the two cannot disagree. */
+const TERMS = {
+  badge: "Legal",
+  title: "Terms of Service.",
+  intro:
+    "These terms replace an earlier version written for a different product. They describe what ATREOX AI actually is: automation software that runs Telegram accounts you supply.",
+  sections: [
     {
       heading: 'What these terms cover',
       body: 'These Terms govern use of ATREOX AI (the "Service") — the website at atreoxai.com, the dashboard at app.atreoxai.com, and the automation engine behind them. By creating an account or paying for a subscription you agree to them. If you are agreeing on behalf of a company, you confirm you are authorised to bind it.',
@@ -209,17 +217,11 @@ function TermsPage({ setPage }) {
       heading: 'Contact',
       body: 'hello@atreoxai.com — Mon–Fri, 08:00–20:00 CET.',
     },
-  ];
-  return (
-    <LegalPage
-      badge="Legal"
-      title="Terms of Service."
-      lastUpdated={UPDATED}
-      intro="These terms replace an earlier version written for a different product. They describe what ATREOX AI actually is: automation software that runs Telegram accounts you supply."
-      sections={sections}
-      setPage={setPage}
-    />
-  );
+  ],
+};
+
+function TermsPage({ setPage }) {
+  return <LegalPage {...TERMS} lastUpdated={UPDATED} setPage={setPage} />;
 }
 
 /* ── Privacy Policy ───────────────────────────────────────────────
@@ -240,8 +242,16 @@ function TermsPage({ setPage }) {
    in a transfers section is exactly the kind of confident wrong answer
    this document should not contain.
    ────────────────────────────────────────────────────────────────── */
-function PrivacyPage({ setPage }) {
-  const sections = [
+/* Lifted out of the component so scripts/prerender.mjs can read it:
+   these are the page's own words, and a crawler has to get them from
+   the HTML rather than after React mounts. LegalPage renders exactly
+   this object, so the two cannot disagree. */
+const PRIVACY = {
+  badge: "Legal",
+  title: "Privacy Policy.",
+  intro:
+    "This policy replaces an earlier version written for a different product, which described cookies this site does not set. One section is deliberately absent: we are not yet incorporated, so there is no registered entity to name as data controller, and naming a placeholder would be worse than the gap.",
+  sections: [
     {
       heading: 'Two roles, and why it matters',
       body: [
@@ -322,17 +332,11 @@ function PrivacyPage({ setPage }) {
       heading: 'Contact',
       body: 'hello@atreoxai.com',
     },
-  ];
-  return (
-    <LegalPage
-      badge="Legal"
-      title="Privacy Policy."
-      lastUpdated={UPDATED}
-      intro="This policy replaces an earlier version written for a different product, which described cookies this site does not set. One section is deliberately absent: we are not yet incorporated, so there is no registered entity to name as data controller, and naming a placeholder would be worse than the gap."
-      sections={sections}
-      setPage={setPage}
-    />
-  );
+  ],
+};
+
+function PrivacyPage({ setPage }) {
+  return <LegalPage {...PRIVACY} lastUpdated={UPDATED} setPage={setPage} />;
 }
 
 /* ── Refund Policy ────────────────────────────────────────────────
@@ -343,8 +347,16 @@ function PrivacyPage({ setPage }) {
    anything. Promising less than the law gives is both pointless and
    looks bad when somebody notices.
    ────────────────────────────────────────────────────────────────── */
-function RefundPage({ setPage }) {
-  const sections = [
+/* Lifted out of the component so scripts/prerender.mjs can read it:
+   these are the page's own words, and a crawler has to get them from
+   the HTML rather than after React mounts. LegalPage renders exactly
+   this object, so the two cannot disagree. */
+const REFUND = {
+  badge: "Legal",
+  title: "Refund Policy.",
+  intro:
+    "What you can get back, when, and what you cannot. This replaces the single paragraph that used to live inside the Terms.",
+  sections: [
     {
       heading: 'Scope',
       body: 'This policy covers subscription fees paid to ATREOX AI through Stripe. It forms part of the Terms of Service and does not limit the statutory rights described below.',
@@ -392,17 +404,31 @@ function RefundPage({ setPage }) {
       heading: 'Changes',
       body: 'We may update this policy. Changes apply to payments made after the updated version is published, never retroactively to a payment already taken.',
     },
-  ];
-  return (
-    <LegalPage
-      badge="Legal"
-      title="Refund Policy."
-      lastUpdated={UPDATED}
-      intro="What you can get back, when, and what you cannot. This replaces the single paragraph that used to live inside the Terms."
-      sections={sections}
-      setPage={setPage}
-    />
-  );
+  ],
+};
+
+function RefundPage({ setPage }) {
+  return <LegalPage {...REFUND} lastUpdated={UPDATED} setPage={setPage} />;
 }
 
 Object.assign(window, { PrivacyPage, TermsPage, RefundPage });
+
+/* ── The same words, as data, for scripts/prerender.mjs ───────────
+   `body` is a string or an array of strings, exactly as LegalPage
+   consumes it, so this is a re-shaping of the objects above and not a
+   second copy of the text. */
+const legalCopy = (page) => ({
+  kicker: page.badge,
+  h1: page.title.replace(/\.$/, ''),
+  lead: page.intro,
+  sections: page.sections.map((s) => ({
+    title: s.heading,
+    blocks: (Array.isArray(s.body) ? s.body : [s.body]).map((t) => ['p', t]),
+  })),
+});
+
+Object.assign(window.PAGE_COPY || (window.PAGE_COPY = {}), {
+  '/terms': legalCopy(TERMS),
+  '/privacy': legalCopy(PRIVACY),
+  '/refund': legalCopy(REFUND),
+});

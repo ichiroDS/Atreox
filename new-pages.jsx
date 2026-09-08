@@ -494,6 +494,38 @@ function CatalogueBanner({ setPage }) {
   );
 }
 
+/* The page's own prose at module scope, so scripts/prerender.mjs can
+   read it. The prices are NOT repeated here — they come from MODULES
+   and FULL_MONTHLY/FULL_YEARLY in catalog.jsx, the same values the
+   cards render and the same ones pricingLd() puts in the structured
+   data, so a price can never be right in one of the three and stale in
+   another. The module SELECTOR is not prerendered: app.jsx deletes the
+   prerendered block on mount, so an interactive control inside it
+   would be one nobody could ever use. */
+const HERO = {
+  badge: 'Pricing',
+  title: 'Pay for what you run.',
+  sub: 'ATREOX is modular. Take the modules you need, or take the whole licence — two of the eight are free either way.',
+};
+
+const BUILD_LEDE =
+  'The six you pay for, in the order they appear in the panel. Select what you need — the total '
+  + 'updates as you go, and the full licence sits beside it for comparison.';
+
+const WHY_PRICES_DIFFER =
+  "A module's price tracks how much computing it needs. Neurocommenting polls hundreds of channels "
+  + 'continuously and generates a comment for every post that appears; NeuroDialogs holds a live '
+  + 'connection open for each account and writes full replies. Active Warmup works to a schedule, '
+  + 'Mass Reactions runs in short bursts, and the parsers do heavy but brief searches — which is why '
+  + 'they sit at the bottom of the list.';
+
+const HOW_BILLING_WORKS = [
+  'Every module is its own monthly line item. Add one and it starts; drop one and the rest '
+  + 'keep running. Cancel from the panel and you keep access to the end of the period.',
+  () => 'Only the full licence is also sold by the year, at ' + eur(FULL_YEARLY)
+    + " — and it covers any module released while it's active, at no extra cost.",
+];
+
 function PricingPage({ setPage }) {
   const gridRef = useRef(null);
   const gridIn = useInView(gridRef, { once: true, amount: 0.05 });
@@ -506,11 +538,7 @@ function PricingPage({ setPage }) {
 
   return (
     <div className="pricing-page">
-      <PageHero
-        badge="Pricing"
-        title="Pay for what you run."
-        sub="ATREOX is modular. Take the modules you need, or take the whole licence — two of the eight are free either way."
-      />
+      <PageHero {...HERO} />
 
       <CatalogueBanner setPage={setPage} />
 
@@ -518,10 +546,7 @@ function PricingPage({ setPage }) {
           everything costs on the right. The two prices sit in the same rail so
           the comparison never needs a scroll. */}
       <PageSection>
-        <SectionLockup title="Build your licence">
-          The six you pay for, in the order they appear in the panel. Select what you need — the total
-          updates as you go, and the full licence sits beside it for comparison.
-        </SectionLockup>
+        <SectionLockup title="Build your licence">{BUILD_LEDE}</SectionLockup>
 
         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
           <div style={{ flex: '1 1 520px', minWidth: 0 }}>
@@ -571,11 +596,7 @@ function PricingPage({ setPage }) {
           <div className="panel" style={{ flex: '1 1 380px', padding: '34px 32px' }}>
             <span className="overline" style={{ display: 'block', marginBottom: 16 }}>{'// '}Why prices differ</span>
             <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.9rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.75 }}>
-              A module's price tracks how much computing it needs. Neurocommenting polls hundreds of channels
-              continuously and generates a comment for every post that appears; NeuroDialogs holds a live
-              connection open for each account and writes full replies. Active Warmup works to a schedule,
-              Mass Reactions runs in short bursts, and the parsers do heavy but brief searches — which is why
-              they sit at the bottom of the list.
+              {WHY_PRICES_DIFFER}
             </p>
           </div>
 
@@ -585,12 +606,10 @@ function PricingPage({ setPage }) {
           <div className="panel" style={{ flex: '1 1 380px', padding: '34px 32px' }}>
             <span className="overline" style={{ display: 'block', marginBottom: 16 }}>{'// '}How billing works</span>
             <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.9rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.75, marginBottom: 16 }}>
-              Every module is its own monthly line item. Add one and it starts; drop one and the rest
-              keep running. Cancel from the panel and you keep access to the end of the period.
+              {HOW_BILLING_WORKS[0]}
             </p>
             <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.9rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.75 }}>
-              Only the full licence is also sold by the year, at {eur(FULL_YEARLY)} — and it covers any
-              module released while it's active, at no extra cost.
+              {HOW_BILLING_WORKS[1]()}
             </p>
           </div>
         </div>
@@ -637,3 +656,37 @@ function PricingPage({ setPage }) {
 }
 
 Object.assign(window, { PricingPage });
+
+/* ── The same words, as data, for scripts/prerender.mjs ─────────── */
+(window.PAGE_COPY || (window.PAGE_COPY = {}))['/pricing'] = {
+  kicker: HERO.badge,
+  h1: HERO.title,
+  lead: HERO.sub,
+  sections: [
+    {
+      title: 'Build your licence',
+      blocks: [
+        ['p', BUILD_LEDE],
+        ['table', {
+          head: ['Module', 'Price', 'What it does'],
+          rows: MODULES.map((m) => [
+            m.name,
+            m.included ? 'Included' : eur(m.price) + '/month',
+            m.desc,
+          ]),
+        }],
+        ['p', 'The full licence covers every module for ' + eur(FULL_MONTHLY)
+          + ' a month, or ' + eur(FULL_YEARLY) + ' a year.'],
+      ],
+    },
+    { title: 'Why prices differ', blocks: [['p', WHY_PRICES_DIFFER]] },
+    { title: 'How billing works', blocks: HOW_BILLING_WORKS.map(
+      (t) => ['p', typeof t === 'function' ? t() : t]) },
+    { title: 'Before you buy', blocks: [
+      ['linkout', { href: '/tools', label: 'Free proxy and account checkers — three checks an hour, no account' }],
+      ['linkout', { href: '/functions', label: 'What each module does, in full' }],
+      ['linkout', { href: '/referral-program', label: 'Referral programme — 25% recurring' }],
+      ['linkout', { href: '/refund', label: 'Refund policy' }],
+    ] },
+  ],
+};

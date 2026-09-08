@@ -665,6 +665,36 @@ function EngineGrid({ setPage, compact }) {
 }
 
 /* ── Hero ── */
+/* ── The home page's own words, as data ───────────────────────────
+   Lifted out of the JSX so scripts/prerender.mjs can put them in the
+   HTML a crawler downloads. index.html shipped an empty body for its
+   whole life — no H1, no sentence saying what this is — which is a
+   large part of why Google indexed the guides and not the front page.
+
+   Only the copy that ARGUES is here. The eight animated module demos,
+   the pipeline diagram and the showcase are presentation: they mean
+   nothing as static text and are deliberately left to React. */
+const HERO = {
+  overline: 'The ultimate Telegram growth engine',
+  title: 'AI-powered Telegram growth, on autopilot.',
+  lead:
+    'ATREOX finds the channels your audience already reads, warms a network of accounts until they '
+    + 'behave like real ones, and then comments, answers DMs and reacts from those accounts — around '
+    + 'the clock, from one panel you control.',
+  builtFor:
+    'Built for: crypto, AI & tech creators — and anyone growing a Telegram funnel · '
+    + 'English-language market · 24/7 automation',
+};
+
+const WHAT_THIS_IS = {
+  title: 'One panel that runs a network of Telegram accounts',
+  body:
+    'ATREOX is a cloud panel, not a program you install. You bring Telegram accounts and proxies; '
+    + 'it handles everything they then do — finding targets, building history, writing comments, '
+    + "answering messages, adding reactions — with every setting exposed and every action logged. "
+    + "Take one module or take all of them; they're billed and run separately.",
+};
+
 function Hero({ setPage }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -686,9 +716,9 @@ function Hero({ setPage }) {
         <div style={{ flex: '1 1 430px', minWidth: 0 }}>
           <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}
             className="overline" style={{ display: 'block', marginBottom: 22 }}>
-            {'// '}<TypeText text="The ultimate Telegram growth engine" startDelay={1200} /><span className="cursor" />
+            {'// '}<TypeText text={HERO.overline} startDelay={1200} /><span className="cursor" />
           </motion.p>
-          <DecryptText text="AI-powered Telegram growth, on autopilot."
+          <DecryptText text={HERO.title}
             style={{ display: 'block', fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(2.7rem, 5.8vw, 4.4rem)', color: 'white', lineHeight: 1.08, letterSpacing: '-0.015em', maxWidth: 640, marginBottom: 20 }}
             startDelay={250}
             glowWords={['Telegram']}
@@ -700,9 +730,7 @@ function Hero({ setPage }) {
           </motion.p>
           <motion.p initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }} animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.8 }}
             style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.72)', maxWidth: 520, lineHeight: 1.65, marginBottom: 36 }}>
-            ATREOX finds the channels your audience already reads, warms a network of accounts until they
-            behave like real ones, and then comments, answers DMs and reacts from those accounts — around
-            the clock, from one panel you control.
+            {HERO.lead}
           </motion.p>
           <motion.div initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }} animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.1 }}
             style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', marginBottom: 30 }}>
@@ -718,7 +746,7 @@ function Hero({ setPage }) {
           </motion.div>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4, duration: 0.7 }}
             style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.7rem', color: 'rgba(255,255,255,0.46)', letterSpacing: '0.08em', lineHeight: 1.7 }}>
-            Built for: crypto, AI & tech creators — and anyone growing a Telegram funnel · English-language market · 24/7 automation
+            {HERO.builtFor}
           </motion.p>
         </div>
 
@@ -746,13 +774,10 @@ function WhatThisIsSection({ setPage }) {
           initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
           <span className="overline" style={{ display: 'block', marginBottom: 16 }}>{'// '}What this is</span>
           <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'white', lineHeight: 1.1, letterSpacing: '-0.015em', marginBottom: 20 }}>
-            One panel that runs a network of Telegram accounts
+            {WHAT_THIS_IS.title}
           </h2>
           <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.78, maxWidth: 560 }}>
-            ATREOX is a cloud panel, not a program you install. You bring Telegram accounts and proxies;
-            it handles everything they then do — finding targets, building history, writing comments,
-            answering messages, adding reactions — with every setting exposed and every action logged.
-            Take one module or take all of them; they're billed and run separately.
+            {WHAT_THIS_IS.body}
           </p>
         </motion.div>
 
@@ -1519,11 +1544,14 @@ function ComparisonSection() {
 /* ══════════════════════════════════════
    6 — FAQ
 ══════════════════════════════════════ */
-function FAQSection({ setPage }) {
-  const ref  = useRef(null);
-  const inView = useInView(ref, { once: true, amount: 0.15 });
-  const [open, setOpen] = useState(null);
-  const faqs = [
+/* The seven questions, at module scope for the same reason as HERO:
+   they are the most search-shaped text on this page, and they were
+   reaching Google only if it chose to run the JavaScript. FAQSection
+   renders this array, so the two cannot drift.
+
+   Not marked up as FAQPage in the structured data, deliberately —
+   see the structured-data note in scripts/prerender.mjs. */
+const FAQS = [
     { q: 'Is it really automated?',
       a: "Yes. Setting it up takes about fifteen minutes — load your accounts, choose the channels, write the persona. After that you press Start in Neurocommenting and it goes: it watches for new posts, writes a comment under each one, waits out its own delays and keeps itself inside its rate limits. You don't feed it anything. You come back to read the log and collect the traffic." },
     { q: 'What do I need before I can start?',
@@ -1538,7 +1566,13 @@ function FAQSection({ setPage }) {
       a: 'No. The parsers search on your keywords in ten languages, and the comment and reply engines work from a prompt you write. Crypto and tech are where many users started; the same pipeline runs an AI-creator funnel or a content community without changing anything but the targets and the persona.' },
     { q: 'Is there a contract, or can I cancel anytime?',
       a: "It's a monthly subscription with no long-term contract. Cancel from the panel and you keep access through the end of the billing period. Only the full licence is also sold by the year." },
-  ];
+];
+
+function FAQSection({ setPage }) {
+  const ref  = useRef(null);
+  const inView = useInView(ref, { once: true, amount: 0.15 });
+  const [open, setOpen] = useState(null);
+  const faqs = FAQS;
   return (
     <section ref={ref} className="section-block" style={{ padding: '88px 5%', maxWidth: 860, margin: '0 auto' }}>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}
@@ -1738,3 +1772,48 @@ function HomePage({ setPage }) {
 }
 
 Object.assign(window, { HomePage });
+
+/* ── The same words, as data, for scripts/prerender.mjs ───────────
+   The front page's prerendered body: what this is, who it is for, what
+   it costs and the seven questions — built from the constants above and
+   from MODULES in catalog.jsx, never retyped. */
+(window.PAGE_COPY || (window.PAGE_COPY = {}))['/'] = {
+  kicker: 'ATREOX',
+  h1: HERO.title,
+  lead: HERO.lead,
+  sections: [
+    { title: 'What this is', blocks: [
+      ['p', WHAT_THIS_IS.body],
+      ['note', HERO.builtFor],
+    ] },
+    { title: 'The eight modules', blocks: [
+      ['kv', MODULES.map((m) => [m.name, m.desc])],
+      ['linkout', { href: '/functions', label: 'What each module does, in full' }],
+    ] },
+    { title: 'What it costs', blocks: [
+      ['p', 'Modules are billed one at a time from ' + eur(CHEAPEST_MODULE)
+        + ' a month; the full licence is ' + eur(FULL_MONTHLY) + ' a month or '
+        + eur(FULL_YEARLY) + ' a year. Two of the eight are included either way.'],
+      ['linkout', { href: '/pricing', label: 'Pricing' }],
+    ] },
+    { title: 'How it compares', blocks: [
+      ['table', {
+        head: ['', 'ATREOX', ...COMPARISON_COLUMNS],
+        rows: COMPARISON_ROWS.map((r) => [
+          r.label,
+          'yes',
+          ...r.marks.map((m) => (m === 'yes' ? 'yes' : m === 'no' ? 'no' : 'unconfirmed')),
+        ]),
+      }],
+    ] },
+    { title: 'Frequently asked questions', blocks: [
+      ['faq', FAQS],
+    ] },
+    { title: 'Where to go next', blocks: [
+      ['linkout', { href: '/tools', label: 'Free proxy and account checkers — no account needed' }],
+      ['linkout', { href: '/guides', label: 'Guides — setup, limits and safety' }],
+      ['linkout', { href: '/blog', label: 'Blog' }],
+      ['linkout', { href: '/contact', label: 'Contact' }],
+    ] },
+  ],
+};

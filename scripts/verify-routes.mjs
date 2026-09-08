@@ -107,6 +107,170 @@ check(
   isRouted('/tools'),
 );
 
+/* ── The body ────────────────────────────────────────────────────
+   A route that resolves is not the same as a page that exists.
+
+   WHY THIS EXISTS. On 2026-09-08 Google reported eleven pages it would
+   not index. All eleven were built, committed, routed, in the sitemap
+   and answering 200 - and all eleven served the SAME body, byte for
+   byte: 78 KB of shell whose only text was the source comments, no H1,
+   and not one <a href>. The home page, both free checkers, the pricing
+   page. Every check in this repo passed the whole time, because every
+   check was asking whether the page RESOLVED.
+
+   So the question this asks is the other one: does the page say
+   anything. The prerendered block is where a crawler's answer lives -
+   app.jsx deletes it the moment React mounts, so it is by definition
+   the version without JavaScript - and it must carry exactly one H1
+   and more prose than a stub.
+
+   Comments are stripped before counting, and that is the point rather
+   than tidiness: the eleven empty pages measured 401 characters of
+   "text" and every one of those characters was a developer comment
+   about how the build works. A floor that counts comments is a floor
+   that the exact failure this file exists for walks straight through.
+─────────────────────────────────────────────────────────────────── */
+
+/* Set from the thinnest page that is legitimately thin, with room to
+   spare: /blog is a heading, a lede and one post card - 353 characters
+   - and a list page with one item on it is short because there is one
+   item, not because it is broken. A floor above that would fail the
+   build for telling the truth.
+
+   It is still far above what the failure this file exists for scores.
+   The eleven empty pages had no prerendered block at all: nothing to
+   measure, zero characters, caught by the check above this one rather
+   than by the floor. What the floor catches is the next version of that
+   bug - a block that exists and is a husk. */
+const MIN_TEXT = 250;
+
+/* url -> the file Vercel serves for it, through the same rewrite table
+   read above rather than a second guess at the mapping. */
+function fileFor(url) {
+  if (url === '/') return 'index.html';
+  for (const rule of vercelJson.rewrites || []) {
+    if (rule.source.includes(':')) {
+      const re = new RegExp(`^${rule.source.replace(/:[A-Za-z0-9_]+/g, '([^/]+)')}$`);
+      const m = re.exec(url);
+      if (m) {
+        let dest = rule.destination;
+        let i = 1;
+        dest = dest.replace(/:[A-Za-z0-9_]+/g, () => m[i++]);
+        return dest.replace(/^\//, '');
+      }
+    } else if (rule.source === url) {
+      return rule.destination.replace(/^\//, '');
+    }
+  }
+  return null;
+}
+
+/* The prerendered block, as prose. Scripts, styles and comments go
+   first - a <script> is not something a reader reads, and a comment is
+   not something anybody reads. */
+function prerenderedText(html) {
+  const m = /<div id="prerendered"[\s\S]*?(?=<div id="root"><\/div>)/.exec(html);
+  if (!m) return null;
+  return m[0]
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&[a-z#0-9]+;/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function h1Count(html) {
+  const m = /<div id="prerendered"[\s\S]*?(?=<div id="root"><\/div>)/.exec(html);
+  return m ? (m[0].match(/<h1[\s>]/gi) || []).length : 0;
+}
+
+/* One page's verdict, as a list of complaints. Separated from the loop
+   so the negative controls below can run it over a page they have
+   deliberately broken, rather than trusting that it would have caught
+   them. */
+function auditBody(url, html) {
+  const bad = [];
+  const text = prerenderedText(html);
+  if (text === null) {
+    bad.push(`${url}: no prerendered block at all - a crawler gets an empty document`);
+    return bad;
+  }
+  const n = h1Count(html);
+  if (n !== 1) bad.push(`${url}: ${n} <h1> in the prerendered block, want exactly 1`);
+  if (text.length < MIN_TEXT) {
+    bad.push(`${url}: ${text.length} characters of text, want at least ${MIN_TEXT}`);
+  }
+  return bad;
+}
+
+console.log('\nBody: every advertised URL says something without JavaScript');
+
+const bodyPages = [];
+for (const url of urls) {
+  const file = fileFor(url);
+  if (!file) { check(`${url}: resolves to a file`, false, 'no rewrite maps it'); continue; }
+  const full = path.join(ROOT, file);
+  if (!fs.existsSync(full)) { check(`${url}: ${file} exists`, false); continue; }
+  bodyPages.push([url, fs.readFileSync(full, 'utf8')]);
+}
+
+const thin = bodyPages.flatMap(([url, html]) => auditBody(url, html));
+check(
+  `all ${bodyPages.length} advertised pages carry a body`,
+  thin.length === 0,
+  thin.length ? thin.slice(0, 6).join('; ') : 'every one has an H1 and real text',
+);
+
+/* The shortest and longest, printed rather than asserted: a number
+   drifting toward the floor is worth seeing before it crosses it. */
+{
+  const sized = bodyPages
+    .map(([url, html]) => [url, (prerenderedText(html) || '').length])
+    .sort((a, b) => a[1] - b[1]);
+  console.log(`         thinnest: ${sized[0][0]} (${sized[0][1]}), fattest: ${sized[sized.length - 1][0]} (${sized[sized.length - 1][1]})`);
+}
+
+/* NEGATIVE CONTROLS. A floor that nothing can fall through proves
+   nothing. Each of these is a real page, gutted the way the eleven were
+   gutted, run through the same auditBody the loop above uses. */
+{
+  const [url, html] = bodyPages.find(([u]) => u === '/') || bodyPages[0];
+
+  check(
+    'negative control: a page with NO prerendered block IS reported',
+    auditBody(url, html.replace(/<div id="prerendered"[\s\S]*?(?=<div id="root"><\/div>)/, '')).length > 0,
+    'this is the exact shape the home page shipped in until 2026-09-08',
+  );
+  check(
+    'negative control: a page with no <h1> IS reported',
+    auditBody(url, html.replace(/<h1[\s>]/i, '<h2 ')).length > 0,
+  );
+  check(
+    'negative control: a page emptied down to its comments IS reported',
+    auditBody(url, html.replace(
+      /<div id="prerendered"[\s\S]*?(?=<div id="root"><\/div>)/,
+      '<div id="prerendered"><!-- '
+      + 'a comment long enough to clear the floor on its own, which is why '
+      + 'comments are stripped before the text is measured: the eleven empty '
+      + 'pages scored 401 characters and every one of them was a comment '
+      + 'exactly like this one, sitting in the shell where the page should be. '
+      + 'Repeated so the raw block is comfortably over six hundred characters '
+      + 'and the only thing standing between it and a PASS is the stripping. '
+      + 'Repeated so the raw block is comfortably over six hundred characters '
+      + 'and the only thing standing between it and a PASS is the stripping. '
+      + '--></div>',
+    )).length > 0,
+    'comments must not count as content, or the original bug passes',
+  );
+  check(
+    'negative control: the real page does NOT trip any of the above',
+    auditBody(url, html).length === 0,
+    'if this fails, the checks are firing on everything and mean nothing',
+  );
+}
+
 /* ── The navigation ──────────────────────────────────────────────
    Every item in the header and the footer must lead somewhere that
    exists. A nav entry naming a page id nothing renders, or one whose

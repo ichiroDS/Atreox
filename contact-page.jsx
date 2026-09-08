@@ -336,6 +336,20 @@ function ContactForm() {
    contact form is worse than none, and this way the page can ship before
    the keys exist and starts working the moment they do, with no second
    deploy. */
+/* The page's own words, at module scope so scripts/prerender.mjs can
+   read them. The FORM is not here and must not be: app.jsx deletes the
+   prerendered block the moment React mounts, so a form inside it would
+   be a form nobody could ever submit. What a crawler needs from this
+   page is who to write to, about what, and when it is answered. */
+const HERO = {
+  badge: 'Contact',
+  title: 'Tell us what you need.',
+  sub: 'One form, one inbox. Billing, something broken, a refund, or anything else.',
+};
+
+const EMAIL = 'hello@atreoxai.com';
+const HOURS = 'Mon–Fri, 08:00–20:00 CET — weekend messages are answered Monday.';
+
 function ContactFallback() {
   return (
     <div style={{ padding: '6px 0', textAlign: 'center' }}>
@@ -355,11 +369,7 @@ function ContactFallback() {
 function ContactPage({ setPage }) {
   return (
     <div>
-      <PageHero
-        badge="Contact"
-        title="Tell us what you need."
-        sub="One form, one inbox. Billing, something broken, a refund, or anything else."
-      />
+      <PageHero {...HERO} />
 
       <PageSection style={{ paddingBottom: 40 }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
@@ -380,8 +390,8 @@ function ContactPage({ setPage }) {
           </div>
 
           <p className="g-note" style={{ marginTop: 32 }}>
-            Prefer email? <a href="mailto:hello@atreoxai.com" style={{ color: ACCENT, textDecoration: 'none' }}>hello@atreoxai.com</a> reaches
-            the same place. Mon–Fri, 08:00–20:00 CET — weekend messages are answered Monday.
+            Prefer email? <a href={`mailto:${EMAIL}`} style={{ color: ACCENT, textDecoration: 'none' }}>{EMAIL}</a> reaches
+            the same place. {HOURS}
           </p>
         </div>
       </PageSection>
@@ -393,3 +403,27 @@ function ContactPage({ setPage }) {
 }
 
 Object.assign(window, { ContactPage });
+
+/* ── The same words, as data, for scripts/prerender.mjs ─────────── */
+(window.PAGE_COPY || (window.PAGE_COPY = {}))['/contact'] = {
+  kicker: HERO.badge,
+  h1: HERO.title.replace(/\.$/, ''),
+  lead: HERO.sub,
+  sections: [
+    {
+      title: 'What to write about',
+      blocks: [
+        ['p', 'The form asks you to pick one of four, so the message lands with the right context attached.'],
+        ['bullets', TOPICS.map(([, label]) => label)],
+      ],
+    },
+    {
+      title: 'Reaching us without the form',
+      blocks: [
+        ['p', 'Email reaches the same inbox as the form: ' + EMAIL + '.'],
+        ['p', HOURS],
+        ['linkout', { href: 'mailto:' + EMAIL, label: EMAIL }],
+      ],
+    },
+  ],
+};

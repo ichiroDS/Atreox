@@ -15,7 +15,7 @@ const {
   motion, useInView,
   ArrowUpRight, Check, ChevronRight, Zap, BookOpen, Shield,
   PageHero, PageSection, SectionLockup, Pill, CrossLinks, FooterBar,
-  MONO, SERIF, MODULES, GUIDE_BY_MODULE, eur,
+  MONO, SERIF, MODULES, GUIDE_BY_MODULE, guideHref, eur,
 } = window;
 
 const DASHBOARD_URL = 'https://app.atreoxai.com';
@@ -431,6 +431,27 @@ function ModuleSection({ mod, index, setPage }) {
   );
 }
 
+/* Hero and section ledes at module scope so scripts/prerender.mjs can
+   read them: they are the page's H1 and its opening paragraphs, and a
+   crawler has to find them in the HTML rather than after React mounts. */
+const HERO = {
+  badge: 'Functions',
+  title: 'Eight modules. One panel.',
+  sub: "Every module runs on its own and they compose into one pipeline. Below: what each one does, the problem it exists for, how it behaves once it's running, and every setting it gives you.",
+};
+
+const INDEX_LEDE =
+  "Listed in the same order you'll find them in the panel, so this page and your sidebar "
+  + 'never disagree. Account Manager and Profile Templates sit under all of it and ship with '
+  + 'any purchase.';
+
+const CLOSE = {
+  title: 'Take the ones you need',
+  body:
+    'Modules are billed one by one, so a campaign that only needs discovery and commenting '
+    + 'only pays for discovery and commenting.',
+};
+
 function FunctionsPage({ setPage }) {
   const jump = (key) => {
     const el = document.getElementById('fn-' + key);
@@ -439,18 +460,10 @@ function FunctionsPage({ setPage }) {
 
   return (
     <div>
-      <PageHero
-        badge="Functions"
-        title="Eight modules. One panel."
-        sub="Every module runs on its own and they compose into one pipeline. Below: what each one does, the problem it exists for, how it behaves once it's running, and every setting it gives you."
-      />
+      <PageHero {...HERO} />
 
       <PageSection style={{ paddingBottom: 40 }}>
-        <SectionLockup title="The modules">
-          Listed in the same order you'll find them in the panel, so this page and your sidebar
-          never disagree. Account Manager and Profile Templates sit under all of it and ship with
-          any purchase.
-        </SectionLockup>
+        <SectionLockup title="The modules">{INDEX_LEDE}</SectionLockup>
         <ModuleIndex jump={jump} />
       </PageSection>
 
@@ -465,11 +478,10 @@ function FunctionsPage({ setPage }) {
             <Zap size={20} color={GREEN} />
           </div>
           <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.7rem, 3.3vw, 2.4rem)', color: 'white', marginBottom: 14, letterSpacing: '-0.01em', lineHeight: 1.1 }}>
-            Take the ones you need
+            {CLOSE.title}
           </h2>
           <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.55)', maxWidth: 500, margin: '0 auto 30px', lineHeight: 1.65 }}>
-            Modules are billed one by one, so a campaign that only needs discovery and commenting
-            only pays for discovery and commenting.
+            {CLOSE.body}
           </p>
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
             <button className="btn-solid" onClick={() => setPage('pricing')} style={{ padding: '15px 30px', fontSize: '0.8rem' }}>
@@ -490,3 +502,41 @@ function FunctionsPage({ setPage }) {
 }
 
 Object.assign(window, { FunctionsPage });
+
+/* ── The same words, as data, for scripts/prerender.mjs ───────────
+   The module write-ups come from MODULES in catalog.jsx — the same
+   array ModuleSection renders above — so this page's prerendered body
+   is the catalogue, not a summary of it typed a second time. */
+(window.PAGE_COPY || (window.PAGE_COPY = {}))['/functions'] = {
+  kicker: HERO.badge,
+  h1: HERO.title,
+  lead: HERO.sub,
+  sections: [
+    {
+      title: 'The modules',
+      blocks: [
+        ['p', INDEX_LEDE],
+        ['kv', MODULES.map((m) => [m.name, m.desc])],
+      ],
+    },
+    ...MODULES.map((m) => ({
+      id: 'fn-' + m.key,
+      title: m.name,
+      blocks: [
+        ['p', m.problem],
+        ['p', m.does],
+        ['steps', m.steps.map(([t, b]) => t + ' — ' + b)],
+        ['kv', m.config],
+        ...(m.guide ? [['linkout', { href: guideHref(m.guide), label: 'Guide: ' + m.name }]] : []),
+      ],
+    })),
+    {
+      title: CLOSE.title,
+      blocks: [
+        ['p', CLOSE.body],
+        ['linkout', { href: '/pricing', label: 'Build your licence' }],
+        ['linkout', { href: '/guides', label: 'See the guides' }],
+      ],
+    },
+  ],
+};

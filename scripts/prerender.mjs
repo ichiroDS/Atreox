@@ -33,6 +33,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { transformSync } from 'esbuild';
 import { optimizeImages } from './optimize-images.mjs';
 import {
   HEAD_RE, LASTMOD_FILE, SLUG_MAP_RE,
@@ -79,11 +80,45 @@ const webpSrc = src => {
    the bottom. A Proxy that answers every read with a placeholder is
    enough to run it; what comes back out is the real arrays.
 ─────────────────────────────────────────────────────────────────── */
+/* The page files, for their copy. catalog.jsx and blog-catalog.jsx are
+   plain data and run in the sandbox as they are; these nine contain JSX,
+   so they go through the same esbuild transform build-app.mjs uses before
+   the sandbox sees them. Each one is wrapped in an IIFE exactly as the
+   browser bundle wraps it, talks to the outside only through `window`,
+   and assigns its own words to window.PAGE_COPY. Nothing here renders
+   anything: the components are declared and never called, so a stubbed
+   window is all they need.
+
+   The point of doing it this way rather than retyping the copy into this
+   file: there is then ONE copy of every sentence on the site, and the
+   prerendered body cannot drift from what a reader sees after React
+   mounts. That is the property renderGuide() already has by reading
+   catalog.jsx, extended to the pages the router owns. */
+const COPY_FILES = [
+  'home.jsx', 'functions.jsx', 'guides.jsx', 'new-pages.jsx', 'legal-pages.jsx',
+  'contact-page.jsx', 'tools-hub.jsx', 'tools-page.jsx', 'account-checker-page.jsx',
+];
+
+/* The eleven addresses the router owns. Every one of them served a body
+   with no H1 and no sentence in it until 2026-09-08 - the same 78 KB of
+   empty shell, byte for byte, at eleven different URLs - which is what
+   Google reported back as eleven pages it would not index. */
+const COPY_ROUTES = [
+  '/', '/functions', '/pricing', '/guides', '/tools',
+  '/tools/proxy-checker', '/tools/account-checker',
+  '/contact', '/privacy', '/terms', '/refund',
+];
+
 function loadCatalog() {
-  const box = {};
+  /* PAGE_COPY is seeded rather than left to the Proxy: an unseeded read
+     would hand back the `Icon(PAGE_COPY)` placeholder, which is truthy,
+     and `window.PAGE_COPY || (window.PAGE_COPY = {})` would then assign
+     onto a string. */
+  const box = { PAGE_COPY: {} };
   const win = new Proxy(box, {
     get: (t, k) => (k in t ? t[k] : `Icon(${String(k)})`),
     has: () => true,
+    set: (t, k, v) => { t[k] = v; return true; },
   });
   const ctx = vm.createContext({ window: win, console });
   /* Both content files, into the SAME box and in this order: the blog
@@ -92,6 +127,29 @@ function loadCatalog() {
      round would work until the first time it did. */
   for (const file of ['catalog.jsx', 'blog-catalog.jsx']) {
     new vm.Script(read(file), { filename: file }).runInContext(ctx);
+  }
+
+  /* Then the page files, transpiled first - they read MODULES, GUIDES
+     and guideHref off the same box, so the catalog has to be in it
+     already. A file that fails to run is a build failure and not a
+     warning: silently losing a page's body is the exact fault this
+     whole change exists to fix. */
+  for (const file of COPY_FILES) {
+    let code;
+    try {
+      code = transformSync(`(function () {
+${read(file)}
+})();`, {
+        loader: 'jsx', target: 'es2019',
+      }).code;
+    } catch (e) {
+      throw new Error(`${file}: could not be transpiled for its copy - ${e.message}`);
+    }
+    try {
+      new vm.Script(code, { filename: file }).runInContext(ctx);
+    } catch (e) {
+      throw new Error(`${file}: threw while being read for its copy - ${e.message}`);
+    }
   }
 
   const { GUIDES, MODULE_BY_KEY } = box;
@@ -161,10 +219,26 @@ function loadCatalog() {
     }
   }
 
+  /* Every route the router owns must have handed over its copy. A page
+     whose file loaded but exported nothing is the pre-2026-09-08 bug
+     coming back quietly, so it fails the build rather than shipping an
+     empty body again. */
+  const { PAGE_COPY } = box;
+  for (const route of COPY_ROUTES) {
+    const copy = PAGE_COPY[route];
+    if (!copy) {
+      throw new Error(`no PAGE_COPY for ${route} - the page file that owns it did not export one`);
+    }
+    if (!copy.h1 || !copy.lead || !Array.isArray(copy.sections) || !copy.sections.length) {
+      throw new Error(`PAGE_COPY for ${route} needs an h1, a lead and at least one section`);
+    }
+  }
+
   return {
     GUIDES, MODULE_BY_KEY,
     POSTS, BLOG_CATEGORIES, TOOL_BY_ID, BLOCK_KINDS,
     postsForList, relatedPosts, formatPostDate, postWasUpdated,
+    PAGE_COPY,
   };
 }
 
@@ -430,6 +504,84 @@ ${step('3', "Everyone who buys through it shows up in your panel — referred to
 
 <p class="g-note">The number in your panel is re-calculated from current subscriptions — it's an estimate, not an invoice. The actual payout is based on invoices that have actually been paid.</p>
 </div>
+</div>`;
+}
+
+/* == The pages the router owns, with a body at last ================
+   One renderer for all eleven, because they now all arrive in the same
+   shape: a kicker, an H1, a lead, and sections of the guides' own block
+   kinds. The copy comes from window.PAGE_COPY, which each page file
+   builds out of the constants it already renders - so this function
+   chooses the markup and never the words.
+
+   What is deliberately NOT here: the proxy and account checkers, the
+   contact form, the pricing selector. app.jsx removes #prerendered the
+   moment React mounts, so anything interactive in this block would be a
+   control that cannot work and is about to vanish. The block carries the
+   argument around the tool; React carries the tool.
+================================================================== */
+
+/* The site's own spine, in the HTML rather than behind React. Until now
+   the eleven shell pages carried NO anchors at all - not one <a href> in
+   the body of the home page - so the only route a crawler had into the
+   site was the sitemap. Every prerendered page ends with this. */
+const SITE_NAV = [
+  ['/', 'Home'],
+  ['/functions', 'What each module does'],
+  ['/pricing', 'Pricing'],
+  ['/tools', 'Free tools'],
+  ['/guides', 'Guides'],
+  ['/blog', 'Blog'],
+  ['/contact', 'Contact'],
+  ['/referral-program', 'Referral programme'],
+  ['/privacy', 'Privacy'],
+  ['/terms', 'Terms'],
+  ['/refund', 'Refunds'],
+];
+
+function siteNav(current) {
+  return `<nav aria-label="Site" style="margin-top:56px;padding-top:22px;border-top:1px solid rgba(255,255,255,0.10)">
+<ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px 22px">${
+    SITE_NAV.map(([href, label]) =>
+      `<li><a href="${esc(href)}"${href === current ? ' aria-current="page"' : ''} style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:${href === current ? '#00d9ff' : 'rgba(255,255,255,0.6)'};text-decoration:none">${esc(label)}</a></li>`
+    ).join('')
+  }</ul>
+</nav>`;
+}
+
+function renderSitePage(route, copy) {
+  const parts = [];
+  if (copy.kicker) {
+    parts.push(`<p style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:#00d9ff;margin:0 0 12px">${esc(copy.kicker)}</p>`);
+  }
+  parts.push(`<h1 style="font-family:'Playfair Display',Georgia,serif;font-weight:500;font-size:2.6rem;line-height:1.1;letter-spacing:-0.015em;color:#fff;margin:0 0 18px">${esc(copy.h1)}</h1>`);
+  parts.push(`<p style="${P};font-size:1.05rem;color:rgba(255,255,255,0.78)">${esc(copy.lead)}</p>`);
+
+  /* A contents rail, for the same reason a guide has one: these pages
+     run long, and the anchors are real before a line of JavaScript has
+     run. Only where the sections carry their own ids - /functions is
+     the one that does, and its ids are the fn-<key> the reader scrolls
+     to, so a search result deep-linking to a module lands on it. */
+  const anchored = copy.sections.filter(sec => sec.id);
+  if (anchored.length > 2) {
+    parts.push(section('On this page',
+      `<div class="g-toc panel" style="padding:16px 18px">${anchored
+        .map((sec, i) => `<a href="#${esc(sec.id)}"><span class="g-toc-n">${String(i + 1).padStart(2, '0')}</span><span class="g-toc-t">${esc(sec.title)}</span></a>`)
+        .join('')}</div>`));
+  }
+
+  for (const sec of copy.sections) {
+    const h2 = sec.id
+      ? `<h2 id="${esc(sec.id)}" style="${H2}">${esc(sec.title)}</h2>`
+      : `<h2 style="${H2}">${esc(sec.title)}</h2>`;
+    parts.push(`${h2}\n${renderBlocks(sec.blocks)}`);
+  }
+
+  return `<div id="prerendered" style="max-width:1340px;margin:0 auto;padding:128px 6% 88px">
+<article>
+${parts.join('\n')}
+</article>
+${siteNav(route)}
 </div>`;
 }
 
@@ -1042,6 +1194,7 @@ const {
   GUIDES, MODULE_BY_KEY,
   POSTS, BLOG_CATEGORIES, TOOL_BY_ID, BLOCK_KINDS,
   postsForList, relatedPosts, formatPostDate, postWasUpdated,
+  PAGE_COPY,
 } = loadCatalog();
 
 /* The slug -> address map the legacy-anchor redirect in index.html
@@ -1052,6 +1205,26 @@ if (!SLUG_MAP_RE.test(shell)) {
 }
 const slugMap = JSON.stringify(Object.fromEntries(GUIDES.map(g => [g.slug, g.url])));
 shell = shell.replace(SLUG_MAP_RE, () => `/* SLUG-MAP */${slugMap}/* /SLUG-MAP */`);
+
+/* THE SAME TRAP AS THE JSON-LD ABOVE, one level down. index.html is both
+   the shell every other page is cut from AND the home page, so from the
+   day the home page got a prerendered body of its own, last run's body
+   was being read back in as part of the shell and a fresh one written in
+   front of it: two blocks after two builds, three after three, and every
+   page cut from the shell carrying the home page's body as well as its
+   own. Stripping it here makes the shell what it claims to be - the
+   empty document - and makes the build idempotent, which is also what
+   lets SHELL_FINGERPRINT below be stable from one run to the next.
+
+   Anchored on #root rather than on the block's own closing tag: the
+   block is written immediately before #root and contains nested divs,
+   so counting </div>s would be guesswork while "up to the one #root in
+   the file" is exact. */
+const PRERENDERED_RE = /<div id="prerendered"[\s\S]*?<div id="root"><\/div>/;
+shell = shell.replace(PRERENDERED_RE, '<div id="root"></div>');
+if (shell.includes('id="prerendered"')) {
+  throw new Error('index.html still carries a prerendered block after stripping - the shell would compound');
+}
 
 if (!/<!-- HEAD:META -->[\s\S]*?<!-- \/HEAD:META -->/.test(shell)) {
   throw new Error('index.html has no HEAD:META markers — guide pages would ship the site-wide title');
@@ -1085,7 +1258,10 @@ const MODE =
   process.argv.includes('--check-lastmod') ? 'check' : 'build';
 
 const TODAY = new Date().toISOString().slice(0, 10);
-const SHELL_FINGERPRINT = shellFingerprint(read('index.html'));
+/* The STRIPPED shell, not the file on disk: index.html on disk carries
+   the home page's prerendered body, which this build writes, so hashing
+   the file would make every router page look changed on every run. */
+const SHELL_FINGERPRINT = shellFingerprint(shell);
 
 /* What each address's date is derived from. An entry's VALUE is
    whatever, if changed, means that address now serves different bytes. */
@@ -1201,14 +1377,22 @@ const MODULES_LIST = Object.values(MODULE_BY_KEY);
    page itself, so its head is written last - after the shell has been used
    to stamp the others, and with the home page's own title rather than the
    one the shell happened to carry. */
-write('index.html', shell.replace(HEAD_RE, () =>
-  withLd(headForPage(HOME_PAGE, ogImages.home || OG_FALLBACK), orgAndSiteLd())));
+write('index.html', shell
+  .replace(HEAD_RE, () =>
+    withLd(headForPage(HOME_PAGE, ogImages.home || OG_FALLBACK), orgAndSiteLd()))
+  .replace('<div id="root"></div>',
+    () => `${renderSitePage('/', PAGE_COPY['/'])}
+  <div id="root"></div>`));
 
 for (const page of SITE_PAGES) {
   const name = page.route.slice(1);
   const extra = page.route === '/pricing' ? pricingLd(MODULES_LIST) : null;
-  write(page.file, shell.replace(HEAD_RE, () =>
-    withLd(headForPage(page, ogImages[name] || OG_FALLBACK), orgAndSiteLd(), extra)));
+  write(page.file, shell
+    .replace(HEAD_RE, () =>
+      withLd(headForPage(page, ogImages[name] || OG_FALLBACK), orgAndSiteLd(), extra))
+    .replace('<div id="root"></div>',
+      () => `${renderSitePage(page.route, PAGE_COPY[page.route])}
+  <div id="root"></div>`));
 }
 
 for (const guide of GUIDES) {
