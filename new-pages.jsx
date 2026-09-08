@@ -106,16 +106,43 @@ function useSubscriptionState() {
   return state;
 }
 
-// Checkout for the modular plans isn't wired yet — every CTA lands on the
-// dashboard's billing screen and the chosen plan gets passed in a later pass.
-// Until then the only thing the Clerk state changes is the wording: an existing
-// subscriber is managing a licence, not buying one.
+/* The selection, carried into the panel.
+
+   This page is a multi-select and its whole argument is the running
+   total, so the CTA used to end the argument by throwing it away: every
+   button landed on a bare /billing, and someone who had just been shown
+   €100/mo for three modules arrived at a blank screen and had to rebuild
+   the choice from memory. That is the last click before payment.
+
+   The panel reads ?modules=a,b,c (a list — see parseModuleIdList in
+   atreox-dashboard/lib/stripe/modules.ts) and ?licence=monthly|yearly.
+   Both survive the Clerk sign-in round trip, which re-attaches the whole
+   query to redirect_url, and the panel's referral middleware strips only
+   `ref` and keeps the rest.
+
+   MODULE IDS ARE TRANSLATED HERE AND NOWHERE ELSE, from the `billing`
+   field on each module in catalog.jsx. Our keys are hyphenated, the
+   panel's are underscored, and the panel rejects ours on purpose. */
 const BILLING_URL = `${DASHBOARD_URL}/billing`;
 
-function billingCTA(sub, label) {
-  const href = window.withReferral(BILLING_URL);
-  if (!sub.loading && sub.active) return { label: 'Manage in panel', href };
-  return { label, href };
+function billingHref(params) {
+  /* Empty values are dropped rather than serialised. With nothing ticked
+     the Continue control is disabled and this href is never followed, but
+     "?modules=" is still a URL claiming to carry a selection, and it is
+     the kind of thing that gets copied out of a devtools panel into a bug
+     report. A link either carries a selection or does not mention one. */
+  const pairs = Object.entries(params || {}).filter(([, v]) => v !== '' && v != null);
+  const qs = pairs.length ? new URLSearchParams(pairs).toString() : '';
+  return window.withReferral(BILLING_URL + (qs ? `?${qs}` : ''));
+}
+
+function billingCTA(sub, label, params) {
+  /* An existing subscriber is managing a licence, not buying one — and
+     the panel skips deep links entirely for an active subscription, so
+     attaching a selection here would build a URL that promises a
+     preselection the page has already decided not to make. */
+  if (!sub.loading && sub.active) return { label: 'Manage in panel', href: billingHref(null) };
+  return { label, href: billingHref(params) };
 }
 
 /* ─── one selectable module ─── */
@@ -201,15 +228,21 @@ function TermToggle({ term, setTerm }) {
       border: `1px solid rgba(${GREEN_RGB},0.2)`, background: 'rgba(0,0,0,0.3)',
     }}>
       {opt('monthly', 'Monthly')}
-      {opt('annual', 'Annual')}
+      {/* value 'yearly', label "Annual". The value is what the panel is
+          told (?licence=yearly, LicenceInterval in the dashboard); the
+          label is what reads better on a toggle. Deliberately not
+          'annual' — that was one word away from the panel's vocabulary
+          and would have needed translating at the CTA, which is exactly
+          the class of mismatch the module keys already cost us. */}
+      {opt('yearly', 'Annual')}
     </div>
   );
 }
 
 /* ─── the licence, priced against the running total directly above it ─── */
 function LicenceCard({ term, setTerm, sub }) {
-  const annual = term === 'annual';
-  const cta = billingCTA(sub, 'Get the full licence');
+  const annual = term === 'yearly';
+  const cta = billingCTA(sub, 'Get the full licence', { licence: term });
   return (
     <div className="panel ticks featured-pulse" style={{ padding: '24px 26px', borderColor: `rgba(${GREEN_RGB},0.45)` }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 18 }}>
@@ -289,7 +322,13 @@ function useDocked() {
 function SelectionPanel({ keys, total, onClear, sub }) {
   const n = keys.length;
   const gap = FULL_MONTHLY - total;
-  const cta = billingCTA(sub, `Continue · ${eur(total)}/mo`);
+  /* keys are this page's own module keys; MODULE_BY_KEY[k].billing is the
+     same module as the panel spells it. Order follows PRICED_MODULES
+     rather than the order they were ticked, so the same three modules
+     always produce the same link. */
+  const cta = billingCTA(sub, `Continue · ${eur(total)}/mo`, {
+    modules: PRICED_MODULES.filter(m => keys.includes(m.key)).map(m => m.billing).join(','),
+  });
   const [open, setOpen] = useState(false);
   const docked = useDocked();
 

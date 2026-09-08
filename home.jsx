@@ -734,8 +734,27 @@ function Hero({ setPage }) {
           </motion.p>
           <motion.div initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }} animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.1 }}
             style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', marginBottom: 30 }}>
-            <a href={window.withReferral('https://app.atreoxai.com')} target="_self" className="btn-solid cta-breathe" style={{ padding: '15px 28px', fontSize: '0.8rem' }} {...magneticHandlers(5)}>
-              Enter panel <ArrowUpRight size={15} />
+            {/* The largest action above the fold used to be "Enter panel" —
+                an invitation to sign in to something a first-time visitor
+                does not have, on the page most of the search traffic lands
+                on. "Build your licence" is the one that fits a stranger:
+                it goes to the page that answers what this costs and what
+                it is made of. Entering the panel is still one click away
+                here and unchanged in the navbar, so nobody who already
+                pays has lost anything. The breathing animation and the
+                magnetic hover move with the role, not with the label. */}
+            <a
+              href="/pricing"
+              onClick={e => {
+                if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                e.preventDefault();
+                setPage('pricing');
+              }}
+              className="btn-solid cta-breathe" style={{ padding: '15px 28px', fontSize: '0.8rem' }} {...magneticHandlers(5)}>
+              Build your licence <ArrowUpRight size={15} />
+            </a>
+            <a href={window.withReferral('https://app.atreoxai.com')} target="_self" className="btn-outline" style={{ padding: '14px 24px' }}>
+              Enter panel <ArrowUpRight size={14} />
             </a>
             <button className="btn-outline" onClick={() => {
               const el = document.getElementById('how-it-runs');

@@ -28,7 +28,6 @@ const MONO = window.MONO;
 const SERIF = window.SERIF;
 const BODY = 'Barlow, sans-serif';
 
-const PANEL_BASE = 'https://app.atreoxai.com';
 const ROSE = '#fb7185';
 const AMBER = '#fcd34d';
 
@@ -150,7 +149,21 @@ function StageRow({ icon: Icon, name, ok, detail, message }) {
   );
 }
 
-/* The most important screen: the wall reads as an invitation. */
+/* The most important screen: the wall reads as an invitation.
+
+   AND IT HAS TO INVITE SOMEWHERE THE VISITOR CAN GO. This button pointed
+   at the panel, which is behind Clerk: whoever hit this wall hit it
+   because they had a batch in front of them and had just spent three
+   checks proving it, and we answered the most buying-intent moment on the
+   site with a sign-in form for an account they do not have. It goes to
+   /pricing now — the page that answers "what does the unlimited version
+   cost", which is the question the wall just put in their head.
+
+   A plain anchor, not a setPage() interception. Three widgets render this
+   screen across two pages and none of them is handed the router, so
+   threading it here would be five components' worth of prop for a click
+   whose whole purpose is to leave the tool. A real navigation to a real
+   prerendered page is also what a middle-click and a crawler want. */
 function LimitScreen({ retryMinutes, tool }) {
   return (
     <div className="panel ticks" style={{ padding: '36px 30px', display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'flex-start' }}>
@@ -164,7 +177,7 @@ function LimitScreen({ retryMinutes, tool }) {
         Included with any ATREOX module.
       </span>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'center', marginTop: 4 }}>
-        <a href={PANEL_BASE} style={{
+        <a href="/pricing" style={{
           display: 'inline-flex', alignItems: 'center', gap: 9,
           border: `1px solid rgba(${ACCENT_RGB},0.5)`, background: `rgba(${ACCENT_RGB},0.12)`,
           boxShadow: `0 0 18px rgba(${ACCENT_RGB},0.16)`, borderRadius: 3, padding: '12px 22px',

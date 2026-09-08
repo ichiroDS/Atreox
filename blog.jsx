@@ -160,7 +160,18 @@ function PostList({ heading, lead, posts, activeCategory, crumbs, onNavigate }) 
               {posts.map(p => <PostCard key={p.slug} post={p} onNavigate={onNavigate} />)}
             </ul>
           ) : (
-            <p className="g-p">Nothing here yet.</p>
+            <>
+              <p className="g-p">{window.BLOG_EMPTY.lead}</p>
+              <ul style={{ listStyle: 'none', margin: '18px 0 0', padding: 0 }}>
+                {window.BLOG_EMPTY.links.map(l => (
+                  <li key={l.href} style={{ marginBottom: 6 }}>
+                    <a href={l.href} style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: window.ACCENT, textDecoration: 'none' }}>
+                      {l.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
         </div>
       </div>

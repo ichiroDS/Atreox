@@ -33,6 +33,9 @@
    `seoTitle`, `seoDescription`
                 what a search result says, when the on-page title is
                 not the best sentence for a result. Both optional.
+   `draft`      OPTIONAL. `true` keeps the entry — and its slug — while
+                publishing nothing: no page, no sitemap entry, no card,
+                no route. See the block above PUBLISHED_POSTS below.
    `published`  ISO date, YYYY-MM-DD. Required.
    `updated`    ISO date. OPTIONAL, and deliberately absent until the
                 article is actually revised — see BOTH DATES below.
@@ -79,6 +82,13 @@ const BLOG_CATEGORY_BY_SLUG = Object.fromEntries(BLOG_CATEGORIES.map(c => [c.slu
 const POSTS = [
   {
     slug: 'how-to-check-telegram-account-before-buying',
+    /* Unpublished 2026-09-09. The body below is scaffolding and says so
+       on the page — "the real text is being written", "nothing in it
+       should be read as advice" — which is not a thing to say to the
+       search traffic the site was just fixed to receive, on the only
+       article the blog has. Delete this line when the real text lands;
+       the slug and the dates are already right. See `draft` below. */
+    draft: true,
     category: 'accounts-and-proxies',
     title: 'How to check a Telegram account before buying',
     summary:
@@ -120,7 +130,35 @@ const POSTS = [
   },
 ];
 
-const POST_BY_SLUG = Object.fromEntries(POSTS.map(p => [p.slug, p]));
+/* ── draft: true — written, keeps its address, is not published ────
+
+   A post stays in POSTS so its slug is still reserved, still validated
+   by prerender.mjs's slug/category/date checks, and still visible to
+   whoever opens this file. It is simply not published: it is absent
+   from the index, from its category, from the read-next rail, from the
+   router and from the sitemap, and prerender.mjs's existing sweep over
+   blog/ deletes the .html the last build left behind, so the address
+   answers 404 rather than serving a page nothing links to.
+
+   WHY THE FLAG RATHER THAN DELETING THE ENTRY. The slug is the asset.
+   /blog/how-to-check-telegram-account-before-buying was published as
+   scaffolding and read, to anyone arriving from search, as "the real
+   text is being written" and "nothing in it should be read as advice" —
+   on the one article the blog had, in the week the SEO work landed.
+   Deleting the entry would free the slug for a typo'd re-creation and
+   lose the two dates; this keeps both and costs one word to undo.
+
+   TO PUBLISH: delete the `draft: true` line and rebuild. Nothing else
+   moves — the slug, the category and the published date are already
+   what they will be.
+─────────────────────────────────────────────────────────────────── */
+const PUBLISHED_POSTS = POSTS.filter(p => !p.draft);
+
+/* Keyed on the published set, so the router cannot reach a draft either:
+   postFromPath is what turns /blog/<slug> into a page, and a draft that
+   404s for a crawler but renders for anyone with JavaScript would be
+   published in every sense that matters. */
+const POST_BY_SLUG = Object.fromEntries(PUBLISHED_POSTS.map(p => [p.slug, p]));
 
 /* ── Addresses ────────────────────────────────────────────────────
    The one place a blog address is spelled, for the same reason
@@ -134,6 +172,36 @@ const POST_BY_SLUG = Object.fromEntries(POSTS.map(p => [p.slug, p]));
    rather than leaving it to be discovered as a 404 later.
 ─────────────────────────────────────────────────────────────────── */
 const BLOG_RESERVED_SLUGS = ['category'];
+
+/* ── What a list page says when it has nothing to list ─────────────
+
+   "Nothing here yet." was the whole empty state, and it was written for
+   a case nobody expected to be in for long. Pulling the placeholder
+   article back to draft put us in it, and one sentence on an otherwise
+   bare page is a dead end for the visitor and a thin page for a
+   crawler — /blog measured 240 characters of body text, under the floor
+   verify-routes.mjs sets, and the build said so.
+
+   So the empty state does the two things it can honestly do: say what
+   the blog is for without promising a date, and hand the reader the
+   pages that already answer the same questions properly. Both are true
+   today and neither needs revisiting when the first article lands.
+
+   Here, beside the posts, because prerender.mjs and blog.jsx both
+   render it — a list page that says one thing before hydration and a
+   different thing after is a page that says neither.
+─────────────────────────────────────────────────────────────────── */
+const BLOG_EMPTY = {
+  lead:
+    'No articles published yet. The first ones are being written from our own numbers rather '
+    + 'than a summary of somebody else’s: what a batch of accounts actually costs once you '
+    + 'divide the price by the share that survives, and what a checker can and cannot prove '
+    + 'about an account before you buy it.',
+  links: [
+    { href: '/guides/buying-telegram-accounts', label: 'Guide: buying Telegram accounts' },
+    { href: '/guides/proxies-for-telegram-accounts', label: 'Guide: choosing and connecting proxies' },
+  ],
+};
 
 const postHref = p => {
   const post = typeof p === 'string' ? POST_BY_SLUG[p] : p;
@@ -177,7 +245,7 @@ const blogCategoryFromPath = pathname => {
    neither.
 ─────────────────────────────────────────────────────────────────── */
 function postsForList({ category = null, page = 1, perPage = Infinity } = {}) {
-  const all = POSTS
+  const all = PUBLISHED_POSTS
     .filter(p => !category || p.category === category)
     .slice()
     .sort((a, b) =>
@@ -227,7 +295,7 @@ const formatPostDate = iso => {
 const postWasUpdated = post => Boolean(post.updated) && post.updated !== post.published;
 
 Object.assign(window, {
-  BLOG_CATEGORIES, BLOG_CATEGORY_BY_SLUG, BLOG_RESERVED_SLUGS,
+  BLOG_CATEGORIES, BLOG_CATEGORY_BY_SLUG, BLOG_RESERVED_SLUGS, BLOG_EMPTY,
   POSTS, POST_BY_SLUG,
   postHref, blogCategoryHref, postFromPath, blogCategoryFromPath,
   postsForList, relatedPosts, formatPostDate, postWasUpdated,

@@ -22,7 +22,23 @@ const {
 
    `price` is the monthly list price in EUR and must match
    MODULE_CATALOGUE in atreox-dashboard/lib/stripe/modules.ts, which is
-   what Stripe actually charges. `included: true` marks the two modules
+   what Stripe actually charges.
+
+   `billing` is that same module's id IN THE PANEL, and it is the ONLY
+   place the two spellings are ever reconciled. Ours are hyphenated
+   because `key` doubles as the guide slug (/guides/mass-reactions);
+   the panel's are underscored because that is the wire form shared
+   with Stripe lookup keys and entitlement metadata. The Pricing page's
+   CTA reads this field to build ?modules=…, and the panel accepts that
+   spelling and no other — verified from the panel's side by
+   atreox-dashboard/scripts/check-billing-deeplink.ts, which asserts
+   our hyphenated form is REJECTED there. It lives on the module row
+   rather than in a lookup table beside it so that adding a module
+   cannot leave a gap: there is no second list to remember. Only priced
+   modules carry it; the two included ones are never sold, so a billing
+   id for them would name something you cannot buy.
+
+   `included: true` marks the two modules
    that ship with any purchase and are never sold alone (the engine's
    INCLUDED_WITH_ANY_PURCHASE) — they're how you get accounts into the
    system in the first place, so they're in this table for Functions
@@ -75,6 +91,7 @@ const MODULES = [
   },
   {
     key: 'active-warmup',
+    billing: 'active_warmup',
     name: 'Active Warmup',
     price: 30,
     icon: Zap,
@@ -135,6 +152,7 @@ const MODULES = [
   },
   {
     key: 'neurocommenting',
+    billing: 'neurocommenting',
     name: 'Neurocommenting',
     price: 50,
     icon: MessageSquare,
@@ -167,6 +185,7 @@ const MODULES = [
   },
   {
     key: 'neurodialogs',
+    billing: 'neurodialogs',
     name: 'NeuroDialogs',
     price: 45,
     icon: Brain,
@@ -199,6 +218,7 @@ const MODULES = [
   },
   {
     key: 'mass-reactions',
+    billing: 'mass_reactions',
     name: 'Mass Reactions',
     price: 30,
     icon: Sparkles,
@@ -233,6 +253,7 @@ const MODULES = [
   },
   {
     key: 'channel-parser',
+    billing: 'channel_parser',
     name: 'Channel Parser',
     price: 20,
     icon: Globe,
@@ -265,6 +286,7 @@ const MODULES = [
   },
   {
     key: 'group-parser',
+    billing: 'group_parser',
     name: 'Group Parser',
     price: 20,
     icon: Users,

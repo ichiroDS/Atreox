@@ -165,7 +165,7 @@ ${read(file)}
   }
 
   const { POSTS, BLOG_CATEGORIES, BLOG_CATEGORY_BY_SLUG, BLOG_RESERVED_SLUGS,
-          TOOL_BY_ID, BLOCK_KINDS, postsForList, relatedPosts,
+          BLOG_EMPTY, TOOL_BY_ID, BLOCK_KINDS, postsForList, relatedPosts,
           formatPostDate, postWasUpdated } = box;
   if (!Array.isArray(POSTS)) throw new Error('blog-catalog.jsx exposed no POSTS');
   if (!Array.isArray(BLOG_CATEGORIES) || !BLOG_CATEGORIES.length) {
@@ -236,7 +236,7 @@ ${read(file)}
 
   return {
     GUIDES, MODULE_BY_KEY,
-    POSTS, BLOG_CATEGORIES, TOOL_BY_ID, BLOCK_KINDS,
+    POSTS, BLOG_CATEGORIES, BLOG_EMPTY, TOOL_BY_ID, BLOCK_KINDS,
     postsForList, relatedPosts, formatPostDate, postWasUpdated,
     PAGE_COPY,
   };
@@ -469,6 +469,7 @@ function renderGuide(guide, guides, mod) {
 <article id="guide-${esc(guide.slug)}">
 ${parts.join('\n')}
 </article>
+${siteNav(`/guides/${guide.url}`)}
 </div>`;
 }
 
@@ -503,6 +504,7 @@ ${step('3', "Everyone who buys through it shows up in your panel — referred to
 </div>
 
 <p class="g-note">The number in your panel is re-calculated from current subscriptions — it's an estimate, not an invoice. The actual payout is based on invoices that have actually been paid.</p>
+${siteNav('/referral-program')}
 </div>
 </div>`;
 }
@@ -524,7 +526,17 @@ ${step('3', "Everyone who buys through it shows up in your panel — referred to
 /* The site's own spine, in the HTML rather than behind React. Until now
    the eleven shell pages carried NO anchors at all - not one <a href> in
    the body of the home page - so the only route a crawler had into the
-   site was the sitemap. Every prerendered page ends with this. */
+   site was the sitemap.
+
+   EVERY prerendered page ends with this, and "every" is the whole point.
+   For a while only renderSitePage() called it, which left the fifteen
+   pages that matter most without it: the eleven guides, /blog, the post,
+   the category page and /referral-program. Those are precisely the pages
+   search traffic lands on, and in the HTML a crawler reads they linked
+   only to each other - a guide's rail reaches sibling guides and nothing
+   else, so /pricing and /tools received no internal link from the half of
+   the site built to earn the visit. scripts/verify-internal-links.mjs
+   fails the build if that ever comes back. */
 const SITE_NAV = [
   ['/', 'Home'],
   ['/functions', 'What each module does'],
@@ -934,6 +946,7 @@ function renderPost(post, category, related) {
 <article id="post-${esc(post.slug)}" style="max-width:860px;margin:0 auto">
 ${parts.join('\n')}
 </article>
+${siteNav(`/blog/${post.slug}`)}
 </div>`;
 }
 
@@ -957,7 +970,11 @@ function postCard(post, category) {
 function renderPostList({ heading, lead, posts, categoryBySlug, crumbs, categories }) {
   const cards = posts.length
     ? `<ul style="list-style:none;margin:0;padding:0">${posts.map(p => postCard(p, categoryBySlug[p.category])).join('\n')}</ul>`
-    : `<p style="${P}">Nothing here yet.</p>`;
+    : `<p style="${P}">${esc(BLOG_EMPTY.lead)}</p>\n<ul style="list-style:none;margin:18px 0 0;padding:0">${
+        BLOG_EMPTY.links.map(l =>
+          `<li style="margin-bottom:6px"><a href="${esc(l.href)}" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.95rem;color:#00d9ff;text-decoration:none">${esc(l.label)}</a></li>`
+        ).join('')
+      }</ul>`;
 
   /* The category rail is on the index AND on every category page, so
      any one of them reaches all the others in one hop. */
@@ -974,6 +991,7 @@ ${crumbs.length > 1 ? breadcrumbs(crumbs) : ''}
 <p style="${P};font-size:1.05rem;color:rgba(255,255,255,0.78);margin-bottom:30px">${esc(lead)}</p>
 ${rail}
 ${cards}
+${siteNav(crumbs[crumbs.length - 1].href)}
 </div>
 </div>`;
 }
@@ -1192,7 +1210,7 @@ const robots = () => [
 /* ── Run ───────────────────────────────────────────────────────── */
 const {
   GUIDES, MODULE_BY_KEY,
-  POSTS, BLOG_CATEGORIES, TOOL_BY_ID, BLOCK_KINDS,
+  POSTS, BLOG_CATEGORIES, BLOG_EMPTY, TOOL_BY_ID, BLOCK_KINDS,
   postsForList, relatedPosts, formatPostDate, postWasUpdated,
   PAGE_COPY,
 } = loadCatalog();

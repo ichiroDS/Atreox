@@ -94,6 +94,15 @@ function pathFor(page, anchor) {
   return (PAGE_TO_PATH[page] || '/') + (anchor ? '#' + anchor : '');
 }
 
+/* Published so the shared chrome can put a real href on an in-app
+   destination. shared.jsx is bundled before this file, so it reads
+   window.pathFor at RENDER time rather than capturing it at module
+   scope — by the time a footer renders, this has run. Deliberately
+   this function and not PAGE_TO_PATH: the guide-anchor rule above is
+   part of "where does this land", and a second caller resolving the
+   map directly would miss it. */
+Object.assign(window, { pathFor });
+
 function getInitialPage() {
   /* Redirect legacy ?p= URLs to clean paths */
   const params = new URLSearchParams(location.search);

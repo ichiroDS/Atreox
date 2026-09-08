@@ -38,6 +38,21 @@
    mistake that actually happened. It does not make the mistake
    impossible.
 
+   THIS GUARD SPENT ITS WHOLE LIFE SWITCHED OFF, and the way it happened
+   is worth more than the guard. vercel.json's buildCommand used to spell
+   the build pipeline out as a second copy of package.json's "build"
+   script. This file was added to one list and not the other - so it ran
+   only when somebody typed `npm run build` by hand, which nobody does,
+   because Vercel is what builds. Every deploy since it was written went
+   out unchecked, and nothing anywhere said so: the build passed, because
+   the build never ran it.
+
+   Fixed on 2026-09-09 by deleting the second list. vercel.json now says
+   `npm run build` and nothing else, so there is one pipeline and adding
+   a step to it cannot miss the deploy. Do not re-expand it - a build
+   command that enumerates steps is a list that has to be kept in sync
+   with another list, and this is what that costs.
+
    Run:  node scripts/verify-survival-claims.mjs
 ══════════════════════════════════════════════════════════════════ */
 import fs from 'node:fs';

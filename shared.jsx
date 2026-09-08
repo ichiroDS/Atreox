@@ -553,6 +553,35 @@ function FadeBottom({ h = 200 }) {
 }
 
 /* ── Footer ── */
+/* An in-app destination as a REAL anchor.
+
+   Every navigation in the footer and in CrossLinks used to be a <span
+   onClick> or a <button onClick>. They worked, for a mouse. They did not
+   exist for anything else: no href to crawl, so "Pricing" was reachable
+   from every page on the site and from none of its HTML; no keyboard
+   focus on the spans, so the footer could not be tabbed; no middle-click,
+   no "copy link address", no open-in-new-tab.
+
+   The click handler stays, so the in-app transition is unchanged for an
+   ordinary left click. The href is what the browser, the crawler and the
+   keyboard use. Modifier clicks fall through to the browser deliberately
+   — that is what makes ctrl-click open a tab.
+
+   textDecoration:'none' is not decoration-fiddling, it is the one thing
+   an anchor brings that a span does not: the underline propagates to
+   descendants, so without it every CrossLinks card would gain a line
+   through its three lines of text. */
+function inAppLink(setPage, page, anchor) {
+  return {
+    href: window.pathFor ? window.pathFor(page, anchor) : '/',
+    onClick: (e) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      setPage(page, anchor);
+    },
+  };
+}
+
 function FooterBar({ setPage }) {
   const navLinks = [
     { id: 'home',      label: 'Home' },
@@ -577,11 +606,11 @@ function FooterBar({ setPage }) {
           <h5 style={colHead}>Navigation</h5>
           <div className="footer-links" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {navLinks.map(link => (
-              <span key={link.id} onClick={() => setPage(link.id)}
-                style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', transition: 'color 0.2s' }}
+              <a key={link.id} {...inAppLink(setPage, link.id)}
+                style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', transition: 'color 0.2s', textDecoration: 'none' }}
                 onMouseEnter={e => e.target.style.color = ACCENT}
                 onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.6)'}
-              >{link.label}</span>
+              >{link.label}</a>
             ))}
           </div>
         </div>
@@ -589,11 +618,11 @@ function FooterBar({ setPage }) {
           <h5 style={colHead}>Legal</h5>
           <div className="footer-links" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {[['referral','Referral Program'],['privacy','Privacy Policy'],['terms','Terms of Service'],['refund','Refund Policy']].map(([id, label]) => (
-              <span key={id} onClick={() => setPage(id)}
-                style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.52)', cursor: 'pointer', transition: 'color 0.2s' }}
+              <a key={id} {...inAppLink(setPage, id)}
+                style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.52)', cursor: 'pointer', transition: 'color 0.2s', textDecoration: 'none' }}
                 onMouseEnter={e => e.target.style.color = ACCENT}
                 onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.52)'}
-              >{label}</span>
+              >{label}</a>
             ))}
           </div>
         </div>
@@ -736,11 +765,18 @@ function CrossLinks({ current, setPage }) {
         {dests.map(k => {
           const d = CROSS_DESTS[k];
           return (
-            <button key={k} type="button" onClick={() => setPage(k)}
+            <a key={k} {...inAppLink(setPage, k)}
               className="panel panel-hover ticks"
               style={{
                 padding: '30px 28px', textAlign: 'left', width: '100%',
                 display: 'flex', flexDirection: 'column', gap: 10, background: 'transparent',
+                /* The two properties a <button> supplied by default and an
+                   <a> does not. `color` paints nothing here — every line of
+                   text below sets its own — but it is the value the button
+                   computed, kept so the swap changes no computed style at
+                   all. textDecoration is the one that would have shown:
+                   an anchor's underline propagates to all three spans. */
+                color: 'rgb(0,0,0)', textDecoration: 'none',
               }}>
               <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.6rem', letterSpacing: '0.24em', textTransform: 'uppercase', color: `rgba(${ACCENT_RGB},0.7)` }}>
                 {'// '}{d.label}
@@ -754,7 +790,7 @@ function CrossLinks({ current, setPage }) {
               <span style={{ marginTop: 6, display: 'inline-flex', alignItems: 'center', gap: 7, fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: ACCENT }}>
                 Open <ArrowUpRight size={13} />
               </span>
-            </button>
+            </a>
           );
         })}
       </div>

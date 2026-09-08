@@ -1,5 +1,5 @@
 {
-  "buildCommand": "node scripts/build-app.mjs && node scripts/prerender.mjs && node scripts/verify-blocks.mjs && node scripts/verify-seo.mjs && node scripts/verify-routes.mjs && node scripts/verify-lastmod.mjs",
+  "buildCommand": "npm run build",
   "outputDirectory": ".",
   "framework": null,
   "trailingSlash": false,

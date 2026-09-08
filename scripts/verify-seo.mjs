@@ -217,7 +217,37 @@ const blogDir = path.join(ROOT, 'blog');
 const articleFiles = fs.existsSync(blogDir)
   ? fs.readdirSync(blogDir).filter(f => f.endsWith('.html'))
   : [];
-check('there is at least one article page', articleFiles.length > 0, `${articleFiles.length}`);
+/* Not "at least one article exists" — that was the assertion here, and it
+   turned an ordinary editorial decision into a failed deploy the first time
+   the blog's only post was pulled back to draft. A blog with nothing
+   published is a legitimate state; a blog that ADVERTISES an article it did
+   not build, or builds one it does not advertise, is not.
+
+   So the pairing is asserted in both directions instead, which also
+   subsumes what the old check was really guarding: if the sitemap lists
+   articles, the per-file assertions below cannot be vacuous, because there
+   is a file for every one of them. When both sides are zero the run says so
+   out loud rather than passing quietly. */
+const articleLocs = sitemapLocs
+  .map(u => u.replace(/^https?:\/\/[^/]+/, ''))
+  .filter(u => /^\/blog\/[^/]+$/.test(u) && !u.startsWith('/blog/category/'));
+const advertised = new Set(articleLocs.map(u => u.slice('/blog/'.length) + '.html'));
+const built = new Set(articleFiles);
+
+check(
+  'every article in the sitemap has a built page',
+  [...advertised].every(f => built.has(f)),
+  [...advertised].filter(f => !built.has(f)).join(', '),
+);
+check(
+  'every built article page is in the sitemap',
+  [...built].every(f => advertised.has(f)),
+  [...built].filter(f => !advertised.has(f)).join(', ') +
+    ' - a page nobody advertises is one the sweep in prerender.mjs should have removed',
+);
+if (articleFiles.length === 0) {
+  console.log('  [note] no article pages built - every post in blog-catalog.jsx is a draft');
+}
 
 for (const f of articleFiles) {
   const html = fs.readFileSync(path.join(blogDir, f), 'utf8');

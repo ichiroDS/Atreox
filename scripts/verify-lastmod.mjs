@@ -116,12 +116,32 @@ check(
   edited.output.includes('npm run lastmod'),
 );
 
-/* New content with no entry yet - adding an article and forgetting. */
+/* New content with no entry yet - adding an article and forgetting.
+
+   The key to delete is DERIVED, not named. It used to be spelled out as
+   post:how-to-check-telegram-account-before-buying, and on 2026-09-09 that
+   post was pulled back to draft: the key stopped existing, the delete
+   stopped changing anything, and this control stopped being a control. It
+   failed loudly rather than passing vacuously, which is the one thing that
+   went right - but a control whose target can be edited out from another
+   file is a control with an expiry date nobody wrote down.
+
+   A guide key is the stable choice: the eleven guides are the content this
+   manifest exists for, verify-seo.mjs already refuses to let any of them
+   move, and "there are no guides" is not a state this repository can reach
+   without far louder failures than this one. */
+const anyGuideKey = Object.keys(JSON.parse(fs.readFileSync(path.join(ROOT, LASTMOD_FILE), 'utf8')))
+  .filter(k => k.startsWith('guide:'))
+  .sort()[0];
+if (!anyGuideKey) {
+  console.error('FATAL: the manifest holds no guide entry to build the missing-entry control on.');
+  process.exit(1);
+}
 const added = withMutation(
   LASTMOD_FILE,
   src => {
     const m = JSON.parse(src);
-    delete m['post:how-to-check-telegram-account-before-buying'];
+    delete m[anyGuideKey];
     return JSON.stringify(m, null, 2) + '\n';
   },
   'content present, manifest entry missing',
