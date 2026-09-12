@@ -604,7 +604,15 @@ const GUIDES = [
           ]],
           ['p', "What we do have is what we are buying ourselves right now, and why."],
           ['p', "Argentina first, Uzbekistan second, with the proxy in the matching country. That is our judgement, based on price and on how our own purchases have gone so far. It is not a measured survival table, and you should treat it as our opinion until we can show you numbers."],
-          ['p', "Those numbers are coming, on a date rather than eventually. We imported an Argentine batch and an Uzbek batch on 4 September. Day 7 falls on 11 September and Day 30 on 4 October. We will publish both here, with the sellers named, including if they disappoint us."],
+          ['callout', [
+            "Day 7: what our own batches did",
+            "We said we would publish this on 11 September, with the sellers named, whatever it said. Here it is, a day late.",
+          ]],
+          ['p', "We tested two Argentine batches bought on the same day from different sellers - AbonTg and theblja - plus an Uzbek batch. Same country for the two Argentine ones, same import day, same proxy setup, same warmup, and no commenting load on any of them."],
+          ['p', "The result that matters: the seller's layover claim predicted nothing. theblja advertised thirty days of rest, and most of that batch was frozen inside the week. AbonTg made no claim we recorded, and almost all of it can still post. The Uzbek batch came through intact. Everything else about the two Argentine batches was the same, so if rest were the variable that mattered, this is the wrong way round."],
+          ['p', "What this does not tell you is whether AbonTg is a good seller. None of these accounts has posted a comment, so what we measured is survival at rest - and a pre-flagged account surfaces when it is used, not while it sits. Surviving a week untouched means not yet disproven, not proven good. The theblja half is the stronger one: those accounts froze having done nothing at all, so they were not worn out by use. They arrived that way."],
+          ['p', "We are holding the exact counts until day 30, when they will carry more weight than they do now. Day 30 is 3 October for the Uzbek batch and 4 October for both Argentine ones, and this section will be updated then."],
+          ['note', "One correction to this page: we wrote earlier that the Uzbek batch was imported on 4 September. It was imported on 3 September, so its day 30 falls on 3 October rather than the 4th."],
           ['p', "Until then, the only survival figures worth acting on are the ones you produce yourself: buy five, wait a week, count what is left."],
           ['callout', [
             "Survival rate on its own is the wrong number to buy on.",

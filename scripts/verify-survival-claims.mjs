@@ -30,12 +30,27 @@
    ATTRIBUTED_NUMBERS below, which is maintained from the engine
    script's output and cites the section it came from.
 
+   AND THEN WE CHANGED THE FORMAT AND THE GUARD DID NOT FOLLOW. On
+   2026-09-10 we decided to publish batch results as RAW FRACTIONS -
+   "49 of 50", never "98%" - because n=20 cannot carry a percentage and
+   we had told a client in writing that twenty is the sample floor. A
+   fraction contains no `%`. So the honest format we deliberately chose
+   walked straight past rule 1, which had been written when the mistake
+   being prevented was a quoted percentage. The guard was not wrong; it
+   was aimed at the old shape of the mistake.
+
+   Rule 1 now reads both. A fraction is normalised to "N of M" and
+   looked up in ATTRIBUTED_NUMBERS under that key, so "49/50",
+   "49 of 50" and "49 out of 50" are one entry and cannot be added
+   three times or forgotten twice.
+
    WHAT IT CANNOT CATCH, stated plainly so nobody trusts it further than
-   it goes: a survival claim written without a percentage ("Argentine
-   stock survives best"), a number attributed in a neighbouring sentence
-   rather than the same one, and anything in a client email, which is
-   not in this repository at all. It narrows the blast radius of the
-   mistake that actually happened. It does not make the mistake
+   it goes: a survival claim written with no number at all ("Argentine
+   stock survives best") - rule 2 covers the attributed phrasings of
+   that and nothing else - a number attributed in a neighbouring
+   sentence rather than the same one, and anything in a client email,
+   which is not in this repository at all. It narrows the blast radius
+   of the mistake that actually happened. It does not make the mistake
    impossible.
 
    THIS GUARD SPENT ITS WHOLE LIFE SWITCHED OFF, and the way it happened
@@ -90,8 +105,45 @@ const ATTRIBUTED_NUMBERS = {
    catalog: 4 sentences match a loose version of this pattern, 2 of them
    promises; the tightened pattern below matches the 2 claims and neither
    promise. */
+/* NO TRAILING \b, and that is a fix rather than a looseness. The pattern
+   used to end in one, which silently killed the last alternative: after
+   "surviv" comes "al", v-to-a is not a word boundary, so
+   "we measured ... survival" could never match. The branch written to
+   catch the vaguest and most dangerous phrasing - a claim to have
+   measured, with no number for rule 1 to see - was dead from the day it
+   was written, and its own negative control passed the whole time
+   because that control used the FIRST alternative, which ends at "data"
+   and does have a boundary after it.
+
+   Found on 2026-09-12 by pasting a real section into the page and
+   noticing the guard stayed silent on "what we measured is survival at
+   rest" - the exact sentence shape this branch exists for. A control
+   below now exercises this branch specifically, so it cannot die again
+   without the build saying so. */
 const MEASUREMENT_CLAIM =
-  /\b(our (?:own )?survival data|our benchmark|in our benchmark|survival rates? across our|our (?:worst|best)-performing|we measured[^.]{0,50}surviv)\b/i;
+  /\b(our (?:own )?survival data|our benchmark|in our benchmark|survival rates? across our|our (?:worst|best)-performing|we measured[^.]{0,50}surviv)/i;
+
+/* Sentences that DO claim a measurement and ARE backed, with the file
+   that backs each one.
+
+   Rule 2 was written when we had measured nothing, so "claims to have
+   measured survival" and "unsupported" were the same set. Since
+   2026-09-11 they are not: logs/day_reports/ holds real Day-7 output for
+   three cohorts, and a page that may not say "what we measured is
+   survival at rest" cannot state the limitation of its own measurement -
+   which is the one sentence a reader most needs.
+
+   EXACT FULL SENTENCE, not a prefix like PENDING_REWRITE. A prefix
+   exemption keeps excusing a sentence after somebody rewrites its
+   second half, which is where the claim usually is. Reword it by one
+   word and it fails again, on purpose. */
+const ATTRIBUTED_CLAIMS = {
+  'None of these accounts has posted a comment, so what we measured is survival at rest - and a pre-flagged account surfaces when it is used, not while it sits.':
+    'engine logs/day_reports/2026-09-11-day7-argentina-abontg.txt and ' +
+    '-argentina-theblja-control.txt: both report NO LOAD / load reaching ' +
+    '20 of 50, and both end NOT QUOTABLE for exactly this reason. The ' +
+    'sentence states the report\'s own limitation.',
+};
 
 /* Claims that are in the guides today, are NOT currently supported, and are
    waiting on an author decision about the replacement wording. The build
@@ -112,6 +164,53 @@ const PENDING_REWRITE = [
 const SURVIVAL_WORDS = /\b(surviv\w*|alive|died|dies|dying|death|ban rate|burn rate)\b/i;
 const ATTRIBUTION = /\b(our|we|us|ATREOX(?:'s)?|the ATREOX team)\b/i;
 const PERCENT = /\d+(?:\.\d+)?%/g;
+
+/* The three ways a fraction is written in English prose, which is the
+   format we actually publish in. "of the" is allowed because "48 of the
+   50 accounts" is how a person writes it.
+
+   The slash form is the loose one and is filtered below rather than in
+   the pattern: a regex tight enough to exclude "24/7" and loose enough
+   to include "9/10" does not exist, so the exclusions are named. */
+const FRACTION = /\b(\d{1,5})\s*(?:\/|of the|out of|of)\s*(\d{1,5})\b/gi;
+
+/* Slash forms that are idioms, not counts. Named individually on
+   purpose: a heuristic ("denominator under 10 is probably an idiom")
+   would silently drop "9/10 survived", which is exactly the shape this
+   rule exists to catch. */
+const SLASH_IDIOMS = new Set(['24/7', '365/24']);
+
+/* A fraction, normalised to the one spelling ATTRIBUTED_NUMBERS is keyed
+   on, or null when the pair is not a count at all.
+
+   Rejects a denominator smaller than the numerator ("50 of 49" is not a
+   survival figure, it is two numbers that happen to be adjacent), a
+   denominator of 0 or 1, and the named slash idioms. Everything that
+   survives those is a claim about how many of a batch are alive - which
+   is the only reason a fraction would be in a sentence that already
+   carries a survival word AND a first-person attribution. */
+function normaliseFraction(raw, numerator, denominator) {
+  const n = Number(numerator);
+  const m = Number(denominator);
+  if (SLASH_IDIOMS.has(raw.replace(/\s+/g, ''))) return null;
+  if (!Number.isInteger(n) || !Number.isInteger(m)) return null;
+  if (m < 2 || n > m) return null;
+  return `${n} of ${m}`;
+}
+
+/* Every attributable NUMBER in one sentence - percentages and fractions
+   together - in the spelling ATTRIBUTED_NUMBERS uses as its key. One
+   function so the two forms cannot drift into being checked by two
+   slightly different rules, which is how the fraction gap opened in the
+   first place. */
+function attributableNumbers(sentence) {
+  const found = [...(sentence.match(PERCENT) ?? [])];
+  for (const match of sentence.matchAll(FRACTION)) {
+    const key = normaliseFraction(match[0], match[1], match[2]);
+    if (key) found.push(key);
+  }
+  return found;
+}
 
 /* Sentence-ish: split on terminators followed by a space or end. Crude on
    purpose - a smarter parser would have to understand the JSX string
@@ -137,8 +236,8 @@ let attributedSentences = 0;
 
 for (const block of prose) {
   for (const sentence of sentences(block)) {
-    const found = sentence.match(PERCENT);
-    if (!found) continue;
+    const found = attributableNumbers(sentence);
+    if (found.length === 0) continue;
     if (!SURVIVAL_WORDS.test(sentence)) continue;
     if (!ATTRIBUTION.test(sentence)) continue;
     attributedSentences++;
@@ -158,7 +257,7 @@ check(
 );
 
 check(
-  'no survival percentage is attributed to us without a reproducible source',
+  'no survival number, percentage or fraction, is attributed to us without a reproducible source',
   offenders.length === 0,
   offenders.length
     ? offenders.map((o) => `${o.pct} -> "${o.sentence}"`).join(' | ')
@@ -171,6 +270,7 @@ for (const block of prose) {
   for (const sentence of sentences(block)) {
     if (!MEASUREMENT_CLAIM.test(sentence)) continue;
     const trimmed = sentence.trim();
+    if (trimmed in ATTRIBUTED_CLAIMS) continue;
     if (PENDING_REWRITE.some((known) => trimmed.startsWith(known))) continue;
     claims.push(trimmed.slice(0, 150));
   }
@@ -202,8 +302,8 @@ if (PENDING_REWRITE.length) {
 function scan(text) {
   const out = [];
   for (const sentence of sentences(text)) {
-    const found = sentence.match(PERCENT);
-    if (!found) continue;
+    const found = attributableNumbers(sentence);
+    if (found.length === 0) continue;
     if (!SURVIVAL_WORDS.test(sentence)) continue;
     if (!ATTRIBUTION.test(sentence)) continue;
     out.push(...found.filter((p) => !(p in ATTRIBUTED_NUMBERS)));
@@ -232,9 +332,53 @@ check(
   'no first-person attribution',
 );
 
+/* ── The fraction half, which is the format we actually publish in ──── */
+check(
+  'negative control: an attributed FRACTION is caught, in all three spellings',
+  scan('Our Argentine batch was 49 of 50 alive.').length === 1 &&
+    scan('Our Argentine batch was 49 out of 50 alive.').length === 1 &&
+    scan('Our Argentine batch was 49/50 alive.').length === 1,
+  'the shape rule 1 could not see before 2026-09-12',
+);
+check(
+  'and all three normalise to ONE key, so one entry excuses all of them',
+  scan('Our batch was 49 of 50 alive.')[0] === '49 of 50' &&
+    scan('Our batch was 49/50 alive.')[0] === '49 of 50' &&
+    scan('Our batch was 49 out of 50 alive.')[0] === '49 of 50',
+  'otherwise the same claim needs three entries and gets one',
+);
+check(
+  'and "of the" is read the way a person writes it',
+  scan('Our batch had 48 of the 50 accounts still alive.').length === 1,
+);
+check(
+  'a fraction with no attribution is NOT caught',
+  scan('A batch that comes back 2 of 30 alive was dead when it was sold.').length === 0,
+  'arithmetic about nobody in particular',
+);
+check(
+  'a fraction in a sentence with no survival word is NOT caught',
+  scan('We assign 1 of 3 proxies to each account.').length === 0,
+);
+check(
+  'NEGATIVE CONTROL: "24/7" is not a survival fraction',
+  scan('Our accounts are watched 24/7 and survival is checked every day.').length === 0,
+  'the one real idiom, excluded by name rather than by a heuristic',
+);
+check(
+  'NEGATIVE CONTROL: a pair that is not a count is not a fraction',
+  scan('Our survival window moved from 50 of 49 days, which is not a ratio.').length === 0,
+  'denominator smaller than numerator',
+);
+check(
+  'NEGATIVE CONTROL: a year or a date is not a fraction',
+  scan('We measured our survival on 3 October 2026 and again in 2026.').length === 0,
+);
+
 function scanClaims(text) {
   return sentences(text).filter(
     (s) => MEASUREMENT_CLAIM.test(s) &&
+      !(s.trim() in ATTRIBUTED_CLAIMS) &&
       !PENDING_REWRITE.some((k) => s.trim().startsWith(k)),
   );
 }
@@ -252,6 +396,30 @@ check(
 check(
   "and somebody else's claim is NOT caught",
   scanClaims('Sellers advertise survival rates they have never measured.').length === 0,
+);
+/* The branch that was dead. Asserted on its own rather than left to the
+   first control, which passes through a different alternative and so
+   proved nothing about this one for as long as it was broken. */
+check(
+  'negative control: the "we measured ... survival" branch is ALIVE',
+  scanClaims('Last month we measured 90% survival across the Argentine stock.').length === 1,
+  'it matched nothing at all until 2026-09-12 - a trailing word boundary after "surviv"',
+);
+check(
+  'and it is still bounded - a far-away survival word does not trip it',
+  scanClaims('We measured the proxy latency, the login time, the import rate, the template apply time and the join rate, and separately their survival.').length === 0,
+  'more than 50 characters between the two, so it is two statements',
+);
+check(
+  'a backed claim is excused, and only by its EXACT sentence',
+  scanClaims(Object.keys(ATTRIBUTED_CLAIMS)[0]).length === 0 &&
+    scanClaims(Object.keys(ATTRIBUTED_CLAIMS)[0].replace('at rest', 'under load')).length === 1,
+  'reword it and the exemption stops applying',
+);
+check(
+  'every backed claim names the file that backs it',
+  Object.values(ATTRIBUTED_CLAIMS).every((src) => /day_reports|public_numbers/.test(src)),
+  'an exemption with no source is permission',
 );
 /* The exemption mechanism itself, tested against a synthetic list rather
    than whatever happens to be in PENDING_REWRITE today - the list is empty
