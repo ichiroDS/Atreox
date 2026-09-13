@@ -776,7 +776,13 @@ function orgAndSiteLd() {
         url: ORIGIN + '/',
         logo: ORIGIN + '/public/apple-touch-icon.png',
         email: 'hello@atreoxai.com',
-        sameAs: ['https://t.me/atreoxai'],
+        // NO sameAs. It claimed https://t.me/atreoxai as one of our profiles,
+        // and that handle is not ours and not a channel - t.me serves a bare
+        // contact page for it. sameAs is how a search engine links an entity to
+        // its accounts elsewhere, so an entry pointing at a handle we do not
+        // control is a false statement made on every page of the site, not just
+        // a dead link. The real channel is private and has no public address;
+        // when it gets one, it goes back here.
       },
       {
         '@type': 'WebSite',
