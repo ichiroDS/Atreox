@@ -284,6 +284,21 @@ for (const f of articleFiles) {
   }
 }
 
+/* 8. No link to the Telegram channel, anywhere a visitor or a crawler can
+   reach it: the bundle, every generated page, the shell. Added 2026-09-14,
+   when the invite link turned out to have survived the channel's removal
+   from the pages for two days inside SOCIAL_LINKS - it was in app.js, not
+   in any page's text, so a page-text search missed it. A code comment that
+   names the old address is not a link; only an href-able t.me URL counts. */
+console.log('\n8. no Telegram channel links');
+const TG_LINK = /["'(=\s]https?:\/\/(?:t\.me|telegram\.me)\/[+\w]/;
+const tgScan = ['public/app.js',
+  ...pages.map(([, f]) => f)].filter(f => fs.existsSync(path.join(ROOT, f)));
+const tgHits = tgScan.filter(f => TG_LINK.test(fs.readFileSync(path.join(ROOT, f), 'utf8')));
+check(`${tgScan.length} files, none links a t.me address`, tgHits.length === 0, tgHits.join(', '));
+check('NEGATIVE CONTROL: the pattern catches the old invite link',
+  TG_LINK.test(`href: 'https://t.me/+YfEU_fmwGJlmOGZi'`));
+
 console.log('');
 if (failures) {
   console.error(`FAIL: ${failures} check(s) failed.`);

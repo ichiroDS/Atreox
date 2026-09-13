@@ -1155,6 +1155,10 @@
     }
     .g-p:last-child { margin-bottom: 0; }
     .g-p b, .g-p strong { font-weight: 500; color: rgba(255,255,255,0.92); }
+    /* A link inside running text ('plink' blocks). Underlined so it reads as
+       a link without a button's weight. */
+    .g-p a.g-inline { color: #7fe9ff; text-decoration: underline; text-underline-offset: 3px; }
+    .g-p a.g-inline:hover { color: #fff; }
 
     /* the chapter list, which is also the way into the chapters.
        .g-toc-side is the sticky sidebar cut: one column, narrower, worn

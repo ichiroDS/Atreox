@@ -1155,6 +1155,10 @@
     }
     .g-p:last-child { margin-bottom: 0; }
     .g-p b, .g-p strong { font-weight: 500; color: rgba(255,255,255,0.92); }
+    /* A link inside running text ('plink' blocks). Underlined so it reads as
+       a link without a button's weight. */
+    .g-p a.g-inline { color: #7fe9ff; text-decoration: underline; text-underline-offset: 3px; }
+    .g-p a.g-inline:hover { color: #fff; }
 
     /* the chapter list, which is also the way into the chapters.
        .g-toc-side is the sticky sidebar cut: one column, narrower, worn
@@ -2182,6 +2186,12 @@
 <span class="g-postcard-cat">Accounts &amp; proxies</span>
 <span class="g-postcard-title">Telegram account aging: does the seller’s claim predict survival?</span>
 <span class="g-postcard-sum">We bought two Argentine batches on the same day from different sellers. One advertised thirty days of aging, the other claimed nothing we recorded. Seven days later the aged batch was the dead one.</span>
+<time class="g-postcard-date" datetime="2026-09-14">14 Sep 2026</time>
+</a></li>
+<li style="margin:0 0 2px"><a href="/blog/telegram-session-killed-by-ip-change" class="g-postcard">
+<span class="g-postcard-cat">Accounts &amp; proxies</span>
+<span class="g-postcard-title">Your Telegram account is not banned. Its session was killed by a moving IP.</span>
+<span class="g-postcard-sum">A Telegram session can die with the account behind it untouched: the proxy’s exit address changes under a live connection, Telegram reads that as a stolen key and revokes it, and most tools then call the account dead.</span>
 <time class="g-postcard-date" datetime="2026-09-14">14 Sep 2026</time>
 </a></li></ul>
 <nav aria-label="Site" style="margin-top:56px;padding-top:22px;border-top:1px solid rgba(255,255,255,0.10)">

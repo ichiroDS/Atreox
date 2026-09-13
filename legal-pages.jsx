@@ -97,6 +97,11 @@ function LegalPage({ badge, title, lastUpdated, intro, sections, setPage }) {
 }
 
 const UPDATED = 'August 27, 2026';
+/* Privacy moved on its own on 2026-09-14: the Turnstile paragraph was
+   wrong (it said contact page only; the account checker had loaded it
+   since the tools launched), and the checkers gained anonymous run counts
+   and the "ask a person" form. Terms and Refund did not change. */
+const PRIVACY_UPDATED = 'September 14, 2026';
 
 /* ── Terms of Service ─────────────────────────────────────────────
    From legal/drafts/terms-of-service.md. Section 16 of that draft,
@@ -281,6 +286,13 @@ const PRIVACY = {
       ],
     },
     {
+      heading: 'Free checkers — what is counted, and the “ask a person” form',
+      body: [
+        'Every run of the free proxy and account checkers is counted, so we can see whether they are used and what they find. Each count records only: when, which checker, how many lines were submitted and checked, how many came back with each result (for example “2 working, 1 does not hold its exit”), and whether the run finished or hit the hourly limit. It records no IP address, no proxy host, port, login or password, and nothing about the account — the table has no column for any of them. These counts are kept for 400 days. Separately, the hourly limit is enforced by remembering the requesting IP address for one day.',
+        'Under a bad result the checker offers a link to ask a person about it. Nothing is sent unless you open that form, type a Telegram username and press send. What is sent is that username, which checker, which result, and for a proxy the two-letter country Telegram reported — never the proxy, the login or the session file. It arrives as an email in our inbox, a person replies to you once on Telegram about that result, and it is not stored in any database or added to any list.',
+      ],
+    },
+    {
       heading: 'People who are not our customers',
       body: 'The Service interacts with Telegram users who have no relationship with us — people who send direct messages that NeuroDialogs answers, and people whose public activity the parsers record. For that data the customer is the controller and is responsible for having a lawful basis for it. That is the position the Terms take, and it is stated here plainly rather than left implied.',
     },
@@ -316,7 +328,7 @@ const PRIVACY = {
         'This site sets no cookies for analytics or advertising, and therefore shows no cookie banner. That is a deliberate outcome, not an oversight.',
         'We use Vercel Web Analytics. It is served from our own domain, so no third-party host is contacted, and it sets no cookies. It records aggregate page views and referrers — which pages are read and roughly where visitors arrived from. It does not build a profile of you and does not follow you between sites.',
         'Two cookies are set, both strictly necessary for something you asked for: atreox_ref, set by the dashboard, remembers which partner referred you so their commission is attributed, and lasts 90 days; and session cookies set by Clerk, which keep you signed in to the dashboard.',
-        'The contact form loads Cloudflare Turnstile, which checks that a submission comes from a person rather than a script. It sets no cookies, and it loads only on the contact page — not while you are reading a guide.',
+        'Cloudflare Turnstile checks that a submission comes from a person rather than a script. It sets no cookies. It loads in three places only: the contact page, the free account checker, and the “ask a person” form under a checker result once you open it — not while you are reading a guide or checking a proxy.',
         'Videos are not embedded. Where a page shows a video, what is on the page is an image served from this site and a play button: no player, no YouTube script, and no request to Google. Pressing play is what loads the video, from youtube-nocookie.com, and YouTube may then set cookies in your browser — which is why the button says so before you press it. If you do not press it, nothing of Google’s is loaded at all.',
       ],
     },
@@ -336,7 +348,7 @@ const PRIVACY = {
 };
 
 function PrivacyPage({ setPage }) {
-  return <LegalPage {...PRIVACY} lastUpdated={UPDATED} setPage={setPage} />;
+  return <LegalPage {...PRIVACY} lastUpdated={PRIVACY_UPDATED} setPage={setPage} />;
 }
 
 /* ── Refund Policy ────────────────────────────────────────────────

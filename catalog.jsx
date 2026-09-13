@@ -653,12 +653,13 @@ const GUIDES = [
               tone: 'bad',
               title: 'The "Red Flags" to Avoid',
               items: [
-                ['Instant IP Death:', "If a seller's accounts get banned immediately during the initial ATREOX health check due to the IP change, abandon that seller."],
+                ['Instant IP Death:', "If a seller's accounts are frozen or banned the moment they first connect through your proxy, abandon that seller. Read the error first, though: \"the authorization key was used under two different IP addresses\" is not a ban. It means the proxy's exit moved under the session and Telegram revoked that login - fix the proxy's hold time and log the account in again before blaming the seller."],
                 ['0-Day / Fresh Accounts:', 'No rest time equals an instant ban.'],
                 ['"Sold Before" or Password-Protected:', 'Someone else holds the keys to the session or can recover it.'],
               ],
             },
           ]],
+          ['linkout', { href: '/blog/telegram-session-killed-by-ip-change', label: 'A dead session is not a banned account: how to tell them apart' }],
         ],
       },
       {
@@ -765,15 +766,31 @@ const GUIDES = [
         title: 'Buying Mobile Proxies',
         blocks: [
           ['p', "For reliable mobile proxies, the ATREOX team mostly uses DataImpulse. They offer a pay-as-you-go model billed by bandwidth (GB) with clean SOCKS5 outputs. The settings below are named the way DataImpulse names them, but every provider asks the same questions under labels of its own."],
-          ['p', "A note on providers. DataImpulse is what we use for most geos, but it does not carry every country - Argentina, currently our first recommendation, is not available there at all. We use FloppyData for Argentine proxies. Check that your provider actually offers the country before you buy the accounts."],
+          ['plink', [
+            "A note on providers. DataImpulse is what we use for most geos, but it does not carry every country - Argentina, currently our first recommendation, is not available there at all. For Argentine proxies we use ",
+            { text: 'FloppyData', href: '/go/floppydata', rel: 'sponsored' },
+            ". That is an affiliate link: we receive a share of what you spend there, and that is not why we name them - it is the provider our own Argentine accounts run through. Check that your provider actually offers the country before you buy the accounts.",
+          ]],
           ['p', "The exact settings to use when generating your list:"],
+          ['linkout', { href: '/blog/telegram-session-killed-by-ip-change', label: 'Why a missing hold time kills sessions: one case, traced' }],
           ['callout', [
             "Type: Sticky. Not rotating.",
             "This is the most important setting on this page, and an earlier version of this guide got it wrong. A rotating proxy changes its exit IP on a timer, underneath a session that is already logged in. To Telegram that looks like the account moving to a different address mid-session, which is one of the clearest signals it acts on.",
             "Every proxy the ATREOX team runs is sticky, and every proxy we recommend is sticky. If you are currently running accounts on rotating proxies because of the earlier version of this page, move them to sticky. Any survival results you collected on rotating proxies measured the proxy, not the stock.",
           ]],
+          /* ADDED 2026-09-14, and it corrects this page rather than extending
+             it. "Sticky" on its own was the whole instruction, and on
+             DataImpulse a sticky PORT without a hold time is exactly the
+             setup whose exit was measured changing carrier inside 23 minutes
+             and whose session Telegram then killed. Following this guide to
+             the letter produced that setup. */
+          ['callout', [
+            "Sticky is not enough on its own: set the hold time.",
+            "On DataImpulse, Sticky gives the account a port that selects a session. How long that session keeps one exit address is set in the login, with sessttl: append ;sessttl.1440 to the login, with a dot, not a dash. Without it the session is held for the provider's default, which is short - we measured one such login move between three addresses on two carriers in 23 minutes, and the account's session died.",
+          ]],
           ['kv', [
             ['Type', 'Sticky. Not rotating.'],
+            ['Hold time', 'Append ;sessttl.1440 to the login, e.g. yourlogin__cr.us;sessttl.1440. A dot between sessttl and the number.'],
             ['Targeting', 'Target Filters, and select the country there. Default targeting means no country selection at all, so it cannot satisfy the matching rule above.'],
             ['Country', "Must exactly match the account's own country."],
             ['Protocol', 'SOCKS5. Do not use HTTP or HTTPS.'],
@@ -836,7 +853,7 @@ const GUIDES = [
         title: 'Frequently Asked Questions (FAQ)',
         blocks: [
           ['faq', [
-            { q: 'Which proxies are best for Telegram automation?', a: 'For automation, sticky proxies with anchored IPs are best. They provide predictable account behavior and drastically reduce the risk of deauthorization and bans.' },
+            { q: 'Which proxies are best for Telegram automation?', a: 'For automation, sticky proxies with anchored IPs are best. They provide predictable account behavior and drastically reduce the risk of the session being deauthorized. Whether they also affect bans is something we have tested and could not show either way.' },
             { q: 'Why is it important to use a separate proxy for every account?', a: 'Sharing a single proxy across multiple accounts links their network footprint. If one account gets flagged for spam, Telegram will instantly ban all other accounts sharing that identical IP address. The rule is absolute: 1 Account = 1 Proxy.' },
             { q: 'Can I use rotating proxies for Telegram?', a: "No. What matters is that the exit IP does not change underneath a logged-in session, and timed rotation — an exit that changes every N seconds or minutes regardless of what your account is doing — breaks exactly that: Telegram reads the change as a hijacked session and deauthorizes the account. A sticky session drawn from a rotating pool is fine, because it holds one IP for the length of your session. \"Sticky\" is the word providers use for it, and the one to look for." },
             { q: 'How do proxies impact account security?', a: 'Proxies are the baseline of your operational security. Unstable, "dirty," or rapidly jumping IP addresses will force Telegram to initiate security checks, apply heavy limits, or permanently ban the session.' },
@@ -2196,9 +2213,9 @@ const GUIDES = [
           /* ── PUT THE YOUTUBE ID IN `id` BELOW ──
              Just the id, not the URL: for
              https://www.youtube.com/watch?v=dQw4w9WgXcQ that is
-             "dQw4w9WgXcQ". While it is null the block renders the poster
-             with "Video coming soon" and stays inert, which is why it is
-             safe to ship before the recording exists.
+             "dQw4w9WgXcQ". While it is null the block renders nothing at
+             all (no empty frame) - so if it goes back to null, remove
+             this section's sentence about watching it too.
 
              `poster` is a file in this repo on purpose — see LiteVideo in
              shared.jsx. Do not point it at i.ytimg.com. */
@@ -3522,7 +3539,7 @@ const TOOL_BY_ID = Object.fromEntries(TOOLS.map(t => [t.id, t]));
 const BLOCK_KINDS = [
   'p', 'callout', 'steps', 'card', 'cards', 'options', 'kv', 'stat',
   'faq', 'map', 'controls', 'figure', 'video', 'plates', 'table',
-  'checklist', 'note', 'bullets', 'linkout', 'toolcta',
+  'checklist', 'note', 'bullets', 'linkout', 'toolcta', 'plink',
 ];
 
 const GUIDE_BY_SLUG = Object.fromEntries(GUIDES.map(g => [g.slug, g]));

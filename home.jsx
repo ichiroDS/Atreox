@@ -1218,11 +1218,13 @@ function PipelineSection({ setPage }) {
    consent banner" true; see shared.jsx for the whole reasoning.
 
    ── PUT THE YOUTUBE ID IN `id` BELOW ── just the id, not the URL.
-   While it is null the block shows the poster and says "Video coming
-   soon", so this ships safely before the clip is up. ═══ */
+   While it is null the whole section is left out - heading included -
+   rather than showing an empty frame. ═══ */
+const HOME_VIDEO_ID = 'om_LYTdDs3E';
 function VideoSection({ setPage }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.12 });
+  if (!HOME_VIDEO_ID) return null;
 
   return (
     <section ref={ref} className="section-block" style={{ padding: '88px 5%', maxWidth: 1280, margin: '0 auto' }}>
@@ -1237,7 +1239,7 @@ function VideoSection({ setPage }) {
         initial={{ opacity: 0, y: 26 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.08 }}
         style={{ maxWidth: 940, margin: '0 auto' }}>
         <LiteVideo
-          id="om_LYTdDs3E"
+          id={HOME_VIDEO_ID}
           title="What ATREOX does"
           poster="/public/video/home-clip.jpg"
           note="Plays from YouTube · nothing is loaded from Google until you press play"
@@ -1635,8 +1637,9 @@ function FAQSection({ setPage }) {
 
 /* ══════════════════════════════════════
    3.5 — FOLLOW
-   The channel and the videos, given room rather than left as two
-   glyphs in the navbar. Sits between the pipeline and the price: the
+   The videos, given room rather than left as a glyph in the navbar.
+   (The Telegram channel card was removed on 2026-09-14 - the channel is
+   private; see SOCIAL_LINKS in shared.jsx.) Sits between the pipeline and the price: the
    visitor has just seen how it runs, and following is the cheapest
    yes on the page to say before being asked for money.
 ══════════════════════════════════════ */

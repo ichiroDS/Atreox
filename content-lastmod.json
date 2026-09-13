@@ -1,67 +1,67 @@
 {
   "page:/": {
-    "hash": "93c0f503de36d317",
-    "date": "2026-09-08"
+    "hash": "8603975f5e2c18b9",
+    "date": "2026-09-13"
   },
   "page:/functions": {
-    "hash": "2de65fbe3ac478c4",
-    "date": "2026-09-08"
+    "hash": "088ddaa14e5adcd6",
+    "date": "2026-09-13"
   },
   "page:/pricing": {
-    "hash": "63cd14d94fd012b2",
-    "date": "2026-09-08"
+    "hash": "77a4681be557bccd",
+    "date": "2026-09-13"
   },
   "page:/guides": {
-    "hash": "553e97f85bb68166",
-    "date": "2026-09-08"
+    "hash": "dfbcd71db01a0304",
+    "date": "2026-09-13"
   },
   "page:/contact": {
-    "hash": "08fc7988f55f2557",
-    "date": "2026-09-08"
+    "hash": "9c82aaaa49b25948",
+    "date": "2026-09-13"
   },
   "page:/tools": {
-    "hash": "27fcdee27ad695ba",
-    "date": "2026-09-08"
+    "hash": "9352717510349068",
+    "date": "2026-09-13"
   },
   "page:/tools/proxy-checker": {
-    "hash": "ce9bfdfc7b9a647d",
-    "date": "2026-09-08"
+    "hash": "ee8c6fd7f87b0568",
+    "date": "2026-09-13"
   },
   "page:/tools/account-checker": {
-    "hash": "0d63638087775569",
-    "date": "2026-09-08"
+    "hash": "440e48d0b864e77e",
+    "date": "2026-09-13"
   },
   "page:/privacy": {
-    "hash": "28421b75377919e7",
-    "date": "2026-09-08"
+    "hash": "13143263cb10131d",
+    "date": "2026-09-13"
   },
   "page:/terms": {
-    "hash": "e5b14d84eb0d2706",
-    "date": "2026-09-08"
+    "hash": "159c38ea45db0e79",
+    "date": "2026-09-13"
   },
   "page:/refund": {
-    "hash": "b386991f761476a5",
-    "date": "2026-09-08"
+    "hash": "6815bd0e4dcc3072",
+    "date": "2026-09-13"
   },
   "page:/referral-program": {
-    "hash": "bdaff72528a1832e",
-    "date": "2026-09-08"
+    "hash": "c7d043616e83f89f",
+    "date": "2026-09-13"
   },
   "page:/blog": {
-    "hash": "cda988c08fed17db",
+    "hash": "09c8657a9b00ab28",
     "date": "2026-09-13"
   },
   "blogcat:accounts-and-proxies": {
-    "hash": "d322f6ec3c62a76e",
+    "hash": "433315315a07d1d3",
     "date": "2026-09-13"
   },
   "guide:buying-telegram-accounts": {
-    "hash": "dfae176114589b33",
+    "hash": "df7b18a967510b6b",
     "date": "2026-09-13"
   },
   "guide:proxies-for-telegram-accounts": {
-    "hash": "e8e76b94bb9a9ed7",
-    "date": "2026-09-05"
+    "hash": "8099d0472b924985",
+    "date": "2026-09-13"
   },
   "guide:billing": {
     "hash": "5edf1796a1f6d0f0",
@@ -101,6 +101,10 @@
   },
   "post:telegram-account-aging-claims-tested": {
     "hash": "3f72e6d5b52bff29",
+    "date": "2026-09-13"
+  },
+  "post:telegram-session-killed-by-ip-change": {
+    "hash": "5e0c668038c894fe",
     "date": "2026-09-13"
   }
 }

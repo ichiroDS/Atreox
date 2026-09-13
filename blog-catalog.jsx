@@ -180,6 +180,136 @@ const POSTS = [
       },
     ],
   },
+  {
+    /* Every fraction below comes from (engine) python -m
+       scripts.session_death_evidence, run 2026-09-14, and is listed with
+       that source in scripts/verify-survival-claims.mjs. The exit-address
+       measurement comes from src/proxy_pinning.py's docstring, measured
+       2026-09-12 on the same login. Re-run before changing a number. */
+    slug: 'telegram-session-killed-by-ip-change',
+    category: 'accounts-and-proxies',
+    title: 'Your Telegram account is not banned. Its session was killed by a moving IP.',
+    summary:
+      'A Telegram session can die with the account behind it untouched: the proxy\u2019s exit '
+      + 'address changes under a live connection, Telegram reads that as a stolen key and '
+      + 'revokes it, and most tools then call the account dead.',
+    seoTitle: 'Telegram AUTH_KEY_DUPLICATED: why sessions die on a rotating proxy',
+    seoDescription:
+      'AUTH_KEY_DUPLICATED revokes a session, not the account: a proxy exit that moved. '
+      + 'One traced case, the setting that prevents it, and what we could not prove.',
+    published: '2026-09-14',
+    body: [
+      {
+        id: 'what-you-see',
+        title: 'What it looks like from the outside',
+        blocks: [
+          ['p', "An account that worked yesterday stops connecting. The tool you run it in marks it dead, disabled or banned, and the obvious conclusion is that the seller sold you something that was already on its way out."],
+          ['p', "Sometimes that is exactly what happened. But there is a second way for an account to stop working that looks identical on a dashboard and has nothing to do with Telegram judging the account at all. The account is fine. The thing that died is the session \u2014 the login your tool was holding \u2014 and it died because of the proxy in front of it."],
+          ['p', "The difference matters for money. A banned account is a loss. A killed session is a login you can redo, on a proxy setting you can fix, and an account you would otherwise throw away or dispute with a seller who did nothing wrong."],
+        ],
+      },
+      {
+        id: 'the-error',
+        title: 'The error, word for word',
+        blocks: [
+          ['callout', [
+            'The authorization key (session file) was used under two different IP addresses simultaneously, and can no longer be used. Use the same session exclusively, or use different sessions.',
+            'In Telegram\u2019s API this is AUTH_KEY_DUPLICATED; Telethon raises it as AuthKeyDuplicatedError.',
+          ]],
+          ['p', "The authorization key is what a session file actually contains. It is created once, when the account logs in on a device, and every later connection proves who it is by holding that key. Nothing else identifies the login."],
+          ['p', "So when Telegram sees one key in use from two addresses at the same moment, it has one reasonable explanation: the session file has been copied, and somebody else is using it. It does the safe thing and revokes that key. It does not, by this alone, restrict the account. A fresh login creates a fresh key and the account carries on \u2014 which is also why the error says to use a different session rather than telling you the account is gone."],
+          ['note', "We have not logged the account in the case below back in, so we cannot show a recovery on it. The statement above is what the error and Telegram\u2019s key model imply, not something we have demonstrated on that account."],
+        ],
+      },
+      {
+        id: 'two-causes',
+        title: 'Two different ways to get there',
+        blocks: [
+          ['p', "The error needs two addresses at once for one key. There are two ordinary ways to produce that, and they call for different fixes."],
+          ['bullets', [
+            'The exit moved under a live connection. Residential and mobile proxy gateways hand out an exit address from a pool. If the login does not ask the provider to hold one address, the pool can move you to another one while your client is still connected. Telegram then sees the same key arrive from a new address while the old connection is still registered.',
+            'Two connections to the same session from two places. A second tool opened the same session file, a copy of it exists somewhere else, or one piece of software opened two connections to one account. Behind an exit that holds still, both connections come from one address and Telegram has nothing to object to. Behind an exit that moves, the second one arrives from somewhere else.',
+          ]],
+          ['p', "The second cause is not hypothetical for us. On 13 September we found our own engine connecting accounts that a run had not been given, alongside connections other parts of the software already held. We changed it so that a run only connects the accounts assigned to it. A moving exit turns that kind of overlap from harmless into fatal, which is why the two causes so often show up together."],
+        ],
+      },
+      {
+        id: 'one-case',
+        title: 'One case, traced end to end',
+        blocks: [
+          ['p', "We have seen this error on more than one account. This is the one we can follow from the proxy setting to the moment the session died, so it is the one we describe."],
+          ['steps', [
+            'The account ran through DataImpulse on a sticky port, 10005, with a login that asked for a country and nothing else. No hold time.',
+            'On 10 September at 20:08 UTC its connection dropped and the reconnect failed with the error above. The engine tried five times; the last attempt failed at 20:11 UTC and it stopped.',
+            'Two days later we sampled the exit address of that same login, once every two minutes. Within 23 minutes it came out of three different addresses belonging to two different carriers.',
+            'Our own panel labelled the account banned. That label was wrong, and we renamed it on 12 September: a session that died this way is now shown as a dead session, not a banned account.',
+          ]],
+          ['p', "The last step is the one worth dwelling on. We build the tooling and know what this error means, and our interface still told us the account was banned. Anyone running the same account through a tool that does not distinguish the two would have written it off and blamed the seller, and there would have been nothing on the screen to suggest otherwise."],
+        ],
+      },
+      {
+        id: 'the-fix',
+        title: 'The setting that holds the exit',
+        blocks: [
+          ['p', "On DataImpulse the sticky session is selected by the port \u2014 their sticky range runs from 10000 to 20000 \u2014 and how long that session keeps one exit address is set in the login, with a parameter called sessttl, in minutes."],
+          ['callout', [
+            'yourlogin__cr.us;sessttl.1440',
+            'The country stays as it is; the hold time is appended after a semicolon, with a dot between the name and the number. 1440 minutes is the longest hold DataImpulse support quoted to us.',
+          ]],
+          ['p', "Their documentation does show the parameter, with a dot, in an example. What it does not say is that the port is what holds the session, or how long a hold can be. Both of those came from their support, and without the first one the parameter looks optional rather than the difference between a session that lasts a day and one that can be killed inside half an hour."],
+          ['note', "We got the spelling wrong ourselves before we got it right. Our panel suggested sessttl-1440, with a dash, and our own validator accepted it. No account in our fleet had that form and nothing documents it. It was fixed on 13 September; if you copied a login from us before then, check the separator."],
+          ['plink', [
+            'For countries DataImpulse does not carry we use ',
+            { text: 'FloppyData', href: '/go/floppydata', rel: 'sponsored' },
+            '. Its logins name a fixed session and switch rotation off with rotation-0, so the exit is held by the login itself rather than by a port. That link is an affiliate link \u2014 we receive a share of what you spend there \u2014 and it is not the reason it is here: it is the provider our own Argentine accounts run through.',
+          ]],
+          ['linkout', { href: '/guides/proxies-for-telegram-accounts', label: 'Guide: choosing and connecting proxies' }],
+        ],
+      },
+      {
+        id: 'if-it-happened',
+        title: 'If it has already happened',
+        blocks: [
+          ['bullets', [
+            'Do not reconnect the same session file. The key is revoked; every further attempt fails the same way, which is all five of ours did.',
+            'Fix the proxy before the new login, not after it. A fresh session on the same moving exit is exposed to exactly the same failure.',
+            'Log in again from what you were sold. Most sellers ship tdata, which can produce a new session; a bare session file with no tdata or phone behind it cannot be recovered this way.',
+            'Run each account in one place at a time. Two tools on one session is the other half of this error, whatever the proxy.',
+          ]],
+        ],
+      },
+      {
+        id: 'not-proven',
+        title: 'What we tested and could not prove',
+        blocks: [
+          ['p', "Once we had a dead session traced to a missing hold time, the next question wrote itself: does the same setting also get accounts banned from posting? It would be a stronger and more useful claim, and one fleet appeared to support it. So we checked three."],
+          ['table', {
+            head: ['Fleet', 'Exit not held: write-banned now', 'Exit held: write-banned now'],
+            rows: [
+              ['Our fleet', '0 of 52', '0 of 60'],
+              ['Client fleet A', '25 of 25', '0 of 45'],
+              ['Client fleet B', '0 of 13', '3 of 62'],
+            ],
+          }],
+          ['p', "Client fleet A reads like proof. It is not. The write-banned accounts came from five purchases in which every account had been set up without a hold time and every account ended up write-banned, and the accounts with a held exit came from other purchases. The seller and the proxy setup changed together, so on that fleet there is no way to tell which of the two did it. The one purchase that was split between both setups contributed two accounts to each side, which decides nothing."],
+          ['p', "Our fleet points the other way: 52 accounts without a hold time and not one of them write-banned, two of them 65 days after import. Client fleet B has its only write-bans on held proxies."],
+          ['p', "So this article makes no claim that a missing hold time leads to a write ban. We looked, and on these fleets the evidence does not separate the proxy from the seller. What would answer it is one purchase split in half on the same day \u2014 half with a hold time, half without \u2014 and rechecked for several weeks. We have not run that yet, and until someone does, anyone telling you the setting causes bans is guessing."],
+          ['note', "\u201cWrite-banned now\u201d counts an account only if its capability check is at most seven days old. An older verdict is treated as no answer rather than as a ban."],
+        ],
+      },
+      {
+        id: 'check-yours',
+        title: 'Check your own proxies',
+        blocks: [
+          ['p', "A proxy that passes a connection test can still move its exit an hour later \u2014 one check samples the address once, and this failure happens between samples. The free proxy checker now reads the login and port as well and says whether the exit is held, so the setting in this article is something you can confirm before an account depends on it."],
+          ['toolcta', {
+            tool: 'proxy-checker',
+            angle: 'Paste the login you run your accounts through. It tells you whether the exit is held, not just whether the proxy connects.',
+          }],
+        ],
+      },
+    ],
+  },
 ];
 
 /* ── draft: true — written, keeps its address, is not published ────

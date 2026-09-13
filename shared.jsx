@@ -84,12 +84,17 @@ const YouTubeIcon = _brandIcon(
   "M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
 );
 
-/* The two places to follow ATREOX. One list, used by the navbar, the
-   footer and the home block, so a changed URL is changed once. */
+/* Where to follow ATREOX. One list, used by the navbar, the footer and
+   the home block, so a changed URL is changed once.
+
+   THE TELEGRAM ENTRY IS GONE, not forgotten. It was an invite link to a
+   private channel, and it outlived the 2026-09-12 removal of every other
+   channel link because it lives here rather than in page text: the
+   article, /catalog and the JSON-LD sameAs were cleaned, and the navbar,
+   the footer and the home "follow" block kept linking to the channel for
+   two more days. Nothing is substituted. scripts/verify-seo.mjs now fails
+   the build if a t.me link reappears anywhere in the bundle. */
 const SOCIAL_LINKS = [
-  { key: 'telegram', label: 'Telegram', icon: TelegramIcon,
-    href: 'https://t.me/+YfEU_fmwGJlmOGZi',
-    blurb: 'Release notes, new modules, and answers to questions people actually ask.' },
   { key: 'youtube', label: 'YouTube', icon: YouTubeIcon,
     href: 'https://www.youtube.com/@atreoxai',
     blurb: 'Walkthroughs of the panel — setup, module by module, start to finish.' },
@@ -840,17 +845,11 @@ function LiteVideo({ id, title, poster, caption, note }) {
   /* The no-JS and pre-hydration path. Until React runs, and for anyone
      without it, this is an ordinary link to the watch page: it costs a
      click to leave the site, and it costs nothing to load. */
-  if (!id) {
-    return (
-      <figure className="g-video">
-        <div className="g-video-frame" style={{ cursor: 'default' }}>
-          <img src={poster} alt="" width="1280" height="720" loading="lazy" decoding="async" />
-          <span className="g-video-note">Video coming soon</span>
-        </div>
-        {caption && <figcaption>{caption}</figcaption>}
-      </figure>
-    );
-  }
+  /* No id, no block. It used to render the poster with "Video coming
+     soon" - an empty frame that promised a video nobody had recorded.
+     Changed 2026-09-14: until the id exists the block is not there at
+     all. scripts/prerender.mjs renders the same nothing. */
+  if (!id) return null;
 
   return (
     <figure className="g-video">

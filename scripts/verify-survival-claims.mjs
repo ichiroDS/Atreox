@@ -125,6 +125,18 @@ const ATTRIBUTED_NUMBERS = {
   '20 of 20': 'batch_day_report uzbek 2026-09-10, CAN WRITE',
   // "DEAD ... 0 of 20" and "NO CURRENT ANSWER ... 0 of 20"
   '0 of 20': 'batch_day_report uzbek 2026-09-10, DEAD and NO CURRENT ANSWER',
+
+  /* /blog/telegram-session-killed-by-ip-change, 2026-09-14. Every entry is a
+     line of (engine) python -m scripts.session_death_evidence, section 2,
+     run against production on 2026-09-13 22:26 UTC. These are write-ban
+     counts split by whether the proxy holds its exit, published as the
+     hypothesis the article could NOT confirm - not as survival figures. */
+  '0 of 52': 'session_death_evidence 2026-09-14, our fleet, exit not held, write-banned',
+  '0 of 60': 'session_death_evidence 2026-09-14, our fleet, exit held, write-banned',
+  '25 of 25': 'session_death_evidence 2026-09-14, client fleet A, exit not held, write-banned',
+  '0 of 45': 'session_death_evidence 2026-09-14, client fleet A, exit held, write-banned',
+  '0 of 13': 'session_death_evidence 2026-09-14, client fleet B, exit not held, write-banned',
+  '3 of 62': 'session_death_evidence 2026-09-14, client fleet B, exit held, write-banned',
 };
 
 /* RULE 2: a claim to HAVE MEASURED survival, with or without a number.

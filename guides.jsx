@@ -548,6 +548,23 @@ function ReaderBlocks({ blocks, onOpen }) {
       case 'note':
         return <p key={i} className="g-note">{v}</p>;
 
+      /* A paragraph with links on words: an array of strings and
+         { text, href, rel } parts. rel "sponsored" marks a paid link to
+         search engines; the disclosure itself must be in the text of the
+         same paragraph, which is where a reader sees it. */
+      case 'plink':
+        return (
+          <p key={i} className="g-p">
+            {v.map((part, j) => typeof part === 'string' ? part : (
+              <a key={j} className="g-inline" href={part.href}
+                rel={['noopener', part.rel].filter(Boolean).join(' ')}
+                target={part.href.startsWith('/go/') ? '_blank' : undefined}>
+                {part.text}
+              </a>
+            ))}
+          </p>
+        );
+
       /* a plain list where order isn't the point — unlike 'steps', which
          numbers a sequence you follow in order, this is just a set of
          things that are all true at once */

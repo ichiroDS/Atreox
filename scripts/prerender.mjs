@@ -353,9 +353,9 @@ ${v.map(c => `<details class="g-ctl-item"${c.id ? ` id="${esc(c.id)}"` : ''}><su
         const inner = `<img src="${esc(v.poster)}" alt="" width="1280" height="720" loading="lazy" decoding="async"><span class="g-video-play" aria-hidden="true"></span><span class="g-video-note">${
           esc(v.note || 'Plays from YouTube - nothing is loaded from Google until you press play')
         }</span>`;
-        const frame = v.id
-          ? `<a class="g-video-frame" href="https://www.youtube.com/watch?v=${esc(v.id)}" rel="noopener" aria-label="Play: ${esc(v.title)}">${inner}</a>`
-          : `<div class="g-video-frame" style="cursor:default"><img src="${esc(v.poster)}" alt="" width="1280" height="720" loading="lazy" decoding="async"><span class="g-video-note">Video coming soon</span></div>`;
+        // No id, no block - mirrors LiteVideo in shared.jsx (2026-09-14).
+        if (!v.id) return '';
+        const frame = `<a class="g-video-frame" href="https://www.youtube.com/watch?v=${esc(v.id)}" rel="noopener" aria-label="Play: ${esc(v.title)}">${inner}</a>`;
         return `<figure class="g-video">${frame}${v.caption ? `<figcaption>${esc(v.caption)}</figcaption>` : ''}</figure>`;
       }
 
@@ -384,6 +384,12 @@ ${v.map(c => `<details class="g-ctl-item"${c.id ? ` id="${esc(c.id)}"` : ''}><su
 
       case 'note':
         return `<p class="g-note">${esc(v)}</p>`;
+
+      /* Mirror of ReaderBlocks' 'plink': a paragraph with links on words. */
+      case 'plink':
+        return `<p class="g-p">${v.map(part => typeof part === 'string'
+          ? esc(part)
+          : `<a class="g-inline" href="${esc(part.href)}" rel="${esc(['noopener', part.rel].filter(Boolean).join(' '))}"${part.href.startsWith('/go/') ? ' target="_blank"' : ''}>${esc(part.text)}</a>`).join('')}</p>`;
 
       case 'bullets':
         return `<ul class="g-bullets">${v.map(t => `<li>${esc(t)}</li>`).join('')}</ul>`;

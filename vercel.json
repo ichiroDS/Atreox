@@ -3,6 +3,13 @@
   "outputDirectory": ".",
   "framework": null,
   "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/go/floppydata",
+      "destination": "https://floppydata.com?ref=H9UGH5",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
       "source": "/functions",

@@ -21,6 +21,7 @@ const React = window.React;
 const { useState, useRef, useEffect, useCallback } = React;
 const {
   ArrowUpRight, Check, X, Server, Globe, Shield, Zap, Cpu, Clock, Info,
+  TOOL_NEXT_STEPS, proxyNextStepKey, accountNextStepKey, handoffContext,
 } = window;
 const ACCENT = window.ACCENT;
 const ACCENT_RGB = window.ACCENT_RGB;
@@ -149,6 +150,32 @@ function StageRow({ icon: Icon, name, ok, detail, message }) {
   );
 }
 
+/* ── What this visitor has already checked this hour ──────────────────
+   For the limit screen to say "you checked 7 proxies in 3 checks" rather
+   than only "limit reached". Kept in sessionStorage in this tab and nowhere
+   else: it is a courtesy to the visitor, not a record of them, and it goes
+   when the tab does. Counts only - no proxy, no file name. */
+const USAGE_KEY = 'atreox.toolUse.';
+function noteToolUse(tool, units) {
+  try {
+    const now = Date.now();
+    const list = JSON.parse(sessionStorage.getItem(USAGE_KEY + tool) || '[]')
+      .filter((e) => now - e.t < 3600 * 1000);
+    list.push({ t: now, units: Math.max(0, units | 0) });
+    sessionStorage.setItem(USAGE_KEY + tool, JSON.stringify(list));
+  } catch { /* storage unavailable: the limit screen just says less */ }
+}
+function toolUseThisHour(tool) {
+  try {
+    const now = Date.now();
+    const list = JSON.parse(sessionStorage.getItem(USAGE_KEY + tool) || '[]')
+      .filter((e) => now - e.t < 3600 * 1000);
+    return { checks: list.length, units: list.reduce((n, e) => n + e.units, 0) };
+  } catch {
+    return { checks: 0, units: 0 };
+  }
+}
+
 /* The most important screen: the wall reads as an invitation.
 
    AND IT HAS TO INVITE SOMEWHERE THE VISITOR CAN GO. This button pointed
@@ -165,16 +192,27 @@ function StageRow({ icon: Icon, name, ok, detail, message }) {
    whose whole purpose is to leave the tool. A real navigation to a real
    prerendered page is also what a middle-click and a crawler want. */
 function LimitScreen({ retryMinutes, tool }) {
+  const used = toolUseThisHour(tool);
+  const noun = tool === 'account' ? 'account' : 'proxy';
+  const plural = (n) => (n === 1 ? noun : tool === 'account' ? 'accounts' : 'proxies');
   return (
     <div className="panel ticks" style={{ padding: '36px 30px', display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'flex-start' }}>
       <span style={{ ...label(), color: `rgba(${ACCENT_RGB},0.75)` }}>Free limit reached</span>
       <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '1.6rem', color: 'white', letterSpacing: '-0.01em', lineHeight: 1.2 }}>
         That’s your 3 free {tool} checks this hour.
       </span>
-      <span style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.98rem', color: 'rgba(255,255,255,0.62)', lineHeight: 1.75, maxWidth: 520 }}>
-        The free checker resets hourly. Checking a whole batch? In the panel there’s no
-        limit — run a whole list at once and keep a history for every proxy and account.
-        Included with any ATREOX module.
+      {/* How much they got through, when this tab knows. The wall is hit by
+          somebody with volume, and saying the volume back is what makes the
+          next sentence about the panel relevant rather than a pitch. */}
+      {used.units > 0 && (
+        <span style={{ fontFamily: MONO, fontSize: '0.8rem', color: 'rgba(255,255,255,0.75)' }}>
+          You checked {used.units} {plural(used.units)} in {used.checks} {used.checks === 1 ? 'check' : 'checks'} from this tab.
+        </span>
+      )}
+      <span style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.98rem', color: 'rgba(255,255,255,0.62)', lineHeight: 1.75, maxWidth: 540 }}>
+        The free {tool} checker allows 3 checks an hour{tool === 'account' ? ', one account each' : ', up to 3 proxies each'}.
+        The same checker in the panel has no hourly limit — run a whole list at once and keep a
+        history for every proxy and account. Included with any ATREOX module.
       </span>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'center', marginTop: 4 }}>
         <a href="/pricing" style={{
@@ -206,6 +244,149 @@ async function readError(res) {
   }
   if (res.status === 429) return { kind: 'busy', message };
   return { kind: 'error', message };
+}
+
+/* ══ AFTER A BAD VERDICT ════════════════════════════════════════════
+
+   What the verdict means, what people do about it, where to read more -
+   from TOOL_NEXT_STEPS (tool-next-steps.jsx). And one optional way to talk
+   to a person about it.
+
+   ONE CAPTURE METHOD, AND WHY IT IS A TELEGRAM USERNAME. The people who use
+   these checkers live in Telegram; an e-mail address is a second channel we
+   would have to run and they would have to check. So the form asks for an
+   @username, says exactly what happens with it, and sends it - with the
+   verdict and nothing else - to our inbox through the same function family
+   as the contact form. Nothing is stored and nothing is subscribed. A
+   person replies once, about this result.
+
+   Turnstile loads only when somebody opens the form, so reading a verdict
+   costs no third-party request. */
+function useLazyTurnstile(enabled) {
+  const ref = useRef(null);
+  const [token, setToken] = useState('');
+  const siteKey = (typeof window !== 'undefined' && window.TURNSTILE_SITE_KEY) || '';
+  const configured = /^[A-Za-z0-9_-]{8,}$/.test(siteKey);
+  useEffect(() => {
+    if (!enabled || !configured) return;
+    let widgetId;
+    let cancelled = false;
+    const render = () => {
+      if (cancelled || !ref.current || !window.turnstile) return;
+      widgetId = window.turnstile.render(ref.current, {
+        sitekey: siteKey, theme: 'dark',
+        callback: (t) => setToken(t),
+        'expired-callback': () => setToken(''),
+        'error-callback': () => setToken(''),
+      });
+    };
+    if (window.turnstile) render();
+    else if (!document.getElementById('cf-turnstile-script')) {
+      const sc = document.createElement('script');
+      sc.id = 'cf-turnstile-script';
+      sc.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+      sc.async = true; sc.defer = true; sc.onload = render;
+      document.head.appendChild(sc);
+    } else {
+      const iv = setInterval(() => { if (window.turnstile) { clearInterval(iv); render(); } }, 100);
+      setTimeout(() => clearInterval(iv), 8000);
+    }
+    return () => { cancelled = true; try { if (widgetId && window.turnstile) window.turnstile.remove(widgetId); } catch { /* */ } };
+  }, [enabled, configured, siteKey]);
+  return { ref, token, configured };
+}
+
+const USERNAME_RE = /^@?[A-Za-z][A-Za-z0-9_]{4,31}$/;
+
+function HandoffForm({ context }) {
+  const [open, setOpen] = useState(false);
+  const [username, setUsername] = useState('');
+  const [state, setState] = useState({ status: 'idle' }); // idle|sending|sent|error
+  const { ref, token, configured } = useLazyTurnstile(open);
+  const valid = USERNAME_RE.test(username.trim());
+
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)}
+        style={{ alignSelf: 'flex-start', background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+          fontFamily: BODY, fontSize: '0.9rem', color: ACCENT, textDecoration: 'underline', textUnderlineOffset: 3 }}>
+        Not sure what to do with this? Ask a person on Telegram
+      </button>
+    );
+  }
+  if (state.status === 'sent') {
+    return (
+      <span style={{ fontFamily: BODY, fontSize: '0.9rem', color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
+        Sent. Someone from ATREOX will message {username.trim().replace(/^@?/, '@')} on Telegram about this result.
+        If your privacy settings block messages from people you have not talked to, write to us first.
+      </span>
+    );
+  }
+
+  async function send() {
+    if (!valid) return;
+    if (configured && !token) { setState({ status: 'error', message: 'Please complete the verification first.' }); return; }
+    setState({ status: 'sending' });
+    try {
+      const res = await fetch('/api/tools/handoff', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Turnstile-Token': token },
+        body: JSON.stringify({ username: username.trim(), ...context }),
+      });
+      if (!res.ok) {
+        const e = await readError(res);
+        setState({ status: 'error', message: e.message });
+        return;
+      }
+      setState({ status: 'sent' });
+    } catch {
+      setState({ status: 'error', message: 'Could not send. Try again.' });
+    }
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, borderTop: '1px solid var(--g-14)', paddingTop: 16 }}>
+      <span style={{ fontFamily: BODY, fontSize: '0.88rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.65 }}>
+        Leave your Telegram username and a person from ATREOX will message you once, about this result.
+        We receive your username and the verdict shown above — not the proxy, its login, or any file.
+        Nothing is stored and you are not added to any list.
+      </span>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+        <div style={{ flex: '1 1 220px', maxWidth: 320 }}>
+          <TextInput value={username} placeholder="@yourusername" autoComplete="off" aria-label="Telegram username"
+            onChange={(e) => setUsername(e.target.value)} />
+        </div>
+        <PrimaryButton onClick={send} disabled={!valid || state.status === 'sending'}>
+          {state.status === 'sending' ? <><Spinner /> Sending…</> : 'Send'}
+        </PrimaryButton>
+      </div>
+      {configured && <div ref={ref} style={{ minHeight: 65 }} />}
+      {state.status === 'error' && <span style={{ fontFamily: BODY, fontSize: '0.86rem', color: ROSE }}>{state.message}</span>}
+    </div>
+  );
+}
+
+function NextStep({ tool, stepKey, result, count }) {
+  const step = stepKey && TOOL_NEXT_STEPS && TOOL_NEXT_STEPS[tool] && TOOL_NEXT_STEPS[tool][stepKey];
+  if (!step) return null;
+  return (
+    <div className="panel" style={{ padding: '22px 24px', display: 'flex', flexDirection: 'column', gap: 14, borderColor: 'rgba(252,211,77,0.3)' }}>
+      <span style={{ ...label(), color: AMBER }}>What this means{count > 1 ? ` · ${count} results like this` : ''}</span>
+      <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '1.3rem', color: 'white', lineHeight: 1.25 }}>{step.title}</span>
+      <span style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.95rem', color: 'rgba(255,255,255,0.72)', lineHeight: 1.7 }}>{step.means}</span>
+      <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {step.doing.map((d) => (
+          <li key={d} style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.92rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>{d}</li>
+        ))}
+      </ul>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 18px' }}>
+        {step.links.map((l) => (
+          <a key={l.href} href={l.href} className="quiet-link">{l.label} <ArrowUpRight size={12} /></a>
+        ))}
+      </div>
+      <HandoffForm context={handoffContext(tool, stepKey, result)} />
+    </div>
+  );
 }
 
 /* ══ PROXY CHECKER ══════════════════════════════════════════════════ */
@@ -308,6 +489,19 @@ function ProxyResult({ r }) {
         <StageRow icon={Globe} name="Exit IP" ok={r.ip.ok}
           detail={r.ip.ok ? [r.ip.address, ip, r.ip.type_label, r.ip.asn == null ? null : `AS${r.ip.asn}`].filter(Boolean).join(' · ') : null}
           message={r.ip.ok ? r.ip.as_org : r.ip.message} />
+        {/* Read off the login and port, not measured: one check samples the
+            exit once and cannot see it move. "unknown" is a provider we have
+            no rule for and is shown as that, never as a pass. Absent (older
+            engine, or MTProto) renders nothing. */}
+        {r.exit_held && r.exit_held !== 'unknown' && (
+          <StageRow icon={Shield} name="Holds its exit" ok={r.exit_held === 'pinned'}
+            detail={r.exit_held === 'pinned' ? 'Yes' : 'No'}
+            message={r.exit_held_detail} />
+        )}
+        {r.exit_held === 'unknown' && (
+          <StageRow icon={Info} name="Holds its exit" ok={false}
+            detail="Cannot tell for this provider" message={r.exit_held_detail} />
+        )}
       </div>
     </div>
   );
@@ -363,11 +557,21 @@ function ProxyBatchWidget() {
           : { status: 'error', message: e.message });
         return;
       }
-      setState({ status: 'result', batch: await res.json() });
+      const batch = await res.json();
+      noteToolUse('proxy', batch.checked);
+      setState({ status: 'result', batch });
     } catch {
       setState({ status: 'error', message: 'Could not reach the checker. Try again.' });
     }
   }
+
+  /* The batch gets ONE next step - for the first line with a problem - and
+     says how many lines share it, rather than repeating the same panel
+     three times. */
+  const batchKeys = state.status === 'result'
+    ? state.batch.items.filter((i) => i.result).map((i) => ({ key: proxyNextStepKey(i.result), r: i.result })).filter((x) => x.key)
+    : [];
+  const firstBad = batchKeys[0];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
@@ -448,6 +652,10 @@ function ProxyBatchWidget() {
               A line we could not read did not cost you anything extra.
             </p>
           )}
+          {firstBad && (
+            <NextStep tool="proxy" stepKey={firstBad.key} result={firstBad.r}
+              count={batchKeys.filter((x) => x.key === firstBad.key).length} />
+          )}
         </div>
       )}
     </div>
@@ -482,7 +690,9 @@ function ProxyCheckerWidget() {
         setState(e.kind === 'limit' ? { status: 'limit', retryMinutes: e.retryMinutes } : { status: 'error', message: e.message });
         return;
       }
-      setState({ status: 'result', result: await res.json() });
+      const result = await res.json();
+      noteToolUse('proxy', 1);
+      setState({ status: 'result', result });
     } catch {
       setState({ status: 'error', message: 'Could not reach the checker. Try again.' });
     }
@@ -540,6 +750,9 @@ function ProxyCheckerWidget() {
         )}
       </div>
       {state.status === 'result' && <ProxyResult r={state.result} />}
+      {state.status === 'result' && (
+        <NextStep tool="proxy" stepKey={proxyNextStepKey(state.result)} result={state.result} />
+      )}
       {state.status === 'limit' && <LimitScreen retryMinutes={state.retryMinutes} tool="proxy" />}
     </div>
   );
@@ -691,7 +904,9 @@ function AccountCheckerWidget() {
         setState(e.kind === 'limit' ? { status: 'limit', retryMinutes: e.retryMinutes } : { status: 'error', message: e.message });
         return;
       }
-      setState({ status: 'result', result: await res.json() });
+      const result = await res.json();
+      noteToolUse('account', 1);
+      setState({ status: 'result', result });
     } catch {
       setState({ status: 'error', message: 'Could not reach the checker. Try again.' });
     }
@@ -752,6 +967,9 @@ function AccountCheckerWidget() {
       </div>
 
       {state.status === 'result' && <AccountResult r={state.result} />}
+      {state.status === 'result' && (
+        <NextStep tool="account" stepKey={accountNextStepKey(state.result)} result={state.result} />
+      )}
       {state.status === 'limit' && <LimitScreen retryMinutes={state.retryMinutes} tool="account" />}
     </div>
   );
