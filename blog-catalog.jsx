@@ -133,6 +133,7 @@ const POSTS = [
           ['p', "All 28 of 30 dead accounts in the theblja batch came back with the same verdict from our check: frozen. Not write-restricted, not slow, not unreachable \u2014 frozen, which is Telegram\u2019s own account-level restriction and the end of the account for our purposes."],
           ['p', "Counts, not percentages, on purpose. Thirty accounts rendered as a percentage reads like a statistic and invites being compared against somebody\u2019s thousand. It is thirty accounts. The fraction says so and a percentage hides it."],
           ['note', "The one AbonTg account in the \u201cno answer\u201d column is ours, not the seller\u2019s: its check did not complete, so we have no current verdict for it. It is counted in the batch of 50 rather than dropped, because dropping the accounts you could not measure is how a survival figure flatters itself."],
+          ['note', "Seller names are reproduced exactly as they appear on the marketplace listing, including the Uzbek seller\u2019s Cyrillic one. Transliterating it would make the name our rendering of the listing rather than the listing, and a reader checking our results against the marketplace needs the string that is actually there."],
         ],
       },
       {
