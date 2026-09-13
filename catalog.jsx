@@ -611,7 +611,9 @@ const GUIDES = [
           ['p', "We tested two Argentine batches bought on the same day from different sellers - AbonTg and theblja - plus an Uzbek batch. Same country for the two Argentine ones, same import day, same proxy setup, same warmup, and no commenting load on any of them."],
           ['p', "The result that matters: the seller's layover claim predicted nothing. theblja advertised thirty days of rest, and most of that batch was frozen inside the week. AbonTg made no claim we recorded, and almost all of it can still post. The Uzbek batch came through intact. Everything else about the two Argentine batches was the same, so if rest were the variable that mattered, this is the wrong way round."],
           ['p', "What this does not tell you is whether AbonTg is a good seller. None of these accounts has posted a comment, so what we measured is survival at rest - and a pre-flagged account surfaces when it is used, not while it sits. Surviving a week untouched means not yet disproven, not proven good. The theblja half is the stronger one: those accounts froze having done nothing at all, so they were not worn out by use. They arrived that way."],
-          ['p', "We are holding the exact counts until day 30, when they will carry more weight than they do now. Day 30 is 3 October for the Uzbek batch and 4 October for both Argentine ones, and this section will be updated then."],
+          ['p', "The counts and the method are in the article below, with the sellers named. Between the scheduled reports we post the current figures in our Telegram channel as they move. Day 30 is 3 October for the Uzbek batch and 4 October for both Argentine ones, and both this section and the article are updated then."],
+          ['linkout', { href: '/blog/telegram-account-aging-claims-tested', label: 'The full day-7 numbers, method and caveats' }],
+          ['linkout', { href: 'https://t.me/atreoxai', label: 'Current figures between reports \u2014 our Telegram channel' }],
           ['note', "One correction to this page: we wrote earlier that the Uzbek batch was imported on 4 September. It was imported on 3 September, so its day 30 falls on 3 October rather than the 4th."],
           ['p', "Until then, the only survival figures worth acting on are the ones you produce yourself: buy five, wait a week, count what is left."],
           ['callout', [
@@ -3490,6 +3492,17 @@ const TOOLS = [
     cta: 'Open the proxy checker',
     page: '/tools/proxy-checker',
     panel: 'https://app.atreoxai.com/tools/proxy-checker',
+  },
+  {
+    id: 'account-checker',
+    name: 'Telegram account checker',
+    blurb:
+      'Check an account against Telegram itself: whether the session still '
+      + 'works, whether the account can resolve and read a public channel, and '
+      + 'whether it is frozen or restricted from posting.',
+    cta: 'Open the account checker',
+    page: '/tools/account-checker',
+    panel: 'https://app.atreoxai.com/tools/account-checker',
   },
 ];
 

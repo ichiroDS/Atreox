@@ -159,7 +159,7 @@ Object.assign(window, { AccountCheckerPage });
     { title: 'The rest of it', blocks: [
       ['linkout', { href: '/tools/proxy-checker', label: 'Proxy checker — country, DC and exit IP' }],
       ['linkout', { href: '/guides/buying-telegram-accounts', label: 'How to buy Telegram accounts: TData, GEO, testing' }],
-      ['linkout', { href: '/blog/how-to-check-telegram-account-before-buying', label: 'How to check a Telegram account before buying' }],
+      ['linkout', { href: '/blog/telegram-account-aging-claims-tested', label: 'Telegram account aging: does the seller’s claim predict survival?' }],
       ['linkout', { href: '/tools', label: 'All free tools' }],
     ] },
   ],

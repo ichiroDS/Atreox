@@ -48,16 +48,16 @@
     "date": "2026-09-08"
   },
   "page:/blog": {
-    "hash": "1704f547420da456",
-    "date": "2026-09-08"
+    "hash": "cda988c08fed17db",
+    "date": "2026-09-13"
   },
   "blogcat:accounts-and-proxies": {
-    "hash": "e1e221087256c47c",
-    "date": "2026-09-08"
+    "hash": "d322f6ec3c62a76e",
+    "date": "2026-09-13"
   },
   "guide:buying-telegram-accounts": {
-    "hash": "37104d4bc91b4b39",
-    "date": "2026-09-12"
+    "hash": "521c531f12bc6abd",
+    "date": "2026-09-13"
   },
   "guide:proxies-for-telegram-accounts": {
     "hash": "e8e76b94bb9a9ed7",
@@ -98,5 +98,9 @@
   "guide:mass-reactions": {
     "hash": "82fb7e28bd251838",
     "date": "2026-08-29"
+  },
+  "post:telegram-account-aging-claims-tested": {
+    "hash": "b580d1483a108e0c",
+    "date": "2026-09-13"
   }
 }

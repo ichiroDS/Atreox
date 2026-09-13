@@ -89,7 +89,42 @@ function check(name, ok, detail = '') {
    re-run exactly that. Empty is the correct state right now: on the
    current database that script refuses every survival figure it has. */
 const ATTRIBUTED_NUMBERS = {
-  // '80.0%': 'public_numbers section 3, survival by account country',
+  /* Day 7, 2026-09-14. Every entry below was read off a fresh run of
+     (engine) python -m scripts.batch_day_report --cohort <c> --as-of <d>,
+     line by line, not from the article and not from memory. Re-run those
+     three commands to check any of them; the cohort ids are in
+     scripts/batch_day_report.PUBLISHED_COHORTS.
+
+     The report prints its own NOT QUOTABLE verdict on all three, and that is
+     not contradicted by publishing them: it refuses them as a SURVIVAL RATE
+     because the load was uneven and one account has no current answer. The
+     article makes neither claim - it reports counts, says the load was
+     uneven, and has a section on what the numbers do not prove. */
+
+  // --- argentina-abontg, --as-of 2026-09-11 --------------------------------
+  // "CAN WRITE ... 49 of 50"
+  '49 of 50': 'batch_day_report argentina-abontg 2026-09-11, CAN WRITE',
+  // "DEAD (neither writes nor reads) 0 of 50"
+  '0 of 50': 'batch_day_report argentina-abontg 2026-09-11, DEAD',
+  // "NO CURRENT ANSWER ... 1 of 50"
+  '1 of 50': 'batch_day_report argentina-abontg 2026-09-11, NO CURRENT ANSWER',
+  // "accounts that did ANY write: 20 of 50" - profile templates applied
+  // 2026-09-08, three days before the verdicts were taken.
+  '20 of 50': 'batch_day_report argentina-abontg 2026-09-11, accounts that did ANY write',
+
+  // --- argentina-theblja-control, --as-of 2026-09-11 -----------------------
+  // "CAN WRITE ... 2 of 30"
+  '2 of 30': 'batch_day_report argentina-theblja-control 2026-09-11, CAN WRITE',
+  // "DEAD ... 28 of 30", each one 'frozen, checked 1.3d ago'
+  '28 of 30': 'batch_day_report argentina-theblja-control 2026-09-11, DEAD (all frozen)',
+  // "NO CURRENT ANSWER ... 0 of 30"
+  '0 of 30': 'batch_day_report argentina-theblja-control 2026-09-11, NO CURRENT ANSWER',
+
+  // --- uzbek, --as-of 2026-09-10 (imported 2026-09-03; Day 7 is the 10th) --
+  // "CAN WRITE ... 20 of 20"
+  '20 of 20': 'batch_day_report uzbek 2026-09-10, CAN WRITE',
+  // "DEAD ... 0 of 20" and "NO CURRENT ANSWER ... 0 of 20"
+  '0 of 20': 'batch_day_report uzbek 2026-09-10, DEAD and NO CURRENT ANSWER',
 };
 
 /* RULE 2: a claim to HAVE MEASURED survival, with or without a number.
@@ -220,22 +255,88 @@ function sentences(text) {
   return text.split(/(?<=[.!?])\s+/);
 }
 
-const source = fs.readFileSync(path.join(ROOT, 'catalog.jsx'), 'utf8');
+/* EVERY FILE THAT HOLDS PROSE WE PUBLISH, not just the guides.
+
+   This read catalog.jsx and nothing else, which was right for exactly as
+   long as catalog.jsx was the only place we wrote sentences. The blog now
+   carries the survival article - the one page on the site whose entire
+   subject is numbers attributed to us, with sellers named - and it would
+   have shipped past this guard without being looked at once. A guard whose
+   scope is a file rather than a kind of content stops covering the site
+   the first time the site grows.
+
+   Add a file here when a new one starts holding prose. The cost of
+   forgetting is not a failed build; it is an unchecked claim. */
+const SCANNED_FILES = ['catalog.jsx', 'blog-catalog.jsx'];
+
+const sources = SCANNED_FILES.map((file) => ({
+  file,
+  text: fs.readFileSync(path.join(ROOT, file), 'utf8'),
+}));
+const source = sources.map((s) => s.text).join('\n');
 
 /* Only the prose. A percentage inside a code identifier or a class name is
    not a claim about anything. */
-const prose = [...source.matchAll(/'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)"/g)]
-  .map((m) => m[1] ?? m[2] ?? '')
-  .filter((s) => s.length > 40);
+const STRING_LITERAL = /'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)"/g;
+
+/* [{ file, text }] rather than a flat list of strings, so a failure can say
+   WHICH file to open. With one file that was noise; with two it is the
+   difference between a fix and a search. */
+const proseBlocks = sources.flatMap(({ file, text }) =>
+  [...text.matchAll(STRING_LITERAL)]
+    .map((m) => m[1] ?? m[2] ?? '')
+    .filter((s) => s.length > 40)
+    .map((text) => ({ file, text })),
+);
+const prose = proseBlocks.map((b) => b.text);
+
+/* TABLE CELLS, which the length filter above deliberately drops and which
+   are the most dangerous place a number can hide.
+
+   The survival article's main visual element is a table, and its cells are
+   strings like '49 of 50' - eight characters, nowhere near the 40 that marks
+   a block of prose. Rule 1 could not see one of them. The headline number of
+   the only page on this site whose whole subject is our own measurements was
+   the single least-guarded string in the repository.
+
+   A cell has no sentence around it, so there is no survival word and no
+   first-person pronoun to gate on. The rule is therefore blunter and that is
+   correct: a string which is ENTIRELY a fraction, sitting in a file we
+   publish prose from, has to be a number we can reproduce. There is no
+   innocent reason for a bare "28 of 30" to be in this repository. */
+const BARE_FRACTION = /^\s*(\d{1,5})\s*(?:\/|of the|out of|of)\s*(\d{1,5})\s*$/i;
+
+/* ANCHORED ON THE QUOTES AROUND THE FRACTION, not on the file-wide string
+   scan above. That scan pairs quotes across the whole file and loses
+   synchronisation the first time an apostrophe appears inside a
+   double-quoted sentence - which is most articles - so everything after it
+   is mis-sliced. Rule 1 has always tolerated that because a mis-sliced
+   block still contains its sentences. A cell cannot tolerate it: the whole
+   value is eight characters and a single lost quote hides it completely.
+   Measured while writing this: the file-wide scan found ZERO of the six
+   fractions in the survival table. */
+const QUOTED_FRACTION =
+  /(['"])\s*(\d{1,5})\s*(?:\/|of the|out of|of)\s*(\d{1,5})\s*\1/gi;
+
+const fractionCells = sources.flatMap(({ file, text }) =>
+  [...text.matchAll(QUOTED_FRACTION)]
+    .map((m) => {
+      const raw = m[0].slice(1, -1);
+      const key = normaliseFraction(raw, m[2], m[3]);
+      return key ? { file, raw, key } : null;
+    })
+    .filter(Boolean),
+);
 
 console.log('Survival claims: a number attributed to us must be one we can reproduce');
+console.log(`  scanning: ${SCANNED_FILES.join(', ')}`);
 
 const allPercents = [...source.matchAll(PERCENT)].length;
 const offenders = [];
 let attributedSentences = 0;
 
-for (const block of prose) {
-  for (const sentence of sentences(block)) {
+for (const { file, text } of proseBlocks) {
+  for (const sentence of sentences(text)) {
     const found = attributableNumbers(sentence);
     if (found.length === 0) continue;
     if (!SURVIVAL_WORDS.test(sentence)) continue;
@@ -243,7 +344,7 @@ for (const block of prose) {
     attributedSentences++;
     for (const pct of found) {
       if (!(pct in ATTRIBUTED_NUMBERS)) {
-        offenders.push({ pct, sentence: sentence.trim().slice(0, 150) });
+        offenders.push({ pct, file, sentence: sentence.trim().slice(0, 150) });
       }
     }
   }
@@ -256,23 +357,33 @@ check(
   'sentence that both mentions survival AND attributes it to us',
 );
 
+for (const cell of fractionCells) {
+  if (!(cell.key in ATTRIBUTED_NUMBERS)) {
+    offenders.push({
+      pct: cell.key,
+      file: cell.file,
+      sentence: `bare cell "${cell.raw}" (a table cell has no sentence to gate on)`,
+    });
+  }
+}
+
 check(
   'no survival number, percentage or fraction, is attributed to us without a reproducible source',
   offenders.length === 0,
   offenders.length
-    ? offenders.map((o) => `${o.pct} -> "${o.sentence}"`).join(' | ')
+    ? offenders.map((o) => `${o.file}: ${o.pct} -> "${o.sentence}"`).join(' | ')
     : 'none found',
 );
 
 /* ── Rule 2 over the same prose ─────────────────────────────────────── */
 const claims = [];
-for (const block of prose) {
-  for (const sentence of sentences(block)) {
+for (const { file, text } of proseBlocks) {
+  for (const sentence of sentences(text)) {
     if (!MEASUREMENT_CLAIM.test(sentence)) continue;
     const trimmed = sentence.trim();
     if (trimmed in ATTRIBUTED_CLAIMS) continue;
     if (PENDING_REWRITE.some((known) => trimmed.startsWith(known))) continue;
-    claims.push(trimmed.slice(0, 150));
+    claims.push(`${file}: ${trimmed.slice(0, 150)}`);
   }
 }
 
@@ -333,23 +444,35 @@ check(
 );
 
 /* ── The fraction half, which is the format we actually publish in ──── */
+/* 77 of 99 and not 49 of 50, and the reason is worth keeping. These
+   controls used a real figure, and the day that figure was legitimately
+   added to ATTRIBUTED_NUMBERS for the survival article both controls
+   started failing - correctly, because the number was no longer
+   unattributed. A control has to be built on a value that will never be
+   attributed, or publishing a number breaks the guard that checks it. */
+const NEVER_ATTRIBUTED = '77 of 99';
 check(
-  'negative control: an attributed FRACTION is caught, in all three spellings',
-  scan('Our Argentine batch was 49 of 50 alive.').length === 1 &&
-    scan('Our Argentine batch was 49 out of 50 alive.').length === 1 &&
-    scan('Our Argentine batch was 49/50 alive.').length === 1,
+  'negative control: an unattributed FRACTION is caught, in all three spellings',
+  scan('Our Argentine batch was 77 of 99 alive.').length === 1 &&
+    scan('Our Argentine batch was 77 out of 99 alive.').length === 1 &&
+    scan('Our Argentine batch was 77/99 alive.').length === 1,
   'the shape rule 1 could not see before 2026-09-12',
 );
 check(
   'and all three normalise to ONE key, so one entry excuses all of them',
-  scan('Our batch was 49 of 50 alive.')[0] === '49 of 50' &&
-    scan('Our batch was 49/50 alive.')[0] === '49 of 50' &&
-    scan('Our batch was 49 out of 50 alive.')[0] === '49 of 50',
+  scan('Our batch was 77 of 99 alive.')[0] === NEVER_ATTRIBUTED &&
+    scan('Our batch was 77/99 alive.')[0] === NEVER_ATTRIBUTED &&
+    scan('Our batch was 77 out of 99 alive.')[0] === NEVER_ATTRIBUTED,
   'otherwise the same claim needs three entries and gets one',
 );
 check(
+  'and an ATTRIBUTED fraction in the same shape is NOT caught',
+  scan('Our Argentine batch was 49 of 50 alive.').length === 0,
+  'the article publishes this one, and the guard has its source',
+);
+check(
   'and "of the" is read the way a person writes it',
-  scan('Our batch had 48 of the 50 accounts still alive.').length === 1,
+  scan('Our batch had 77 of the 99 accounts still alive.').length === 1,
 );
 check(
   'a fraction with no attribution is NOT caught',
@@ -369,6 +492,21 @@ check(
   'NEGATIVE CONTROL: a pair that is not a count is not a fraction',
   scan('Our survival window moved from 50 of 49 days, which is not a ratio.').length === 0,
   'denominator smaller than numerator',
+);
+check(
+  'a bare table cell is read as a fraction and must be attributed',
+  BARE_FRACTION.test('49 of 50') && BARE_FRACTION.test(' 2 of 30 '),
+  'the shape the survival table is built from',
+);
+check(
+  'NEGATIVE CONTROL: a cell with words around it is NOT a bare fraction',
+  !BARE_FRACTION.test('lost 2 of 30 accounts'),
+  'that one is prose and goes through the sentence rule instead',
+);
+check(
+  'NEGATIVE CONTROL: a bare number or a date is not a bare fraction',
+  !BARE_FRACTION.test('30 days') && !BARE_FRACTION.test('2026-10-04')
+    && !BARE_FRACTION.test('50'),
 );
 check(
   'NEGATIVE CONTROL: a year or a date is not a fraction',
