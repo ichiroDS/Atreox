@@ -170,8 +170,7 @@ const POSTS = [
         title: 'What happens next, and when',
         blocks: [
           ['p', "The same three batches get measured again at day 30: 3 October for the Uzbek batch and 4 October for both Argentine ones. This article is updated on those dates with the new counts, whatever they say. If the AbonTg batch collapses in week three, that will appear here."],
-          ['p', "Between the scheduled reports we post the current figures in our Telegram channel as they move, which is the fastest place to see them."],
-          ['linkout', { href: 'https://t.me/atreoxai', label: 'Current figures between reports \u2014 our Telegram channel' }],
+          ['p', "There is no interim feed to subscribe to. The numbers on this page are the numbers, and they change on the two dates above."],
           ['p', "If you have a batch in hand right now, the useful move is not to take our numbers for it. Run the same check against your own accounts before you spend anything else on them \u2014 the account checker below is free, needs no signup, and answers the same question this article was built on: can this account still do the thing it was bought for?"],
           ['toolcta', {
             tool: 'account-checker',
