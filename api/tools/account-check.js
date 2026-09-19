@@ -2,12 +2,13 @@
  *
  * Same bridge role as tools/proxy-check.js (attaches the engine master
  * bearer, marks the call public, forwards the real visitor IP for the
- * 3/hour quota), with two differences the account checker needs:
+ * 3/hour quota, and is gated by Cloudflare Turnstile), with two things the
+ * account checker needs on top:
  *
- *   1. Cloudflare Turnstile. The proxy checker takes no file; this one takes
- *      an uploaded session, so it is gated by the same Turnstile the contact
- *      form uses (TURNSTILE_SECRET_KEY). A failed/absent token is rejected
- *      before the engine is touched.
+ *   1. Cloudflare Turnstile, as in the proxy checker - the same Turnstile the
+ *      contact form uses (TURNSTILE_SECRET_KEY). This one takes an uploaded
+ *      session, which is reason enough on its own. A failed/absent token is
+ *      rejected before the engine is touched.
  *
  *   2. The upload. The browser sends the raw .session bytes as the request
  *      body with the Turnstile token in X-Turnstile-Token; this function

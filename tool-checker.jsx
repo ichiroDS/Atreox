@@ -8,9 +8,11 @@
    into the panel, not a refusal.
 
    Both talk to same-origin serverless bridges (api/tools/*.js), which
-   hold the engine token and forward the call as public. The account
-   checker adds Cloudflare Turnstile (the site key is injected as
-   window.TURNSTILE_SITE_KEY on every page, same as the contact form).
+   hold the engine token and forward the call as public. Both are gated
+   by Cloudflare Turnstile (the site key is injected as
+   window.TURNSTILE_SITE_KEY on every page, same as the contact form) -
+   the proxy checker too, because a proxy check makes our server connect
+   to whatever host and port it is given, and that must not be scriptable.
 
    Design language is the site's: dark, technical, the cyan accent, mono
    overlines over serif headings. No score anywhere — only the facts, the
@@ -533,6 +535,7 @@ const BATCH_MAX_LINES = 3;
 function ProxyBatchWidget() {
   const [text, setText] = useState('');
   const [state, setState] = useState({ status: 'idle' });
+  const { ref: turnstileRef, token, configured, reset: resetTurnstile } = useTurnstile();
 
   // Splitting a textarea on newlines. This is the ONLY thing this file does
   // to a proxy line - trim() also disposes of the \r a Windows paste brings.
@@ -540,14 +543,19 @@ function ProxyBatchWidget() {
   const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
   const tooMany = lines.length > BATCH_MAX_LINES;
   const canSubmit = lines.length > 0 && !tooMany;
+  // Without a site key there is no widget to wait for: the request goes out
+  // with no token and the bridge answers with its own message, the same way
+  // the account checker degrades.
+  const needsToken = configured && !token;
 
   async function submit() {
-    if (!canSubmit) return;
+    if (!canSubmit || needsToken) return;
     setState({ status: 'loading' });
     try {
+      // The whole batch is one POST, so it carries one token.
       const res = await fetch('/api/tools/proxy-check', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Turnstile-Token': token },
         body: JSON.stringify({ lines }),
       });
       if (!res.ok) {
@@ -562,6 +570,8 @@ function ProxyBatchWidget() {
       setState({ status: 'result', batch });
     } catch {
       setState({ status: 'error', message: 'Could not reach the checker. Try again.' });
+    } finally {
+      resetTurnstile();
     }
   }
 
@@ -589,8 +599,10 @@ function ProxyBatchWidget() {
           />
         </Field>
 
+        {configured && <div ref={turnstileRef} style={{ minHeight: 65 }} />}
+
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 14 }}>
-          <PrimaryButton onClick={submit} disabled={!canSubmit || state.status === 'loading'}>
+          <PrimaryButton onClick={submit} disabled={!canSubmit || needsToken || state.status === 'loading'}>
             {state.status === 'loading'
               ? <><Spinner /> Checking {lines.length}…</>
               : `Check ${lines.length || ''} ${lines.length === 1 ? 'proxy' : 'proxies'}`.replace('  ', ' ')}
@@ -600,7 +612,9 @@ function ProxyBatchWidget() {
               ? `That is ${lines.length} lines. Check ${BATCH_MAX_LINES} at a time.`
               : state.status === 'loading'
                 ? 'Each one connects, then asks Telegram — up to half a minute apiece.'
-                : `All ${BATCH_MAX_LINES} count as one of your free checks. Format is auto-detected.`}
+                : needsToken
+                  ? 'Complete the verification above to check.'
+                  : `All ${BATCH_MAX_LINES} count as one of your free checks. Format is auto-detected.`}
           </span>
         </div>
 
@@ -670,20 +684,24 @@ function ProxyCheckerWidget() {
   const [password, setPassword] = useState('');
   const [secret, setSecret] = useState('');
   const [state, setState] = useState({ status: 'idle' }); // idle|loading|result|limit|error
+  const { ref: turnstileRef, token, configured, reset: resetTurnstile } = useTurnstile();
   const isMt = type === 'mtproto';
 
   const portNum = Number(port);
   const canSubmit = host.trim() && Number.isInteger(portNum) && portNum >= 1 && portNum <= 65535 && (!isMt || secret.trim());
+  const needsToken = configured && !token;
 
   async function submit() {
-    if (!canSubmit) return;
+    if (!canSubmit || needsToken) return;
     setState({ status: 'loading' });
     const payload = { type, host: host.trim(), port: portNum };
     if (isMt) payload.secret = secret.trim();
     else { if (username.trim()) payload.username = username.trim(); if (password) payload.password = password; }
     try {
       const res = await fetch('/api/tools/proxy-check', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Turnstile-Token': token },
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
         const e = await readError(res);
@@ -695,6 +713,8 @@ function ProxyCheckerWidget() {
       setState({ status: 'result', result });
     } catch {
       setState({ status: 'error', message: 'Could not reach the checker. Try again.' });
+    } finally {
+      resetTurnstile();
     }
   }
 
@@ -735,14 +755,17 @@ function ProxyCheckerWidget() {
             </Field>
           </div>
         )}
+        {configured && <div ref={turnstileRef} style={{ minHeight: 65 }} />}
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 14 }}>
-          <PrimaryButton onClick={submit} disabled={!canSubmit || state.status === 'loading'}>
+          <PrimaryButton onClick={submit} disabled={!canSubmit || needsToken || state.status === 'loading'}>
             {state.status === 'loading' ? <><Spinner /> Checking…</> : 'Check proxy'}
           </PrimaryButton>
           <span style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)' }}>
             {state.status === 'loading'
               ? 'Connecting, then asking Telegram — up to half a minute.'
-              : 'No account, no session. Nothing about the proxy is stored.'}
+              : needsToken
+                ? 'Complete the verification above to check.'
+                : 'No account, no session. Nothing about the proxy is stored.'}
           </span>
         </div>
         {state.status === 'error' && (
@@ -772,18 +795,29 @@ const SPAM_LABEL = {
   none: 'No spam limit', limited: 'Spam-limited', not_checked: 'Not checked here', unknown: 'Unknown',
 };
 
+/* A token is single-use: siteverify accepts it once. reset() clears the
+   stored token and asks the widget for a fresh one, and a caller that sends
+   a token calls it after EVERY request, success or failure - otherwise the
+   next check goes out with a spent token and comes back a 400. */
 function useTurnstile() {
   const ref = useRef(null);
+  const widgetIdRef = useRef(null);
   const [token, setToken] = useState('');
   const siteKey = (typeof window !== 'undefined' && window.TURNSTILE_SITE_KEY) || '';
   const configured = /^[A-Za-z0-9_-]{8,}$/.test(siteKey);
+  const reset = useCallback(() => {
+    setToken('');
+    try {
+      if (widgetIdRef.current != null && window.turnstile) window.turnstile.reset(widgetIdRef.current);
+    } catch { /* widget already gone */ }
+  }, []);
   useEffect(() => {
     if (!configured) return;
     let widgetId;
     let cancelled = false;
     const render = () => {
       if (cancelled || !ref.current || !window.turnstile) return;
-      widgetId = window.turnstile.render(ref.current, {
+      widgetId = widgetIdRef.current = window.turnstile.render(ref.current, {
         sitekey: siteKey,
         theme: 'dark',
         callback: (t) => setToken(t),
@@ -802,9 +836,13 @@ function useTurnstile() {
       const iv = setInterval(() => { if (window.turnstile) { clearInterval(iv); render(); } }, 100);
       setTimeout(() => clearInterval(iv), 8000);
     }
-    return () => { cancelled = true; try { if (widgetId && window.turnstile) window.turnstile.remove(widgetId); } catch { /* */ } };
+    return () => {
+      cancelled = true;
+      widgetIdRef.current = null;
+      try { if (widgetId && window.turnstile) window.turnstile.remove(widgetId); } catch { /* */ }
+    };
   }, [configured, siteKey]);
-  return { ref, token, configured };
+  return { ref, token, configured, reset };
 }
 
 function AccountResult({ r }) {
