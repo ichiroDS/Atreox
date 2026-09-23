@@ -44,7 +44,7 @@
       /* slug -> address, written from catalog.jsx by prerender.mjs.
          An unknown slug is left alone: the index is a better landing
          than a 404 on a guide that does not exist. */
-      var moved = /* SLUG-MAP */{"buying-accounts":"buying-telegram-accounts","proxies":"proxies-for-telegram-accounts","billing":"billing","account-manager":"account-manager","profile-templates":"profile-templates","active-warmup":"active-warmup","channel-parser":"channel-parser","group-parser":"group-parser","neurocommenting":"neurocommenting","neurodialogs":"neurodialogs","mass-reactions":"mass-reactions"}/* /SLUG-MAP */;
+      var moved = /* SLUG-MAP */{"buying-accounts":"buying-telegram-accounts","proxies":"proxies-for-telegram-accounts","billing":"billing","account-manager":"account-manager","account-protection":"account-protection","spamblock-frozen-shadowban":"spamblock-frozen-shadowban","profile-templates":"profile-templates","active-warmup":"active-warmup","channel-parser":"channel-parser","group-parser":"group-parser","neurocommenting":"neurocommenting","neurodialogs":"neurodialogs","mass-reactions":"mass-reactions"}/* /SLUG-MAP */;
       if (!moved[slug]) return;
       location.replace('/guides/' + moved[slug]);
     } catch (_) {}
@@ -2192,6 +2192,10 @@
 <p class="g-p">One per module, in the order the pipeline runs them.</p>
 <div class="g-card"><span class="g-kicker">Import, check, keep alive</span><p class="g-p">Every control on the Accounts page, what it actually does in the engine, and the order to touch them in on day one.</p>
 <a href="/guides/account-manager" class="quiet-link" style="margin-bottom:16px">Managing Telegram accounts →</a></div>
+<div class="g-card"><span class="g-kicker">Make a bought session yours</span><p class="g-p">A bought account arrives logged in on the seller's key. This is the scheme that turns that shared session into one only you hold — pinned proxy, settling rest, two resets, your own session, 2FA — and where each step lives in the panel.</p>
+<a href="/guides/account-protection" class="quiet-link" style="margin-bottom:16px">How to protect a Telegram account after purchase: the full Atreox scheme →</a></div>
+<div class="g-card"><span class="g-kicker">Three blocks, three fixes</span><p class="g-p">Three different restrictions get called &quot;blocked,&quot; and each has its own fix. What spamblock, a freeze and a shadow-ban actually are, how each one shows up in the dashboard, and the practical remedy for each.</p>
+<a href="/guides/spamblock-frozen-shadowban" class="quiet-link" style="margin-bottom:16px">Spamblock, freeze and shadow-ban: what to do in Atreox →</a></div>
 <div class="g-card"><span class="g-kicker">One face across a batch</span><p class="g-p">What a template holds, what applying one actually does to an account, and the cooldowns that pace a rollout across a pool.</p>
 <a href="/guides/profile-templates" class="quiet-link" style="margin-bottom:16px">Setting up Telegram profiles in bulk →</a></div>
 <div class="g-card"><span class="g-kicker">History before it earns</span><p class="g-p">Every control on the Active Warmup page, the caps the engine actually enforces, and the two floors you cannot configure your way past.</p>

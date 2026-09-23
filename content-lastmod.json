@@ -71,6 +71,14 @@
     "hash": "d0935d88584b4b7e",
     "date": "2026-08-29"
   },
+  "guide:account-protection": {
+    "hash": "0a24d30c9aa44f7b",
+    "date": "2026-09-23"
+  },
+  "guide:spamblock-frozen-shadowban": {
+    "hash": "e06e984751534a09",
+    "date": "2026-09-23"
+  },
   "guide:profile-templates": {
     "hash": "45e650e65ae2e840",
     "date": "2026-08-29"

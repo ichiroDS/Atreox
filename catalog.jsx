@@ -1324,6 +1324,252 @@ const GUIDES = [
     ],
   },
   {
+    slug: 'account-protection',
+    url: 'account-protection',
+    group: 'module',
+    short: 'Make a bought session yours',
+    title: 'How to protect a Telegram account after purchase: the full Atreox scheme',
+    summary: "A bought account arrives logged in on the seller's key. This is the scheme that turns that shared session into one only you hold — pinned proxy, settling rest, two resets, your own session, 2FA — and where each step lives in the panel.",
+    seoTitle: 'Protect a bought Telegram account: the full scheme',
+    seoDescription:
+      "A purchased Telegram session shares the seller's auth key. The five-step Atreox protection scheme — pinned proxy, settling, terminate other sessions, own session, 2FA — and how to run it from the Account Manager.",
+    module: null,
+    video: null,
+    body: [
+      {
+        id: 'why-it-matters',
+        title: 'Why a bought account is not yet yours',
+        blocks: [
+          ['p', "When you buy a Telegram account you do not get a fresh login — you get the seller's login. Whether it arrives as a tdata folder or a session string, what is inside is one authorization key: the credential Telegram created when the account was first signed in, on the seller's device. Importing it into ATREOX hands you that same key. Nothing about the purchase creates a new one."],
+          ['p', "This is the UseCurrentSession model. The account is authorized once, and every place that holds a copy of that session — your import, and any copy the seller kept — is the same authorization as far as Telegram is concerned. So the day you import it, the seller can still be logged in beside you, reading and acting on the account, with no error or warning to say so."],
+          ['callout', [
+            "Protection is the process of ending that. It makes the session exclusively yours: it removes every authorization except one, and that one is created by you, on your proxy, and locked with a password only you know. Until you have done it, treat a freshly bought account as shared.",
+          ]],
+        ],
+      },
+      {
+        id: 'the-five-steps',
+        title: 'The five steps, in order',
+        blocks: [
+          ['p', "The scheme is five measures in a fixed order. Each depends on the one before it, and the order is what the Protected shield counts. An optional sixth step gives you a spare."],
+          ['steps', [
+            "Give the account one stable, pinned proxy. Pinned means it holds a single exit IP for the whole session instead of rotating it underneath a live connection. This is measure 1, and every later step runs over it.",
+            "Let it settle. Rest the account for 2 to 24 hours before you touch its sessions — 24 hours is the recommended window. This is measure 2, the Settling state.",
+            "Terminate all other sessions. From the imported session, end every authorization except the one in use. This clears the seller's older devices and any stale logins.",
+            "Create your own fresh session. Sign the account in again, on your proxy, producing a new authorization key that no one else has ever held.",
+            "Set two-step verification (2FA). A password of your own, so the account cannot be re-added or reset by whoever registered it.",
+          ]],
+          ['note', "Optional step 6: once the account is protected, export a clean backup session. Keep two — a working session the engine runs on, and a reserve you store untouched. The Backup and recovery section below explains why that reserve is cheap insurance."],
+          ['callout', [
+            "Steps 1 and 2 — the pinned proxy and the settling rest — are applied today. Steps 3, 4 and 5 are the scheme the panel is built around: the buttons for them are in place and their execution is being enabled. Where a step's executor is still rolling out, the control says so rather than pretending it ran — so do not assume an account is fully reset until its shield says so.",
+          ]],
+        ],
+      },
+      {
+        id: 'why-second-reset-24h',
+        title: 'Why it takes two resets, 24 hours apart',
+        blocks: [
+          ['p', "There is a catch in step 3 that the scheme is designed around, and it is worth understanding because it is why protection is not instant."],
+          ['p', "A brand-new session is not allowed to terminate the others straight away. For roughly the first 24 hours of its life, Telegram refuses the request with FRESH_RESET_AUTHORISATION_FORBIDDEN — a young session cannot reset the rest. This is Telegram's own anti-theft rule: if someone steals a login and immediately kicks everyone else off, the delay buys the real owner a day to notice."],
+          ['p', "So the reset happens in two passes. The first terminate-all, run from the imported session, clears the seller's older devices — but the imported session is still the seller's key, so that key is not gone yet. Then you create your own session (step 4) and wait. About 24 hours later a second terminate-all, run from your new session, is finally allowed to revoke everything else, the imported session included. That second pass is the one that cuts the key you shared with the seller."],
+          ['kv', [
+            ['First reset', "From the imported (seller) session. Clears older authorizations. The seller's key is still live."],
+            ['Wait ~24h', 'A fresh session may not reset the others until it has aged past FRESH_RESET_AUTHORISATION_FORBIDDEN.'],
+            ['Second reset', 'From your own new session. Revokes the imported session. The account is now on a key only you hold.'],
+          ]],
+          ['note', "This is why the scheme schedules the second reset for you rather than asking you to remember it. The 24-hour timer starts from the settling deadline, and the pipeline holds the job until it is due."],
+        ],
+      },
+      {
+        id: 'the-protected-shield',
+        title: 'The Protected shield',
+        blocks: [
+          ['p', "Every account carries a Protected shield, shown as its own column in the Account Manager list — right after the account name and before Comments. It is a running score of how much of the scheme is done."],
+          ['controls', [
+            {
+              id: 'ctl-shield-partial', name: 'Protected shield — partial', where: 'Account list · after the name', kind: 'badge', value: 'Shield 2/5',
+              rows: [
+                ['What it shows', 'A hollow shield in a grey ring, with a count out of five. Some measures are applied and some are not yet.'],
+                ['Reading it', 'The number is how many of the five measures are done. A fresh import that has a pinned proxy and a settling window set reads 2 of 5.'],
+                ['Click it', 'Opens a list of all five measures with a done or pending tick against each, plus the settling countdown while it is running.'],
+                ['Details link', 'The grey shield’s tooltip ends in a Details link that opens this guide.'],
+              ],
+            },
+            {
+              id: 'ctl-shield-protected', name: 'Protected shield — full', where: 'Account list · after the name', kind: 'badge', tone: 'ok', value: 'Shield 5/5',
+              rows: [
+                ['What it shows', 'A solid shield in a blue ring. Every one of the five measures is applied: the account is on a key only you hold, behind a pinned proxy, with 2FA set.'],
+                ['When it turns', 'Only at five of five. Four of five is still a grey, hollow shield — the scheme is not finished until the last measure lands.'],
+              ],
+            },
+          ]],
+          ['p', "The column header, Protected, carries an info tooltip that summarises the five-step scheme and links back to this guide. The shield reads its state from data already loaded with the account list, so it is always current without a separate check."],
+        ],
+      },
+      {
+        id: 'running-it',
+        title: 'Running it: the Protect button',
+        blocks: [
+          ['p', "One button runs the whole scheme. Select the accounts, open the Protection group in the Account Manager bulk actions bar, and press Protect."],
+          ['controls', [
+            {
+              id: 'ctl-protect', name: 'Protect (run pipeline)', where: 'Bulk actions bar · Protection group', kind: 'button', value: 'Protect',
+              rows: [
+                ['What it does', 'Runs the protection pipeline over the selected accounts: confirms the pinned proxy (measure 1), sets or checks the settling window (measure 2), and schedules the session reset, own-session and 2FA steps (measures 3 to 5) in order.'],
+                ['It replaces Supervise', 'This is the button that used to be Supervise. Auto-Warmup, which Supervise used to toggle, now lives in the Accounts group as its own switch.'],
+                ['Safe to press twice', 'The action is idempotent. Pressing it again picks up wherever the account is, never repeats a completed step, and never terminates the last remaining session.'],
+                ['Rolling out', 'Measures 1 and 2 apply immediately. The executors for measures 3 to 5 are being enabled; until one is live for your account, Protect records the step as pending and the control for it is marked as such rather than acting silently.'],
+                ['When to use it', 'On every batch, once it has a pinned proxy and has rested. It is the single entry point to the whole scheme.'],
+              ],
+            },
+            {
+              id: 'ctl-protect-reauth', name: 'Reauth', where: 'Bulk actions bar · Protection group', kind: 'button', tone: 'warn', value: 'Reauth',
+              rows: [
+                ['What it does', 'Opens the reauth flow to replace a dead session from a fresh tdata export, single or in a batch. It sits in the Protection group because reauthorizing is part of keeping a session yours.'],
+              ],
+            },
+            {
+              id: 'ctl-terminate-sessions', name: 'Terminate other sessions', where: 'Bulk actions bar · Protection group', kind: 'button', tone: 'plain', value: 'Terminate other sessions',
+              rows: [
+                ['What it will do', 'Measure 3, on demand: end every authorization on the account except the one in use.'],
+                ['Status', 'Rolling out. The control is in the Protection group and shows as coming soon until its executor is enabled. Protect schedules this step in the meantime.'],
+              ],
+            },
+            {
+              id: 'ctl-set-2fa', name: 'Set 2FA', where: 'Bulk actions bar · Protection group', kind: 'button', tone: 'plain', value: 'Set 2FA',
+              rows: [
+                ['What it will do', 'Measure 5: set two-step verification with a password of yours, so the account cannot be reset by whoever registered it.'],
+                ['Status', 'Rolling out. Shown as coming soon until enabled.'],
+              ],
+            },
+            {
+              id: 'ctl-download-session', name: 'Download session / tdata', where: 'Bulk actions bar · Protection group', kind: 'button', tone: 'plain', value: 'Download session',
+              rows: [
+                ['What it will do', 'Export a clean backup session — the optional sixth step — so you hold one working copy and one reserve.'],
+                ['Status', 'Rolling out. Shown as coming soon until enabled.'],
+              ],
+            },
+          ]],
+          ['p', "Per-account progress is on the account itself. Open any account and its detail dialog has a Protection tab: the five measures with their current state, and the full history of every protection step that has run, newest first."],
+        ],
+      },
+      {
+        id: 'backup-and-recovery',
+        title: 'Backup session and recovery after de-authorization',
+        blocks: [
+          ['p', "Two sessions per account is the habit that turns a scare into a five-minute fix. One is the working session the engine runs on. The other is a reserve you export once, after protection, and never touch — its own clean copy of the account's login, stored away from everything that runs."],
+          ['p', "The reason is a failure that looks worse than it is. A session can stop working overnight with the account behind it completely intact — most often when a proxy's exit IP moves under a live connection and Telegram reads the same key arriving from two places at once. It revokes the key and returns AUTH_KEY_DUPLICATED. The panel can only show you that the session stopped; at a glance it looks like a ban."],
+          ['callout', [
+            "A killed session is not a lost account. AUTH_KEY_DUPLICATED revokes the login, not the account — a fresh login creates a fresh key and the account carries on. That is exactly what the reserve session, or a new reauth from tdata, is for: you re-log in, you do not start over.",
+          ]],
+          ['plink', [
+            "The full mechanism — the exact error, the two ways it happens, and one case traced from the proxy setting to the moment the session was killed — is in ",
+            { href: '/blog/telegram-session-killed-by-ip-change#the-error', text: 'why Telegram sessions die on a moving IP' },
+            ". Read it before you blame a seller for an account that a proxy setting killed.",
+          ]],
+          ['note', "The rule that prevents most of this: one live session, one stable pinned proxy. Protection sets that up, and the proxy guard keeps a protected account from being moved onto a different proxy identity without an explicit override."],
+          ['linkout', { href: '/guides/spamblock-frozen-shadowban', label: 'When it goes wrong: spamblock, freeze and shadow-ban' }],
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'spamblock-frozen-shadowban',
+    url: 'spamblock-frozen-shadowban',
+    group: 'module',
+    short: 'Three blocks, three fixes',
+    title: 'Spamblock, freeze and shadow-ban: what to do in Atreox',
+    summary: 'Three different restrictions get called "blocked," and each has its own fix. What spamblock, a freeze and a shadow-ban actually are, how each one shows up in the dashboard, and the practical remedy for each.',
+    seoTitle: 'Telegram spamblock, freeze and shadow-ban: the fixes',
+    seoDescription:
+      'Tell a spamblock from a freeze from a shadow-ban: what each restriction is, how it surfaces in the Atreox dashboard, and the practical remedy — rest, appeal via @SpamBot, and proxy hygiene.',
+    module: null,
+    video: null,
+    body: [
+      {
+        id: 'three-states',
+        title: 'Three states people call "blocked"',
+        blocks: [
+          ['p', "Three different things get lumped together as 'the account is blocked,' and the fix is different for each. Telling them apart is most of the work."],
+          ['cards', [
+            {
+              kicker: 'Spamblock (limited)',
+              blocks: [
+                ['p', "A restriction Telegram places on an account that has sent too much, too fast, or drawn reports. The account still works, but its messages to people who have not added it are held back or refused. Telegram's own @SpamBot is the source of truth: it says whether an account is limited and, when it is, until when."],
+              ],
+            },
+            {
+              kicker: 'Frozen',
+              blocks: [
+                ['p', "A harder, request-level restriction. A frozen account often cannot even resolve a public username or read a channel — the operations the engine needs before it can do anything. Freezing is enforced when a request is made, not written onto the account as a flag, so a plain health check cannot see it. It lifts only through Telegram's own verification flow."],
+              ],
+            },
+            {
+              kicker: 'Shadow-ban / write-ban',
+              blocks: [
+                ['p', "The quiet one. The account reports success, but its writes never actually land: comments and messages are silently refused with no error to catch. There is no status Telegram hands you for this — it shows up reactively, when a send that looked fine turns out to have gone nowhere."],
+              ],
+            },
+          ]],
+        ],
+      },
+      {
+        id: 'in-the-dashboard',
+        title: 'How each one surfaces',
+        blocks: [
+          ['p', "Two of the three now have their own status tile at the top of the Account Manager; the third is caught by a check you run."],
+          ['controls', [
+            {
+              id: 'ctl-tile-spamblock', name: 'Spamblock', where: 'Status tiles', kind: 'tile', tone: 'warn', value: '2',
+              rows: [
+                ['Counts', 'Accounts whose last spamblock check came back limited. Amber, because a limited account is resting off a restriction, not gone.'],
+                ['Filter', 'Click it to show only limited accounts, click again to clear, like every other tile.'],
+              ],
+            },
+            {
+              id: 'ctl-tile-frozen', name: 'Frozen', where: 'Status tiles', kind: 'tile', value: '1',
+              rows: [
+                ['Counts', 'Accounts whose last capability check came back frozen. Shown with a snowflake in a blue tile, promoted to a status of its own rather than folded into a general failure.'],
+                ['Filter', 'Click to show only frozen accounts.'],
+              ],
+            },
+            {
+              id: 'ctl-check-spamblock', name: 'Check spamblock', where: 'Bulk actions bar · Checks group', kind: 'button', tone: 'ok', value: 'Check spamblock',
+              rows: [
+                ['What it does', "Asks @SpamBot, through the account's own pinned proxy on its own claimed connection, whether the account is limited. Writes the verdict — none, limited, unknown or not checked — to the account and to the Spamblock tile."],
+                ['Where it lives', 'In the Checks group of the bulk actions bar, alongside Check health, Check proxy and Check capability. It is a read-only diagnostic, the same family as the others.'],
+                ['In bulk', 'Run it over a selection; it paces itself across the accounts the way the other checks do.'],
+                ['When to use it', 'On a fresh batch before you scale, and whenever posts stop landing without any account reporting an error.'],
+              ],
+            },
+          ]],
+          ['p', "A shadow-ban has no tile of its own, because Telegram gives nothing to count. It surfaces as work that fails: a comment that returns success but never appears, an account that quietly stops producing results. The capability check and a real send are how you confirm it."],
+        ],
+      },
+      {
+        id: 'fixing-each',
+        title: 'The remedy for each',
+        blocks: [
+          ['p', "The remedy follows the diagnosis. None of the three is fixed by working the account harder; all three start with taking work off it."],
+          ['kv', [
+            ['Spamblock / limited', 'Stop sending from it and let it rest — the Settling window exists for exactly this. Many limits are temporary and clear on their own, and @SpamBot will tell you the date. If it is a hard limit, open @SpamBot, press Start, and follow its prompts to request a review. Confirm the proxy is clean and pinned before you put the account back to work.'],
+            ['Frozen', "Do not delete it on the day of the verdict. Give it a long rest — around three weeks — then run Check capability again; a frozen account can come back on its own. A freeze lifts only through Telegram's own verification, so there is nothing in the panel that removes it directly."],
+            ['Shadow-ban / write-ban', 'Treat it as a proxy-hygiene problem first. Put the account on one stable, pinned proxy, rest it, and confirm the one-live-session rule holds — a write-ban often follows an account being run from two places at once, or over an exit that moved. Then verify with Check capability and a single real send before trusting it again.'],
+          ]],
+          ['callout', [
+            "The common thread is pacing and proxies, not the individual account. A batch that keeps producing spamblocks and write-bans is usually being sent too hard, or is sharing IPs — fix the pace and the proxy assignment and the states stop appearing.",
+          ]],
+          ['plink', [
+            "Write-bans in particular travel with the proxy. The traced case, the exact error a moving exit produces, and the setting that prevents it are in ",
+            { href: '/blog/telegram-session-killed-by-ip-change', text: 'why Telegram sessions die on a moving IP' },
+            ".",
+          ]],
+          ['linkout', { href: '/guides/account-protection', label: 'The protection scheme that prevents most of this' }],
+        ],
+      },
+    ],
+  },
+  {
     slug: 'profile-templates',
     url: 'profile-templates',
     group: 'module',
