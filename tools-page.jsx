@@ -131,7 +131,7 @@ function ProxyCheckerPage({ setPage }) {
 
         <SectionLockup title="What it tells you">{LEDES.readings}</SectionLockup>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: 18 }}>
           {READINGS.map(({ icon: Icon, title, body }) => (
             <div key={title} className="panel ticks" style={{ padding: '28px 26px', display: 'flex', flexDirection: 'column', gap: 12 }}>
               <span style={{ color: ACCENT }} aria-hidden="true"><Icon size={18} /></span>
@@ -151,7 +151,7 @@ function ProxyCheckerPage({ setPage }) {
 
         <div style={{ display: 'grid', gap: 0 }}>
           {FACTS.map(([term, detail]) => (
-            <div key={term} style={{
+            <div key={term} className="fact-row" style={{
               display: 'grid', gridTemplateColumns: 'minmax(180px, 240px) 1fr', gap: 24,
               padding: '20px 0', borderTop: '1px solid var(--g-14)',
             }}>

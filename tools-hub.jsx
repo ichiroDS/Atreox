@@ -136,7 +136,7 @@ function ToolsHubPage({ setPage }) {
           style={{
             display: 'grid',
             gap: 20,
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))',
             marginTop: 28,
           }}
         >
@@ -258,7 +258,7 @@ function ToolsHubPage({ setPage }) {
           style={{
             display: 'grid',
             gap: 18,
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))',
             marginTop: 24,
           }}
         >
@@ -293,6 +293,7 @@ function ToolsHubPage({ setPage }) {
           {READS.map((read) => (
             <a
               key={read.href}
+              className="read-link"
               href={read.href}
               onClick={(e) => {
                 if (!read.page) return;
@@ -313,7 +314,7 @@ function ToolsHubPage({ setPage }) {
           all three show - which is right on a hub whose visitor has not yet
           seen Functions, Guides or Pricing. */}
       <CrossLinks current="tools" setPage={setPage} />
-      <FooterBar setPage={setPage} />
+      <div style={{ padding: '0 5% 64px' }}><FooterBar setPage={setPage} /></div>
     </div>
   );
 }

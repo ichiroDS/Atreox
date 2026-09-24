@@ -133,7 +133,9 @@ function useTurnstile(containerRef, onToken) {
         //   browser - so on a Russian-locale machine the one widget on an
         //   otherwise English page rendered "Успешно." and "Конфиденциальность".
         theme: 'dark',
-        size: 'flexible',
+        //   ...unless the column is under flexible's 300px minimum (a
+        //   320px phone), where only the 150px compact widget fits.
+        size: containerRef.current.offsetWidth < 300 ? 'compact' : 'flexible',
         language: 'en',
         callback: token => onToken(token),
         // A token is single-use and expires. Clearing it on both paths
@@ -274,7 +276,7 @@ function ContactForm() {
           type="text" tabIndex="-1" autoComplete="off" defaultValue="" />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0 20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: '0 20px' }}>
         <Field id="contact-name" label="Your name" error={errors.name}>
           <input id="contact-name" name="name" type="text" className="contact-field" style={fieldStyle}
             value={values.name} onChange={e => set('name', e.target.value)}

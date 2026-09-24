@@ -277,15 +277,19 @@ function GlassBtn({ children, onClick, white, style }) {
 }
 
 /* ── Navbar ── */
+/* Below this the bar folds into the menu button. Five links, the social
+   glyph and "Enter panel" need ~900px; an iPad held upright is 768–834,
+   where the desktop row used to squeeze "Enter panel" onto two lines. */
+const NAV_COMPACT_BELOW = 980;
 function Navbar({ currentPage, setPage }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < NAV_COMPACT_BELOW);
   const [scrolled, setScrolled] = useState(window.scrollY > 8);
   const progRef = useRef(null);
 
   useEffect(() => {
     const onResize = () => {
-      const mobile = window.innerWidth < 768;
+      const mobile = window.innerWidth < NAV_COMPACT_BELOW;
       setIsMobile(mobile);
       if (!mobile) setMenuOpen(false);
     };
@@ -378,7 +382,7 @@ function Navbar({ currentPage, setPage }) {
 
         {/* Desktop nav */}
         {!isMobile && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 30, flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(20px, 2.4vw, 30px)', flexShrink: 0 }}>
             {links.map(link => (
               <button key={link.id}
                 className={'nav-link' + (currentPage === link.id ? ' active' : '')}
@@ -394,7 +398,7 @@ function Navbar({ currentPage, setPage }) {
           <div style={{ flex: '1 1 0', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 14 }}>
             <SocialLinks size={16} />
             <span aria-hidden="true" style={{ width: 1, height: 18, background: `rgba(${ACCENT_RGB},0.16)` }} />
-            <a href={window.withReferral(DASHBOARD_URL)} target="_self" className="btn-solid btn-glitch" style={{ padding: '10px 20px', fontSize: '0.7rem' }}>
+            <a href={window.withReferral(DASHBOARD_URL)} target="_self" className="btn-solid btn-glitch" style={{ padding: '10px 20px', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
               Enter panel <ArrowUpRight size={13} />
             </a>
           </div>
@@ -597,8 +601,8 @@ function FooterBar({ setPage }) {
   const colHead = { fontFamily: "'JetBrains Mono', monospace", fontWeight: 500, fontSize: '0.6rem', color: `rgba(${ACCENT_RGB},0.55)`, letterSpacing: '0.24em', textTransform: 'uppercase', marginBottom: 18 };
   return (
     <footer style={{ borderTop: `1px solid rgba(${ACCENT_RGB},0.14)`, paddingTop: 56, marginTop: 60, position: 'relative' }}>
-      <div style={{ display: 'flex', gap: 60, flexWrap: 'wrap', marginBottom: 48 }}>
-        <div style={{ flex: '1 1 220px' }}>
+      <div className="footer-cols" style={{ display: 'flex', gap: 60, flexWrap: 'wrap', marginBottom: 48 }}>
+        <div className="footer-brand" style={{ flex: '1 1 220px' }}>
           <div style={{ cursor: 'pointer', marginBottom: 16 }} onClick={() => setPage('home')}>
             <Wordmark size="0.92rem" glow={false} />
           </div>
@@ -606,7 +610,7 @@ function FooterBar({ setPage }) {
             AI-powered Telegram neuro-commenting. Real accounts, real growth.
           </p>
         </div>
-        <div style={{ flex: '0 0 auto' }}>
+        <div className="footer-col" style={{ flex: '0 0 auto' }}>
           <h5 style={colHead}>Navigation</h5>
           <div className="footer-links" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {navLinks.map(link => (
@@ -618,7 +622,7 @@ function FooterBar({ setPage }) {
             ))}
           </div>
         </div>
-        <div style={{ flex: '0 0 auto' }}>
+        <div className="footer-col" style={{ flex: '0 0 auto' }}>
           <h5 style={colHead}>Legal</h5>
           <div className="footer-links" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {[['referral','Referral Program'],['privacy','Privacy Policy'],['terms','Terms of Service'],['refund','Refund Policy']].map(([id, label]) => (
@@ -630,7 +634,7 @@ function FooterBar({ setPage }) {
             ))}
           </div>
         </div>
-        <div style={{ flex: '0 0 auto' }}>
+        <div className="footer-col" style={{ flex: '0 0 auto' }}>
           <h5 style={colHead}>Contact</h5>
           <span className="footer-link" onClick={() => setPage('contact')}
             style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', display: 'block', marginBottom: 10, transition: 'color 0.2s' }}
@@ -641,7 +645,7 @@ function FooterBar({ setPage }) {
           <span style={{ display: 'block', fontFamily: "'JetBrains Mono', monospace", fontWeight: 500, fontSize: '0.68rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: `rgba(${ACCENT_RGB},0.7)`, marginBottom: 5 }}>Mon–Fri · 08:00–20:00 CET</span>
           <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>Weekend messages are answered Monday</span>
         </div>
-        <div style={{ flex: '0 0 auto' }}>
+        <div className="footer-col" style={{ flex: '0 0 auto' }}>
           <h5 style={colHead}>Follow</h5>
           <div className="footer-links" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {SOCIAL_LINKS.map(({ key, label, icon: Icon, href }) => (
@@ -654,7 +658,7 @@ function FooterBar({ setPage }) {
           </div>
         </div>
       </div>
-      <div style={{ borderTop: `1px solid rgba(${ACCENT_RGB},0.08)`, paddingTop: 22, paddingBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+      <div className="footer-base" style={{ borderTop: `1px solid rgba(${ACCENT_RGB},0.08)`, paddingTop: 22, paddingBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
         <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.68rem', letterSpacing: '0.06em', color: 'rgba(255,255,255,0.4)' }}>© 2026 ATREOX AI. All rights reserved.</span>
         <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.68rem', letterSpacing: '0.06em', color: 'rgba(255,255,255,0.4)', display: 'inline-flex', alignItems: 'center', gap: 7 }}>
           <span style={{ width: 5, height: 5, borderRadius: '50%', background: ACCENT, display: 'inline-block', animation: 'pulse-dot 2s ease-in-out infinite' }} />
@@ -676,7 +680,7 @@ const SERIF = "'Playfair Display', Georgia, serif";
 /* ─── inner-page hero ─── */
 function PageHero({ badge, title, sub }) {
   return (
-    <section style={{ paddingTop: 170, paddingBottom: 84, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: `1px solid rgba(${ACCENT_RGB},0.12)` }}>
+    <section className="page-hero" style={{ paddingTop: 170, paddingBottom: 84, paddingLeft: '5%', paddingRight: '5%', textAlign: 'center', borderBottom: `1px solid rgba(${ACCENT_RGB},0.12)` }}>
       <SectionBadge>{badge}</SectionBadge>
       <DecryptText text={title} style={{
         display: 'block',
@@ -713,9 +717,9 @@ function PageSection({ children, style, id }) {
 function SectionLockup({ title, children, style }) {
   return (
     <div style={{ marginBottom: 34, ...style }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+      <div className="lockup-row" style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
         <span aria-hidden="true" style={{ fontFamily: MONO, fontWeight: 600, fontSize: '1rem', lineHeight: 1, color: ACCENT, userSelect: 'none' }}>//</span>
-        <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.6rem, 3vw, 2.1rem)', color: 'white', letterSpacing: '-0.01em', lineHeight: 1 }}>
+        <h2 className="lockup-title" style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(1.6rem, 3vw, 2.1rem)', color: 'white', letterSpacing: '-0.01em', lineHeight: 1 }}>
           <DecryptText text={title} />
         </h2>
         <div aria-hidden="true" className="section-rule" style={{ flex: '1 1 32px', minWidth: 32 }} />
@@ -765,7 +769,7 @@ function CrossLinks({ current, setPage }) {
   const dests = Object.keys(CROSS_DESTS).filter(k => k !== current);
   return (
     <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 5%' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 18 }}>
+      <div className="crosslinks-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: 18 }}>
         {dests.map(k => {
           const d = CROSS_DESTS[k];
           return (

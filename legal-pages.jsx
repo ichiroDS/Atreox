@@ -83,7 +83,7 @@ function LegalPage({ badge, title, lastUpdated, intro, sections, setPage }) {
         ))}
 
         <div className="panel" style={{ padding: '24px 28px', display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap', marginTop: 20 }}>
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: '1 1 220px' }}>
             <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.88rem', color: 'white', marginBottom: 4 }}>Questions about this policy?</p>
             <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>Use the contact form, or email <a href="mailto:hello@atreoxai.com" style={{ color: ACCENT, textDecoration: 'none' }}>hello@atreoxai.com</a></p>
           </div>

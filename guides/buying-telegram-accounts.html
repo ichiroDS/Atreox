@@ -810,8 +810,8 @@
        plain arrow back. Disabled buttons are left out, so their
        not-allowed still shows. ── */
     :root {
-      --cursor-arrow: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='32' viewBox='0 0 26 32'%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='none' stroke='%2300d9ff' stroke-opacity='0.12' stroke-width='6' stroke-linejoin='round'/%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='none' stroke='%2300d9ff' stroke-opacity='0.26' stroke-width='3.4' stroke-linejoin='round'/%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='%2300d9ff' stroke='%23021015' stroke-width='1'/%3E%3C/svg%3E") 4 3, auto;
-      --cursor-hot: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='32' viewBox='0 0 26 32'%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='none' stroke='%2300d9ff' stroke-opacity='0.24' stroke-width='6' stroke-linejoin='round'/%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='none' stroke='%2300d9ff' stroke-opacity='0.5' stroke-width='3.4' stroke-linejoin='round'/%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='%237de9ff' stroke='%23021015' stroke-width='1'/%3E%3C/svg%3E") 4 3, pointer;
+      --cursor-arrow: url("data:image/svg+xml;utf8,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%2718%27%20height=%2720%27%20viewBox=%270%200%2018%2020%27%3E%3Cpath%20d=%27M2%202%20L14.5%209.3%20L7.6%2011.4%20L2.6%2017%20Z%27%20fill=%27none%27%20stroke=%27%2300d9ff%27%20stroke-opacity=%270.28%27%20stroke-width=%273.2%27%20stroke-linejoin=%27round%27/%3E%3Cpath%20d=%27M2%202%20L14.5%209.3%20L7.6%2011.4%20L2.6%2017%20Z%27%20fill=%27%2300d9ff%27%20stroke=%27%23021015%27%20stroke-width=%270.9%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E") 2 2, auto;
+      --cursor-hot: url("data:image/svg+xml;utf8,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%2718%27%20height=%2720%27%20viewBox=%270%200%2018%2020%27%3E%3Cpath%20d=%27M2%202%20L14.5%209.3%20L7.6%2011.4%20L2.6%2017%20Z%27%20fill=%27none%27%20stroke=%27%2300d9ff%27%20stroke-opacity=%270.6%27%20stroke-width=%274.6%27%20stroke-linejoin=%27round%27/%3E%3Cpath%20d=%27M2%202%20L14.5%209.3%20L7.6%2011.4%20L2.6%2017%20Z%27%20fill=%27%2300d9ff%27%20stroke=%27%23021015%27%20stroke-width=%270.9%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E") 2 2, pointer;
     }
     html, body { cursor: var(--cursor-arrow); }
     [style*="cursor: default"] { cursor: var(--cursor-arrow) !important; }
@@ -2114,8 +2114,8 @@
        nothing, since the only other control in the card is 18px away
        under a heading. */
     @media (max-width: 640px) {
-      .term-opt { position: relative; }
-      .term-opt::after {
+      .term-opt, .demo-opt { position: relative; }
+      .term-opt::after, .demo-opt::after {
         content: ''; position: absolute; left: 0; right: 0;
         top: 50%; height: 45px; transform: translateY(-50%);
       }
@@ -2302,6 +2302,157 @@
     @media (max-width: 768px) {
       .g-toolcta { padding: 18px 16px; }
       .g-postcard { padding: 16px 16px; }
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       Phones and tablets.
+       Everything here sits inside a max-width query, so the desktop
+       layout above ~980px is exactly what it was. Most of the site is
+       styled inline in the .jsx files, which is why several of these
+       carry !important: an inline style beats any selector that is not
+       (the same trick the section-rhythm rules use). The classes they
+       target exist only to be hooked from here.
+    ══════════════════════════════════════════════════════════════ */
+
+    /* ── Footer: a grid instead of a wrapping row. The row wrapped
+       wherever the widths happened to fall — Navigation hanging off the
+       right edge beside the tagline, Contact and Follow a row below with
+       Legal alone in between. The brand takes the first row; the four
+       columns share the next one on a tablet and pair up on a phone.
+       (At 1024 the row still wrapped: Follow alone on a second line.) ── */
+    @media (max-width: 1100px) {
+      .footer-cols {
+        display: grid !important; gap: 34px 28px !important;
+        grid-template-columns: repeat(4, auto); justify-content: space-between;
+      }
+      .footer-brand { grid-column: 1 / -1; }
+      .footer-brand p { max-width: 320px !important; }
+    }
+    @media (max-width: 560px) {
+      .footer-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); justify-content: stretch; gap: 30px 20px !important; }
+      .footer-base { flex-direction: column; align-items: flex-start !important; gap: 8px !important; }
+    }
+    /* below ~375px the mailto no longer fits half a row */
+    @media (max-width: 374px) {
+      .footer-cols > :nth-child(4) { grid-column: 1 / -1; }
+    }
+
+    /* ── Cross-links: three destinations on home and /tools. On a tablet
+       auto-fit makes that two cards and an orphan; one row of three
+       reads as the set it is. ── */
+    @media (min-width: 700px) and (max-width: 1023px) {
+      .crosslinks-grid {
+        grid-template-columns: none !important; grid-auto-flow: column;
+        grid-auto-columns: minmax(0, 1fr); gap: 14px !important;
+      }
+      .crosslinks-grid > a { padding: 24px 20px !important; }
+    }
+
+    /* ── Section lockup: on a narrow screen a long title used to wrap
+       as a whole, leaving the // mark alone on the line above it. The
+       title now shrinks and wraps inside itself instead, and gets the
+       line-height a two-line heading needs. ── */
+    @media (max-width: 768px) {
+      .lockup-row { flex-wrap: nowrap !important; }
+      .lockup-title { min-width: 0; line-height: 1.15 !important; }
+    }
+
+    /* ── Inner-page hero: 170px of top padding under a 64px bar is a
+       third of a phone screen before the headline. ── */
+    @media (max-width: 640px) {
+      .page-hero { padding-top: 124px !important; padding-bottom: 56px !important; }
+    }
+
+    /* ── Home: hero actions, the "what this is" aside, the pipeline ── */
+    /* four audiences: three and an orphan on an iPad held sideways */
+    @media (min-width: 641px) and (max-width: 1127px) {
+      .audience-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+    }
+    @media (max-width: 900px) {
+      /* the aside is a 300px card beside the copy; once it drops under
+         the copy it takes the whole row, and on a tablet its four
+         points sit two by two */
+      .wti-aside { flex: 1 1 100% !important; }
+    }
+    @media (min-width: 641px) and (max-width: 900px) {
+      .wti-list { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 32px; }
+      .wti-list > div { margin-bottom: 0 !important; padding-bottom: 0 !important; border-bottom: none !important; }
+    }
+    @media (max-width: 640px) {
+      /* the primary action alone on the first row, full width; the two
+         secondary ones share the row under it, or stack when they
+         cannot */
+      .hero-ctas { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px !important; }
+      .hero-ctas > * { justify-content: center; white-space: nowrap; min-height: 48px; padding-left: 12px !important; padding-right: 12px !important; }
+      .hero-ctas > :first-child { grid-column: 1 / -1; }
+
+      /* five stages in a 330px row: the stage name moves out (the panel
+         under the rail already names it) and the nodes share the width
+         instead of scrolling the fifth one out of sight */
+      [role="tablist"][aria-label="Pipeline stages"] { gap: 6px !important; overflow: visible !important; }
+      .pipe-node { min-width: 0; gap: 8px; }
+      .pipe-idx-label { display: none; }
+      .pipe-verb { font-size: 0.82rem; line-height: 1.25; }
+    }
+
+    /* ── Pricing ── */
+    @media (max-width: 640px) {
+      .price-counts { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px !important; width: 100%; }
+      .price-counts > div { min-width: 0 !important; }
+      .price-included { min-width: 0 !important; }
+    }
+    /* Between the phone dock and the side-by-side desktop rail the rail
+       wraps under the module grid as a 400px column with the rest of the
+       row empty. There, the running total and the licence sit side by
+       side across the full width instead. */
+    @media (min-width: 641px) and (max-width: 970px) {
+      .price-rail {
+        flex: 1 1 100% !important; max-width: none !important; position: static !important;
+        display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px !important; align-items: start;
+      }
+      .price-rail .sel-or { display: none !important; }
+    }
+
+    /* ── Free tools: the form, the facts list ── */
+    /* tablet: type, host and port on one line rather than port alone
+       on a second */
+    @media (min-width: 641px) and (max-width: 1023px) {
+      .tool-form-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr) !important; }
+      .tool-form-grid > * { grid-column: auto !important; }
+    }
+    @media (max-width: 640px) {
+      /* one field per row; the host field's span-2 would otherwise
+         invent a second column the select then only half fills */
+      .tool-form-grid { grid-template-columns: minmax(0, 1fr) !important; }
+      .tool-form-grid > * { grid-column: auto !important; }
+      /* iOS zooms into any focused control under 16px (see .contact-field) */
+      .tool-field { font-size: 16px !important; }
+      .tool-btn { width: 100%; justify-content: center; min-height: 46px; }
+      /* term above its answer: side by side, a 180px label column left
+         the answer about six words a line */
+      .fact-row { grid-template-columns: minmax(0, 1fr) !important; gap: 8px !important; }
+    }
+
+    /* ── Guide and article body on a phone ── */
+    @media (max-width: 640px) {
+      .g-p, .g-bullets li { font-size: 1.08rem; }
+      /* an error code or a URL is one unbreakable word, and one of those
+         was enough to widen the whole page past the screen */
+      .g-p, .g-bullets li, .g-note, .g-check-t, .g-kv-row dd, .g-table td, .g-ctl-rows dd, .g-callout { overflow-wrap: anywhere; }
+      /* parameter over value: a 150px label column left a mono value
+         column of three words a line */
+      .g-kv-row { flex-direction: column; gap: 4px; }
+      .g-kv-row dt { width: auto; }
+      .g-kv-row dd { font-size: 0.88rem; }
+      .g-toolcta-cta { min-height: 44px; }
+    }
+
+    /* ── Tap targets that were a line of text tall ── */
+    @media (max-width: 640px) {
+      .stage-chip { min-height: 44px; }
+      /* the eight module tiles two by two rather than eight rows */
+      .mod-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; }
+      .read-link { display: block; padding: 10px 0; }
     }
   </style>
   <!-- Vercel Web Analytics. Served from our own origin (/_vercel/...),

@@ -487,7 +487,7 @@ function CatalogueBanner({ setPage }) {
 
         <div style={{ display: 'flex', gap: 'clamp(24px, 5vw, 60px)', flexWrap: 'wrap', alignItems: 'flex-start' }}>
           {/* the three numbers, largest thing on the page */}
-          <div style={{ display: 'flex', gap: 'clamp(22px, 4vw, 46px)', flexWrap: 'wrap', flex: '0 1 auto' }}>
+          <div className="price-counts" style={{ display: 'flex', gap: 'clamp(22px, 4vw, 46px)', flexWrap: 'wrap', flex: '0 1 auto' }}>
             {counts.map(({ n, label, tone }) => (
               <div key={label} style={{ minWidth: 96 }}>
                 <div style={{
@@ -508,7 +508,7 @@ function CatalogueBanner({ setPage }) {
 
           {/* which two, by name, clickable — "free" is worth nothing until
               you know what you're getting */}
-          <div style={{ flex: '1 1 300px', minWidth: 260 }}>
+          <div className="price-included" style={{ flex: '1 1 300px', minWidth: 260 }}>
             <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: 'clamp(0.95rem, 1.5vw, 1.05rem)', color: 'rgba(255,255,255,0.7)', lineHeight: 1.7 }}>
               <strong style={{ fontWeight: 600, color: 'white' }}>
                 {INCLUDED_MODULES.map(m => m.name).join(' and ')}
@@ -591,7 +591,7 @@ function PricingPage({ setPage }) {
           <div style={{ flex: '1 1 520px', minWidth: 0 }}>
             <div ref={gridRef} style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(250px, 100%), 1fr))',
               gap: 16, alignContent: 'start',
             }}>
               {PRICED_MODULES.map((m, i) => (
@@ -608,7 +608,7 @@ function PricingPage({ setPage }) {
 
           {/* Sticky as a direct flex child: its containing block is then the row,
               which is as tall as the module grid, so the rail has room to travel. */}
-          <div style={{
+          <div className="price-rail" style={{
             flex: '1 1 330px', maxWidth: 400, alignSelf: 'flex-start',
             position: 'sticky', top: 80,
             display: 'flex', flexDirection: 'column', gap: 12,

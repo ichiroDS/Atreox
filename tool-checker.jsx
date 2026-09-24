@@ -66,6 +66,7 @@ function TextInput(props) {
   return (
     <input
       {...props}
+      className="tool-field"
       style={inputStyle}
       onFocus={(e) => { e.target.style.borderColor = `rgba(${ACCENT_RGB},0.55)`; props.onFocus?.(e); }}
       onBlur={(e) => { e.target.style.borderColor = 'var(--g-14)'; props.onBlur?.(e); }}
@@ -75,7 +76,7 @@ function TextInput(props) {
 
 function PrimaryButton({ children, onClick, disabled }) {
   return (
-    <button type="button" onClick={onClick} disabled={disabled}
+    <button type="button" className="tool-btn" onClick={onClick} disabled={disabled}
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 9,
         border: `1px solid rgba(${ACCENT_RGB},${disabled ? 0.2 : 0.5})`,
@@ -277,6 +278,9 @@ function useLazyTurnstile(enabled) {
       if (cancelled || !ref.current || !window.turnstile) return;
       widgetId = window.turnstile.render(ref.current, {
         sitekey: siteKey, theme: 'dark',
+        // under 300px (a 320px phone) the standard 300px widget would
+        // push the page sideways; the compact one is 150px wide
+        size: ref.current.offsetWidth < 300 ? 'compact' : 'normal',
         callback: (t) => setToken(t),
         'expired-callback': () => setToken(''),
         'error-callback': () => setToken(''),
@@ -354,7 +358,7 @@ function HandoffForm({ context }) {
         Nothing is stored and you are not added to any list.
       </span>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
-        <div style={{ flex: '1 1 220px', maxWidth: 320 }}>
+        <div style={{ flex: '1 1 220px', maxWidth: 320, minWidth: 0 }}>
           <TextInput value={username} placeholder="@yourusername" autoComplete="off" aria-label="Telegram username"
             onChange={(e) => setUsername(e.target.value)} />
         </div>
@@ -589,6 +593,7 @@ function ProxyBatchWidget() {
         <Field id="pb-lines" label={`Paste up to ${BATCH_MAX_LINES} proxies, one per line`}>
           <textarea
             id="pb-lines"
+            className="tool-field"
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={4}
@@ -721,9 +726,9 @@ function ProxyCheckerWidget() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div className="panel" style={{ padding: '26px 24px', display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14 }}>
+        <div className="tool-form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14 }}>
           <Field id="pc-type" label="Type">
-            <select id="pc-type" value={type} onChange={(e) => setType(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
+            <select id="pc-type" className="tool-field" value={type} onChange={(e) => setType(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
               <option value="socks5">SOCKS5</option>
               <option value="http">HTTP</option>
               <option value="mtproto">MTProto</option>
@@ -820,6 +825,7 @@ function useTurnstile() {
       widgetId = widgetIdRef.current = window.turnstile.render(ref.current, {
         sitekey: siteKey,
         theme: 'dark',
+        size: ref.current.offsetWidth < 300 ? 'compact' : 'normal',
         callback: (t) => setToken(t),
         'expired-callback': () => setToken(''),
         'error-callback': () => setToken(''),

@@ -145,7 +145,7 @@ function GuideWall({ guides, offset, onOpen, fill }) {
   return (
     /* auto-fill for the pair at the top, so two cards stay card-sized
        instead of stretching to half the page and reading as banners */
-    <div ref={ref} style={{ display: 'grid', gridTemplateColumns: `repeat(${fill ? 'auto-fill' : 'auto-fit'}, minmax(250px, 1fr))`, gap: 18 }}>
+    <div ref={ref} style={{ display: 'grid', gridTemplateColumns: `repeat(${fill ? 'auto-fill' : 'auto-fit'}, minmax(min(250px, 100%), 1fr))`, gap: 18 }}>
       {guides.map((g, i) => (
         <GuideTile key={g.slug} guide={g} index={offset + i} inView={inView} onOpen={onOpen} />
       ))}
@@ -845,7 +845,7 @@ function GuideReader({ slug, onOpen, onClose }) {
                 </div>
 
                 <ReaderHeading>What you can change</ReaderHeading>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 12 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(250px, 100%), 1fr))', gap: 12 }}>
                   {mod.config.map(([t, b]) => (
                     <div key={t} className="panel" style={{ padding: '16px 18px' }}>
                       <span style={{ display: 'block', fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', letterSpacing: '0.13em', textTransform: 'uppercase', color: GREEN, marginBottom: 8 }}>{t}</span>

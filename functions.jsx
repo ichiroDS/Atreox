@@ -28,7 +28,7 @@ function ModuleIndex({ jump }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.05 });
   return (
-    <div ref={ref} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 12 }}>
+    <div ref={ref} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(230px, 100%), 1fr))', gap: 12 }}>
       {MODULES.map((m, i) => {
         const Icon = m.icon;
         return (
@@ -141,7 +141,7 @@ function DemoToggle({ options, value, onChange }) {
       {options.map(([val, label]) => {
         const on = value === val;
         return (
-          <button key={val} type="button" onClick={() => onChange(val)} aria-pressed={on}
+          <button key={val} type="button" className="demo-opt" onClick={() => onChange(val)} aria-pressed={on}
             style={{
               padding: '7px 13px', borderRadius: 3, border: 'none', cursor: 'pointer',
               fontFamily: MONO, fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.14em',

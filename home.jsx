@@ -733,7 +733,7 @@ function Hero({ setPage }) {
             {HERO.lead}
           </motion.p>
           <motion.div initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }} animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.1 }}
-            style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', marginBottom: 30 }}>
+            className="hero-ctas" style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', marginBottom: 30 }}>
             {/* The largest action above the fold used to be "Enter panel" —
                 an invitation to sign in to something a first-time visitor
                 does not have, on the page most of the search traffic lands
@@ -800,9 +800,9 @@ function WhatThisIsSection({ setPage }) {
           </p>
         </motion.div>
 
-        <motion.div style={{ flex: '0 1 300px', minWidth: 240 }}
+        <motion.div className="wti-aside" style={{ flex: '0 1 300px', minWidth: 240 }}
           initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.12 }}>
-          <div className="panel" style={{ padding: '24px 24px 22px' }}>
+          <div className="panel wti-list" style={{ padding: '24px 24px 22px' }}>
             {[
               ['Runs in the browser', 'Nothing to install. The engine runs on our side, not your machine.'],
               ['Your accounts, your proxies', 'Bring your own. Nothing is rented to you and nothing is shared.'],
@@ -822,7 +822,7 @@ function WhatThisIsSection({ setPage }) {
       </div>
 
       {/* the eight, at a glance — every tile is a way into Functions */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 12 }}>
+      <div className="mod-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(190px, 100%), 1fr))', gap: 12 }}>
         {MODULES.map((m, i) => {
           const Icon = m.icon;
           return (
@@ -875,7 +875,7 @@ function AudienceSection() {
           </p>
         </motion.div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 18 }}>
+      <div className="audience-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(240px, 100%), 1fr))', gap: 18 }}>
         {audiences.map(({ icon: Icon, title, body }, i) => (
           <motion.div key={i} className="panel panel-hover"
             initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.55, delay: i * 0.09 }}
@@ -1139,7 +1139,7 @@ function PipelineSection({ setPage }) {
               className="pipe-node"
               onClick={() => { setActive(i); setPinned(true); }}>
               <span aria-hidden="true" className="pipe-dot" />
-              <span className="pipe-idx">{String(i + 1).padStart(2, '0')} · {s.label}</span>
+              <span className="pipe-idx">{String(i + 1).padStart(2, '0')}<span className="pipe-idx-label"> · {s.label}</span></span>
               <span className="pipe-verb">{s.verb}</span>
             </button>
           ))}
@@ -1178,7 +1178,7 @@ function PipelineSection({ setPage }) {
                 const Icon = m.icon;
                 return (
                   <button key={k} type="button" onClick={() => setPage('functions', 'fn-' + k)}
-                    className="panel panel-hover"
+                    className="panel panel-hover stage-chip"
                     style={{
                       padding: '9px 13px', display: 'inline-flex', alignItems: 'center', gap: 9,
                       background: 'transparent', borderRadius: 4,
@@ -1380,7 +1380,7 @@ function TrustSection({ setPage }) {
           watch all of it while it works.
         </SectionLockup>
       </motion.div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: 18 }}>
         {pillars.map(({ icon: Icon, title, body }, i) => (
           <motion.div key={title} className="panel panel-hover"
             initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.07 }}
@@ -1648,7 +1648,7 @@ function SocialSection() {
   const inView = useInView(ref, { once: true, amount: 0.2 });
   return (
     <section ref={ref} className="section-block" style={{ padding: '20px 5% 60px', maxWidth: 1280, margin: '0 auto' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: 18 }}>
         {SOCIAL_LINKS.map(({ key, label, icon: Icon, href, blurb }, i) => (
           <motion.a key={key} href={href} target="_blank" rel="noopener noreferrer"
             className="panel panel-hover"
