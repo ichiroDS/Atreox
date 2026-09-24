@@ -797,6 +797,33 @@
       cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'><g stroke='%2300d9ff' stroke-width='1' opacity='0.9'><line x1='11' y1='0' x2='11' y2='7'/><line x1='11' y1='15' x2='11' y2='22'/><line x1='0' y1='11' x2='7' y2='11'/><line x1='15' y1='11' x2='22' y2='11'/></g><circle cx='11' cy='11' r='1.6' fill='%2300d9ff'/></svg>") 11 11, auto;
     }
 
+    /* ── The site's pointer: a classic tilted arrow in the accent cyan,
+       a 1px near-black keyline so it holds on light screenshots too, and
+       a soft glow edge (two wide translucent strokes under the fill; an
+       SVG filter is not something every browser rasterises for a cursor).
+       Hotspot is the tip. The brighter twin marks anything clickable.
+       The clickable rule carries !important because pointer is set
+       inline all over the JSX (style={{ cursor: 'pointer' }}), and an
+       inline style beats any selector that isn't important; the
+       [style*=...] selectors catch the clickable divs and spans that
+       only say so in that inline style, and an inline default gets the
+       plain arrow back. Disabled buttons are left out, so their
+       not-allowed still shows. ── */
+    :root {
+      --cursor-arrow: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='32' viewBox='0 0 26 32'%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='none' stroke='%2300d9ff' stroke-opacity='0.12' stroke-width='6' stroke-linejoin='round'/%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='none' stroke='%2300d9ff' stroke-opacity='0.26' stroke-width='3.4' stroke-linejoin='round'/%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='%2300d9ff' stroke='%23021015' stroke-width='1'/%3E%3C/svg%3E") 4 3, auto;
+      --cursor-hot: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='32' viewBox='0 0 26 32'%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='none' stroke='%2300d9ff' stroke-opacity='0.24' stroke-width='6' stroke-linejoin='round'/%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='none' stroke='%2300d9ff' stroke-opacity='0.5' stroke-width='3.4' stroke-linejoin='round'/%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='%237de9ff' stroke='%23021015' stroke-width='1'/%3E%3C/svg%3E") 4 3, pointer;
+    }
+    html, body { cursor: var(--cursor-arrow); }
+    [style*="cursor: default"] { cursor: var(--cursor-arrow) !important; }
+    a, button:not(:disabled), [role="button"], [role="tab"], summary, label, select, .btn-like,
+    input[type="checkbox"], input[type="radio"], input[type="submit"], input[type="button"], input[type="range"],
+    [style*="cursor: pointer"], [style*="cursor:pointer"] {
+      cursor: var(--cursor-hot) !important;
+    }
+    input:not([type]), input[type="text"], input[type="email"], input[type="search"], input[type="url"],
+    input[type="tel"], input[type="password"], input[type="number"], textarea { cursor: text; }
+
+
     /* ── Mono overline label:  // SECTION ── */
     .overline {
       font-family: var(--mono);
@@ -1078,19 +1105,9 @@
       }
     }
 
-    /* ── Guides: the tiles drift.
-       The float lives on a wrapper and the hover lift on the card
-       inside it — one element cannot carry both, since a running
-       animation owns `transform` outright. ── */
-    @keyframes guide-float {
-      0%, 100% { transform: translateY(0); }
-      50%      { transform: translateY(-7px); }
-    }
-    .float-wrap {
-      animation: guide-float 6.5s ease-in-out infinite;
-      display: flex;
-    }
-    .float-wrap:hover { animation-play-state: paused; }
+    /* ── Guides: the tiles stand still. The wrapper only keeps the card
+       stretched to its grid cell; the lift on hover is .panel-hover's. ── */
+    .guide-tile-wrap { display: flex; }
     .guide-tile { min-height: 100%; }
     .guide-tile .guide-tile-chip { transition: transform 0.25s cubic-bezier(0.2,0.9,0.3,1), box-shadow 0.25s ease; }
     .guide-tile:hover .guide-tile-chip {
@@ -1098,31 +1115,149 @@
       box-shadow: 0 0 32px rgba(0,217,255,0.28);
     }
 
-    /* guide reader: the rail of every other guide */
-    .guide-nav-folders { min-width: 0; padding: 10px; scrollbar-width: thin; scrollbar-color: rgba(0,217,255,.25) transparent; overscroll-behavior: contain; }
+    /* ══ Guide reader: the rail of every other guide ══════════════
+       The dashboard's Account Manager folders, in the site's cyan: each
+       folder is a drawer (a mono uppercase label on a tinted face with
+       the register ticks every .panel wears) and the open one's list
+       unrolls straight down out of it in the same tint, so trigger and
+       list read as one object with a crease, not a button and a menu.
+       Rows are the sidebar's anatomy: label left, a two-digit index on
+       the right, hairlines between, and the accent bar on the left edge
+       for the guide you are on and the one under the pointer.
+       The rail itself draws no panel: the stacked drawers are the
+       surface. Its padding is room for the ticks and the glow, which
+       the rail's own scroll box would otherwise clip.
+       The `> summary` / `> ul` selectors are the prerendered rail
+       (native <details>, scripts/prerender.mjs), dressed the same. */
+    .guide-nav-folders { min-width: 0; padding: 4px; scrollbar-width: thin; scrollbar-color: rgba(0,217,255,.25) transparent; overscroll-behavior: contain; }
     .guide-nav-folders.is-desktop { flex: 0 0 250px; position: sticky; top: 92px; max-height: calc(100vh - 190px); max-height: calc(100dvh - 190px); overflow-y: auto; }
     .guide-nav-folders.is-compact { margin-top: 8px; max-height: 65vh; max-height: 65dvh; overflow-y: auto; }
     .guide-nav-compact { flex: 1 1 100%; width: 100%; margin-bottom: 14px; }
-    .guide-folder { margin-bottom: 6px; border: 1px solid rgba(0,217,255,.10); border-radius: 7px; overflow: hidden; background: rgba(0,217,255,.025); }
+    .guide-folder { margin-bottom: 8px; counter-reset: guide-row; }
     .guide-folder:last-child { margin-bottom: 0; }
-    .guide-folder.has-active { border-color: rgba(0,217,255,.25); background: rgba(0,217,255,.04); }
-    .guide-folder-toggle, .guide-folder > summary { width: 100%; display: flex; align-items: center; gap: 9px; padding: 12px 10px; border: 0; background: transparent; color: rgba(174,246,255,.8); font-family: 'JetBrains Mono',monospace; font-size: .64rem; font-weight: 500; letter-spacing: .07em; cursor: pointer; text-align: left; }
-    .guide-folder-toggle > span:first-of-type { flex: 1; }
-    .guide-folder-toggle:hover { background: rgba(0,217,255,.06); color: white; }
-    .guide-folder-toggle:focus-visible { outline: 2px solid var(--g); outline-offset: -3px; border-radius: 5px; }
-    .guide-folder-count { font-size: .58rem; color: rgba(174,246,255,.45); }
-    .guide-folder-chevron { transition: transform 220ms ease; flex-shrink: 0; }
-    .guide-folder-toggle[aria-expanded="true"] .guide-folder-chevron { transform: rotate(90deg); }
-    .guide-folder-content { display: grid; grid-template-rows: 0fr; visibility: hidden; transition: grid-template-rows 240ms ease, visibility 240ms; }
+
+    /* the drawer face */
+    .guide-folder-toggle, .guide-folder > summary {
+      position: relative; width: 100%; min-height: 2.6rem;
+      display: flex; align-items: center; gap: 10px; padding: 0 12px 0 13px;
+      border: 1px solid rgba(0,217,255,.3); border-radius: 4px;
+      background: linear-gradient(180deg, rgba(0,217,255,.13), rgba(0,217,255,.05)), var(--panel);
+      color: rgba(0,217,255,.85);
+      font-family: var(--mono); font-size: .64rem; font-weight: 500;
+      letter-spacing: .2em; text-transform: uppercase; text-align: left;
+      list-style: none; cursor: pointer; user-select: none;
+      transition: border-color .2s ease, box-shadow .25s ease, color .2s ease, border-radius .12s ease;
+    }
+    .guide-folder > summary::-webkit-details-marker { display: none; }
+    .guide-folder.has-active > .guide-folder-toggle { border-color: rgba(0,217,255,.45); }
+    .guide-folder-toggle > span:first-of-type { flex: 1; min-width: 0; }
+    /* register ticks: top-left on the face; bottom-right on the face while
+       shut, handed over to the list's foot once it opens */
+    .guide-folder-toggle::before, .guide-folder-toggle::after,
+    .guide-folder > summary::before, .guide-folder > summary::after,
+    .guide-folder-links::after {
+      content: ''; position: absolute; width: 9px; height: 9px;
+      pointer-events: none; opacity: .75;
+      transition: width .2s ease, height .2s ease, opacity .2s ease;
+    }
+    .guide-folder-toggle::before, .guide-folder > summary::before { top: -1px; left: -1px; border-top: 1px solid var(--g); border-left: 1px solid var(--g); }
+    .guide-folder-toggle::after, .guide-folder > summary::after,
+    .guide-folder-links::after { bottom: -1px; right: -1px; border-bottom: 1px solid var(--g); border-right: 1px solid var(--g); }
+    .guide-folder-toggle:hover, .guide-folder > summary:hover {
+      color: #fff; border-color: rgba(0,217,255,.7);
+      box-shadow: 0 0 20px -8px rgba(0,217,255,.55), inset 0 0 14px -8px rgba(0,217,255,.5);
+    }
+    .guide-folder-toggle:hover::before, .guide-folder-toggle:hover::after,
+    .guide-folder > summary:hover::before, .guide-folder > summary:hover::after { width: 14px; height: 14px; opacity: 1; }
+    .guide-folder-toggle:focus-visible, .guide-folder > summary:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(0,217,255,.55); }
+    .guide-folder-toggle[aria-expanded="true"], .guide-folder[open] > summary {
+      color: #fff; border-color: rgba(0,217,255,.7);
+      border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+      background: linear-gradient(180deg, rgba(0,217,255,.22), rgba(0,217,255,.11)), var(--panel);
+      box-shadow: 0 0 26px -10px rgba(0,217,255,.7);
+    }
+    .guide-folder-toggle[aria-expanded="true"]::before, .guide-folder[open] > summary::before { width: 14px; height: 14px; opacity: 1; }
+    .guide-folder-toggle[aria-expanded="true"]::after, .guide-folder[open] > summary::after { opacity: 0; }
+    .guide-folder-count { font-size: .58rem; letter-spacing: .1em; color: rgba(0,217,255,.55); }
+    .guide-folder-toggle[aria-expanded="true"] .guide-folder-count { color: rgba(125,233,255,.8); }
+    .guide-folder-chevron { transition: transform .28s cubic-bezier(.2,.9,.25,1); flex-shrink: 0; opacity: .75; }
+    .guide-folder-toggle[aria-expanded="true"] .guide-folder-chevron { transform: rotate(90deg); opacity: 1; }
+
+    /* the list: the drawer continued. The grid row carries the height,
+       the clip-path the unroll, and one bright hairline sweeps down
+       through it as it opens (the dashboard's scan line). The border
+       lives on the list, not on the grid item, so a shut folder leaves
+       no 2px stub behind. */
+    .guide-folder-content { display: grid; grid-template-rows: 0fr; visibility: hidden; transition: grid-template-rows .28s cubic-bezier(.2,.9,.25,1), visibility .28s; }
     .guide-folder-content.is-open { grid-template-rows: 1fr; visibility: visible; }
     .guide-folder-inner { min-height: 0; overflow: hidden; }
-    .guide-folder-links { list-style: none; padding: 0 6px 7px; margin: 0; }
-    .guide-nav-item { display: block; padding: 9px 10px; border: 1px solid transparent; border-radius: 4px; color: rgba(255,255,255,.62); font-family: Barlow,sans-serif; font-size: .88rem; line-height: 1.3; text-decoration: none; transition: background 150ms,color 150ms; }
-    .guide-nav-item:hover { background: rgba(0,217,255,.07); color: white; }
-    .guide-nav-item[aria-current="page"] { color: var(--g-bright); border-color: rgba(0,217,255,.3); background: rgba(0,217,255,.10); font-weight: 500; }
-    .guide-nav-item:focus-visible { outline: 2px solid var(--g); outline-offset: -2px; }
-    @media (max-width: 1039px) { .guide-nav-item { padding: 12px 10px; font-size: .95rem; } }
-    @media (prefers-reduced-motion: reduce) { .guide-folder-content, .guide-folder-chevron { transition: none; } }
+    .guide-folder-links, .guide-folder > ul {
+      position: relative; list-style: none; margin: 0; padding: 0 !important;
+      border: 1px solid rgba(0,217,255,.7); border-top-color: rgba(0,217,255,.22);
+      border-radius: 0 0 4px 4px;
+      background: linear-gradient(180deg, rgba(0,217,255,.11), rgba(0,217,255,.04) 70%), var(--panel);
+      box-shadow: inset 0 0 22px -14px rgba(0,217,255,.6);
+    }
+    .guide-folder-links { clip-path: inset(0 0 100% 0); transition: clip-path .28s cubic-bezier(.2,.9,.25,1); }
+    .guide-folder-content.is-open .guide-folder-links { clip-path: inset(0 0 0 0); }
+    .guide-folder-links::after { width: 14px; height: 14px; opacity: 1; }
+    .guide-folder-links::before {
+      content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+      z-index: 2; pointer-events: none; opacity: 0;
+      background: linear-gradient(90deg, transparent, rgba(0,217,255,.95) 30%, rgba(0,217,255,.95) 70%, transparent);
+      box-shadow: 0 0 10px rgba(0,217,255,.8);
+    }
+    .guide-folder-content.is-open .guide-folder-links::before { animation: guide-folder-scan .55s cubic-bezier(.3,.7,.3,1) .04s both; }
+    @keyframes guide-folder-scan {
+      0%   { top: 0; opacity: 1; }
+      80%  { opacity: .9; }
+      100% { top: 100%; opacity: 0; }
+    }
+
+    /* a row */
+    .guide-folder-links li + li, .guide-folder > ul li + li { border-top: 1px solid rgba(0,217,255,.14); }
+    .guide-nav-item {
+      position: relative; display: flex; align-items: center; gap: 10px;
+      min-height: 2.6rem; padding: 8px 12px 8px 14px;
+      color: rgba(255,255,255,.66); font-family: var(--sans); font-size: .88rem; line-height: 1.3;
+      text-decoration: none; counter-increment: guide-row;
+      transition: background-color .16s ease, color .16s ease, box-shadow .16s ease, padding-left .2s cubic-bezier(.2,.9,.25,1);
+    }
+    .guide-nav-item::after {
+      content: counter(guide-row, decimal-leading-zero);
+      margin-left: auto; padding-left: 8px; flex-shrink: 0;
+      font-family: var(--mono); font-size: .6rem; font-weight: 500; letter-spacing: .1em; color: var(--g);
+      opacity: .45; transition: opacity .16s ease;
+    }
+    /* hover and the page you are on: the sidebar's active mark (an
+       accent bar on the left edge with a short inner glow) and the
+       label steps in to meet it */
+    .guide-nav-item:hover, .guide-nav-item[aria-current="page"] {
+      color: #fff; background: rgba(0,217,255,.1); padding-left: 16px;
+      box-shadow: inset 2px 0 0 var(--g), inset 18px 0 18px -16px rgba(0,217,255,.7);
+    }
+    .guide-nav-item[aria-current="page"] { color: var(--g-bright); background: rgba(0,217,255,.16); font-weight: 500; }
+    .guide-nav-item:hover::after, .guide-nav-item[aria-current="page"]::after { opacity: .9; }
+    .guide-nav-item:focus-visible { outline: 1px solid var(--g); outline-offset: -2px; }
+    /* rows arrive one after another behind the scan line */
+    .guide-folder-content.is-open .guide-nav-item { animation: guide-folder-row .32s cubic-bezier(.2,.9,.25,1) both; }
+    .guide-folder-links li:nth-child(2) .guide-nav-item { animation-delay: .04s; }
+    .guide-folder-links li:nth-child(3) .guide-nav-item { animation-delay: .08s; }
+    .guide-folder-links li:nth-child(4) .guide-nav-item { animation-delay: .12s; }
+    .guide-folder-links li:nth-child(5) .guide-nav-item { animation-delay: .16s; }
+    .guide-folder-links li:nth-child(n+6) .guide-nav-item { animation-delay: .2s; }
+    @keyframes guide-folder-row {
+      from { opacity: 0; transform: translateX(-6px); }
+      to   { opacity: 1; transform: none; }
+    }
+    @media (max-width: 1039px) { .guide-nav-item { min-height: 2.9rem; font-size: .95rem; } }
+    @media (prefers-reduced-motion: reduce) {
+      .guide-folder-content, .guide-folder-links, .guide-folder-chevron,
+      .guide-folder-toggle, .guide-folder-toggle::before, .guide-folder-toggle::after,
+      .guide-nav-item { transition: none; }
+      .guide-folder-content.is-open .guide-folder-links::before,
+      .guide-folder-content.is-open .guide-nav-item { animation: none; }
+    }
 
     .guide-picker {
       display: flex; align-items: center; gap: 12px;
@@ -1180,29 +1315,65 @@
        stylesheet, so before .g-toc-t existed on every renderer the
        titles fell back to the browser's own link blue on a near-black
        panel, which is the "unreadable" bug this replaced. */
-    .g-toc { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr)); gap: 1px; }
-    .g-toc-side { display: flex; flex-direction: column; gap: 1px; }
-    .g-toc a {
-      display: flex; gap: 11px; align-items: baseline;
-      padding: 9px 11px; border-radius: 4px; text-decoration: none;
-      border: 1px solid transparent;
-      transition: background 0.16s ease, border-color 0.16s ease;
+    /* Dressed in the rail's language: a tinted panel face with register
+       ticks, a mono overline, rows split by hairlines, and the left-edge
+       accent bar on the chapter you are reading and the one under the
+       pointer. The ticks are the panel's own ::before/::after, absolutely
+       placed, so they take no grid cell and every renderer (the reader
+       and the prerendered page alike) gets them without a second class.
+       Every row carries a hairline on top: in the sidebar the first one
+       is the rule under the overline, in the inline grid it is the rule
+       that opens each column. */
+    .g-toc {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr));
+      column-gap: 18px; row-gap: 0;
+      border-color: rgba(0,217,255,.3); border-radius: 4px;
+      background: linear-gradient(180deg, rgba(0,217,255,.1), rgba(0,217,255,.03) 70%), var(--panel);
+      box-shadow: inset 0 0 22px -14px rgba(0,217,255,.55);
     }
-    .g-toc a:hover { background: rgba(0,217,255,0.07); }
-    .g-toc a:focus-visible { outline: 1px solid var(--g); outline-offset: 1px; }
-    .g-toc a[aria-current] { background: rgba(0,217,255,0.1); border-color: var(--g-40); }
+    .g-toc-side { display: flex; flex-direction: column; }
+    .g-toc::before, .g-toc::after {
+      content: ''; position: absolute; width: 9px; height: 9px;
+      pointer-events: none; opacity: .75;
+      transition: width .2s ease, height .2s ease, opacity .2s ease;
+    }
+    .g-toc::before { top: -1px; left: -1px; border-top: 1px solid var(--g); border-left: 1px solid var(--g); }
+    .g-toc::after { bottom: -1px; right: -1px; border-bottom: 1px solid var(--g); border-right: 1px solid var(--g); }
+    .g-toc:hover::before, .g-toc:hover::after { width: 14px; height: 14px; opacity: 1; }
+    .g-toc-over {
+      display: block; padding: 4px 10px 11px;
+      font-family: var(--mono); font-weight: 500; font-size: .6rem;
+      letter-spacing: .22em; text-transform: uppercase; color: rgba(0,217,255,.8);
+    }
+    .g-toc a {
+      position: relative; display: flex; gap: 11px; align-items: baseline;
+      padding: 9px 11px; text-decoration: none;
+      border-top: 1px solid rgba(0,217,255,.14);
+      transition: background-color .16s ease, box-shadow .16s ease, padding-left .2s cubic-bezier(.2,.9,.25,1);
+    }
+    .g-toc a:hover, .g-toc a[aria-current] {
+      background: rgba(0,217,255,.1); padding-left: 13px;
+      box-shadow: inset 2px 0 0 var(--g), inset 18px 0 18px -16px rgba(0,217,255,.7);
+    }
+    .g-toc a[aria-current] { background: rgba(0,217,255,.16); }
+    .g-toc a:focus-visible { outline: 1px solid var(--g); outline-offset: -1px; }
     .g-toc-t {
       font-family: var(--sans); font-weight: 300; font-size: 0.95rem;
       line-height: 1.5; color: rgba(255,255,255,0.82);
       transition: color 0.16s ease;
     }
-    .g-toc a:hover .g-toc-t,
-    .g-toc a[aria-current] .g-toc-t { color: var(--g-bright); }
+    .g-toc a:hover .g-toc-t { color: #fff; }
+    .g-toc a[aria-current] .g-toc-t { color: var(--g-bright); font-weight: 400; }
     .g-toc-n {
       font-family: var(--mono); font-weight: 500; font-size: 0.62rem;
-      color: rgba(0,217,255,0.6); flex-shrink: 0;
+      letter-spacing: .1em; color: rgba(0,217,255,0.6); flex-shrink: 0;
+      transition: color 0.16s ease;
     }
+    .g-toc a:hover .g-toc-n,
     .g-toc a[aria-current] .g-toc-n { color: var(--g-bright); }
+    @media (prefers-reduced-motion: reduce) {
+      .g-toc a, .g-toc::before, .g-toc::after { transition: none; }
+    }
 
     /* the paragraph the whole guide turns on */
     .g-callout {
@@ -2023,7 +2194,7 @@
     @media (prefers-reduced-motion: reduce) {
       .splash-ticks, .splash-sweep, .splash-core, .cursor { animation: none; }
       .cta-breathe, .dots::after,
-      .eg-scan, .eg-dwell, .float-wrap,
+      .eg-scan, .eg-dwell,
       .featured-pulse, .stage-body,
       .btn-glitch, .btn-glitch:hover, .mod-tile:hover .mod-tile-icon { animation: none; }
       .splash-log span { animation: none; opacity: 1; }
@@ -2203,20 +2374,20 @@
 <h1 style="font-family:'Playfair Display',Georgia,serif;font-weight:500;font-size:2.6rem;line-height:1.1;letter-spacing:-0.015em;color:#fff;margin:0 0 18px">Managing Telegram accounts</h1>
 <p style="font-family:Barlow,sans-serif;font-weight:300;font-size:1rem;line-height:1.8;color:rgba(255,255,255,0.72);margin:0 0 14px;font-size:1.05rem;color:rgba(255,255,255,0.78)">Every control on the Accounts page, what it actually does in the engine, and the order to touch them in on day one.</p>
 <h2 style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px">In this guide</h2>
-<div class="g-toc panel" style="padding:16px 18px"><a href="#what-it-is"><span class="g-toc-n">01</span><span class="g-toc-t">What this page is</span></a><a href="#map"><span class="g-toc-n">02</span><span class="g-toc-t">Map of the page</span></a><a href="#getting-accounts-in"><span class="g-toc-n">03</span><span class="g-toc-t">Getting accounts in</span></a><a href="#proxies"><span class="g-toc-n">04</span><span class="g-toc-t">One proxy per account</span></a><a href="#the-three-checks"><span class="g-toc-n">05</span><span class="g-toc-t">The three checks</span></a><a href="#reading-the-list"><span class="g-toc-n">06</span><span class="g-toc-t">Reading the pool</span></a><a href="#bulk-actions"><span class="g-toc-n">07</span><span class="g-toc-t">Acting on a selection</span></a><a href="#one-account"><span class="g-toc-n">08</span><span class="g-toc-t">One account up close</span></a><a href="#first-run"><span class="g-toc-n">09</span><span class="g-toc-t">First run</span></a></div>
+<div class="g-toc panel" style="padding:16px 18px"><a href="#what-it-is"><span class="g-toc-n">01</span><span class="g-toc-t">What this page is</span></a><a href="#map"><span class="g-toc-n">02</span><span class="g-toc-t">Map of the page</span></a><a href="#getting-accounts-in"><span class="g-toc-n">03</span><span class="g-toc-t">Getting accounts in</span></a><a href="#proxies"><span class="g-toc-n">04</span><span class="g-toc-t">One proxy per account</span></a><a href="#the-three-checks"><span class="g-toc-n">05</span><span class="g-toc-t">The checks</span></a><a href="#reading-the-list"><span class="g-toc-n">06</span><span class="g-toc-t">Reading the pool</span></a><a href="#bulk-actions"><span class="g-toc-n">07</span><span class="g-toc-t">Acting on a selection</span></a><a href="#one-account"><span class="g-toc-n">08</span><span class="g-toc-t">One account up close</span></a><a href="#first-run"><span class="g-toc-n">09</span><span class="g-toc-t">First run</span></a></div>
 <h2 id="what-it-is" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">01</span>What this page is</h2>
 <p class="g-p">Account Manager is the second item in the sidebar and the page every other module depends on. Accounts enter the system here, get a proxy here, and are checked here; the modules that earn — Neurocommenting, NeuroDialogs, Mass Reactions — draw from the pool this page maintains. It is included with any purchase because none of the others can run without it.</p>
 <p class="g-p">It is a single page, not a set of tabs. Everything below is a region of that screen, including the Accounts, Checks and Protection groups in its bulk actions menu.</p>
-<div class="g-callout"><p class="g-p">Everything on this page is explicit. None of the three checks runs on a schedule or in the background — each one happens because you pressed a button, and each is read-only on the Telegram side: no messages, no profile writes, nothing that could itself get an account flagged.</p></div>
+<div class="g-callout"><p class="g-p">Everything in the Checks folder is explicit: each check runs because you pressed it. Health, proxy and capability are read-only on the Telegram side — no messages, no profile writes. Check spamblock is the one exception: it sends a single message to @SpamBot, Telegram's own bot.</p></div>
 <h2 id="map" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">02</span>Map of the page</h2>
-<ol class="g-map"><li><span class="g-map-n">01</span><span class="g-map-body"><span class="g-map-name">Toolbar</span><span class="g-map-holds">Reassign proxies · Bulk import · Add account. Top right, always present.</span></span></li><li><span class="g-map-n">02</span><span class="g-map-body"><span class="g-map-name">Capability summary</span><span class="g-map-holds">A banner counting how much of the pool has passed, failed or never had a capability check.</span></span></li><li><span class="g-map-n">03</span><span class="g-map-body"><span class="g-map-name">Shared-proxy warning</span><span class="g-map-holds">Appears only when two or more active accounts sit behind the same proxy. Carries its own Reassign now button.</span></span></li><li><span class="g-map-n">04</span><span class="g-map-body"><span class="g-map-name">Status tiles</span><span class="g-map-holds">Seven counts — Active, Busy, Cooldown, Needs Reauth, Banned, Flagged, Dead. Each one is also a filter for the list below.</span></span></li><li><span class="g-map-n">05</span><span class="g-map-body"><span class="g-map-name">Bulk actions bar</span><span class="g-map-holds">Three groups: Accounts, Checks and Protection. Delete accounts is at the bottom of Accounts.</span></span></li><li><span class="g-map-n">06</span><span class="g-map-body"><span class="g-map-name">Account list</span><span class="g-map-holds">One row per account: name, Protected, Comments, Last used, Added, Proxy, Days, Check, Status. Clicking a row opens its detail dialog.</span></span></li><li><span class="g-map-n">07</span><span class="g-map-body"><span class="g-map-name">Banned cleanup bar</span><span class="g-map-holds">A floating bar at the bottom, only when the selection contains banned accounts.</span></span></li><li><span class="g-map-n">08</span><span class="g-map-body"><span class="g-map-name">Dialogs</span><span class="g-map-holds">Add account · Bulk import (Paste text / TData) · Reassign proxies · Reauthenticate · Account detail (Overview / Profile / Protection).</span></span></li></ol>
+<ol class="g-map"><li><span class="g-map-n">01</span><span class="g-map-body"><span class="g-map-name">Toolbar</span><span class="g-map-holds">Reassign proxies · Import accounts. Top right, always present.</span></span></li><li><span class="g-map-n">02</span><span class="g-map-body"><span class="g-map-name">Capability summary</span><span class="g-map-holds">A banner counting how much of the pool has passed, failed or never had a capability check.</span></span></li><li><span class="g-map-n">03</span><span class="g-map-body"><span class="g-map-name">Shared-proxy warning</span><span class="g-map-holds">Appears only when two or more active accounts sit behind the same proxy. Carries its own Reassign now button.</span></span></li><li><span class="g-map-n">04</span><span class="g-map-body"><span class="g-map-name">Status tiles</span><span class="g-map-holds">Seven counts — Active, In work, Unchecked, Spamblock, Invalid, Frozen, Needs reauth. Each one is also a filter for the list below.</span></span></li><li><span class="g-map-n">05</span><span class="g-map-body"><span class="g-map-name">Bulk actions bar</span><span class="g-map-holds">Three folders: Accounts, Checks and Protection. Delete accounts is at the bottom of Accounts.</span></span></li><li><span class="g-map-n">06</span><span class="g-map-body"><span class="g-map-name">Account list</span><span class="g-map-holds">One row per account: name, Protected, Comments, Last used, Added, Proxy, Supervise, Check, Status. Clicking a row opens its detail dialog.</span></span></li><li><span class="g-map-n">07</span><span class="g-map-body"><span class="g-map-name">Banned cleanup bar</span><span class="g-map-holds">A floating bar at the bottom, only when the selection contains banned accounts.</span></span></li><li><span class="g-map-n">08</span><span class="g-map-body"><span class="g-map-name">Dialogs</span><span class="g-map-holds">Import accounts (Bulk import / Single import) · Reassign proxies · Recover from tdata · Account detail (Overview / Profile / Protection).</span></span></li></ol>
 <h2 id="getting-accounts-in" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">03</span>Getting accounts in</h2>
-<p class="g-p">Two ways in, both in the toolbar. Add account is the single-account form; Bulk import takes either a paste of session lines or a zip of Telegram Desktop tdata folders, which it converts for you.</p>
+<p class="g-p">One button in the toolbar, Import accounts, with two modes. Bulk import, which opens first, takes the zip a purchase came in and converts its tdata folders for you; Single import is the one-account form.</p>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
-<details class="g-ctl-item" id="ctl-add-account"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn">Add account</span></span><span class="g-ctl-label"><span class="g-ctl-name">Add account</span><span class="g-ctl-where">Toolbar</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Opens a form for one account: ID, display name, phone, session string, api_id, api_hash, and an optional proxy.</dd></div><div><dt>Required</dt><dd>ID (no spaces or slashes), session string, api_id, api_hash. Display name and phone are optional.</dd></div><div><dt>Validation</dt><dd>Session string must be at least 100 characters — a Telethon StringSession is usually 350+. api_id must be a positive integer. api_hash must be exactly 32 hex characters.</dd></div><div><dt>When to use it</dt><dd>One account at a time, when you already have a Telethon session string. If you have tdata folders instead, use Bulk import — it converts them.</dd></div></dl></details>
-<details class="g-ctl-item" id="ctl-proxy-toggle"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-toggle"></span></span><span class="g-ctl-label"><span class="g-ctl-name">Proxy</span><span class="g-ctl-where">Add account dialog</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Reveals the proxy fields for this account: Type, Host, Port, User, Pass.</dd></div><div><dt>Default</dt><dd>Off — an account is created with no proxy unless you turn this on.</dd></div><div><dt>Type</dt><dd>socks5 or http. socks5 is the default selection.</dd></div><div><dt>If left off</dt><dd>The account is saved without a proxy. Check proxy then returns a 400 for it, and the proxy column in the list stays empty.</dd></div></dl></details>
-<details class="g-ctl-item" id="ctl-bulk-import"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn">Bulk import</span></span><span class="g-ctl-label"><span class="g-ctl-name">Bulk import</span><span class="g-ctl-where">Toolbar</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Opens a two-tab dialog. Paste text takes one account per line; TData converts a zip of Telegram Desktop tdata folders into sessions first.</dd></div><div><dt>Line format</dt><dd>id|display_name|phone|session_string|api_id|api_hash — pipe-separated, leave display_name and phone blank if unused.</dd></div><div><dt>Limit</dt><dd>100 accounts per request. Paste more and the dialog says so, then imports only the first 100.</dd></div><div><dt>Proxies</dt><dd>A separate field takes one proxy per line, in any of the four accepted formats. Mixed formats in the same paste are fine.</dd></div><div><dt>When to use it</dt><dd>Any time you are adding more than one account — this is the normal path after a marketplace purchase.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-add-account"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn">Single import</span></span><span class="g-ctl-label"><span class="g-ctl-name">Single import</span><span class="g-ctl-where">Import accounts dialog</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>A form for one account: ID, display name, phone, session string, api_id, api_hash, and an optional proxy.</dd></div><div><dt>Required</dt><dd>ID (no spaces or slashes), session string, api_id, api_hash. Display name and phone are optional.</dd></div><div><dt>Validation</dt><dd>Session string must be at least 100 characters — a Telethon StringSession is usually 350+. api_id must be a positive integer. api_hash must be exactly 32 hex characters.</dd></div><div><dt>When to use it</dt><dd>One account at a time, when you already have a Telethon session string. If you have tdata folders instead, use Bulk import — it converts them.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-proxy-toggle"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-toggle"></span></span><span class="g-ctl-label"><span class="g-ctl-name">Proxy</span><span class="g-ctl-where">Single import</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Reveals the proxy fields for this account: Type, Host, Port, User, Pass.</dd></div><div><dt>Default</dt><dd>Off — an account is created with no proxy unless you turn this on.</dd></div><div><dt>Type</dt><dd>socks5 or http. socks5 is the default selection.</dd></div><div><dt>If left off</dt><dd>The account is saved without a proxy. Check proxy then returns a 400 for it, and the proxy column in the list stays empty.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-bulk-import"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn">Bulk import</span></span><span class="g-ctl-label"><span class="g-ctl-name">Bulk import</span><span class="g-ctl-where">Import accounts dialog</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Takes the zip a purchase came in — one folder per account holding its tdata, with per-account zips mixed in if need be — and converts every folder in one pass. A folder that cannot be read is listed with the reason instead of stopping the rest.</dd></div><div><dt>Names</dt><dd>Each account's ID and display name default to its folder's name.</dd></div><div><dt>Limit</dt><dd>100 accounts per import. Upload more and the dialog says so, then imports only the first 100.</dd></div><div><dt>Proxies</dt><dd>A separate field takes one proxy per line, in any of the four accepted formats. Mixed formats in the same paste are fine.</dd></div><div><dt>When to use it</dt><dd>Any time you are adding more than one account — this is the normal path after a marketplace purchase.</dd></div></dl></details>
 </div>
 <p class="g-p">The proxy field in Bulk import, the one in Reassign proxies and the single-line editor in an account's detail dialog all run through the same parser, so all three accept exactly the same four shapes and reject the same way:</p>
 <div class="g-tablewrap panel"><table class="g-table"><thead><tr><th scope="col">Format</th><th scope="col">Notes</th></tr></thead><tbody><tr><td data-label="Format">type:host:port:user:pass</td><td data-label="Notes">Fully explicit. type is socks5 or http.</td></tr><tr><td data-label="Format">host:port:user:pass</td><td data-label="Notes">Type assumed socks5.</td></tr><tr><td data-label="Format">user:pass@host:port</td><td data-label="Notes">Type assumed socks5.</td></tr><tr><td data-label="Format">type://user:pass@host:port</td><td data-label="Notes">URL style.</td></tr></tbody></table></div>
@@ -2228,31 +2399,32 @@
 <details class="g-ctl-item" id="ctl-reassign"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn">Reassign proxies</span></span><span class="g-ctl-label"><span class="g-ctl-name">Reassign proxies</span><span class="g-ctl-where">Toolbar</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Assigns one distinct proxy per target account, in order.</dd></div><div><dt>Target accounts</dt><dd>A dropdown with two choices: all active accounts, or the current selection. Selection is disabled when nothing is selected.</dd></div><div><dt>All or nothing</dt><dd>Every line is parsed and deduplicated first. If there are fewer distinct valid proxies than target accounts, the whole request is rejected before a single row is written — never a partial apply, never a proxy reused across two accounts in the same call.</dd></div><div><dt>Accounts in use</dt><dd>An account with a live connection in any of the engine's pools right now — posting, discovery, health checker, profile manager, channel joiner, active warmup — is skipped rather than swapped, and reported back with the reason. Telegram has no way to change the proxy under an open connection. Re-run it after the session ends; there is no queue to drain.</dd></div><div><dt>When to use it</dt><dd>After a bulk import, when the shared-proxy banner appears, or whenever you replace a batch of proxies.</dd></div></dl></details>
 <details class="g-ctl-item" id="ctl-target-mode"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-select"><span class="g-r-select-v">All active accounts</span><span class="g-r-caret"></span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Target accounts</span><span class="g-ctl-where">Reassign proxies dialog</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Chooses who gets a new proxy: every active account, or only the rows you ticked.</dd></div><div><dt>Default</dt><dd>All active accounts.</dd></div><div><dt>When to change it</dt><dd>Switch to the selection when you are fixing a specific group — the shared-proxy banner's own button does this for you.</dd></div></dl></details>
 </div>
-<h2 id="the-three-checks" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">05</span>The three checks</h2>
-<p class="g-p">Three separate checks, three separate things they can tell you, three independent five-minute cooldowns. They do not substitute for each other: an account can pass health and still be unusable, which is the whole reason the capability check exists.</p>
+<h2 id="the-three-checks" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">05</span>The checks</h2>
+<p class="g-p">The Checks folder holds four: health, proxy, capability and spamblock. The first three are below, each with its own five-minute cooldown; Check spamblock has its own guide. They do not substitute for each other: an account can pass health and still be unusable, which is the whole reason the capability check exists.</p>
+<a href="/guides/spamblock-frozen-shadowban#in-the-dashboard" class="quiet-link" style="margin-bottom:16px">Check spamblock, and the Spamblock and Frozen tiles →</a>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
-<details class="g-ctl-item" id="ctl-check-health"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn t-ok">Check health</span></span><span class="g-ctl-label"><span class="g-ctl-name">Check health</span><span class="g-ctl-where">Bulk actions bar · Account detail → Actions</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Connects the account's own Telegram client for the length of the call, confirms the session is authorised, and makes one lightweight self-lookup. Reports back active, banned, disabled or unknown, plus whatever restricted / scam / fake flags Telegram already attaches to the account.</dd></div><div><dt>What it cannot see</dt><dd>A spam block. A self-lookup cannot detect one; it only ever shows up reactively when a real send fails, and that lands the account in cooldown instead.</dd></div><div><dt>Rate limit</dt><dd>One per account per five minutes. Sooner returns 429, and the button in the detail dialog shows the seconds remaining instead.</dd></div><div><dt>Side effects</dt><dd>None on the Telegram side — no messages, no profile writes. Read-only.</dd></div><div><dt>When to use it</dt><dd>Right after import, and whenever an account starts behaving oddly.</dd></div></dl></details>
-<details class="g-ctl-item" id="ctl-check-proxy"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn">Check proxy</span></span><span class="g-ctl-label"><span class="g-ctl-name">Check proxy</span><span class="g-ctl-where">Bulk actions bar · Account detail → Actions</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Opens a raw SOCKS5 or HTTP CONNECT through the account's configured proxy to a Telegram data-centre address and reports whether it got through, with the latency in milliseconds.</dd></div><div><dt>Timeout</dt><dd>10 seconds, hard.</dd></div><div><dt>No proxy configured</dt><dd>Returns a 400. In the detail dialog the button is disabled with a tooltip saying so.</dd></div><div><dt>Rate limit</dt><dd>One per account per five minutes, counted separately from the other two checks.</dd></div><div><dt>Side effects</dt><dd>Never touches the Telegram session at all — no MTProto handshake, just a TCP connect.</dd></div><div><dt>When to use it</dt><dd>When accounts stop working all at once, or after changing proxies. It separates &quot;the proxy is dead&quot; from &quot;the account is dead&quot;.</dd></div></dl></details>
-<details class="g-ctl-item" id="ctl-check-capability"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn">Check capability</span></span><span class="g-ctl-label"><span class="g-ctl-name">Check capability</span><span class="g-ctl-where">Bulk actions bar · Account detail → Actions</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Asks the account to resolve a known-good public username and read that channel's message history — the exact pair of operations the engine performs for every monitored channel. Result is saved and shown in the list's Check column.</dd></div><div><dt>Why it exists</dt><dd>An account can be frozen, or simply unable to resolve anything, while the health check's restricted / scam / fake flags stay at zero the whole time. Freezing is enforced at the request level, not written onto the account, so a self-lookup cannot see it.</dd></div><div><dt>Results</dt><dd>ok · can't resolve · frozen · unknown · error. frozen is a real Telegram restriction, lifted only through their own verification flow. error means the check itself was rate-limited by Telegram, which is not a verdict either way.</dd></div><div><dt>Rate limit</dt><dd>One per account per five minutes, on its own timer.</dd></div><div><dt>In bulk</dt><dd>Runs as a background task with a 1–3 second gap between accounts.</dd></div><div><dt>When to use it</dt><dd>On every fresh batch before you scale, and whenever a pool goes quiet without any account reporting a problem.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-check-health"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn t-ok">Check health</span></span><span class="g-ctl-label"><span class="g-ctl-name">Check health</span><span class="g-ctl-where">Bulk actions bar · Account detail → Actions</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Connects the account's own Telegram client for the length of the call, confirms the session is authorised, and makes one lightweight self-lookup. Reports back active, banned, disabled or unknown, plus whatever restricted / scam / fake flags Telegram already attaches to the account.</dd></div><div><dt>What it cannot see</dt><dd>A spam block or a freeze. A self-lookup cannot detect either — that is what Check spamblock and Check capability are for.</dd></div><div><dt>Rate limit</dt><dd>One per account per five minutes. Sooner returns 429, and the button in the detail dialog shows the seconds remaining instead.</dd></div><div><dt>Side effects</dt><dd>None on the Telegram side — no messages, no profile writes. Read-only.</dd></div><div><dt>When to use it</dt><dd>Right after import, and whenever an account starts behaving oddly.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-check-proxy"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn">Check proxy</span></span><span class="g-ctl-label"><span class="g-ctl-name">Check proxy</span><span class="g-ctl-where">Bulk actions bar · Account detail → Actions</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Runs the same check as the free Proxy Checker through the account's proxy: connects, reaches Telegram, and reports a verdict with the latency, the exit IP's country and the country Telegram sees. A mismatch between the two is flagged.</dd></div><div><dt>How long</dt><dd>Up to about thirty seconds. Accounts sharing one proxy reuse a check made in the last few minutes.</dd></div><div><dt>No proxy configured</dt><dd>Returns a 400. In the detail dialog the button is disabled with a tooltip saying so.</dd></div><div><dt>Rate limit</dt><dd>One per account per five minutes, counted separately from the other checks.</dd></div><div><dt>Side effects</dt><dd>Never touches the account's Telegram session. The handshake with Telegram is unauthenticated.</dd></div><div><dt>When to use it</dt><dd>When accounts stop working all at once, or after changing proxies. It separates &quot;the proxy is dead&quot; from &quot;the account is dead&quot;.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-check-capability"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn">Check capability</span></span><span class="g-ctl-label"><span class="g-ctl-name">Check capability</span><span class="g-ctl-where">Bulk actions bar · Account detail → Actions</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Asks the account to resolve a known-good public username and read that channel's message history — the exact pair of operations the engine performs for every monitored channel. Result is saved and shown in the list's Check column.</dd></div><div><dt>Why it exists</dt><dd>An account can be frozen, or simply unable to resolve anything, while the health check's restricted / scam / fake flags stay at zero the whole time. Freezing is enforced at the request level, not written onto the account, so a self-lookup cannot see it.</dd></div><div><dt>Results</dt><dd>ok · not checked · check failed · frozen · can't resolve · can't post. frozen is a real Telegram restriction, lifted only through their own verification flow. can't post means Telegram refuses the account's messages while it still reads and resolves. check failed means the check ran and could not decide (a timeout, a dead proxy) — run it again.</dd></div><div><dt>Rate limit</dt><dd>One per account per five minutes, on its own timer.</dd></div><div><dt>In bulk</dt><dd>Runs as a background task with a 1–3 second gap between accounts.</dd></div><div><dt>When to use it</dt><dd>On every fresh batch before you scale, and whenever a pool goes quiet without any account reporting a problem.</dd></div></dl></details>
 </div>
 <p class="g-p">The capability check targets Telegram's own official channel rather than anything of yours, so running it never disturbs your monitored channels or counts against their limits.</p>
 <h2 id="reading-the-list" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">06</span>Reading the pool</h2>
-<p class="g-p">Seven tiles across the top, each a live count and a filter — click one to show only those accounts, click again to clear. Active, Cooldown, Needs Reauth and Banned are mutually exclusive; Busy, Flagged and Dead are separate signals that can apply on top of any of them.</p>
+<p class="g-p">Seven tiles across the top, each a live count and a filter — click one to show only those accounts, click it again to clear. Every account sits in exactly one of Active, Unchecked, Spamblock, Invalid, Frozen and Needs reauth, so those six add up to the pool. In work is the exception: a part of Active, not added to the total.</p>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
-<details class="g-ctl-item" id="ctl-tile-active"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-tile t-ok"><span class="g-r-tile-n">12</span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Active</span><span class="g-ctl-where">Status tiles</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>Counts</dt><dd>Accounts whose status is active, that are not flagged, and that have not failed a capability check.</dd></div></dl></details>
-<details class="g-ctl-item" id="ctl-tile-busy"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-tile"><span class="g-r-tile-n">3</span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Busy</span><span class="g-ctl-where">Status tiles</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>Counts</dt><dd>Accounts currently claimed by discovery or the commenting pool. An account claimed by one of the two is still free for the other, so this counts anything not free for both.</dd></div></dl></details>
-<details class="g-ctl-item" id="ctl-tile-cooldown"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-tile t-warn"><span class="g-r-tile-n">2</span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Cooldown</span><span class="g-ctl-where">Status tiles</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>Counts</dt><dd>Accounts waiting out a cooldown.</dd></div><div><dt>Breakdown</dt><dd>Hovering the tile lists the reasons behind the number: floodwait, peerflood, profile update, discovery.</dd></div></dl></details>
-<details class="g-ctl-item" id="ctl-tile-reauth"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-tile"><span class="g-r-tile-n">1</span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Needs Reauth</span><span class="g-ctl-where">Status tiles</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>Counts</dt><dd>Accounts whose status is disabled because their working session needs recovery. Inspect the account and use the recovery flow with valid credentials.</dd></div></dl></details>
-<details class="g-ctl-item" id="ctl-tile-banned"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-tile t-bad"><span class="g-r-tile-n">0</span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Banned</span><span class="g-ctl-where">Status tiles</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>Counts</dt><dd>Accounts Telegram has banned. Selecting any of these brings up the cleanup bar at the bottom of the page.</dd></div></dl></details>
-<details class="g-ctl-item" id="ctl-tile-flagged"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-tile t-warn"><span class="g-r-tile-n">0</span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Flagged</span><span class="g-ctl-where">Status tiles</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>Counts</dt><dd>Accounts carrying Telegram's own restricted, scam or fake flag, as read during the last health check. Independent of status — an account can be active and flagged at once.</dd></div><div><dt>What to do</dt><dd>Do not throw it away. Give it no work for about two weeks and the flag lifts by itself. The mistake is keeping it commenting while it is flagged, not keeping it at all.</dd></div></dl></details>
-<details class="g-ctl-item" id="ctl-tile-dead"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-tile t-bad"><span class="g-r-tile-n">0</span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Dead</span><span class="g-ctl-where">Status tiles</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>Counts</dt><dd>Accounts whose last capability check came back frozen or can't resolve — Telegram itself saying this account cannot do the one thing the engine needs.</dd></div><div><dt>Exception</dt><dd>An account you disabled yourself shows as Needs Reauth, not Dead, so a deliberate action is never masked by a capability verdict.</dd></div><div><dt>What to do</dt><dd>Do not delete it. Leave it alone for about three weeks, then run Check capability on it again — a meaningful share of frozen accounts come back on their own. Deleting on the day of the verdict throws away accounts that would have recovered.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-tile-active"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-tile t-ok"><span class="g-r-tile-n">12</span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Active</span><span class="g-ctl-where">Status tiles</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>Counts</dt><dd>Healthy accounts: checked, reachable, and in none of the tiles below. An account in cooldown, at its comment limit or paused by hand is still healthy and counts here; its row says what it is doing.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-tile-busy"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-tile"><span class="g-r-tile-n">3</span></span></span><span class="g-ctl-label"><span class="g-ctl-name">In work</span><span class="g-ctl-where">Status tiles</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>Counts</dt><dd>Active accounts set aside for a module — in the commenting pool, or held by a running Parser search. Set aside, not necessarily posting this minute.</dd></div><div><dt>Breakdown</dt><dd>Hovering the tile lists which module holds how many.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-tile-unchecked"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-tile"><span class="g-r-tile-n">2</span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Unchecked</span><span class="g-ctl-where">Status tiles</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>Counts</dt><dd>Accounts with no capability check yet — the engine will not use them until one has run — plus accounts whose proxy is down right now. Proxy down is fixed at the proxy, not with a new session.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-tile-spamblock"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-tile t-warn"><span class="g-r-tile-n">0</span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Spamblock</span><span class="g-ctl-where">Status tiles</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>Counts</dt><dd>Accounts @SpamBot reports as limited, plus accounts whose capability check came back can't post. Either way, Telegram is blocking them from posting.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-tile-banned"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-tile t-bad"><span class="g-r-tile-n">0</span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Invalid</span><span class="g-ctl-where">Status tiles</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>Counts</dt><dd>Banned accounts, and sessions Telegram has rejected outright. Uploading the same tdata again cannot revive them.</dd></div><div><dt>Cleanup</dt><dd>Selecting banned accounts brings up the cleanup bar at the bottom of the page.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-tile-dead"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-tile"><span class="g-r-tile-n">0</span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Frozen</span><span class="g-ctl-where">Status tiles</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>Counts</dt><dd>Accounts whose last capability check came back frozen or can't resolve — Telegram itself saying this account cannot do the one thing the engine needs.</dd></div><div><dt>What to do</dt><dd>Do not delete it. Leave it alone for about three weeks, then run Check capability on it again — a meaningful share of frozen accounts come back on their own. Deleting on the day of the verdict throws away accounts that would have recovered.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-tile-reauth"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-tile"><span class="g-r-tile-n">1</span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Needs reauth</span><span class="g-ctl-where">Status tiles</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>Counts</dt><dd>Accounts the engine flagged after three failed hourly reconnects in a row, plus accounts that are not responding. Both need a person to look; only the flagged ones need a fresh tdata, through Recover from tdata.</dd></div><div><dt>Parked accounts</dt><dd>An account you set to disabled yourself is counted here too.</dd></div></dl></details>
 </div>
 <p class="g-p">Below the tiles, one row per account. Narrow screens drop the middle columns first and keep Check and Status to the end.</p>
-<div class="g-tablewrap panel"><table class="g-table"><thead><tr><th scope="col">Column</th><th scope="col">Shows</th></tr></thead><tbody><tr><td data-label="Column">Comments</td><td data-label="Shows">How many comments this account has posted. Clicking the number opens a histogram.</td></tr><tr><td data-label="Column">Last used</td><td data-label="Shows">When the engine last used this account.</td></tr><tr><td data-label="Column">Added</td><td data-label="Shows">When the account was imported (added_at). Supervise counts its seven-day window from this timestamp.</td></tr><tr><td data-label="Column">Proxy</td><td data-label="Shows">The proxy currently assigned, with a warning marker when another active account shares it.</td></tr><tr><td data-label="Column">Days</td><td data-label="Shows">Supervise age as x/7, measured from import and capped at 7/7. A dash means the account has not been supervised.</td></tr><tr><td data-label="Column">Check</td><td data-label="Shows">The verdict from the last capability check. Hover for the raw result and when it ran.</td></tr><tr><td data-label="Column">Status</td><td data-label="Shows">The account's state in the pool. A dead capability verdict overrides it here, since such an account cannot be used whatever its status says.</td></tr></tbody></table></div>
+<div class="g-tablewrap panel"><table class="g-table"><thead><tr><th scope="col">Column</th><th scope="col">Shows</th></tr></thead><tbody><tr><td data-label="Column">Protected</td><td data-label="Shows">The protection shield: grey until the five protection steps have succeeded in order, blue at 5/5.</td></tr><tr><td data-label="Column">Comments</td><td data-label="Shows">How many comments this account has posted. Clicking the number opens a histogram.</td></tr><tr><td data-label="Column">Last used</td><td data-label="Shows">When the engine last used this account.</td></tr><tr><td data-label="Column">Added</td><td data-label="Shows">When the account was imported (added_at). Supervise counts its seven-day window from this timestamp.</td></tr><tr><td data-label="Column">Proxy</td><td data-label="Shows">The proxy currently assigned, with a warning marker when another active account shares it.</td></tr><tr><td data-label="Column">Supervise</td><td data-label="Shows">Supervise age as x/7, measured from import and capped at 7/7. A dash means Supervise is not on for this account.</td></tr><tr><td data-label="Column">Check</td><td data-label="Shows">The verdict from the last capability check. Hover for the raw result and when it ran.</td></tr><tr><td data-label="Column">Status</td><td data-label="Shows">The account's state in the pool. A dead capability verdict overrides it here, since such an account cannot be used whatever its status says.</td></tr></tbody></table></div>
 <h2 id="bulk-actions" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">07</span>Acting on a selection</h2>
-<p class="g-p">The menu groups actions under Accounts, Checks and Protection. Checks holds the health, proxy and capability checks. Protection holds Terminate other sessions, Reauthenticate, Download new tdata and Set 2FA, in that order.</p>
+<p class="g-p">Actions sit in three folders. Accounts holds Apply template, Reset counts, Supervise, Recover from tdata and Delete accounts. Checks holds Check health, Check proxy, Check capability and Check spamblock. Protection holds Terminate other sessions, Reauthenticate, Download new tdata and Set 2FA, in that order.</p>
 <a href="/guides/account-protection#running-it" class="quiet-link" style="margin-bottom:16px">The four Protection actions and the five-step shield sequence →</a>
 <p class="g-p">Tick rows and the bar under the tiles comes alive. One bulk operation runs at a time — while one is in flight the rest disable, rather than letting several overlapping batches run at once.</p>
 <div class="g-ctl">
@@ -2269,13 +2441,13 @@
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
 <details class="g-ctl-item" id="ctl-display-name"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-field">Acc 101</span></span><span class="g-ctl-label"><span class="g-ctl-name">Display name</span><span class="g-ctl-where">Detail → Overview → Info</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Renames the account inside ATREOX only. This is a label for you, not the Telegram profile name — that lives on the Profile tab.</dd></div></dl></details>
 <details class="g-ctl-item" id="ctl-edit-proxy"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn">Edit proxy</span></span><span class="g-ctl-label"><span class="g-ctl-name">Edit proxy</span><span class="g-ctl-where">Detail → Overview → Proxy</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>A single-line proxy editor for this one account, accepting the same four formats as everywhere else.</dd></div><div><dt>Clear proxy</dt><dd>A second button removes the proxy entirely, leaving the account with none.</dd></div><div><dt>When to use it</dt><dd>One-off fixes. For a batch, use Reassign proxies instead — it guarantees no two accounts end up sharing.</dd></div></dl></details>
-<details class="g-ctl-item" id="ctl-danger-status"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-select"><span class="g-r-select-v">active</span><span class="g-r-caret"></span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Manual status override</span><span class="g-ctl-where">Detail → Overview → Danger zone</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Forces the account's status to one of four values: active, cooldown, banned, disabled.</dd></div><div><dt>Default</dt><dd>Whatever the account's current status is. The Save button stays disabled until you pick something different.</dd></div><div><dt>What it is really for</dt><dd>Parking an account you need kept out of circulation without deleting it. The usual case: no comment limit was set, the account has posted far more than it should have, and the next comment is the one that gets it banned. Moving it off active buys you time to decide.</dd></div><div><dt>Why parking works</dt><dd>The engine only ever builds its pool from accounts whose status is active. A parked account is never selected for commenting, even if its id is still sitting in the commenting pool. In the panel the pool's available column offers active accounts only, so it cannot be added back by accident — and disabled or banned accounts already in the pool are pulled out of it automatically.</dd></div><div><dt>Use disabled, not cooldown</dt><dd>Parking at cooldown does not hold. Setting it here writes no expiry, and on its next poll round the engine reactivates any cooldown account whose expiry is empty or already past — so the account quietly returns to active within one cycle. disabled stays put until you change it back.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-danger-status"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-select"><span class="g-r-select-v">active</span><span class="g-r-caret"></span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Manual status override</span><span class="g-ctl-where">Detail → Overview → Danger zone</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Forces the account's status to active, banned or disabled. Cooldown is set and cleared by the engine; it shows in the list only when the account is already in it, and cannot be picked.</dd></div><div><dt>Default</dt><dd>Whatever the account's current status is. The Save button stays disabled until you pick something different.</dd></div><div><dt>What it is really for</dt><dd>Parking an account you need kept out of circulation without deleting it. The usual case: no comment limit was set, the account has posted far more than it should have, and the next comment is the one that gets it banned. Moving it off active buys you time to decide.</dd></div><div><dt>Why parking works</dt><dd>The engine only ever builds its pool from accounts whose status is active. A parked account is never selected for commenting, even if its id is still sitting in the commenting pool. In the panel the pool's available column offers active accounts only, so it cannot be added back by accident — and disabled or banned accounts already in the pool are pulled out of it automatically.</dd></div><div><dt>Use disabled</dt><dd>disabled stays put until you change it back. A parked account is counted under the Needs reauth tile.</dd></div></dl></details>
 <details class="g-ctl-item" id="ctl-profile-tab"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn t-plain">Profile</span></span><span class="g-ctl-label"><span class="g-ctl-name">Profile tab</span><span class="g-ctl-where">Detail → Profile</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Edits the real Telegram profile for this account: first name, last name, username, bio and avatar, with a live preview of how it will look.</dd></div><div><dt>Rate limits</dt><dd>One profile change per account per hour. Username is slower still at one change per account per 48 hours, since it is the most visible and searchable of the fields.</dd></div><div><dt>Avatar</dt><dd>Up to 5 MB.</dd></div><div><dt>When to use it</dt><dd>Single-account touch-ups. For a whole batch, build a template on the Profile Templates page and use Apply template.</dd></div></dl></details>
 </div>
 <h2 id="first-run" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">09</span>First run</h2>
 <p class="g-p">The shortest path from an empty pool to accounts a module can draw on.</p>
-<ol class="g-steps"><li><p class="g-p">Bring the accounts in — Bulk import for a batch, Add account for one. Paste your proxies into the same dialog if you have them ready.</p></li><li><p class="g-p">If you imported without proxies, run Reassign proxies now, before anything connects. One distinct proxy per account, or the request is refused outright.</p></li><li><p class="g-p">Select everything and press Check health. Anything that comes back banned on its first contact with a new IP was never going to survive; note the seller.</p></li><li><p class="g-p">Select everything again and press Check capability. This is the check that catches a frozen account while every other signal still reads clean.</p></li><li><p class="g-p">Select the survivors and press Supervise in Accounts. The seven-day window is measured from import, and the Days column shows x/7.</p></li><li><p class="g-p">Use the Protection group to complete the five ordered security steps, and apply your profile template. Wait until Supervise reaches 7/7 before running Neurocommenting, Neurodialogs or Mass Reactions.</p></li></ol>
-<p class="g-p">After that the pool is ready for a module to claim from. The tiles are the thing to watch day to day: a rising Cooldown count is pacing, a rising Dead count is the accounts themselves.</p>
+<ol class="g-steps"><li><p class="g-p">Bring the accounts in with Import accounts — Bulk import for a batch, Single import for one. Paste your proxies into the same dialog if you have them ready.</p></li><li><p class="g-p">If you imported without proxies, run Reassign proxies now, before anything connects. One distinct proxy per account, or the request is refused outright.</p></li><li><p class="g-p">Select everything and press Check health. Anything that comes back banned on its first contact with a new IP was never going to survive; note the seller.</p></li><li><p class="g-p">Select everything again and press Check capability. This is the check that catches a frozen account while every other signal still reads clean.</p></li><li><p class="g-p">Select the survivors and press Supervise in the Accounts folder. The seven-day window is measured from import, and the Supervise column shows x/7.</p></li><li><p class="g-p">Use the Protection folder to complete the five ordered security steps, and apply your profile template. Wait until Supervise reaches 7/7 before running Neurocommenting, Neurodialogs or Mass Reactions.</p></li></ol>
+<p class="g-p">After that the pool is ready for a module to claim from. The tiles are the thing to watch day to day: a rising Spamblock count is pacing, a rising Frozen or Invalid count is the accounts themselves.</p>
 <p class="g-note">Account changes reach the engine on their own: it re-reads the pool from the database every poll round, so an account you add, park or re-proxy is picked up within one poll interval without you doing anything else.</p>
 <a href="/guides/profile-templates" class="quiet-link" style="margin-bottom:16px">Next: give the whole batch a face →</a>
 </article>

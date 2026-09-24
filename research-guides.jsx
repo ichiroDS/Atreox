@@ -163,7 +163,7 @@ const RESEARCH_GUIDES = [
             'The account ran through DataImpulse on a sticky port, 10005, with a login that asked for a country and nothing else. No hold time.',
             'On 10 September at 20:08 UTC its connection dropped and the reconnect failed with the error above. The engine tried five times; the last attempt failed at 20:11 UTC and it stopped.',
             'Two days later we sampled the exit address of that same login, once every two minutes. Within 23 minutes it came out of three different addresses belonging to two different carriers.',
-            'Our own panel labelled the account banned. That label was wrong, and we renamed it on 12 September: a session that died this way is now shown as a dead session, not a banned account.',
+            'Our own panel labelled the account banned. That label was wrong, and we renamed it on 12 September: a session that died this way now counts under Invalid, not as a banned account.',
           ]],
           ['p', "The last step is the one worth dwelling on. We build the tooling and know what this error means, and our interface still told us the account was banned. Anyone running the same account through a tool that does not distinguish the two would have written it off and blamed the seller, and there would have been nothing on the screen to suggest otherwise."],
         ],

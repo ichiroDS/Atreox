@@ -372,7 +372,7 @@ function Navbar({ currentPage, setPage }) {
             letterSpacing: '0.08em', color: `rgba(${ACCENT_RGB},0.6)`,
             userSelect: 'none', flexShrink: 0,
           }}>
-            v1.0
+            v1.1
           </span>
         </div>
 
@@ -729,7 +729,7 @@ function SectionLockup({ title, children, style }) {
   );
 }
 
-/* ─── Sharp-cornered marker pill, same lockup language as the v1.0 chip ─── */
+/* ─── Sharp-cornered marker pill, same lockup language as the version chip ─── */
 function Pill({ children, dot, muted }) {
   const c = muted ? 'rgba(255,255,255,0.42)' : ACCENT;
   return (

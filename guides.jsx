@@ -2,7 +2,7 @@
 /* ══════════════════════════════════════════════════════════════════
    guides.jsx — the page that teaches.
 
-   Two views, one page. The index is a wall of floating cards, one per
+   Two views, one page. The index is a wall of cards, one per
    guide, carrying a name and a handful of words — enough to choose
    from, never enough to read instead of opening. Clicking one opens
    the reader: every guide in a rail down the left, and the chosen one
@@ -96,7 +96,7 @@ function GuideTile({ guide, index, inView, onOpen }) {
     <motion.div
       initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5, delay: Math.min(index, 7) * 0.06 }}
-      className="float-wrap" style={{ animationDelay: (index % 4) * 0.7 + 's' }}>
+      className="guide-tile-wrap">
       <a href={guideHref(guide)}
         onClick={e => { if (plainClick(e)) { e.preventDefault(); onOpen(guide.slug); } }}
         className="panel panel-hover ticks guide-tile"
@@ -668,7 +668,7 @@ function ReaderNav({ slug, onOpen, compact }) {
   if (compact) return (
     <nav aria-label="Guides" className="guide-nav-compact">
       <button type="button" onClick={() => setOpen(o => !o)} aria-expanded={open}
-        aria-controls={`${prefix}-folders`} className="panel guide-picker">
+        aria-controls={`${prefix}-folders`} className="panel ticks guide-picker">
         <BookOpen size={16} color={GREEN} aria-hidden="true" />
         <span className="guide-picker-label">
           <span className="guide-picker-kicker">{'// '}Guides</span>
@@ -676,10 +676,10 @@ function ReaderNav({ slug, onOpen, compact }) {
         </span>
         <span aria-hidden="true" className={'guide-picker-chevron' + (open ? ' is-open' : '')}><ChevronRight size={15} /></span>
       </button>
-      {open && <div id={`${prefix}-folders`} className="panel guide-nav-folders is-compact">{list}</div>}
+      {open && <div id={`${prefix}-folders`} className="guide-nav-folders is-compact">{list}</div>}
     </nav>
   );
-  return <nav aria-label="Guides" className="panel guide-nav-folders is-desktop">{list}</nav>;
+  return <nav aria-label="Guides" className="guide-nav-folders is-desktop">{list}</nav>;
 }
 
 /* The chapter list, as links — shared between the sticky sidebar (wide
@@ -701,6 +701,7 @@ function GuideReader({ slug, onOpen, onClose }) {
   const mod = guide.module ? MODULE_BY_KEY[guide.module] : null;
   const [compact, setCompact] = useState(window.innerWidth < 1040);
   const [activeId, setActiveId] = useState(null);
+  const articleRef = useRef(null);
 
   useEffect(() => {
     const onResize = () => setCompact(window.innerWidth < 1040);
@@ -711,10 +712,17 @@ function GuideReader({ slug, onOpen, onClose }) {
   /* Which chapter is "active": the one whose heading is nearest the top
      of a band just under the sticky nav, so the sidebar tracks the
      section you're actually reading rather than the one that merely
-     touched the viewport in passing. */
+     touched the viewport in passing.
+     The sections are looked up inside this article, not by bare id:
+     on first load the prerendered copy of the guide (#prerendered, same
+     ids on its headings) is still in the document when this effect
+     runs - App removes it in its own effect, which React runs after
+     ours - so getElementById handed back the prerendered headings, the
+     observer watched nodes that were gone a moment later, and the
+     chapter list never lit up. */
   useEffect(() => {
-    if (!guide.body) return;
-    const els = guide.body.map(s => document.getElementById(s.id)).filter(Boolean);
+    if (!guide.body || !articleRef.current) return;
+    const els = guide.body.map(s => articleRef.current.querySelector('#' + CSS.escape(s.id))).filter(Boolean);
     if (!els.length) return;
     const obs = new IntersectionObserver(entries => {
       const visible = entries.filter(e => e.isIntersecting)
@@ -756,7 +764,7 @@ function GuideReader({ slug, onOpen, onClose }) {
               sidebar (below): capped at READER_MAX with nothing beside
               it, the column would otherwise hug the left rail and leave
               the rest of the row empty on one side. */}
-          <article id={'guide-' + guide.slug} style={{ flex: '1 1 420px', minWidth: 0, maxWidth: READER_MAX, margin: '0 auto', scrollMarginTop: 150 }}>
+          <article ref={articleRef} id={'guide-' + guide.slug} style={{ flex: '1 1 420px', minWidth: 0, maxWidth: READER_MAX, margin: '0 auto', scrollMarginTop: 150 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18, flexWrap: 'wrap' }}>
               <Pill dot>{mod ? mod.tagline : 'Preparation'}</Pill>
               {guide.video && (
@@ -877,7 +885,7 @@ function GuideReader({ slug, onOpen, onClose }) {
           {guide.body && !compact && (
             <nav aria-label="Chapters" className="panel g-toc g-toc-side"
               style={{ flex: '0 0 220px', minWidth: 0, position: 'sticky', top: 92, padding: 12 }}>
-              <span style={{ display: 'block', padding: '6px 10px 10px', fontFamily: MONO, fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: `rgba(${GREEN_RGB},0.6)` }}>
+              <span className="g-toc-over">
                 In this guide
               </span>
               <ChapterNav sections={guide.body} activeId={activeId} />

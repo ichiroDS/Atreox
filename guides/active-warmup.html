@@ -797,6 +797,33 @@
       cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'><g stroke='%2300d9ff' stroke-width='1' opacity='0.9'><line x1='11' y1='0' x2='11' y2='7'/><line x1='11' y1='15' x2='11' y2='22'/><line x1='0' y1='11' x2='7' y2='11'/><line x1='15' y1='11' x2='22' y2='11'/></g><circle cx='11' cy='11' r='1.6' fill='%2300d9ff'/></svg>") 11 11, auto;
     }
 
+    /* ── The site's pointer: a classic tilted arrow in the accent cyan,
+       a 1px near-black keyline so it holds on light screenshots too, and
+       a soft glow edge (two wide translucent strokes under the fill; an
+       SVG filter is not something every browser rasterises for a cursor).
+       Hotspot is the tip. The brighter twin marks anything clickable.
+       The clickable rule carries !important because pointer is set
+       inline all over the JSX (style={{ cursor: 'pointer' }}), and an
+       inline style beats any selector that isn't important; the
+       [style*=...] selectors catch the clickable divs and spans that
+       only say so in that inline style, and an inline default gets the
+       plain arrow back. Disabled buttons are left out, so their
+       not-allowed still shows. ── */
+    :root {
+      --cursor-arrow: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='32' viewBox='0 0 26 32'%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='none' stroke='%2300d9ff' stroke-opacity='0.12' stroke-width='6' stroke-linejoin='round'/%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='none' stroke='%2300d9ff' stroke-opacity='0.26' stroke-width='3.4' stroke-linejoin='round'/%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='%2300d9ff' stroke='%23021015' stroke-width='1'/%3E%3C/svg%3E") 4 3, auto;
+      --cursor-hot: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='32' viewBox='0 0 26 32'%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='none' stroke='%2300d9ff' stroke-opacity='0.24' stroke-width='6' stroke-linejoin='round'/%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='none' stroke='%2300d9ff' stroke-opacity='0.5' stroke-width='3.4' stroke-linejoin='round'/%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='%237de9ff' stroke='%23021015' stroke-width='1'/%3E%3C/svg%3E") 4 3, pointer;
+    }
+    html, body { cursor: var(--cursor-arrow); }
+    [style*="cursor: default"] { cursor: var(--cursor-arrow) !important; }
+    a, button:not(:disabled), [role="button"], [role="tab"], summary, label, select, .btn-like,
+    input[type="checkbox"], input[type="radio"], input[type="submit"], input[type="button"], input[type="range"],
+    [style*="cursor: pointer"], [style*="cursor:pointer"] {
+      cursor: var(--cursor-hot) !important;
+    }
+    input:not([type]), input[type="text"], input[type="email"], input[type="search"], input[type="url"],
+    input[type="tel"], input[type="password"], input[type="number"], textarea { cursor: text; }
+
+
     /* ── Mono overline label:  // SECTION ── */
     .overline {
       font-family: var(--mono);
@@ -1078,19 +1105,9 @@
       }
     }
 
-    /* ── Guides: the tiles drift.
-       The float lives on a wrapper and the hover lift on the card
-       inside it — one element cannot carry both, since a running
-       animation owns `transform` outright. ── */
-    @keyframes guide-float {
-      0%, 100% { transform: translateY(0); }
-      50%      { transform: translateY(-7px); }
-    }
-    .float-wrap {
-      animation: guide-float 6.5s ease-in-out infinite;
-      display: flex;
-    }
-    .float-wrap:hover { animation-play-state: paused; }
+    /* ── Guides: the tiles stand still. The wrapper only keeps the card
+       stretched to its grid cell; the lift on hover is .panel-hover's. ── */
+    .guide-tile-wrap { display: flex; }
     .guide-tile { min-height: 100%; }
     .guide-tile .guide-tile-chip { transition: transform 0.25s cubic-bezier(0.2,0.9,0.3,1), box-shadow 0.25s ease; }
     .guide-tile:hover .guide-tile-chip {
@@ -1098,31 +1115,149 @@
       box-shadow: 0 0 32px rgba(0,217,255,0.28);
     }
 
-    /* guide reader: the rail of every other guide */
-    .guide-nav-folders { min-width: 0; padding: 10px; scrollbar-width: thin; scrollbar-color: rgba(0,217,255,.25) transparent; overscroll-behavior: contain; }
+    /* ══ Guide reader: the rail of every other guide ══════════════
+       The dashboard's Account Manager folders, in the site's cyan: each
+       folder is a drawer (a mono uppercase label on a tinted face with
+       the register ticks every .panel wears) and the open one's list
+       unrolls straight down out of it in the same tint, so trigger and
+       list read as one object with a crease, not a button and a menu.
+       Rows are the sidebar's anatomy: label left, a two-digit index on
+       the right, hairlines between, and the accent bar on the left edge
+       for the guide you are on and the one under the pointer.
+       The rail itself draws no panel: the stacked drawers are the
+       surface. Its padding is room for the ticks and the glow, which
+       the rail's own scroll box would otherwise clip.
+       The `> summary` / `> ul` selectors are the prerendered rail
+       (native <details>, scripts/prerender.mjs), dressed the same. */
+    .guide-nav-folders { min-width: 0; padding: 4px; scrollbar-width: thin; scrollbar-color: rgba(0,217,255,.25) transparent; overscroll-behavior: contain; }
     .guide-nav-folders.is-desktop { flex: 0 0 250px; position: sticky; top: 92px; max-height: calc(100vh - 190px); max-height: calc(100dvh - 190px); overflow-y: auto; }
     .guide-nav-folders.is-compact { margin-top: 8px; max-height: 65vh; max-height: 65dvh; overflow-y: auto; }
     .guide-nav-compact { flex: 1 1 100%; width: 100%; margin-bottom: 14px; }
-    .guide-folder { margin-bottom: 6px; border: 1px solid rgba(0,217,255,.10); border-radius: 7px; overflow: hidden; background: rgba(0,217,255,.025); }
+    .guide-folder { margin-bottom: 8px; counter-reset: guide-row; }
     .guide-folder:last-child { margin-bottom: 0; }
-    .guide-folder.has-active { border-color: rgba(0,217,255,.25); background: rgba(0,217,255,.04); }
-    .guide-folder-toggle, .guide-folder > summary { width: 100%; display: flex; align-items: center; gap: 9px; padding: 12px 10px; border: 0; background: transparent; color: rgba(174,246,255,.8); font-family: 'JetBrains Mono',monospace; font-size: .64rem; font-weight: 500; letter-spacing: .07em; cursor: pointer; text-align: left; }
-    .guide-folder-toggle > span:first-of-type { flex: 1; }
-    .guide-folder-toggle:hover { background: rgba(0,217,255,.06); color: white; }
-    .guide-folder-toggle:focus-visible { outline: 2px solid var(--g); outline-offset: -3px; border-radius: 5px; }
-    .guide-folder-count { font-size: .58rem; color: rgba(174,246,255,.45); }
-    .guide-folder-chevron { transition: transform 220ms ease; flex-shrink: 0; }
-    .guide-folder-toggle[aria-expanded="true"] .guide-folder-chevron { transform: rotate(90deg); }
-    .guide-folder-content { display: grid; grid-template-rows: 0fr; visibility: hidden; transition: grid-template-rows 240ms ease, visibility 240ms; }
+
+    /* the drawer face */
+    .guide-folder-toggle, .guide-folder > summary {
+      position: relative; width: 100%; min-height: 2.6rem;
+      display: flex; align-items: center; gap: 10px; padding: 0 12px 0 13px;
+      border: 1px solid rgba(0,217,255,.3); border-radius: 4px;
+      background: linear-gradient(180deg, rgba(0,217,255,.13), rgba(0,217,255,.05)), var(--panel);
+      color: rgba(0,217,255,.85);
+      font-family: var(--mono); font-size: .64rem; font-weight: 500;
+      letter-spacing: .2em; text-transform: uppercase; text-align: left;
+      list-style: none; cursor: pointer; user-select: none;
+      transition: border-color .2s ease, box-shadow .25s ease, color .2s ease, border-radius .12s ease;
+    }
+    .guide-folder > summary::-webkit-details-marker { display: none; }
+    .guide-folder.has-active > .guide-folder-toggle { border-color: rgba(0,217,255,.45); }
+    .guide-folder-toggle > span:first-of-type { flex: 1; min-width: 0; }
+    /* register ticks: top-left on the face; bottom-right on the face while
+       shut, handed over to the list's foot once it opens */
+    .guide-folder-toggle::before, .guide-folder-toggle::after,
+    .guide-folder > summary::before, .guide-folder > summary::after,
+    .guide-folder-links::after {
+      content: ''; position: absolute; width: 9px; height: 9px;
+      pointer-events: none; opacity: .75;
+      transition: width .2s ease, height .2s ease, opacity .2s ease;
+    }
+    .guide-folder-toggle::before, .guide-folder > summary::before { top: -1px; left: -1px; border-top: 1px solid var(--g); border-left: 1px solid var(--g); }
+    .guide-folder-toggle::after, .guide-folder > summary::after,
+    .guide-folder-links::after { bottom: -1px; right: -1px; border-bottom: 1px solid var(--g); border-right: 1px solid var(--g); }
+    .guide-folder-toggle:hover, .guide-folder > summary:hover {
+      color: #fff; border-color: rgba(0,217,255,.7);
+      box-shadow: 0 0 20px -8px rgba(0,217,255,.55), inset 0 0 14px -8px rgba(0,217,255,.5);
+    }
+    .guide-folder-toggle:hover::before, .guide-folder-toggle:hover::after,
+    .guide-folder > summary:hover::before, .guide-folder > summary:hover::after { width: 14px; height: 14px; opacity: 1; }
+    .guide-folder-toggle:focus-visible, .guide-folder > summary:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(0,217,255,.55); }
+    .guide-folder-toggle[aria-expanded="true"], .guide-folder[open] > summary {
+      color: #fff; border-color: rgba(0,217,255,.7);
+      border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+      background: linear-gradient(180deg, rgba(0,217,255,.22), rgba(0,217,255,.11)), var(--panel);
+      box-shadow: 0 0 26px -10px rgba(0,217,255,.7);
+    }
+    .guide-folder-toggle[aria-expanded="true"]::before, .guide-folder[open] > summary::before { width: 14px; height: 14px; opacity: 1; }
+    .guide-folder-toggle[aria-expanded="true"]::after, .guide-folder[open] > summary::after { opacity: 0; }
+    .guide-folder-count { font-size: .58rem; letter-spacing: .1em; color: rgba(0,217,255,.55); }
+    .guide-folder-toggle[aria-expanded="true"] .guide-folder-count { color: rgba(125,233,255,.8); }
+    .guide-folder-chevron { transition: transform .28s cubic-bezier(.2,.9,.25,1); flex-shrink: 0; opacity: .75; }
+    .guide-folder-toggle[aria-expanded="true"] .guide-folder-chevron { transform: rotate(90deg); opacity: 1; }
+
+    /* the list: the drawer continued. The grid row carries the height,
+       the clip-path the unroll, and one bright hairline sweeps down
+       through it as it opens (the dashboard's scan line). The border
+       lives on the list, not on the grid item, so a shut folder leaves
+       no 2px stub behind. */
+    .guide-folder-content { display: grid; grid-template-rows: 0fr; visibility: hidden; transition: grid-template-rows .28s cubic-bezier(.2,.9,.25,1), visibility .28s; }
     .guide-folder-content.is-open { grid-template-rows: 1fr; visibility: visible; }
     .guide-folder-inner { min-height: 0; overflow: hidden; }
-    .guide-folder-links { list-style: none; padding: 0 6px 7px; margin: 0; }
-    .guide-nav-item { display: block; padding: 9px 10px; border: 1px solid transparent; border-radius: 4px; color: rgba(255,255,255,.62); font-family: Barlow,sans-serif; font-size: .88rem; line-height: 1.3; text-decoration: none; transition: background 150ms,color 150ms; }
-    .guide-nav-item:hover { background: rgba(0,217,255,.07); color: white; }
-    .guide-nav-item[aria-current="page"] { color: var(--g-bright); border-color: rgba(0,217,255,.3); background: rgba(0,217,255,.10); font-weight: 500; }
-    .guide-nav-item:focus-visible { outline: 2px solid var(--g); outline-offset: -2px; }
-    @media (max-width: 1039px) { .guide-nav-item { padding: 12px 10px; font-size: .95rem; } }
-    @media (prefers-reduced-motion: reduce) { .guide-folder-content, .guide-folder-chevron { transition: none; } }
+    .guide-folder-links, .guide-folder > ul {
+      position: relative; list-style: none; margin: 0; padding: 0 !important;
+      border: 1px solid rgba(0,217,255,.7); border-top-color: rgba(0,217,255,.22);
+      border-radius: 0 0 4px 4px;
+      background: linear-gradient(180deg, rgba(0,217,255,.11), rgba(0,217,255,.04) 70%), var(--panel);
+      box-shadow: inset 0 0 22px -14px rgba(0,217,255,.6);
+    }
+    .guide-folder-links { clip-path: inset(0 0 100% 0); transition: clip-path .28s cubic-bezier(.2,.9,.25,1); }
+    .guide-folder-content.is-open .guide-folder-links { clip-path: inset(0 0 0 0); }
+    .guide-folder-links::after { width: 14px; height: 14px; opacity: 1; }
+    .guide-folder-links::before {
+      content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+      z-index: 2; pointer-events: none; opacity: 0;
+      background: linear-gradient(90deg, transparent, rgba(0,217,255,.95) 30%, rgba(0,217,255,.95) 70%, transparent);
+      box-shadow: 0 0 10px rgba(0,217,255,.8);
+    }
+    .guide-folder-content.is-open .guide-folder-links::before { animation: guide-folder-scan .55s cubic-bezier(.3,.7,.3,1) .04s both; }
+    @keyframes guide-folder-scan {
+      0%   { top: 0; opacity: 1; }
+      80%  { opacity: .9; }
+      100% { top: 100%; opacity: 0; }
+    }
+
+    /* a row */
+    .guide-folder-links li + li, .guide-folder > ul li + li { border-top: 1px solid rgba(0,217,255,.14); }
+    .guide-nav-item {
+      position: relative; display: flex; align-items: center; gap: 10px;
+      min-height: 2.6rem; padding: 8px 12px 8px 14px;
+      color: rgba(255,255,255,.66); font-family: var(--sans); font-size: .88rem; line-height: 1.3;
+      text-decoration: none; counter-increment: guide-row;
+      transition: background-color .16s ease, color .16s ease, box-shadow .16s ease, padding-left .2s cubic-bezier(.2,.9,.25,1);
+    }
+    .guide-nav-item::after {
+      content: counter(guide-row, decimal-leading-zero);
+      margin-left: auto; padding-left: 8px; flex-shrink: 0;
+      font-family: var(--mono); font-size: .6rem; font-weight: 500; letter-spacing: .1em; color: var(--g);
+      opacity: .45; transition: opacity .16s ease;
+    }
+    /* hover and the page you are on: the sidebar's active mark (an
+       accent bar on the left edge with a short inner glow) and the
+       label steps in to meet it */
+    .guide-nav-item:hover, .guide-nav-item[aria-current="page"] {
+      color: #fff; background: rgba(0,217,255,.1); padding-left: 16px;
+      box-shadow: inset 2px 0 0 var(--g), inset 18px 0 18px -16px rgba(0,217,255,.7);
+    }
+    .guide-nav-item[aria-current="page"] { color: var(--g-bright); background: rgba(0,217,255,.16); font-weight: 500; }
+    .guide-nav-item:hover::after, .guide-nav-item[aria-current="page"]::after { opacity: .9; }
+    .guide-nav-item:focus-visible { outline: 1px solid var(--g); outline-offset: -2px; }
+    /* rows arrive one after another behind the scan line */
+    .guide-folder-content.is-open .guide-nav-item { animation: guide-folder-row .32s cubic-bezier(.2,.9,.25,1) both; }
+    .guide-folder-links li:nth-child(2) .guide-nav-item { animation-delay: .04s; }
+    .guide-folder-links li:nth-child(3) .guide-nav-item { animation-delay: .08s; }
+    .guide-folder-links li:nth-child(4) .guide-nav-item { animation-delay: .12s; }
+    .guide-folder-links li:nth-child(5) .guide-nav-item { animation-delay: .16s; }
+    .guide-folder-links li:nth-child(n+6) .guide-nav-item { animation-delay: .2s; }
+    @keyframes guide-folder-row {
+      from { opacity: 0; transform: translateX(-6px); }
+      to   { opacity: 1; transform: none; }
+    }
+    @media (max-width: 1039px) { .guide-nav-item { min-height: 2.9rem; font-size: .95rem; } }
+    @media (prefers-reduced-motion: reduce) {
+      .guide-folder-content, .guide-folder-links, .guide-folder-chevron,
+      .guide-folder-toggle, .guide-folder-toggle::before, .guide-folder-toggle::after,
+      .guide-nav-item { transition: none; }
+      .guide-folder-content.is-open .guide-folder-links::before,
+      .guide-folder-content.is-open .guide-nav-item { animation: none; }
+    }
 
     .guide-picker {
       display: flex; align-items: center; gap: 12px;
@@ -1180,29 +1315,65 @@
        stylesheet, so before .g-toc-t existed on every renderer the
        titles fell back to the browser's own link blue on a near-black
        panel, which is the "unreadable" bug this replaced. */
-    .g-toc { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr)); gap: 1px; }
-    .g-toc-side { display: flex; flex-direction: column; gap: 1px; }
-    .g-toc a {
-      display: flex; gap: 11px; align-items: baseline;
-      padding: 9px 11px; border-radius: 4px; text-decoration: none;
-      border: 1px solid transparent;
-      transition: background 0.16s ease, border-color 0.16s ease;
+    /* Dressed in the rail's language: a tinted panel face with register
+       ticks, a mono overline, rows split by hairlines, and the left-edge
+       accent bar on the chapter you are reading and the one under the
+       pointer. The ticks are the panel's own ::before/::after, absolutely
+       placed, so they take no grid cell and every renderer (the reader
+       and the prerendered page alike) gets them without a second class.
+       Every row carries a hairline on top: in the sidebar the first one
+       is the rule under the overline, in the inline grid it is the rule
+       that opens each column. */
+    .g-toc {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr));
+      column-gap: 18px; row-gap: 0;
+      border-color: rgba(0,217,255,.3); border-radius: 4px;
+      background: linear-gradient(180deg, rgba(0,217,255,.1), rgba(0,217,255,.03) 70%), var(--panel);
+      box-shadow: inset 0 0 22px -14px rgba(0,217,255,.55);
     }
-    .g-toc a:hover { background: rgba(0,217,255,0.07); }
-    .g-toc a:focus-visible { outline: 1px solid var(--g); outline-offset: 1px; }
-    .g-toc a[aria-current] { background: rgba(0,217,255,0.1); border-color: var(--g-40); }
+    .g-toc-side { display: flex; flex-direction: column; }
+    .g-toc::before, .g-toc::after {
+      content: ''; position: absolute; width: 9px; height: 9px;
+      pointer-events: none; opacity: .75;
+      transition: width .2s ease, height .2s ease, opacity .2s ease;
+    }
+    .g-toc::before { top: -1px; left: -1px; border-top: 1px solid var(--g); border-left: 1px solid var(--g); }
+    .g-toc::after { bottom: -1px; right: -1px; border-bottom: 1px solid var(--g); border-right: 1px solid var(--g); }
+    .g-toc:hover::before, .g-toc:hover::after { width: 14px; height: 14px; opacity: 1; }
+    .g-toc-over {
+      display: block; padding: 4px 10px 11px;
+      font-family: var(--mono); font-weight: 500; font-size: .6rem;
+      letter-spacing: .22em; text-transform: uppercase; color: rgba(0,217,255,.8);
+    }
+    .g-toc a {
+      position: relative; display: flex; gap: 11px; align-items: baseline;
+      padding: 9px 11px; text-decoration: none;
+      border-top: 1px solid rgba(0,217,255,.14);
+      transition: background-color .16s ease, box-shadow .16s ease, padding-left .2s cubic-bezier(.2,.9,.25,1);
+    }
+    .g-toc a:hover, .g-toc a[aria-current] {
+      background: rgba(0,217,255,.1); padding-left: 13px;
+      box-shadow: inset 2px 0 0 var(--g), inset 18px 0 18px -16px rgba(0,217,255,.7);
+    }
+    .g-toc a[aria-current] { background: rgba(0,217,255,.16); }
+    .g-toc a:focus-visible { outline: 1px solid var(--g); outline-offset: -1px; }
     .g-toc-t {
       font-family: var(--sans); font-weight: 300; font-size: 0.95rem;
       line-height: 1.5; color: rgba(255,255,255,0.82);
       transition: color 0.16s ease;
     }
-    .g-toc a:hover .g-toc-t,
-    .g-toc a[aria-current] .g-toc-t { color: var(--g-bright); }
+    .g-toc a:hover .g-toc-t { color: #fff; }
+    .g-toc a[aria-current] .g-toc-t { color: var(--g-bright); font-weight: 400; }
     .g-toc-n {
       font-family: var(--mono); font-weight: 500; font-size: 0.62rem;
-      color: rgba(0,217,255,0.6); flex-shrink: 0;
+      letter-spacing: .1em; color: rgba(0,217,255,0.6); flex-shrink: 0;
+      transition: color 0.16s ease;
     }
+    .g-toc a:hover .g-toc-n,
     .g-toc a[aria-current] .g-toc-n { color: var(--g-bright); }
+    @media (prefers-reduced-motion: reduce) {
+      .g-toc a, .g-toc::before, .g-toc::after { transition: none; }
+    }
 
     /* the paragraph the whole guide turns on */
     .g-callout {
@@ -2023,7 +2194,7 @@
     @media (prefers-reduced-motion: reduce) {
       .splash-ticks, .splash-sweep, .splash-core, .cursor { animation: none; }
       .cta-breathe, .dots::after,
-      .eg-scan, .eg-dwell, .float-wrap,
+      .eg-scan, .eg-dwell,
       .featured-pulse, .stage-body,
       .btn-glitch, .btn-glitch:hover, .mod-tile:hover .mod-tile-icon { animation: none; }
       .splash-log span { animation: none; opacity: 1; }
@@ -2207,29 +2378,29 @@
 <h2 id="what-it-is" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">01</span>What this module is</h2>
 <p class="g-p">Active Warmup has an account do human-shaped things — read channels, scroll, mark things read, react, join — so that when it eventually starts commenting it has a history behind it instead of nothing. It is the opposite motion to the lockout on the Accounts page: that one says do not work yet, this one says do something human meanwhile.</p>
 <p class="g-p">Enrolling an account supervises it indefinitely, not for one run. It works only inside its schedule window, gets lighter as it matures, and stops when you disable it.</p>
-<div class="g-callout"><p class="g-p">Active Warmup is this module: accounts perform the reading and activity you configure. Supervise in Accounts is separate: it gates Neurocommenting, Neurodialogs and Mass Reactions until seven days after import. The Dashboard Warmup switch is a separate posting-rate ramp. Configure each where it lives; enabling one does not enable the others.</p></div>
+<div class="g-callout"><p class="g-p">Active Warmup is this module: accounts perform the reading and activity you configure. Supervise in Accounts is separate: it gates Neurocommenting, Neurodialogs and Mass Reactions until seven days after import. The Warmup switch on the Neurocommenting page is a separate posting-rate ramp. Configure each where it lives; enabling one does not enable the others.</p></div>
 <h2 id="map" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">02</span>Map of the page</h2>
-<p class="g-p">Nine sections, with a jump-nav across the top in this order.</p>
-<ol class="g-map"><li><span class="g-map-n">01</span><span class="g-map-body"><span class="g-map-name">Control</span><span class="g-map-holds">Running/stopped state, enrollment and activity counts, the per-account status list, and the Enable button.</span></span></li><li><span class="g-map-n">02</span><span class="g-map-body"><span class="g-map-name">Accounts</span><span class="g-map-holds">Which accounts the configuration below applies to when you press Enable. Replaced by a single account when you are editing one already enrolled.</span></span></li><li><span class="g-map-n">03</span><span class="g-map-body"><span class="g-map-name">Intensity</span><span class="g-map-holds">Auto-adapt by account stage, and the manual preset picker it hides.</span></span></li><li><span class="g-map-n">04</span><span class="g-map-body"><span class="g-map-name">Schedule</span><span class="g-map-holds">Activity windows, client timezone, random breaks.</span></span></li><li><span class="g-map-n">05</span><span class="g-map-body"><span class="g-map-name">Limits</span><span class="g-map-holds">Actions per hour and per day, joins per day, messages per day, and progressive increase.</span></span></li><li><span class="g-map-n">06</span><span class="g-map-body"><span class="g-map-name">Actions</span><span class="g-map-holds">Economy mode, and the checklist of twenty individual warmup actions.</span></span></li><li><span class="g-map-n">07</span><span class="g-map-body"><span class="g-map-name">Template</span><span class="g-map-holds">The profile template the Gradual profile updates action re-applies. Optional.</span></span></li><li><span class="g-map-n">08</span><span class="g-map-body"><span class="g-map-name">Targets</span><span class="g-map-holds">Specific channels to read, and whether accounts may touch your own channels.</span></span></li><li><span class="g-map-n">09</span><span class="g-map-body"><span class="g-map-name">Logs</span><span class="g-map-holds">Engine log and the warmup action log.</span></span></li></ol>
+<p class="g-p">Eight sections, with a jump-nav across the top in this order — the same shape as every module page: control and engine logs first, then the pool, then statistics.</p>
+<ol class="g-map"><li><span class="g-map-n">01</span><span class="g-map-body"><span class="g-map-name">Control</span><span class="g-map-holds">Running/stopped state, the Enable button, Stop all, and the engine log underneath, collapsed.</span></span></li><li><span class="g-map-n">02</span><span class="g-map-body"><span class="g-map-name">Warmup Pool</span><span class="g-map-holds">Two panes. Available accounts is the picker the configuration below applies to when you press Enable; Supervised accounts lists every enrolled account with its status, Edit and Disable.</span></span></li><li><span class="g-map-n">03</span><span class="g-map-body"><span class="g-map-name">Statistics</span><span class="g-map-holds">Supervised, Active now, Resting and Outside window.</span></span></li><li><span class="g-map-n">04</span><span class="g-map-body"><span class="g-map-name">Presets</span><span class="g-map-holds">The whole form below saved under a name, and loaded back in one click.</span></span></li><li><span class="g-map-n">05</span><span class="g-map-body"><span class="g-map-name">Schedule</span><span class="g-map-holds">Auto-adapt by account stage, activity windows, client timezone, random breaks.</span></span></li><li><span class="g-map-n">06</span><span class="g-map-body"><span class="g-map-name">Safety limits</span><span class="g-map-holds">The manual preset picker when Auto-adapt is off, actions per hour and per day, joins per day, messages per day, and progressive increase.</span></span></li><li><span class="g-map-n">07</span><span class="g-map-body"><span class="g-map-name">Warmup actions</span><span class="g-map-holds">Economy mode, and the checklist of twenty individual warmup actions.</span></span></li><li><span class="g-map-n">08</span><span class="g-map-body"><span class="g-map-name">Target channels</span><span class="g-map-holds">Specific channels to read, and whether accounts may touch your own channels.</span></span></li></ol>
 <h2 id="control" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">03</span>Control</h2>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
-<details class="g-ctl-item" id="ctl-enable"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn">Enable (12 accounts)</span></span><span class="g-ctl-label"><span class="g-ctl-name">Enable</span><span class="g-ctl-where">Control</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Enrols every account picked in the Accounts section below on the configuration currently shown on this page, and starts supervising them.</dd></div><div><dt>Not a run</dt><dd>There is no start and stop. An enrolled account stays supervised until you disable it — working only inside its schedule window, and more lightly as it ages.</dd></div><div><dt>In edit mode</dt><dd>The same button becomes Save changes and targets only the one account you are editing.</dd></div></dl></details>
-<details class="g-ctl-item" id="ctl-stat-tiles"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-tile"><span class="g-r-tile-n">12</span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Supervised / Active now / Outside window</span><span class="g-ctl-where">Control</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What they count</dt><dd>Supervised is everything enrolled in Active Warmup. Active now is what is working this moment. Outside window is accounts idle because their schedule is closed. This enrollment count is separate from Supervise in Accounts.</dd></div><div><dt>Module state</dt><dd>The module reads as running whenever at least one account is supervised, and stopped when none is.</dd></div></dl></details>
-<details class="g-ctl-item" id="ctl-status-list"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-badge t-plain">Resting (reading-only)</span></span><span class="g-ctl-label"><span class="g-ctl-name">Per-account status list</span><span class="g-ctl-where">Control</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it shows</dt><dd>One badge per enrolled account, in the engine’s own order of precedence: the account’s own status first, then Resting, then Outside window with the time the next one opens, then Maintenance, then Active with the intensity currently in force.</dd></div><div><dt>Per-row actions</dt><dd>Disable removes the account from supervision. Edit loads that account’s own configuration into the form below so you can change one account without touching the rest.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-enable"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-btn">Enable (12 accounts)</span></span><span class="g-ctl-label"><span class="g-ctl-name">Enable</span><span class="g-ctl-where">Control</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Enrols every account ticked in the Warmup Pool on the configuration currently shown on this page, and starts supervising them.</dd></div><div><dt>Not a run</dt><dd>There is no start and stop. An enrolled account stays supervised until you disable it — working only inside its schedule window, and more lightly as it ages.</dd></div><div><dt>In edit mode</dt><dd>The same button becomes Save changes and targets only the one account you are editing.</dd></div><div><dt>Stop all</dt><dd>Beside it while anything is enrolled: disables warmup on every supervised account, after a confirmation.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-stat-tiles"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-tile"><span class="g-r-tile-n">12</span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Supervised / Active now / Resting / Outside window</span><span class="g-ctl-where">Statistics</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What they count</dt><dd>Supervised is everything enrolled in Active Warmup. Active now is what is working this moment. Outside window is accounts idle because their schedule is closed. This enrollment count is separate from Supervise in Accounts.</dd></div><div><dt>Module state</dt><dd>The module reads as running whenever at least one account is supervised, and stopped when none is.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-status-list"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-badge t-plain">Resting (reading-only)</span></span><span class="g-ctl-label"><span class="g-ctl-name">Supervised accounts</span><span class="g-ctl-where">Warmup Pool</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it shows</dt><dd>One badge per enrolled account, in the engine’s own order of precedence: the account’s own status first, then Resting, then Outside window with the time the next one opens, then Maintenance, then Active with the intensity currently in force.</dd></div><div><dt>Per-row actions</dt><dd>Disable removes the account from supervision. Edit loads that account’s own configuration into the form below so you can change one account without touching the rest.</dd></div></dl></details>
 </div>
 <p class="g-p">How many accounts actually run at once is not a setting on this page. The engine leases a fixed number of workers per owner — three by default — so however many accounts are enrolled, only that many are ever connected and acting at the same time. Enrolling a hundred accounts does not put a hundred sessions online.</p>
 <h2 id="intensity" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">04</span>Intensity</h2>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
-<details class="g-ctl-item" id="ctl-auto-adapt"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-toggle is-on"></span></span><span class="g-ctl-label"><span class="g-ctl-name">Auto-adapt by account stage</span><span class="g-ctl-where">Intensity</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Picks the intensity preset from how old the account actually is, and moves it up on its own as it ages: under 7 days Careful, 7 to 30 days Normal, past 30 days Aggressive.</dd></div><div><dt>Default</dt><dd>On.</dd></div><div><dt>Which clock</dt><dd>The account’s real age, counted from when it was added to the pool — not from when you enrolled it here. A 40-day-old account enrolled today starts on Aggressive immediately.</dd></div><div><dt>While it is on</dt><dd>The four numbers in Limits below are not read at all. Caps come from the preset the account’s age selects. Turn this off if you want those numbers to mean anything.</dd></div><div><dt>When to turn it off</dt><dd>When you want one fixed intensity regardless of age — usually because you are deliberately running below what the age band would pick.</dd></div></dl></details>
-<details class="g-ctl-item" id="ctl-preset"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-select"><span class="g-r-select-v">Careful</span><span class="g-r-caret"></span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Preset</span><span class="g-ctl-where">Intensity</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Sets one fixed intensity for the accounts being enrolled.</dd></div><div><dt>Visible when</dt><dd>Only when Auto-adapt is off. With Auto-adapt on the picker is hidden, because it would have no effect.</dd></div><div><dt>Options</dt><dd>Careful, Normal, Aggressive. Maintenance is not selectable — it is a state an account graduates into on its own.</dd></div><div><dt>Default</dt><dd>Careful.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-auto-adapt"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-toggle is-on"></span></span><span class="g-ctl-label"><span class="g-ctl-name">Auto-adapt by account stage</span><span class="g-ctl-where">Schedule, first row</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Picks the intensity preset from how old the account actually is, and moves it up on its own as it ages: under 7 days Careful, 7 to 30 days Normal, past 30 days Aggressive.</dd></div><div><dt>Default</dt><dd>On.</dd></div><div><dt>Which clock</dt><dd>The account’s real age, counted from when it was added to the pool — not from when you enrolled it here. A 40-day-old account enrolled today starts on Aggressive immediately.</dd></div><div><dt>While it is on</dt><dd>The four numbers in Safety limits are not read at all, and the panel greys them out. Caps come from the preset the account’s age selects. Turn this off if you want those numbers to mean anything.</dd></div><div><dt>When to turn it off</dt><dd>When you want one fixed intensity regardless of age — usually because you are deliberately running below what the age band would pick.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-preset"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-select"><span class="g-r-select-v">Careful</span><span class="g-r-caret"></span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Preset</span><span class="g-ctl-where">Safety limits</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Sets one fixed intensity for the accounts being enrolled, and fills the four caps below it.</dd></div><div><dt>Visible when</dt><dd>Only when Auto-adapt is off. With Auto-adapt on the picker is hidden, because it would have no effect.</dd></div><div><dt>Options</dt><dd>Careful, Normal, Aggressive. Maintenance is not selectable — it is a state an account graduates into on its own.</dd></div><div><dt>Default</dt><dd>Careful.</dd></div></dl></details>
 </div>
 <p class="g-p">What each preset is worth, per account:</p>
 <div class="g-tablewrap panel"><table class="g-table"><thead><tr><th scope="col">Preset</th><th scope="col">Actions / hour</th><th scope="col">Actions / day</th><th scope="col">Joins / day</th><th scope="col">Saved Messages / day</th></tr></thead><tbody><tr><td data-label="Preset">Careful</td><td data-label="Actions / hour">3</td><td data-label="Actions / day">10</td><td data-label="Joins / day">1</td><td data-label="Saved Messages / day">2</td></tr><tr><td data-label="Preset">Normal</td><td data-label="Actions / hour">5</td><td data-label="Actions / day">15</td><td data-label="Joins / day">2</td><td data-label="Saved Messages / day">3</td></tr><tr><td data-label="Preset">Aggressive</td><td data-label="Actions / hour">8</td><td data-label="Actions / day">25</td><td data-label="Joins / day">3</td><td data-label="Saved Messages / day">5</td></tr><tr><td data-label="Preset">Maintenance</td><td data-label="Actions / hour">2</td><td data-label="Actions / day">6</td><td data-label="Joins / day">1</td><td data-label="Saved Messages / day">1</td></tr></tbody></table></div>
 <p class="g-p">Maintenance is below Careful on purpose. It is not a starting point anyone picks — it is the ceiling an account settles into once it already has the history this module exists to build.</p>
 <h2 id="schedule" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">05</span>Schedule</h2>
-<p class="g-p">When accounts are allowed to be active. Outside the windows they sit idle; the counts on the Control section show how many are waiting.</p>
+<p class="g-p">When accounts are allowed to be active. Outside the windows they sit idle; the counts in Statistics show how many are waiting.</p>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
 <details class="g-ctl-item" id="ctl-windows"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-field">09:00 — 11:00</span></span><span class="g-ctl-label"><span class="g-ctl-name">Activity windows</span><span class="g-ctl-where">Schedule</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>One or more start/end pairs, in the timezone below. An account may only act inside one of them.</dd></div><div><dt>Default</dt><dd>Two windows: 09:00 to 11:00, and 15:00 to 18:00.</dd></div><div><dt>No windows at all</dt><dd>Removing every window makes the account always eligible — its hourly and daily caps still bound it, but nothing stops it by time of day.</dd></div><div><dt>Crossing midnight</dt><dd>A window whose end is earlier than its start wraps through midnight and works as you would expect. A window whose start and end are identical is skipped entirely.</dd></div></dl></details>
@@ -2237,30 +2408,30 @@
 <details class="g-ctl-item" id="ctl-random-breaks"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-toggle is-on"></span></span><span class="g-ctl-label"><span class="g-ctl-name">Random breaks</span><span class="g-ctl-where">Schedule</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Occasionally stretches the gap between two actions so activity is not evenly spaced.</dd></div><div><dt>How often</dt><dd>A one-in-seven chance per action, and when it fires the gap is multiplied by between two and four.</dd></div><div><dt>Default</dt><dd>On.</dd></div><div><dt>Baseline pacing</dt><dd>Even with this off, the gap is never fixed: it is the hour divided by your actions-per-hour cap, then jittered between 0.6 and 1.4 of that.</dd></div></dl></details>
 </div>
 <h2 id="limits" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">06</span>Safety limits</h2>
-<div class="g-callout"><p class="g-p">These four numbers do nothing while Auto-adapt is on, and Auto-adapt is on by default. The engine reads them only when Auto-adapt is off; otherwise the caps come from the preset the account’s age selects. The panel still shows the fields as editable either way.</p></div>
+<div class="g-callout"><p class="g-p">These four numbers do nothing while Auto-adapt is on, and Auto-adapt is on by default. The engine reads them only when Auto-adapt is off; otherwise the caps come from the preset the account’s age selects. The panel greys them out while it is on.</p></div>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
-<details class="g-ctl-item" id="ctl-actions-hour"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-field">5</span></span><span class="g-ctl-label"><span class="g-ctl-name">Actions / hour</span><span class="g-ctl-where">Limits</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Ceiling on every warmup action this account may take in an hour. Also sets the pace: the gap between actions is one hour divided by this number, jittered.</dd></div><div><dt>Default</dt><dd>5.</dd></div><div><dt>Range</dt><dd>1 to 100.</dd></div><div><dt>At the minimum</dt><dd>One action an hour — about as slow as this module goes without being switched off.</dd></div><div><dt>At the maximum</dt><dd>100 an hour is far above every preset, Aggressive included at 8. Nothing in the engine tempers it for you beyond the daily cap and the shared worker limit.</dd></div></dl></details>
-<details class="g-ctl-item" id="ctl-actions-day"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-field">15</span></span><span class="g-ctl-label"><span class="g-ctl-name">Actions / day</span><span class="g-ctl-where">Limits</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Ceiling on total warmup actions per day for this account. Checked after the hourly cap; once it is spent the account does nothing more that day.</dd></div><div><dt>Default</dt><dd>15.</dd></div><div><dt>Range</dt><dd>1 to 500.</dd></div></dl></details>
-<details class="g-ctl-item" id="ctl-joins-day"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-field">2</span></span><span class="g-ctl-label"><span class="g-ctl-name">Joins / day</span><span class="g-ctl-where">Limits</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Caps one action specifically — Joining groups. Nothing else counts against it.</dd></div><div><dt>Default</dt><dd>2.</dd></div><div><dt>Range</dt><dd>0 to 50.</dd></div><div><dt>At zero</dt><dd>The account never joins anything during warmup, even with the action toggled on.</dd></div></dl></details>
-<details class="g-ctl-item" id="ctl-messages-day"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-field">3</span></span><span class="g-ctl-label"><span class="g-ctl-name">Saved Messages / day</span><span class="g-ctl-where">Limits</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Caps exactly two actions: Saved-messages notes and Forward to Saved Messages. Both write only to the account’s own Saved Messages — nothing here sends a message to another person or chat.</dd></div><div><dt>Default</dt><dd>3.</dd></div><div><dt>Range</dt><dd>0 to 50.</dd></div><div><dt>At zero</dt><dd>Those two actions never fire. Every other action is unaffected.</dd></div></dl></details>
-<details class="g-ctl-item" id="ctl-progressive"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-toggle is-on"></span></span><span class="g-ctl-label"><span class="g-ctl-name">Progressive increase</span><span class="g-ctl-where">Limits</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Ramps whatever caps are in force from 30% on the first day of enrolment to 100% by day seven.</dd></div><div><dt>Default</dt><dd>On.</dd></div><div><dt>Which clock</dt><dd>Counted from when you enrolled the account here — not from the account’s age. An old account enrolled today gets Aggressive caps by age and still ramps into them from 30%.</dd></div><div><dt>Interaction</dt><dd>Applies on top of whichever preset is in force, auto-adapted or fixed. It never raises a cap above 100% of it.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-actions-hour"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-field">5</span></span><span class="g-ctl-label"><span class="g-ctl-name">Actions / hour</span><span class="g-ctl-where">Safety limits</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Ceiling on every warmup action this account may take in an hour. Also sets the pace: the gap between actions is one hour divided by this number, jittered.</dd></div><div><dt>Default</dt><dd>5.</dd></div><div><dt>Range</dt><dd>1 to 100.</dd></div><div><dt>At the minimum</dt><dd>One action an hour — about as slow as this module goes without being switched off.</dd></div><div><dt>At the maximum</dt><dd>100 an hour is far above every preset, Aggressive included at 8. Nothing in the engine tempers it for you beyond the daily cap and the shared worker limit.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-actions-day"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-field">15</span></span><span class="g-ctl-label"><span class="g-ctl-name">Actions / day</span><span class="g-ctl-where">Safety limits</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Ceiling on total warmup actions per day for this account. Checked after the hourly cap; once it is spent the account does nothing more that day.</dd></div><div><dt>Default</dt><dd>15.</dd></div><div><dt>Range</dt><dd>1 to 500.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-joins-day"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-field">2</span></span><span class="g-ctl-label"><span class="g-ctl-name">Joins / day</span><span class="g-ctl-where">Safety limits</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Caps one action specifically — Joining groups. Nothing else counts against it.</dd></div><div><dt>Default</dt><dd>2.</dd></div><div><dt>Range</dt><dd>0 to 50.</dd></div><div><dt>At zero</dt><dd>The account never joins anything during warmup, even with the action toggled on.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-messages-day"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-field">3</span></span><span class="g-ctl-label"><span class="g-ctl-name">Saved Messages / day</span><span class="g-ctl-where">Safety limits</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Caps exactly two actions: Saved-messages notes and Forward to Saved Messages. Both write only to the account’s own Saved Messages — nothing here sends a message to another person or chat.</dd></div><div><dt>Default</dt><dd>3.</dd></div><div><dt>Range</dt><dd>0 to 50.</dd></div><div><dt>At zero</dt><dd>Those two actions never fire. Every other action is unaffected.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-progressive"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-toggle is-on"></span></span><span class="g-ctl-label"><span class="g-ctl-name">Progressive increase</span><span class="g-ctl-where">Safety limits</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Ramps whatever caps are in force from 30% on the first day of enrolment to 100% by day seven.</dd></div><div><dt>Default</dt><dd>On.</dd></div><div><dt>Which clock</dt><dd>Counted from when you enrolled the account here — not from the account’s age. An old account enrolled today gets Aggressive caps by age and still ramps into them from 30%.</dd></div><div><dt>Interaction</dt><dd>Applies on top of whichever preset is in force, auto-adapted or fixed. It never raises a cap above 100% of it.</dd></div></dl></details>
 </div>
 <h2 id="actions" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">07</span>What accounts actually do</h2>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
-<details class="g-ctl-item" id="ctl-economy"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-toggle is-on"></span></span><span class="g-ctl-label"><span class="g-ctl-name">Economy mode</span><span class="g-ctl-where">Actions</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Drops every action marked traffic-heavy, whatever the checklist says. Those are the ones that download real media: View videos, Listen to voice messages, GIF search / inline bots, Sticker packs, Story views.</dd></div><div><dt>Default</dt><dd>On.</dd></div><div><dt>Why</dt><dd>Those actions burn real gigabytes, and mobile proxies are billed by traffic.</dd></div><div><dt>When to turn it off</dt><dd>Only when your proxies are not metered and you want the fuller behavioural picture.</dd></div></dl></details>
-<details class="g-ctl-item" id="ctl-action-checklist"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-toggle is-on"></span></span><span class="g-ctl-label"><span class="g-ctl-name">Action checklist</span><span class="g-ctl-where">Actions</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Twenty individual actions across nine categories, each switched on or off for the accounts being enrolled.</dd></div><div><dt>Default</dt><dd>Reading only. A newly enrolled account has View dialogs, Scroll channel, Mark as read and Search messages on, and the other sixteen off.</dd></div><div><dt>Three hard gates</dt><dd>Reactions, Story views and Joining groups need the account to be at least 3 days old. Economy mode removes the traffic-heavy ones. Gradual profile updates stays off until a template is selected — with nothing to apply it would do nothing every time it ran.</dd></div><div><dt>One more gate</dt><dd>An account with no target channels of its own depends on the shared pool from Channel Parser. While that pool has fewer than 20 channels, the account is collapsed to View dialogs — the one action needing no channel — rather than failing everything else for want of a target.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-economy"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-toggle is-on"></span></span><span class="g-ctl-label"><span class="g-ctl-name">Economy mode</span><span class="g-ctl-where">Warmup actions</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Drops every action marked traffic-heavy, whatever the checklist says. Those are the ones that download real media: View videos, Listen to voice messages, GIF search / inline bots, Sticker packs, Story views.</dd></div><div><dt>Default</dt><dd>On.</dd></div><div><dt>Why</dt><dd>Those actions burn real gigabytes, and mobile proxies are billed by traffic.</dd></div><div><dt>When to turn it off</dt><dd>Only when your proxies are not metered and you want the fuller behavioural picture.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-action-checklist"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-toggle is-on"></span></span><span class="g-ctl-label"><span class="g-ctl-name">Action checklist</span><span class="g-ctl-where">Warmup actions</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Twenty individual actions across nine categories, each switched on or off for the accounts being enrolled.</dd></div><div><dt>Default</dt><dd>Reading only. A newly enrolled account has View dialogs, Scroll channel, Mark as read and Search messages on, and the other sixteen off.</dd></div><div><dt>Two hard gates</dt><dd>Reactions, Story views and Joining groups need the account to be at least 3 days old. Economy mode removes the traffic-heavy ones.</dd></div><div><dt>One more gate</dt><dd>An account with no target channels of its own depends on the shared pool from Channel Parser. While that pool has fewer than 20 channels, the account is collapsed to View dialogs — the one action needing no channel — rather than failing everything else for want of a target.</dd></div></dl></details>
 </div>
 <p class="g-p">The full list, with what forces each one off:</p>
-<div class="g-tablewrap panel"><table class="g-table"><thead><tr><th scope="col">Action</th><th scope="col">Category</th><th scope="col">On for a new account</th><th scope="col">Gated by</th></tr></thead><tbody><tr><td data-label="Action">View dialogs</td><td data-label="Category">Reading</td><td data-label="On for a new account">Yes</td><td data-label="Gated by">—</td></tr><tr><td data-label="Action">Scroll channel</td><td data-label="Category">Reading</td><td data-label="On for a new account">Yes</td><td data-label="Gated by">—</td></tr><tr><td data-label="Action">Mark as read</td><td data-label="Category">Reading</td><td data-label="On for a new account">Yes</td><td data-label="Gated by">—</td></tr><tr><td data-label="Action">Search messages</td><td data-label="Category">Reading</td><td data-label="On for a new account">Yes</td><td data-label="Gated by">—</td></tr><tr><td data-label="Action">Vote in polls</td><td data-label="Category">Activity</td><td data-label="On for a new account">No</td><td data-label="Gated by">—</td></tr><tr><td data-label="Action">View videos</td><td data-label="Category">Activity</td><td data-label="On for a new account">No</td><td data-label="Gated by">Economy mode</td></tr><tr><td data-label="Action">Listen to voice messages</td><td data-label="Category">Activity</td><td data-label="On for a new account">No</td><td data-label="Gated by">Economy mode</td></tr><tr><td data-label="Action">GIF search / inline bots</td><td data-label="Category">Entertainment</td><td data-label="On for a new account">No</td><td data-label="Gated by">Economy mode</td></tr><tr><td data-label="Action">Sticker packs</td><td data-label="Category">Entertainment</td><td data-label="On for a new account">No</td><td data-label="Gated by">Economy mode</td></tr><tr><td data-label="Action">Forward to Saved Messages</td><td data-label="Category">Social</td><td data-label="On for a new account">No</td><td data-label="Gated by">Saved Messages / day</td></tr><tr><td data-label="Action">Saved-messages notes</td><td data-label="Category">Social</td><td data-label="On for a new account">No</td><td data-label="Gated by">Saved Messages / day</td></tr><tr><td data-label="Action">Archive chats</td><td data-label="Category">Groups</td><td data-label="On for a new account">No</td><td data-label="Gated by">—</td></tr><tr><td data-label="Action">Mute chats / notification settings</td><td data-label="Category">Groups</td><td data-label="On for a new account">No</td><td data-label="Gated by">—</td></tr><tr><td data-label="Action">View profiles</td><td data-label="Category">Profile</td><td data-label="On for a new account">No</td><td data-label="Gated by">—</td></tr><tr><td data-label="Action">Check settings</td><td data-label="Category">Profile</td><td data-label="On for a new account">No</td><td data-label="Gated by">—</td></tr><tr><td data-label="Action">Gradual profile updates</td><td data-label="Category">Profile</td><td data-label="On for a new account">No</td><td data-label="Gated by">Needs a template</td></tr><tr><td data-label="Action">Drafts</td><td data-label="Category">Profile</td><td data-label="On for a new account">No</td><td data-label="Gated by">—</td></tr><tr><td data-label="Action">Reactions</td><td data-label="Category">Reactions</td><td data-label="On for a new account">No</td><td data-label="Gated by">3+ days old</td></tr><tr><td data-label="Action">Story views</td><td data-label="Category">Stories</td><td data-label="On for a new account">No</td><td data-label="Gated by">3+ days old, Economy mode</td></tr><tr><td data-label="Action">Joining groups</td><td data-label="Category">Joins</td><td data-label="On for a new account">No</td><td data-label="Gated by">3+ days old, Joins / day</td></tr></tbody></table></div>
+<div class="g-tablewrap panel"><table class="g-table"><thead><tr><th scope="col">Action</th><th scope="col">Category</th><th scope="col">On for a new account</th><th scope="col">Gated by</th></tr></thead><tbody><tr><td data-label="Action">View dialogs</td><td data-label="Category">Reading</td><td data-label="On for a new account">Yes</td><td data-label="Gated by">—</td></tr><tr><td data-label="Action">Scroll channel</td><td data-label="Category">Reading</td><td data-label="On for a new account">Yes</td><td data-label="Gated by">—</td></tr><tr><td data-label="Action">Mark as read</td><td data-label="Category">Reading</td><td data-label="On for a new account">Yes</td><td data-label="Gated by">—</td></tr><tr><td data-label="Action">Search messages</td><td data-label="Category">Reading</td><td data-label="On for a new account">Yes</td><td data-label="Gated by">—</td></tr><tr><td data-label="Action">Vote in polls</td><td data-label="Category">Activity</td><td data-label="On for a new account">No</td><td data-label="Gated by">—</td></tr><tr><td data-label="Action">View videos</td><td data-label="Category">Activity</td><td data-label="On for a new account">No</td><td data-label="Gated by">Economy mode</td></tr><tr><td data-label="Action">Listen to voice messages</td><td data-label="Category">Activity</td><td data-label="On for a new account">No</td><td data-label="Gated by">Economy mode</td></tr><tr><td data-label="Action">GIF search / inline bots</td><td data-label="Category">Entertainment</td><td data-label="On for a new account">No</td><td data-label="Gated by">Economy mode</td></tr><tr><td data-label="Action">Sticker packs</td><td data-label="Category">Entertainment</td><td data-label="On for a new account">No</td><td data-label="Gated by">Economy mode</td></tr><tr><td data-label="Action">Forward to Saved Messages</td><td data-label="Category">Social</td><td data-label="On for a new account">No</td><td data-label="Gated by">Saved Messages / day</td></tr><tr><td data-label="Action">Saved-messages notes</td><td data-label="Category">Social</td><td data-label="On for a new account">No</td><td data-label="Gated by">Saved Messages / day</td></tr><tr><td data-label="Action">Archive chats</td><td data-label="Category">Groups</td><td data-label="On for a new account">No</td><td data-label="Gated by">—</td></tr><tr><td data-label="Action">Mute chats / notification settings</td><td data-label="Category">Groups</td><td data-label="On for a new account">No</td><td data-label="Gated by">—</td></tr><tr><td data-label="Action">View profiles</td><td data-label="Category">Profile</td><td data-label="On for a new account">No</td><td data-label="Gated by">—</td></tr><tr><td data-label="Action">Check settings</td><td data-label="Category">Profile</td><td data-label="On for a new account">No</td><td data-label="Gated by">—</td></tr><tr><td data-label="Action">Reapply account's template</td><td data-label="Category">Profile</td><td data-label="On for a new account">No</td><td data-label="Gated by">Does nothing without a template</td></tr><tr><td data-label="Action">Drafts</td><td data-label="Category">Profile</td><td data-label="On for a new account">No</td><td data-label="Gated by">—</td></tr><tr><td data-label="Action">Reactions</td><td data-label="Category">Reactions</td><td data-label="On for a new account">No</td><td data-label="Gated by">3+ days old</td></tr><tr><td data-label="Action">Story views</td><td data-label="Category">Stories</td><td data-label="On for a new account">No</td><td data-label="Gated by">3+ days old, Economy mode</td></tr><tr><td data-label="Action">Joining groups</td><td data-label="Category">Joins</td><td data-label="On for a new account">No</td><td data-label="Gated by">3+ days old, Joins / day</td></tr></tbody></table></div>
 <p class="g-p">Accounts never message each other. There is no action for it and it is excluded deliberately — a closed circle of accounts that only ever talk among themselves maps the whole network the moment one of them is examined.</p>
 <h2 id="targets-and-template" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">08</span>Template and targets</h2>
+<p class="g-p">There is no template picker on this page. The Reapply account's template action uses each account's own assigned template — the one Apply template gave it — through the same pipeline and pacing; on an account that never had one, it does nothing.</p>
 <div class="g-ctl">
 <p class="g-ctl-warn"><span class="g-ctl-warn-badge">Illustration</span><span class="g-ctl-warn-text">Not the live panel — nothing here is connected: no state, no saving, no requests. Click a control to read what it does.</span></p>
-<details class="g-ctl-item" id="ctl-template"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-select"><span class="g-r-select-v">No template</span><span class="g-r-caret"></span></span></span><span class="g-ctl-label"><span class="g-ctl-name">Profile template</span><span class="g-ctl-where">Template</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Chooses the template the Gradual profile updates action re-applies, through the same pipeline and pacing the Profile Templates page uses.</dd></div><div><dt>Default</dt><dd>No template.</dd></div><div><dt>If you have none</dt><dd>The picker is replaced by a link to the Profile Templates page, and the action stays blocked in the checklist.</dd></div><div><dt>When to set it</dt><dd>Only if you want accounts touching their profiles during warmup. It is optional and off by default.</dd></div></dl></details>
-<details class="g-ctl-item" id="ctl-target-channels"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-field">@channel_one, @channel_two</span></span><span class="g-ctl-label"><span class="g-ctl-name">Target channels</span><span class="g-ctl-where">Targets</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>A specific list of channels for these accounts to read and join, comma or newline separated.</dd></div><div><dt>Default</dt><dd>Empty.</dd></div><div><dt>If left empty</dt><dd>The account reads random channels from the pool Channel Parser has discovered. An account with its own list is unaffected by the state of that pool.</dd></div><div><dt>When to set it</dt><dd>When you want accounts building history in a particular niche rather than whatever discovery happens to have found.</dd></div></dl></details>
-<details class="g-ctl-item" id="ctl-own-channels"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-toggle"></span></span><span class="g-ctl-label"><span class="g-ctl-name">Allow reading/joining my own channels</span><span class="g-ctl-where">Targets</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Lets warmup accounts read and join channels you own.</dd></div><div><dt>Default</dt><dd>Off.</dd></div><div><dt>Why off</dt><dd>A fresh account whose entire reading history is your own channels is a giveaway. The panel warns about this when you switch it on.</dd></div><div><dt>When to turn it on</dt><dd>Once accounts are past their early warmup stage — not before.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-target-channels"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-field">@channel_one, @channel_two</span></span><span class="g-ctl-label"><span class="g-ctl-name">Target channels</span><span class="g-ctl-where">Target channels</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>A specific list of channels for these accounts to read and join, comma or newline separated.</dd></div><div><dt>Default</dt><dd>Empty.</dd></div><div><dt>If left empty</dt><dd>The account reads random channels from the pool Channel Parser has discovered. An account with its own list is unaffected by the state of that pool.</dd></div><div><dt>When to set it</dt><dd>When you want accounts building history in a particular niche rather than whatever discovery happens to have found.</dd></div></dl></details>
+<details class="g-ctl-item" id="ctl-own-channels"><summary><span class="g-ctl-stage"><span aria-hidden="true" class="g-r-toggle"></span></span><span class="g-ctl-label"><span class="g-ctl-name">Allow reading/joining my own channels</span><span class="g-ctl-where">Target channels</span></span><span class="g-ctl-plus" aria-hidden="true"></span></summary><dl class="g-ctl-rows"><div><dt>What it does</dt><dd>Lets warmup accounts read and join channels you own.</dd></div><div><dt>Default</dt><dd>Off.</dd></div><div><dt>Why off</dt><dd>A fresh account whose entire reading history is your own channels is a giveaway. The panel warns about this when you switch it on.</dd></div><div><dt>When to turn it on</dt><dd>Once accounts are past their early warmup stage — not before.</dd></div></dl></details>
 </div>
 <h2 id="floors" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">09</span>Limits that still apply</h2>
 <p class="g-p">Your schedule and intensity settings work alongside action-specific age checks and the maintenance ceiling. These are enforced in the engine.</p>
@@ -2269,9 +2440,9 @@
 <p class="g-p">Every action an account takes is written to the warmup log with its outcome, kept for 30 days, so what an account was doing in the week before it froze is still answerable afterwards.</p>
 <h2 id="first-run" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border-radius:3px;border:1px solid rgba(0,217,255,0.32);background:rgba(0,217,255,0.07);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.58rem;color:#00d9ff;margin-right:11px;vertical-align:middle">10</span>First run</h2>
 <p class="g-p">The defaults are already the conservative configuration. For a fresh batch, most of this page is worth leaving alone.</p>
-<ol class="g-steps"><li><p class="g-p">Pick the accounts in the Accounts section. Start with a handful rather than the whole pool — only three ever run at once anyway, so a small first group tells you what a large one will do.</p></li><li><p class="g-p">Leave Auto-adapt on. It will put fresh accounts on Careful and move them up as they age, which is what you want and means the four numbers under Limits need no attention.</p></li><li><p class="g-p">Set the timezone under Schedule to match where the accounts are supposed to be from, and adjust the two default windows if those hours do not suit that region.</p></li><li><p class="g-p">Leave the action checklist on its Reading-only default, Economy mode on, and own channels off.</p></li><li><p class="g-p">Press Enable. The accounts are supervised from that moment, inside their windows, ramping from 30% of their caps to full over the first week.</p></li></ol>
-<p class="g-p">Watch the Control section day to day: Outside window means the schedule is closed, and Active with an intensity beside it means the account is working.</p>
-<p class="g-note">Stop Active Warmup from the status list on this page. Changing Supervise in Accounts changes only the outreach rest gate; it does not change enrollment in this module.</p>
+<ol class="g-steps"><li><p class="g-p">Tick the accounts in the Warmup Pool. Start with a handful rather than the whole pool — only three ever run at once anyway, so a small first group tells you what a large one will do.</p></li><li><p class="g-p">Leave Auto-adapt on. It will put fresh accounts on Careful and move them up as they age, which is what you want and means the four numbers under Limits need no attention.</p></li><li><p class="g-p">Set the timezone under Schedule to match where the accounts are supposed to be from, and adjust the two default windows if those hours do not suit that region.</p></li><li><p class="g-p">Leave the action checklist on its Reading-only default, Economy mode on, and own channels off.</p></li><li><p class="g-p">Press Enable. The accounts are supervised from that moment, inside their windows, ramping from 30% of their caps to full over the first week.</p></li></ol>
+<p class="g-p">Watch the Supervised accounts pane day to day: Outside window means the schedule is closed, and Active with an intensity beside it means the account is working.</p>
+<p class="g-note">Stop Active Warmup per account with Disable in the Warmup Pool, or for everyone with Stop all. Changing Supervise in Accounts changes only the outreach rest gate; it does not change enrollment in this module.</p>
 <a href="/guides/channel-parser" class="quiet-link" style="margin-bottom:16px">Next: find channels worth commenting in →</a>
 </article>
 <nav aria-label="Site" style="margin-top:56px;padding-top:22px;border-top:1px solid rgba(255,255,255,0.10)">

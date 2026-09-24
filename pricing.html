@@ -796,6 +796,33 @@
       cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'><g stroke='%2300d9ff' stroke-width='1' opacity='0.9'><line x1='11' y1='0' x2='11' y2='7'/><line x1='11' y1='15' x2='11' y2='22'/><line x1='0' y1='11' x2='7' y2='11'/><line x1='15' y1='11' x2='22' y2='11'/></g><circle cx='11' cy='11' r='1.6' fill='%2300d9ff'/></svg>") 11 11, auto;
     }
 
+    /* ── The site's pointer: a classic tilted arrow in the accent cyan,
+       a 1px near-black keyline so it holds on light screenshots too, and
+       a soft glow edge (two wide translucent strokes under the fill; an
+       SVG filter is not something every browser rasterises for a cursor).
+       Hotspot is the tip. The brighter twin marks anything clickable.
+       The clickable rule carries !important because pointer is set
+       inline all over the JSX (style={{ cursor: 'pointer' }}), and an
+       inline style beats any selector that isn't important; the
+       [style*=...] selectors catch the clickable divs and spans that
+       only say so in that inline style, and an inline default gets the
+       plain arrow back. Disabled buttons are left out, so their
+       not-allowed still shows. ── */
+    :root {
+      --cursor-arrow: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='32' viewBox='0 0 26 32'%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='none' stroke='%2300d9ff' stroke-opacity='0.12' stroke-width='6' stroke-linejoin='round'/%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='none' stroke='%2300d9ff' stroke-opacity='0.26' stroke-width='3.4' stroke-linejoin='round'/%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='%2300d9ff' stroke='%23021015' stroke-width='1'/%3E%3C/svg%3E") 4 3, auto;
+      --cursor-hot: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='32' viewBox='0 0 26 32'%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='none' stroke='%2300d9ff' stroke-opacity='0.24' stroke-width='6' stroke-linejoin='round'/%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='none' stroke='%2300d9ff' stroke-opacity='0.5' stroke-width='3.4' stroke-linejoin='round'/%3E%3Cpath d='M4 3 L4 25.4 L9.6 19.8 L13.8 28.3 L17.3 26.9 L13.4 18.2 L20.8 18.2 Z' fill='%237de9ff' stroke='%23021015' stroke-width='1'/%3E%3C/svg%3E") 4 3, pointer;
+    }
+    html, body { cursor: var(--cursor-arrow); }
+    [style*="cursor: default"] { cursor: var(--cursor-arrow) !important; }
+    a, button:not(:disabled), [role="button"], [role="tab"], summary, label, select, .btn-like,
+    input[type="checkbox"], input[type="radio"], input[type="submit"], input[type="button"], input[type="range"],
+    [style*="cursor: pointer"], [style*="cursor:pointer"] {
+      cursor: var(--cursor-hot) !important;
+    }
+    input:not([type]), input[type="text"], input[type="email"], input[type="search"], input[type="url"],
+    input[type="tel"], input[type="password"], input[type="number"], textarea { cursor: text; }
+
+
     /* ── Mono overline label:  // SECTION ── */
     .overline {
       font-family: var(--mono);
@@ -1077,19 +1104,9 @@
       }
     }
 
-    /* ── Guides: the tiles drift.
-       The float lives on a wrapper and the hover lift on the card
-       inside it — one element cannot carry both, since a running
-       animation owns `transform` outright. ── */
-    @keyframes guide-float {
-      0%, 100% { transform: translateY(0); }
-      50%      { transform: translateY(-7px); }
-    }
-    .float-wrap {
-      animation: guide-float 6.5s ease-in-out infinite;
-      display: flex;
-    }
-    .float-wrap:hover { animation-play-state: paused; }
+    /* ── Guides: the tiles stand still. The wrapper only keeps the card
+       stretched to its grid cell; the lift on hover is .panel-hover's. ── */
+    .guide-tile-wrap { display: flex; }
     .guide-tile { min-height: 100%; }
     .guide-tile .guide-tile-chip { transition: transform 0.25s cubic-bezier(0.2,0.9,0.3,1), box-shadow 0.25s ease; }
     .guide-tile:hover .guide-tile-chip {
@@ -1097,31 +1114,149 @@
       box-shadow: 0 0 32px rgba(0,217,255,0.28);
     }
 
-    /* guide reader: the rail of every other guide */
-    .guide-nav-folders { min-width: 0; padding: 10px; scrollbar-width: thin; scrollbar-color: rgba(0,217,255,.25) transparent; overscroll-behavior: contain; }
+    /* ══ Guide reader: the rail of every other guide ══════════════
+       The dashboard's Account Manager folders, in the site's cyan: each
+       folder is a drawer (a mono uppercase label on a tinted face with
+       the register ticks every .panel wears) and the open one's list
+       unrolls straight down out of it in the same tint, so trigger and
+       list read as one object with a crease, not a button and a menu.
+       Rows are the sidebar's anatomy: label left, a two-digit index on
+       the right, hairlines between, and the accent bar on the left edge
+       for the guide you are on and the one under the pointer.
+       The rail itself draws no panel: the stacked drawers are the
+       surface. Its padding is room for the ticks and the glow, which
+       the rail's own scroll box would otherwise clip.
+       The `> summary` / `> ul` selectors are the prerendered rail
+       (native <details>, scripts/prerender.mjs), dressed the same. */
+    .guide-nav-folders { min-width: 0; padding: 4px; scrollbar-width: thin; scrollbar-color: rgba(0,217,255,.25) transparent; overscroll-behavior: contain; }
     .guide-nav-folders.is-desktop { flex: 0 0 250px; position: sticky; top: 92px; max-height: calc(100vh - 190px); max-height: calc(100dvh - 190px); overflow-y: auto; }
     .guide-nav-folders.is-compact { margin-top: 8px; max-height: 65vh; max-height: 65dvh; overflow-y: auto; }
     .guide-nav-compact { flex: 1 1 100%; width: 100%; margin-bottom: 14px; }
-    .guide-folder { margin-bottom: 6px; border: 1px solid rgba(0,217,255,.10); border-radius: 7px; overflow: hidden; background: rgba(0,217,255,.025); }
+    .guide-folder { margin-bottom: 8px; counter-reset: guide-row; }
     .guide-folder:last-child { margin-bottom: 0; }
-    .guide-folder.has-active { border-color: rgba(0,217,255,.25); background: rgba(0,217,255,.04); }
-    .guide-folder-toggle, .guide-folder > summary { width: 100%; display: flex; align-items: center; gap: 9px; padding: 12px 10px; border: 0; background: transparent; color: rgba(174,246,255,.8); font-family: 'JetBrains Mono',monospace; font-size: .64rem; font-weight: 500; letter-spacing: .07em; cursor: pointer; text-align: left; }
-    .guide-folder-toggle > span:first-of-type { flex: 1; }
-    .guide-folder-toggle:hover { background: rgba(0,217,255,.06); color: white; }
-    .guide-folder-toggle:focus-visible { outline: 2px solid var(--g); outline-offset: -3px; border-radius: 5px; }
-    .guide-folder-count { font-size: .58rem; color: rgba(174,246,255,.45); }
-    .guide-folder-chevron { transition: transform 220ms ease; flex-shrink: 0; }
-    .guide-folder-toggle[aria-expanded="true"] .guide-folder-chevron { transform: rotate(90deg); }
-    .guide-folder-content { display: grid; grid-template-rows: 0fr; visibility: hidden; transition: grid-template-rows 240ms ease, visibility 240ms; }
+
+    /* the drawer face */
+    .guide-folder-toggle, .guide-folder > summary {
+      position: relative; width: 100%; min-height: 2.6rem;
+      display: flex; align-items: center; gap: 10px; padding: 0 12px 0 13px;
+      border: 1px solid rgba(0,217,255,.3); border-radius: 4px;
+      background: linear-gradient(180deg, rgba(0,217,255,.13), rgba(0,217,255,.05)), var(--panel);
+      color: rgba(0,217,255,.85);
+      font-family: var(--mono); font-size: .64rem; font-weight: 500;
+      letter-spacing: .2em; text-transform: uppercase; text-align: left;
+      list-style: none; cursor: pointer; user-select: none;
+      transition: border-color .2s ease, box-shadow .25s ease, color .2s ease, border-radius .12s ease;
+    }
+    .guide-folder > summary::-webkit-details-marker { display: none; }
+    .guide-folder.has-active > .guide-folder-toggle { border-color: rgba(0,217,255,.45); }
+    .guide-folder-toggle > span:first-of-type { flex: 1; min-width: 0; }
+    /* register ticks: top-left on the face; bottom-right on the face while
+       shut, handed over to the list's foot once it opens */
+    .guide-folder-toggle::before, .guide-folder-toggle::after,
+    .guide-folder > summary::before, .guide-folder > summary::after,
+    .guide-folder-links::after {
+      content: ''; position: absolute; width: 9px; height: 9px;
+      pointer-events: none; opacity: .75;
+      transition: width .2s ease, height .2s ease, opacity .2s ease;
+    }
+    .guide-folder-toggle::before, .guide-folder > summary::before { top: -1px; left: -1px; border-top: 1px solid var(--g); border-left: 1px solid var(--g); }
+    .guide-folder-toggle::after, .guide-folder > summary::after,
+    .guide-folder-links::after { bottom: -1px; right: -1px; border-bottom: 1px solid var(--g); border-right: 1px solid var(--g); }
+    .guide-folder-toggle:hover, .guide-folder > summary:hover {
+      color: #fff; border-color: rgba(0,217,255,.7);
+      box-shadow: 0 0 20px -8px rgba(0,217,255,.55), inset 0 0 14px -8px rgba(0,217,255,.5);
+    }
+    .guide-folder-toggle:hover::before, .guide-folder-toggle:hover::after,
+    .guide-folder > summary:hover::before, .guide-folder > summary:hover::after { width: 14px; height: 14px; opacity: 1; }
+    .guide-folder-toggle:focus-visible, .guide-folder > summary:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(0,217,255,.55); }
+    .guide-folder-toggle[aria-expanded="true"], .guide-folder[open] > summary {
+      color: #fff; border-color: rgba(0,217,255,.7);
+      border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+      background: linear-gradient(180deg, rgba(0,217,255,.22), rgba(0,217,255,.11)), var(--panel);
+      box-shadow: 0 0 26px -10px rgba(0,217,255,.7);
+    }
+    .guide-folder-toggle[aria-expanded="true"]::before, .guide-folder[open] > summary::before { width: 14px; height: 14px; opacity: 1; }
+    .guide-folder-toggle[aria-expanded="true"]::after, .guide-folder[open] > summary::after { opacity: 0; }
+    .guide-folder-count { font-size: .58rem; letter-spacing: .1em; color: rgba(0,217,255,.55); }
+    .guide-folder-toggle[aria-expanded="true"] .guide-folder-count { color: rgba(125,233,255,.8); }
+    .guide-folder-chevron { transition: transform .28s cubic-bezier(.2,.9,.25,1); flex-shrink: 0; opacity: .75; }
+    .guide-folder-toggle[aria-expanded="true"] .guide-folder-chevron { transform: rotate(90deg); opacity: 1; }
+
+    /* the list: the drawer continued. The grid row carries the height,
+       the clip-path the unroll, and one bright hairline sweeps down
+       through it as it opens (the dashboard's scan line). The border
+       lives on the list, not on the grid item, so a shut folder leaves
+       no 2px stub behind. */
+    .guide-folder-content { display: grid; grid-template-rows: 0fr; visibility: hidden; transition: grid-template-rows .28s cubic-bezier(.2,.9,.25,1), visibility .28s; }
     .guide-folder-content.is-open { grid-template-rows: 1fr; visibility: visible; }
     .guide-folder-inner { min-height: 0; overflow: hidden; }
-    .guide-folder-links { list-style: none; padding: 0 6px 7px; margin: 0; }
-    .guide-nav-item { display: block; padding: 9px 10px; border: 1px solid transparent; border-radius: 4px; color: rgba(255,255,255,.62); font-family: Barlow,sans-serif; font-size: .88rem; line-height: 1.3; text-decoration: none; transition: background 150ms,color 150ms; }
-    .guide-nav-item:hover { background: rgba(0,217,255,.07); color: white; }
-    .guide-nav-item[aria-current="page"] { color: var(--g-bright); border-color: rgba(0,217,255,.3); background: rgba(0,217,255,.10); font-weight: 500; }
-    .guide-nav-item:focus-visible { outline: 2px solid var(--g); outline-offset: -2px; }
-    @media (max-width: 1039px) { .guide-nav-item { padding: 12px 10px; font-size: .95rem; } }
-    @media (prefers-reduced-motion: reduce) { .guide-folder-content, .guide-folder-chevron { transition: none; } }
+    .guide-folder-links, .guide-folder > ul {
+      position: relative; list-style: none; margin: 0; padding: 0 !important;
+      border: 1px solid rgba(0,217,255,.7); border-top-color: rgba(0,217,255,.22);
+      border-radius: 0 0 4px 4px;
+      background: linear-gradient(180deg, rgba(0,217,255,.11), rgba(0,217,255,.04) 70%), var(--panel);
+      box-shadow: inset 0 0 22px -14px rgba(0,217,255,.6);
+    }
+    .guide-folder-links { clip-path: inset(0 0 100% 0); transition: clip-path .28s cubic-bezier(.2,.9,.25,1); }
+    .guide-folder-content.is-open .guide-folder-links { clip-path: inset(0 0 0 0); }
+    .guide-folder-links::after { width: 14px; height: 14px; opacity: 1; }
+    .guide-folder-links::before {
+      content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+      z-index: 2; pointer-events: none; opacity: 0;
+      background: linear-gradient(90deg, transparent, rgba(0,217,255,.95) 30%, rgba(0,217,255,.95) 70%, transparent);
+      box-shadow: 0 0 10px rgba(0,217,255,.8);
+    }
+    .guide-folder-content.is-open .guide-folder-links::before { animation: guide-folder-scan .55s cubic-bezier(.3,.7,.3,1) .04s both; }
+    @keyframes guide-folder-scan {
+      0%   { top: 0; opacity: 1; }
+      80%  { opacity: .9; }
+      100% { top: 100%; opacity: 0; }
+    }
+
+    /* a row */
+    .guide-folder-links li + li, .guide-folder > ul li + li { border-top: 1px solid rgba(0,217,255,.14); }
+    .guide-nav-item {
+      position: relative; display: flex; align-items: center; gap: 10px;
+      min-height: 2.6rem; padding: 8px 12px 8px 14px;
+      color: rgba(255,255,255,.66); font-family: var(--sans); font-size: .88rem; line-height: 1.3;
+      text-decoration: none; counter-increment: guide-row;
+      transition: background-color .16s ease, color .16s ease, box-shadow .16s ease, padding-left .2s cubic-bezier(.2,.9,.25,1);
+    }
+    .guide-nav-item::after {
+      content: counter(guide-row, decimal-leading-zero);
+      margin-left: auto; padding-left: 8px; flex-shrink: 0;
+      font-family: var(--mono); font-size: .6rem; font-weight: 500; letter-spacing: .1em; color: var(--g);
+      opacity: .45; transition: opacity .16s ease;
+    }
+    /* hover and the page you are on: the sidebar's active mark (an
+       accent bar on the left edge with a short inner glow) and the
+       label steps in to meet it */
+    .guide-nav-item:hover, .guide-nav-item[aria-current="page"] {
+      color: #fff; background: rgba(0,217,255,.1); padding-left: 16px;
+      box-shadow: inset 2px 0 0 var(--g), inset 18px 0 18px -16px rgba(0,217,255,.7);
+    }
+    .guide-nav-item[aria-current="page"] { color: var(--g-bright); background: rgba(0,217,255,.16); font-weight: 500; }
+    .guide-nav-item:hover::after, .guide-nav-item[aria-current="page"]::after { opacity: .9; }
+    .guide-nav-item:focus-visible { outline: 1px solid var(--g); outline-offset: -2px; }
+    /* rows arrive one after another behind the scan line */
+    .guide-folder-content.is-open .guide-nav-item { animation: guide-folder-row .32s cubic-bezier(.2,.9,.25,1) both; }
+    .guide-folder-links li:nth-child(2) .guide-nav-item { animation-delay: .04s; }
+    .guide-folder-links li:nth-child(3) .guide-nav-item { animation-delay: .08s; }
+    .guide-folder-links li:nth-child(4) .guide-nav-item { animation-delay: .12s; }
+    .guide-folder-links li:nth-child(5) .guide-nav-item { animation-delay: .16s; }
+    .guide-folder-links li:nth-child(n+6) .guide-nav-item { animation-delay: .2s; }
+    @keyframes guide-folder-row {
+      from { opacity: 0; transform: translateX(-6px); }
+      to   { opacity: 1; transform: none; }
+    }
+    @media (max-width: 1039px) { .guide-nav-item { min-height: 2.9rem; font-size: .95rem; } }
+    @media (prefers-reduced-motion: reduce) {
+      .guide-folder-content, .guide-folder-links, .guide-folder-chevron,
+      .guide-folder-toggle, .guide-folder-toggle::before, .guide-folder-toggle::after,
+      .guide-nav-item { transition: none; }
+      .guide-folder-content.is-open .guide-folder-links::before,
+      .guide-folder-content.is-open .guide-nav-item { animation: none; }
+    }
 
     .guide-picker {
       display: flex; align-items: center; gap: 12px;
@@ -1179,29 +1314,65 @@
        stylesheet, so before .g-toc-t existed on every renderer the
        titles fell back to the browser's own link blue on a near-black
        panel, which is the "unreadable" bug this replaced. */
-    .g-toc { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr)); gap: 1px; }
-    .g-toc-side { display: flex; flex-direction: column; gap: 1px; }
-    .g-toc a {
-      display: flex; gap: 11px; align-items: baseline;
-      padding: 9px 11px; border-radius: 4px; text-decoration: none;
-      border: 1px solid transparent;
-      transition: background 0.16s ease, border-color 0.16s ease;
+    /* Dressed in the rail's language: a tinted panel face with register
+       ticks, a mono overline, rows split by hairlines, and the left-edge
+       accent bar on the chapter you are reading and the one under the
+       pointer. The ticks are the panel's own ::before/::after, absolutely
+       placed, so they take no grid cell and every renderer (the reader
+       and the prerendered page alike) gets them without a second class.
+       Every row carries a hairline on top: in the sidebar the first one
+       is the rule under the overline, in the inline grid it is the rule
+       that opens each column. */
+    .g-toc {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr));
+      column-gap: 18px; row-gap: 0;
+      border-color: rgba(0,217,255,.3); border-radius: 4px;
+      background: linear-gradient(180deg, rgba(0,217,255,.1), rgba(0,217,255,.03) 70%), var(--panel);
+      box-shadow: inset 0 0 22px -14px rgba(0,217,255,.55);
     }
-    .g-toc a:hover { background: rgba(0,217,255,0.07); }
-    .g-toc a:focus-visible { outline: 1px solid var(--g); outline-offset: 1px; }
-    .g-toc a[aria-current] { background: rgba(0,217,255,0.1); border-color: var(--g-40); }
+    .g-toc-side { display: flex; flex-direction: column; }
+    .g-toc::before, .g-toc::after {
+      content: ''; position: absolute; width: 9px; height: 9px;
+      pointer-events: none; opacity: .75;
+      transition: width .2s ease, height .2s ease, opacity .2s ease;
+    }
+    .g-toc::before { top: -1px; left: -1px; border-top: 1px solid var(--g); border-left: 1px solid var(--g); }
+    .g-toc::after { bottom: -1px; right: -1px; border-bottom: 1px solid var(--g); border-right: 1px solid var(--g); }
+    .g-toc:hover::before, .g-toc:hover::after { width: 14px; height: 14px; opacity: 1; }
+    .g-toc-over {
+      display: block; padding: 4px 10px 11px;
+      font-family: var(--mono); font-weight: 500; font-size: .6rem;
+      letter-spacing: .22em; text-transform: uppercase; color: rgba(0,217,255,.8);
+    }
+    .g-toc a {
+      position: relative; display: flex; gap: 11px; align-items: baseline;
+      padding: 9px 11px; text-decoration: none;
+      border-top: 1px solid rgba(0,217,255,.14);
+      transition: background-color .16s ease, box-shadow .16s ease, padding-left .2s cubic-bezier(.2,.9,.25,1);
+    }
+    .g-toc a:hover, .g-toc a[aria-current] {
+      background: rgba(0,217,255,.1); padding-left: 13px;
+      box-shadow: inset 2px 0 0 var(--g), inset 18px 0 18px -16px rgba(0,217,255,.7);
+    }
+    .g-toc a[aria-current] { background: rgba(0,217,255,.16); }
+    .g-toc a:focus-visible { outline: 1px solid var(--g); outline-offset: -1px; }
     .g-toc-t {
       font-family: var(--sans); font-weight: 300; font-size: 0.95rem;
       line-height: 1.5; color: rgba(255,255,255,0.82);
       transition: color 0.16s ease;
     }
-    .g-toc a:hover .g-toc-t,
-    .g-toc a[aria-current] .g-toc-t { color: var(--g-bright); }
+    .g-toc a:hover .g-toc-t { color: #fff; }
+    .g-toc a[aria-current] .g-toc-t { color: var(--g-bright); font-weight: 400; }
     .g-toc-n {
       font-family: var(--mono); font-weight: 500; font-size: 0.62rem;
-      color: rgba(0,217,255,0.6); flex-shrink: 0;
+      letter-spacing: .1em; color: rgba(0,217,255,0.6); flex-shrink: 0;
+      transition: color 0.16s ease;
     }
+    .g-toc a:hover .g-toc-n,
     .g-toc a[aria-current] .g-toc-n { color: var(--g-bright); }
+    @media (prefers-reduced-motion: reduce) {
+      .g-toc a, .g-toc::before, .g-toc::after { transition: none; }
+    }
 
     /* the paragraph the whole guide turns on */
     .g-callout {
@@ -2022,7 +2193,7 @@
     @media (prefers-reduced-motion: reduce) {
       .splash-ticks, .splash-sweep, .splash-core, .cursor { animation: none; }
       .cta-breathe, .dots::after,
-      .eg-scan, .eg-dwell, .float-wrap,
+      .eg-scan, .eg-dwell,
       .featured-pulse, .stage-body,
       .btn-glitch, .btn-glitch:hover, .mod-tile:hover .mod-tile-icon { animation: none; }
       .splash-log span { animation: none; opacity: 1; }
