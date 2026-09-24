@@ -279,7 +279,7 @@ function sentences(text) {
 
    Add a file here when a new one starts holding prose. The cost of
    forgetting is not a failed build; it is an unchecked claim. */
-const SCANNED_FILES = ['catalog.jsx', 'blog-catalog.jsx'];
+const SCANNED_FILES = ['catalog.jsx', 'research-guides.jsx'];
 
 const sources = SCANNED_FILES.map((file) => ({
   file,

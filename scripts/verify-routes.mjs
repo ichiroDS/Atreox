@@ -470,17 +470,8 @@ for (const [where, ids] of [['header', headerIds], ['footer', footerIds]]) {
   }
 }
 
-/* The blog is not in the header any more. It must still be reachable,
-   or "we moved it to the footer" is how a section quietly dies. */
-check(
-  'the blog is still reachable from the footer',
-  footerIds.includes('blog'),
-  footerIds.join(', '),
-);
-check(
-  'and /blog still resolves',
-  isRouted('/blog') && fs.existsSync(path.join(ROOT, 'blog.html')),
-);
+check('blog navigation is retired', !footerIds.includes('blog') && !headerIds.includes('blog'));
+check('old blog index redirects to Guides', vercelJson.redirects.some(r => r.source === '/blog' && r.destination === '/guides'));
 check(
   'the tools hub is in the header',
   headerIds.includes('tools'),

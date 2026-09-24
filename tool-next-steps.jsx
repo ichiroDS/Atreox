@@ -52,7 +52,7 @@ const TOOL_NEXT_STEPS = {
         'Re-check the new login here before connecting an account through it.',
       ],
       links: [
-        { href: '/blog/telegram-session-killed-by-ip-change', label: 'Why a moving exit kills sessions: one case, traced' },
+        { href: '/guides/telegram-session-killed-by-ip-change', label: 'Why a moving exit kills sessions: one case, traced' },
         { href: '/guides/proxies-for-telegram-accounts', label: 'Guide: choosing and connecting proxies' },
       ],
     },
@@ -68,7 +68,7 @@ const TOOL_NEXT_STEPS = {
         'Only after that, if the fresh login also fails, treat it as the seller’s problem.',
       ],
       links: [
-        { href: '/blog/telegram-session-killed-by-ip-change', label: 'A dead session is not a banned account' },
+        { href: '/guides/telegram-session-killed-by-ip-change', label: 'A dead session is not a banned account' },
         { href: '/tools/proxy-checker', label: 'Check the proxy it ran on' },
       ],
     },

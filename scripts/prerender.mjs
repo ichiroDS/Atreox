@@ -125,7 +125,7 @@ function loadCatalog() {
      reads nothing from the catalog today, but it shares the block
      vocabulary and the tool registry, and a box built the other way
      round would work until the first time it did. */
-  for (const file of ['catalog.jsx', 'blog-catalog.jsx']) {
+  for (const file of ['research-guides.jsx', 'catalog.jsx']) {
     new vm.Script(read(file), { filename: file }).runInContext(ctx);
   }
 
@@ -164,58 +164,12 @@ ${read(file)}
     seen.add(g.url);
   }
 
-  const { POSTS, BLOG_CATEGORIES, BLOG_CATEGORY_BY_SLUG, BLOG_RESERVED_SLUGS,
-          BLOG_EMPTY, TOOL_BY_ID, BLOCK_KINDS, postsForList, relatedPosts,
-          formatPostDate, postWasUpdated } = box;
-  if (!Array.isArray(POSTS)) throw new Error('blog-catalog.jsx exposed no POSTS');
-  if (!Array.isArray(BLOG_CATEGORIES) || !BLOG_CATEGORIES.length) {
-    throw new Error('blog-catalog.jsx exposed no BLOG_CATEGORIES');
-  }
-
-  const postSlugs = new Set();
-  for (const post of POSTS) {
-    if (!post.slug) throw new Error(`a post ("${post.title}") has no slug`);
-    if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(post.slug)) {
-      throw new Error(`post slug "${post.slug}" is not a clean path segment`);
-    }
-    /* /blog/category/<slug> and /blog/<slug> share a namespace, so a
-       post slugged "category" would make one of them unreachable. Caught
-       here rather than found later as a 404. */
-    if (BLOG_RESERVED_SLUGS.includes(post.slug)) {
-      throw new Error(`post slug "${post.slug}" is reserved under /blog`);
-    }
-    if (postSlugs.has(post.slug)) throw new Error(`two posts share the address /blog/${post.slug}`);
-    postSlugs.add(post.slug);
-    if (!BLOG_CATEGORY_BY_SLUG[post.category]) {
-      throw new Error(`post "${post.slug}" is in unknown category "${post.category}"`);
-    }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(post.published || '')) {
-      throw new Error(`post "${post.slug}" needs a published date as YYYY-MM-DD`);
-    }
-    if (post.updated !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(post.updated)) {
-      throw new Error(`post "${post.slug}" has an updated date that is not YYYY-MM-DD`);
-    }
-    if (post.updated && post.updated < post.published) {
-      throw new Error(`post "${post.slug}" was updated before it was published`);
-    }
-    if (!Array.isArray(post.body) || !post.body.length) {
-      throw new Error(`post "${post.slug}" has no body`);
-    }
+  const { GUIDE_FOLDERS, guideHref, TOOL_BY_ID, BLOCK_KINDS } = box;
+  for (const g of GUIDES) {
     const anchors = new Set();
-    for (const sec of post.body) {
-      if (!sec.id) throw new Error(`a section of "${post.slug}" has no id to anchor`);
-      if (anchors.has(sec.id)) throw new Error(`post "${post.slug}" repeats the anchor #${sec.id}`);
-      anchors.add(sec.id);
-    }
-  }
-
-  /* A guide address and a post address cannot collide - they live under
-     different prefixes - but their OG images did, because those are
-     keyed into one flat map. Posts are namespaced under blog/ for that
-     reason; this asserts the namespacing is actually doing its job. */
-  for (const c of BLOG_CATEGORIES) {
-    if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(c.slug)) {
-      throw new Error(`category slug "${c.slug}" is not a clean path segment`);
+    for (const section of g.body || []) {
+      if (!section.id || anchors.has(section.id)) throw new Error(`Invalid anchor in ${g.slug}`);
+      anchors.add(section.id);
     }
   }
 
@@ -236,8 +190,7 @@ ${read(file)}
 
   return {
     GUIDES, MODULE_BY_KEY,
-    POSTS, BLOG_CATEGORIES, BLOG_EMPTY, TOOL_BY_ID, BLOCK_KINDS,
-    postsForList, relatedPosts, formatPostDate, postWasUpdated,
+    GUIDE_FOLDERS, guideHref, TOOL_BY_ID, BLOCK_KINDS,
     PAGE_COPY,
   };
 }
@@ -463,19 +416,20 @@ function renderGuide(guide, guides, mod) {
 
   /* Every other guide, as links. The reader shows this rail too; here
      it is also how a crawler gets from any one guide to the other nine. */
-  const rail = guides.map(g =>
-    `<li style="margin-bottom:6px"><a href="/guides/${esc(g.url)}"${g.url === guide.url ? ' aria-current="page"' : ''} style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.9rem;color:${g.url === guide.url ? '#00d9ff' : 'rgba(255,255,255,0.6)'};text-decoration:none">${esc(g.title)}</a></li>`
-  ).join('');
+  const rail = GUIDE_FOLDERS.map(folder => `<details class="guide-folder"${folder.guides.some(g => g.slug === guide.slug) ? ' open' : ''}>
+<summary>${esc(folder.title)}</summary><ul style="list-style:none;margin:0;padding:4px 12px">${folder.guides.map(g =>
+  `<li><a class="guide-nav-item" href="${esc(guideHref(g))}"${g.slug === guide.slug ? ' aria-current="page"' : ''}>${esc(g.navTitle || g.title)}</a></li>`
+).join('')}</ul></details>`).join('');
 
   return `<div id="prerendered" style="max-width:1340px;margin:0 auto;padding:128px 6% 88px">
 <nav aria-label="Guides" style="margin-bottom:26px">
 <a href="/guides" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.62rem;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.34);text-decoration:none">All guides</a>
-<ul style="list-style:none;margin:14px 0 0;padding:0">${rail}</ul>
+<div style="margin-top:14px">${rail}</div>
 </nav>
 <article id="guide-${esc(guide.slug)}">
 ${parts.join('\n')}
 </article>
-${siteNav(`/guides/${guide.url}`)}
+${siteNav(guideHref(guide))}
 </div>`;
 }
 
@@ -549,7 +503,6 @@ const SITE_NAV = [
   ['/pricing', 'Pricing'],
   ['/tools', 'Free tools'],
   ['/guides', 'Guides'],
-  ['/blog', 'Blog'],
   ['/contact', 'Contact'],
   ['/referral-program', 'Referral programme'],
   ['/privacy', 'Privacy'],
@@ -633,7 +586,7 @@ function headFor(guide, mod, ogImage) {
      in the catalog and everything else falls back to the old shape. */
   const title = guide.seoTitle ? `${guide.seoTitle} — ATREOX` : `${guide.title} — ATREOX guide`;
   return metaBlock({
-    url: `${ORIGIN}/guides/${guide.url}`, title,
+    url: `${ORIGIN}${guideHref(guide)}`, title,
     desc: guide.seoDescription || guide.summary,
     ogImage, type: 'article',
   });
@@ -824,7 +777,7 @@ function pricingLd(modules) {
 }
 
 function guideLd(guide, ogImage) {
-  const url = `${ORIGIN}/guides/${guide.url}`;
+  const url = `${ORIGIN}${guideHref(guide)}`;
   return [
     jsonLd({
       '@context': 'https://schema.org',
@@ -836,6 +789,7 @@ function guideLd(guide, ogImage) {
       author: { '@id': ORG_ID },
       publisher: { '@id': ORG_ID },
       inLanguage: 'en',
+      ...(guide.published ? { datePublished: guide.published, dateModified: guide.updated || guide.published } : {}),
     }),
     jsonLd({
       '@context': 'https://schema.org',
@@ -874,188 +828,6 @@ function headForReferral() {
     title: 'Referral program — ATREOX',
     desc: 'Earn 25% recurring commission for as long as a customer you referred stays subscribed. Copy your link from Settings — open to creators and regular users alike.',
     ogImage: OG_FALLBACK, type: 'website',
-  });
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   The blog: one page per article, one per category, and the index.
-
-   Everything below reuses renderBlocks — the same function the guides
-   go through, with the same block kinds and the same g-* classes. What
-   is new here is only the frame around a body: breadcrumbs, the two
-   dates, the contents rail and the read-next block. That split is the
-   point: an article and a guide differ in their frame, not in what a
-   paragraph is, so there is exactly one block renderer to keep honest.
-══════════════════════════════════════════════════════════════════ */
-
-/* lastmod lives in ./lastmod.mjs: the content-hash manifest, the three
-   states it can be in, and why a disagreement between it and the
-   content is a build failure rather than something this build quietly
-   rewrites. */
-
-/* ── One article ──────────────────────────────────────────────────── */
-const CRUMB = "font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.6rem;letter-spacing:0.16em;text-transform:uppercase;text-decoration:none";
-
-function breadcrumbs(trail) {
-  const items = trail.map((c, i) => {
-    const last = i === trail.length - 1;
-    const inner = last
-      ? `<span style="${CRUMB};color:rgba(255,255,255,0.5)" aria-current="page">${esc(c.name)}</span>`
-      : `<a href="${esc(c.href)}" style="${CRUMB};color:#00d9ff">${esc(c.name)}</a>`;
-    return `<li style="display:inline">${inner}${last ? '' : `<span aria-hidden="true" style="${CRUMB};color:rgba(255,255,255,0.28);padding:0 8px">/</span>`}</li>`;
-  }).join('');
-  return `<nav aria-label="Breadcrumb" style="margin-bottom:22px"><ol style="list-style:none;margin:0;padding:0">${items}</ol></nav>`;
-}
-
-/* Published always, Updated only when the article has genuinely been
-   revised. An "Updated" line on the day of publication says nothing and
-   trains a reader to stop reading the one place it will eventually
-   matter - which is why blog-catalog.jsx leaves `updated` absent rather
-   than defaulting it to the publication date. */
-function postDates(post) {
-  const parts = [
-    `<time datetime="${esc(post.published)}">Published ${esc(formatPostDate(post.published))}</time>`,
-  ];
-  if (postWasUpdated(post)) {
-    parts.push(`<time datetime="${esc(post.updated)}">Updated ${esc(formatPostDate(post.updated))}</time>`);
-  }
-  return `<p class="g-postmeta">${parts.join('<span aria-hidden="true" class="g-postmeta-sep">·</span>')}</p>`;
-}
-
-function renderPost(post, category, related) {
-  const parts = [];
-
-  parts.push(breadcrumbs([
-    { name: 'Blog', href: '/blog' },
-    { name: category.name, href: `/blog/category/${category.slug}` },
-    { name: post.title },
-  ]));
-
-  parts.push(`<h1 style="font-family:'Playfair Display',Georgia,serif;font-weight:500;font-size:2.6rem;line-height:1.1;letter-spacing:-0.015em;color:#fff;margin:0 0 16px">${esc(post.title)}</h1>`);
-  parts.push(postDates(post));
-  parts.push(`<p style="${P};font-size:1.05rem;color:rgba(255,255,255,0.78)">${esc(post.summary)}</p>`);
-
-  /* The contents, as real anchors: a search result deep-linking to a
-     section lands on it before a line of JavaScript has run. Same
-     markup and the same classes as a guide's chapter list. */
-  parts.push(section('In this article',
-    `<div class="g-toc panel" style="padding:16px 18px">${post.body
-      .map((s, i) => `<a href="#${esc(s.id)}"><span class="g-toc-n">${String(i + 1).padStart(2, '0')}</span><span class="g-toc-t">${esc(s.title)}</span></a>`)
-      .join('')}</div>`));
-
-  for (const [i, s] of post.body.entries()) {
-    parts.push(`<h2 id="${esc(s.id)}" style="${H2}"><span style="${NUM}">${String(i + 1).padStart(2, '0')}</span>${esc(s.title)}</h2>\n${renderBlocks(s.blocks)}`);
-  }
-
-  if (related.length) {
-    parts.push(section('Read next',
-      `<div class="g-toc panel" style="padding:16px 18px">${related
-        .map(r => `<a href="/blog/${esc(r.slug)}"><span class="g-toc-t">${esc(r.title)}</span></a>`)
-        .join('')}</div>`));
-  }
-
-  return `<div id="prerendered" style="max-width:1340px;margin:0 auto;padding:128px 6% 88px">
-<article id="post-${esc(post.slug)}" style="max-width:860px;margin:0 auto">
-${parts.join('\n')}
-</article>
-${siteNav(`/blog/${post.slug}`)}
-</div>`;
-}
-
-/* ── The index and the category pages ─────────────────────────────
-   Given real prerendered bodies rather than the head-only treatment
-   /guides and /pricing get, and for one reason: those two are reachable
-   from every guide page's rail, so a crawler finds them and what they
-   link to either way. A young blog has no such web - the index and the
-   category pages ARE the internal linking, and a page whose HTML holds
-   no links to the articles leaves the sitemap as the only way in.
-─────────────────────────────────────────────────────────────────── */
-function postCard(post, category) {
-  return `<li style="margin:0 0 2px"><a href="/blog/${esc(post.slug)}" class="g-postcard">
-<span class="g-postcard-cat">${esc(category.name)}</span>
-<span class="g-postcard-title">${esc(post.title)}</span>
-<span class="g-postcard-sum">${esc(post.summary)}</span>
-<time class="g-postcard-date" datetime="${esc(post.published)}">${esc(formatPostDate(post.published))}</time>
-</a></li>`;
-}
-
-function renderPostList({ heading, lead, posts, categoryBySlug, crumbs, categories }) {
-  const cards = posts.length
-    ? `<ul style="list-style:none;margin:0;padding:0">${posts.map(p => postCard(p, categoryBySlug[p.category])).join('\n')}</ul>`
-    : `<p style="${P}">${esc(BLOG_EMPTY.lead)}</p>\n<ul style="list-style:none;margin:18px 0 0;padding:0">${
-        BLOG_EMPTY.links.map(l =>
-          `<li style="margin-bottom:6px"><a href="${esc(l.href)}" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.95rem;color:#00d9ff;text-decoration:none">${esc(l.label)}</a></li>`
-        ).join('')
-      }</ul>`;
-
-  /* The category rail is on the index AND on every category page, so
-     any one of them reaches all the others in one hop. */
-  const rail = categories.length > 1 || crumbs.length > 1
-    ? `<nav aria-label="Categories" style="margin:0 0 30px"><ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px">${
-        categories.map(c => `<li><a href="/blog/category/${esc(c.slug)}" class="g-postcat">${esc(c.name)}</a></li>`).join('')
-      }</ul></nav>`
-    : '';
-
-  return `<div id="prerendered" style="max-width:1340px;margin:0 auto;padding:128px 6% 88px">
-<div style="max-width:860px;margin:0 auto">
-${crumbs.length > 1 ? breadcrumbs(crumbs) : ''}
-<h1 style="font-family:'Playfair Display',Georgia,serif;font-weight:500;font-size:2.6rem;line-height:1.1;letter-spacing:-0.015em;color:#fff;margin:0 0 16px">${esc(heading)}</h1>
-<p style="${P};font-size:1.05rem;color:rgba(255,255,255,0.78);margin-bottom:30px">${esc(lead)}</p>
-${rail}
-${cards}
-${siteNav(crumbs[crumbs.length - 1].href)}
-</div>
-</div>`;
-}
-
-/* ── Structured data ──────────────────────────────────────────────
-   Article and BreadcrumbList, and deliberately NOT FAQPage even for an
-   article that carries an faq block. Google has restricted FAQ rich
-   results to government and health sites since 2023, so the markup buys
-   no snippet; Article and BreadcrumbList are what actually describe the
-   page. An faq block is still an faq block - it just carries no schema.
-
-   dateModified falls back to datePublished: the field has to be present
-   for the markup to be complete, and an article that has never been
-   revised was last modified when it was written. Nothing on the page
-   claims a revision that did not happen - see postDates above.
-─────────────────────────────────────────────────────────────────── */
-function postLd(post, category, ogImage) {
-  const url = `${ORIGIN}/blog/${post.slug}`;
-  return [
-    jsonLd({
-      '@context': 'https://schema.org',
-      '@type': 'Article',
-      headline: post.seoTitle || post.title,
-      description: post.seoDescription || post.summary,
-      image: ogImage,
-      mainEntityOfPage: url,
-      datePublished: post.published,
-      dateModified: post.updated || post.published,
-      author: { '@id': ORG_ID },
-      publisher: { '@id': ORG_ID },
-      inLanguage: 'en',
-      articleSection: category.name,
-    }),
-    jsonLd({
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Blog', item: ORIGIN + '/blog' },
-        { '@type': 'ListItem', position: 2, name: category.name, item: `${ORIGIN}/blog/category/${category.slug}` },
-        { '@type': 'ListItem', position: 3, name: post.title, item: url },
-      ],
-    }),
-  ].join('\n');
-}
-
-function blogListLd(crumbs) {
-  return jsonLd({
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: crumbs.map((c, i) => ({
-      '@type': 'ListItem', position: i + 1, name: c.name, item: ORIGIN + c.href,
-    })),
   });
 }
 
@@ -1104,7 +876,7 @@ ${lines.map((l, i) => `<text x="80" y="${250 + i * 78}" font-family="Playfair Di
 </svg>`;
 }
 
-async function buildOgImages(guides, moduleByKey, posts, categories, blogIndexCard) {
+async function buildOgImages(guides, moduleByKey) {
   let Resvg = null;
   try { ({ Resvg } = await import('@resvg/resvg-js')); }
   catch (_) {
@@ -1137,26 +909,6 @@ async function buildOgImages(guides, moduleByKey, posts, categories, blogIndexCa
     render(page.route === '/' ? 'home' : page.route.slice(1), page);
   }
 
-  /* The blog's cards are keyed under blog/ rather than by bare slug.
-     `out` is one flat map, so an article slugged the same as a guide's
-     url would otherwise overwrite that guide's card - the two live at
-     different addresses and could never collide as pages, which is
-     exactly what makes the collision easy to miss. */
-  render('blog', blogIndexCard);
-  for (const c of categories) {
-    render(`blog/category/${c.slug}`, {
-      kicker: 'BLOG', heading: c.name, short: c.blurb.split('.')[0],
-      footer: 'atreoxai.com/blog',
-    });
-  }
-  for (const p of posts) {
-    const cat = categories.find(c => c.slug === p.category);
-    render(`blog/${p.slug}`, {
-      kicker: cat ? cat.name.toUpperCase() : 'BLOG',
-      heading: p.title, short: p.summary.split('.')[0],
-      footer: 'atreoxai.com/blog',
-    });
-  }
   return out;
 }
 
@@ -1222,8 +974,7 @@ const robots = () => [
 /* ── Run ───────────────────────────────────────────────────────── */
 const {
   GUIDES, MODULE_BY_KEY,
-  POSTS, BLOG_CATEGORIES, BLOG_EMPTY, TOOL_BY_ID, BLOCK_KINDS,
-  postsForList, relatedPosts, formatPostDate, postWasUpdated,
+  GUIDE_FOLDERS, guideHref, TOOL_BY_ID, BLOCK_KINDS,
   PAGE_COPY,
 } = loadCatalog();
 
@@ -1233,7 +984,7 @@ let shell = read('index.html');
 if (!SLUG_MAP_RE.test(shell)) {
   throw new Error('index.html has no SLUG-MAP markers — the legacy #guide- redirect would go stale');
 }
-const slugMap = JSON.stringify(Object.fromEntries(GUIDES.map(g => [g.slug, g.url])));
+const slugMap = JSON.stringify(Object.fromEntries(GUIDES.map(g => [g.slug, g.path || g.url])));
 shell = shell.replace(SLUG_MAP_RE, () => `/* SLUG-MAP */${slugMap}/* /SLUG-MAP */`);
 
 /* THE SAME TRAP AS THE JSON-LD ABOVE, one level down. index.html is both
@@ -1263,19 +1014,6 @@ if (!shell.includes('<div id="root"></div>')) {
   throw new Error('index.html has no <div id="root"></div> to prerender in front of');
 }
 
-const BLOG_CATEGORY_BY_SLUG = Object.fromEntries(BLOG_CATEGORIES.map(c => [c.slug, c]));
-const ALL_POSTS = postsForList().items;
-
-const BLOG_INDEX = {
-  route: '/blog',
-  title: 'Telegram automation blog — ATREOX',
-  desc: 'Articles on running Telegram accounts at scale: buying and checking accounts, matching proxies, warming safely, and finding channels worth commenting in.',
-  heading: 'Blog',
-  lead: 'What we have learned running Telegram accounts at scale, written for the questions people actually search for.',
-  kicker: 'BLOG',
-  short: 'Written for the questions people search',
-};
-
 /* ── lastmod: resolved AND ENFORCED before a single file is written ──
    Deliberately the first thing the run does, ahead of image
    optimisation and every write below it, so `--check-lastmod` can
@@ -1303,17 +1041,8 @@ const LASTMOD_ENTRIES = [
   ...[HOME_PAGE, ...SITE_PAGES].map(page =>
     [`page:${page.route}`, { page, shell: SHELL_FINGERPRINT }]),
   ['page:/referral-program', { page: 'referral', shell: SHELL_FINGERPRINT }],
-  ['page:/blog', { posts: ALL_POSTS.map(p => p.slug), shell: SHELL_FINGERPRINT }],
-  ...BLOG_CATEGORIES.map(c => [`blogcat:${c.slug}`, {
-    category: c,
-    posts: postsForList({ category: c.slug }).items.map(p => p.slug),
-    shell: SHELL_FINGERPRINT,
-  }]),
   ...GUIDES.map(g => [`guide:${g.url}`, g]),
-  /* Articles are hashed too, but NOT to date them — their dates are
-     editorial and belong to the author. The hash is only so the drift
-     warning below can fire. */
-  ...ALL_POSTS.map(p => [`post:${p.slug}`, p]),
+
 ];
 
 const SEED_NOTICE =
@@ -1377,28 +1106,12 @@ if (committed === null) {
 const { dates: LASTMOD, changed: CONTENT_CHANGED } =
   resolveDates(LASTMOD_ENTRIES, manifest, TODAY);
 
-/* An article whose text changed while its `updated` field did not. Not
-   an error: the author may be fixing a typo, and forcing a date bump
-   for that would make `updated` meaningless in the other direction. It
-   fires during `npm run lastmod`, which is exactly the moment somebody
-   is looking at the change and can decide. */
-for (const post of ALL_POSTS) {
-  if (CONTENT_CHANGED.has(`post:${post.slug}`) && post.updated !== TODAY) {
-    console.warn(
-      `[lastmod] "${post.slug}" changed but its updated date is ` +
-      `${post.updated || '(unset)'} — set updated: '${TODAY}' if this was a revision`,
-    );
-  }
-}
-
-const postLastmod = p => p.updated || p.published;
-
 /* Writing starts here. Everything above only reads. */
 const imgResult = await optimizeImages(path.join(ROOT, 'public', 'screenshots'));
 if (imgResult.processed) console.log(`[optimize-images] ${imgResult.processed} image(s) optimized, ${imgResult.skipped} already small`);
 
 const ogImages = await buildOgImages(
-  GUIDES, MODULE_BY_KEY, ALL_POSTS, BLOG_CATEGORIES, BLOG_INDEX,
+  GUIDES, MODULE_BY_KEY,
 );
 const MODULES_LIST = Object.values(MODULE_BY_KEY);
 
@@ -1434,7 +1147,7 @@ for (const guide of GUIDES) {
     })
     .replace('<div id="root"></div>',
       () => `${renderGuide(guide, GUIDES, mod)}\n  <div id="root"></div>`);
-  write(`guides/${guide.url}.html`, html);
+  write(`${guideHref(guide).slice(1)}.html`, html);
 }
 
 /* One page, same shell-swap trick as every guide above. */
@@ -1445,111 +1158,10 @@ for (const guide of GUIDES) {
   write('referral-program.html', html);
 }
 
-/* ── The blog's own pages ────────────────────────────────────────
-   Three kinds, all cut from the same shell as everything else, each
-   with its own head from metaBlock — which is what keeps the canonical
-   honest. The bug this site already had (nine routes serving one head,
-   all of them claiming to be "/") could only happen to a page that had
-   no head of its own; every page below has one, and verify-seo.mjs
-   asserts that for every generated file rather than trusting it.
-─────────────────────────────────────────────────────────────────── */
-/* /blog */
-{
-  const html = shell
-    .replace(HEAD_RE, () => withLd(
-      metaBlock({
-        url: ORIGIN + '/blog',
-        title: BLOG_INDEX.title, desc: BLOG_INDEX.desc,
-        ogImage: ogImages['blog'] || OG_FALLBACK, type: 'website',
-      }),
-      orgAndSiteLd(),
-      blogListLd([{ name: 'Blog', href: '/blog' }]),
-    ))
-    .replace('<div id="root"></div>', () => `${renderPostList({
-      heading: BLOG_INDEX.heading,
-      lead: BLOG_INDEX.lead,
-      posts: ALL_POSTS,
-      categoryBySlug: BLOG_CATEGORY_BY_SLUG,
-      crumbs: [{ name: 'Blog', href: '/blog' }],
-      categories: BLOG_CATEGORIES,
-    })}\n  <div id="root"></div>`);
-  write('blog.html', html);
-}
-
-/* /blog/category/<slug> */
-for (const category of BLOG_CATEGORIES) {
-  const crumbs = [
-    { name: 'Blog', href: '/blog' },
-    { name: category.name, href: `/blog/category/${category.slug}` },
-  ];
-  const html = shell
-    .replace(HEAD_RE, () => withLd(
-      metaBlock({
-        url: `${ORIGIN}/blog/category/${category.slug}`,
-        title: category.seoTitle || `${category.name} — ATREOX blog`,
-        desc: category.seoDescription || category.blurb,
-        ogImage: ogImages[`blog/category/${category.slug}`] || OG_FALLBACK,
-        type: 'website',
-      }),
-      orgAndSiteLd(),
-      blogListLd(crumbs),
-    ))
-    .replace('<div id="root"></div>', () => `${renderPostList({
-      heading: category.name,
-      lead: category.blurb,
-      posts: postsForList({ category: category.slug }).items,
-      categoryBySlug: BLOG_CATEGORY_BY_SLUG,
-      crumbs,
-      categories: BLOG_CATEGORIES,
-    })}\n  <div id="root"></div>`);
-  write(`blog/category/${category.slug}.html`, html);
-}
-
-/* /blog/<slug> */
-for (const post of ALL_POSTS) {
-  const category = BLOG_CATEGORY_BY_SLUG[post.category];
-  const og = ogImages[`blog/${post.slug}`] || OG_FALLBACK;
-  const html = shell
-    .replace(HEAD_RE, () => withLd(
-      metaBlock({
-        url: `${ORIGIN}/blog/${post.slug}`,
-        title: post.seoTitle || post.title,
-        desc: post.seoDescription || post.summary,
-        ogImage: og, type: 'article',
-      }),
-      orgAndSiteLd(),
-      postLd(post, category, og),
-    ))
-    .replace('<div id="root"></div>',
-      () => `${renderPost(post, category, relatedPosts(post))}\n  <div id="root"></div>`);
-  write(`blog/${post.slug}.html`, html);
-}
-
-/* A post renamed in the catalog leaves its old file behind, and the
-   deploy serves whatever is in the directory — so the address would go
-   on answering with a page nothing links to any more. The guides have
-   their own sweep over their own directory; these are separate on
-   purpose, each with its own wanted-set, so neither can ever delete the
-   other's pages. */
-const wantedPosts = new Set(ALL_POSTS.map(p => p.slug + '.html'));
-for (const f of fs.readdirSync(path.join(ROOT, 'blog'))) {
-  if (f.endsWith('.html') && !wantedPosts.has(f)) {
-    fs.unlinkSync(path.join(ROOT, 'blog', f));
-    console.log(`[prerender] removed stale blog/${f}`);
-  }
-}
-const wantedCategories = new Set(BLOG_CATEGORIES.map(c => c.slug + '.html'));
-for (const f of fs.readdirSync(path.join(ROOT, 'blog', 'category'))) {
-  if (f.endsWith('.html') && !wantedCategories.has(f)) {
-    fs.unlinkSync(path.join(ROOT, 'blog', 'category', f));
-    console.log(`[prerender] removed stale blog/category/${f}`);
-  }
-}
-
 /* A guide renamed in the catalog leaves its old file behind, and the
    deploy serves whatever is in the directory — so the address would go
    on answering with a page nothing links to any more. Sweep it. */
-const wanted = new Set(GUIDES.map(g => g.url + '.html'));
+const wanted = new Set(GUIDES.filter(g => !g.path).map(g => g.url + '.html'));
 for (const f of fs.readdirSync(path.join(ROOT, 'guides'))) {
   if (f.endsWith('.html') && !wanted.has(f)) {
     fs.unlinkSync(path.join(ROOT, 'guides', f));
@@ -1560,13 +1172,10 @@ for (const f of fs.readdirSync(path.join(ROOT, 'guides'))) {
 
 write('sitemap.xml', sitemap([
   ...STATIC_PAGES.map(([loc, priority]) => [loc, priority, LASTMOD[`page:${loc}`] || TODAY]),
-  ['/blog', '0.8', LASTMOD['page:/blog']],
-  ...BLOG_CATEGORIES.map(c => [`/blog/category/${c.slug}`, '0.5', LASTMOD[`blogcat:${c.slug}`]]),
-  ...ALL_POSTS.map(p => [`/blog/${p.slug}`, '0.7', postLastmod(p)]),
-  ...GUIDES.map(g => [`/guides/${g.url}`, '0.7', LASTMOD[`guide:${g.url}`]]),
+  ...GUIDES.map(g => [guideHref(g), '0.7', LASTMOD[`guide:${g.url}`]]),
 ]));
 write('robots.txt', robots());
 
-console.log(`[prerender] ${GUIDES.length} guide pages, ${ALL_POSTS.length} article(s), ${BLOG_CATEGORIES.length} category page(s), 1 referral page, sitemap.xml, robots.txt`);
-for (const g of GUIDES) console.log(`  /guides/${g.url}`);
+console.log(`[prerender] ${GUIDES.length} guide pages, 1 referral page, sitemap.xml, robots.txt`);
+for (const g of GUIDES) console.log(`  ${guideHref(g)}`);
 console.log('  /referral-program');

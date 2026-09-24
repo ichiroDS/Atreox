@@ -62,7 +62,7 @@ function loadContent() {
   const box = {};
   const win = new Proxy(box, { get: (t, k) => (k in t ? t[k] : `Icon(${String(k)})`), has: () => true });
   const ctx = vm.createContext({ window: win, console });
-  for (const file of ['catalog.jsx', 'blog-catalog.jsx']) {
+  for (const file of ['research-guides.jsx', 'catalog.jsx']) {
     new vm.Script(read(file), { filename: file }).runInContext(ctx);
   }
   return box;
@@ -106,7 +106,7 @@ function audit({ blockKinds, readerCases, prerenderCases, used }) {
 console.log('Block renderers: guides.jsx and prerender.mjs handle the same kinds');
 
 const box = loadContent();
-const { BLOCK_KINDS, GUIDES, POSTS, TOOL_BY_ID } = box;
+const { BLOCK_KINDS, GUIDES, TOOL_BY_ID } = box;
 const guidesSrc = read('guides.jsx');
 const prerenderSrc = read('scripts/prerender.mjs');
 
@@ -114,7 +114,7 @@ const real = {
   blockKinds: BLOCK_KINDS,
   readerCases: casesIn(guidesSrc),
   prerenderCases: casesIn(prerenderSrc),
-  used: kindsUsed([...GUIDES.filter(g => g.body).map(g => g.body), ...POSTS.map(p => p.body)]),
+  used: kindsUsed([...GUIDES.filter(g => g.body).map(g => g.body)]),
 };
 
 /* ── Negative controls, first ─────────────────────────────────────── */
@@ -166,7 +166,7 @@ const walkTools = blocks => {
     if (kind === 'cards' && Array.isArray(v)) for (const c of v) if (c.blocks) walkTools(c.blocks);
   }
 };
-for (const body of [...GUIDES.filter(g => g.body).map(g => g.body), ...POSTS.map(p => p.body)]) {
+for (const body of [...GUIDES.filter(g => g.body).map(g => g.body)]) {
   for (const section of body) walkTools(section.blocks);
 }
 check('no toolcta names an unknown tool', !badTools.length, badTools.join(', '));

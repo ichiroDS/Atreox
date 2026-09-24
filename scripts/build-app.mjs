@@ -36,12 +36,11 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const APP_FILES = [
   'shared.jsx',
+  'research-guides.jsx',
   'catalog.jsx',
-  'blog-catalog.jsx',
   'home.jsx',
   'functions.jsx',
   'guides.jsx',
-  'blog.jsx',
   'new-pages.jsx',
   'legal-pages.jsx',
   'referral-page.jsx',

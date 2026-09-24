@@ -32,7 +32,7 @@ const {
   motion, useInView,
   ArrowUpRight, Play, BookOpen, ChevronRight, Shield, Zap, X,
   PageHero, PageSection, SectionLockup, Pill, CrossLinks, FooterBar,
-  MONO, SERIF, GUIDES, MODULE_BY_KEY, eur, REDUCED_MOTION,
+  MONO, SERIF, GUIDES, GUIDE_FOLDERS, MODULE_BY_KEY, eur, REDUCED_MOTION,
   TOOL_BY_ID,
   guideHref, guideFromPath, GUIDE_BY_SLUG, LiteVideo,
 } = window;
@@ -160,30 +160,21 @@ function GuideWall({ guides, offset, onOpen, fill }) {
 const HERO = {
   badge: 'Guides',
   title: 'Learn it once, then run it.',
-  sub: 'Two things to get right before you start, and one guide per module. Open any of them — each one walks the panel end to end.',
+  sub: 'Start with the essentials, protect your accounts, then open the guide for the module you want to run.',
 };
 
-const GROUPS = [
-  { key: 'setup', title: 'Before you start', lede: 'The things you buy elsewhere and bring with you.' },
-  { key: 'module', title: 'Module guides', lede: 'One per module, in the order the pipeline runs them.' },
-];
+const GROUPS = GUIDE_FOLDERS;
 
 function GuideIndex({ onOpen }) {
-  const setup = GUIDES.filter(g => g.group === 'setup');
-  const modules = GUIDES.filter(g => g.group === 'module');
   return (
     <div>
       <PageHero {...HERO} />
-
-      <PageSection style={{ paddingBottom: 30 }}>
-        <SectionLockup title={GROUPS[0].title}>{GROUPS[0].lede}</SectionLockup>
-        <GuideWall guides={setup} offset={0} onOpen={onOpen} fill />
-      </PageSection>
-
-      <PageSection style={{ paddingTop: 0 }}>
-        <SectionLockup title={GROUPS[1].title}>{GROUPS[1].lede}</SectionLockup>
-        <GuideWall guides={modules} offset={setup.length} onOpen={onOpen} />
-      </PageSection>
+      {GROUPS.map((group, index) => (
+        <PageSection key={group.id} style={{ paddingTop: index ? 0 : undefined, paddingBottom: 30 }}>
+          <SectionLockup title={group.title}>{group.lede}</SectionLockup>
+          <GuideWall guides={group.guides} offset={GROUPS.slice(0, index).reduce((n, f) => n + f.guides.length, 0)} onOpen={onOpen} fill />
+        </PageSection>
+      ))}
     </div>
   );
 }
@@ -629,90 +620,66 @@ function ReaderBlocks({ blocks, onOpen }) {
   });
 }
 
-/* The rail on the left: every guide, always, so moving between them
-   never costs a trip back to the index.
-
-   Two shapes. Wide: the full list, sticky, always open — there is a
-   column for it and nothing is covered up. Narrow: the same list, but
-   collapsed behind the name of the guide you're on, because a phone
-   has no spare column and the alternative (a horizontal strip of ten
-   names) meant scrolling a list sideways every time you wanted a
-   different guide, above text you were trying to read. Closed it is
-   one thumb-sized row; open it pushes the article down instead of
-   covering it, and choosing collapses it again. */
+/* Folder buttons use native keyboard activation; closed contents are inert.
+   Each rail has unique IDs because desktop and compact versions can coexist. */
 function ReaderNav({ slug, onOpen, compact }) {
+  const activeFolder = GUIDE_FOLDERS.find(f => f.guides.some(g => g.slug === slug))?.id || 'start';
   const [open, setOpen] = useState(false);
-  const groups = [
-    ['Before you start', GUIDES.filter(g => g.group === 'setup')],
-    ['Module guides', GUIDES.filter(g => g.group === 'module')],
-  ];
+  const [expanded, setExpanded] = useState(() => ({ [activeFolder]: true }));
+  const prefix = compact ? 'guide-mobile' : 'guide-desktop';
+  useEffect(() => {
+    setExpanded(previous => ({ ...previous, [activeFolder]: true }));
+  }, [slug, activeFolder]);
 
-  /* Active is marked exactly one way — a tinted row with a hairline
-     border — and that one way is shared with the chapter list on the
-     right, which wears it through .g-toc a[aria-current]. No tick on
-     one side and not the other. */
-  const item = g => {
-    const on = g.slug === slug;
-    const mod = g.module ? MODULE_BY_KEY[g.module] : null;
-    const Icon = mod ? mod.icon : BookOpen;
+  const list = GUIDE_FOLDERS.map(folder => {
+    const isOpen = !!expanded[folder.id];
+    const containsActive = folder.id === activeFolder;
+    const panelId = `${prefix}-${folder.id}`;
     return (
-      <a key={g.slug} href={guideHref(g)}
-        onClick={e => { if (plainClick(e)) { e.preventDefault(); setOpen(false); onOpen(g.slug); } }}
-        aria-current={on ? 'page' : undefined}
-        className="guide-nav-item"
-        style={{
-          display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-          flexShrink: 0, textAlign: 'left', padding: compact ? '13px 12px' : '10px 12px',
-          borderRadius: 4,
-          border: `1px solid ${on ? `rgba(${GREEN_RGB},0.4)` : 'transparent'}`,
-          background: on ? `rgba(${GREEN_RGB},0.1)` : 'transparent',
-          textDecoration: 'none', cursor: 'pointer',
-        }}>
-        <Icon size={14} color={on ? GREEN : 'rgba(255,255,255,0.4)'} />
-        <span style={{
-          flex: 1, minWidth: 0, fontFamily: 'Barlow, sans-serif', fontWeight: on ? 500 : 300,
-          fontSize: compact ? '0.95rem' : '0.9rem', lineHeight: 1.35,
-          color: on ? 'var(--g-bright)' : 'rgba(255,255,255,0.6)',
-        }}>{g.title}</span>
-      </a>
-    );
-  };
-
-  const list = groups.map(([title, guides], gi) => (
-    <div key={title} style={{ marginBottom: gi === 0 ? 14 : 0 }}>
-      <span style={{ display: 'block', padding: '6px 12px 10px', fontFamily: MONO, fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: `rgba(${GREEN_RGB},0.6)` }}>
-        {title}
-      </span>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>{guides.map(item)}</div>
-    </div>
-  ));
-
-  if (compact) {
-    const current = GUIDES.find(g => g.slug === slug) || GUIDES[0];
-    const mod = current.module ? MODULE_BY_KEY[current.module] : null;
-    const Icon = mod ? mod.icon : BookOpen;
-    return (
-      <nav style={{ flex: '1 1 100%', width: '100%', marginBottom: 14 }}>
-        <button type="button" onClick={() => setOpen(o => !o)}
-          aria-expanded={open} className="panel guide-picker">
-          <Icon size={16} color={GREEN} style={{ flexShrink: 0 }} />
-          <span className="guide-picker-label">
-            <span className="guide-picker-kicker">{'// '}Guide</span>
-            <span className="guide-picker-name">{current.title}</span>
-          </span>
-          <span aria-hidden="true" className={'guide-picker-chevron' + (open ? ' is-open' : '')}>
-            <ChevronRight size={15} />
-          </span>
+      <section className={'guide-folder' + (containsActive ? ' has-active' : '')} key={folder.id}>
+        <button type="button" className="guide-folder-toggle" aria-expanded={isOpen}
+          aria-controls={panelId} id={`${panelId}-label`}
+          onClick={() => setExpanded(previous => ({ ...previous, [folder.id]: !previous[folder.id] }))}>
+          <BookOpen size={14} aria-hidden="true" />
+          <span>{folder.title}</span>
+          <span className="guide-folder-count" aria-hidden="true">{folder.guides.length}</span>
+          <ChevronRight size={14} className="guide-folder-chevron" aria-hidden="true" />
         </button>
-        {open && <div className="panel" style={{ marginTop: 8, padding: 12 }}>{list}</div>}
-      </nav>
+        <div id={panelId} className={'guide-folder-content' + (isOpen ? ' is-open' : '')}
+          inert={isOpen ? undefined : ''} aria-hidden={!isOpen} aria-labelledby={`${panelId}-label`}>
+          <div className="guide-folder-inner">
+            <ul className="guide-folder-links">
+              {folder.guides.map(g => (
+                <li key={g.slug}>
+                  <a href={guideHref(g)} aria-current={g.slug === slug ? 'page' : undefined}
+                    className="guide-nav-item"
+                    onClick={e => { if (plainClick(e)) { e.preventDefault(); setOpen(false); onOpen(g.slug); } }}>
+                    {g.navTitle || g.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
     );
-  }
-  return (
-    <nav className="panel" style={{ flex: '0 0 250px', minWidth: 0, padding: 12, position: 'sticky', top: 92 }}>
-      {list}
+  });
+  const current = GUIDE_BY_SLUG[slug] || GUIDES[0];
+  if (compact) return (
+    <nav aria-label="Guides" className="guide-nav-compact">
+      <button type="button" onClick={() => setOpen(o => !o)} aria-expanded={open}
+        aria-controls={`${prefix}-folders`} className="panel guide-picker">
+        <BookOpen size={16} color={GREEN} aria-hidden="true" />
+        <span className="guide-picker-label">
+          <span className="guide-picker-kicker">{'// '}Guides</span>
+          <span className="guide-picker-name">{current.navTitle || current.title}</span>
+        </span>
+        <span aria-hidden="true" className={'guide-picker-chevron' + (open ? ' is-open' : '')}><ChevronRight size={15} /></span>
+      </button>
+      {open && <div id={`${prefix}-folders`} className="panel guide-nav-folders is-compact">{list}</div>}
     </nav>
   );
+  return <nav aria-label="Guides" className="panel guide-nav-folders is-desktop">{list}</nav>;
 }
 
 /* The chapter list, as links — shared between the sticky sidebar (wide
@@ -984,7 +951,7 @@ Object.assign(window, { GuidesPage, ReaderBlocks, ChapterNav, ReaderHeading });
     title: g.title,
     blocks: [
       ['p', g.lede],
-      ...GUIDES.filter((x) => x.group === g.key).flatMap((x) => [
+      ...g.guides.flatMap((x) => [
         ['card', { kicker: x.short, blocks: [
           ['p', x.summary],
           ['linkout', { href: guideHref(x), label: x.title }],

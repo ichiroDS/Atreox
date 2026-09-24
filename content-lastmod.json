@@ -1,91 +1,83 @@
 {
   "page:/": {
-    "hash": "8603975f5e2c18b9",
-    "date": "2026-09-13"
+    "hash": "3ddd218b1a0486ce",
+    "date": "2026-09-24"
   },
   "page:/functions": {
-    "hash": "088ddaa14e5adcd6",
-    "date": "2026-09-13"
+    "hash": "d738bc69f72511ef",
+    "date": "2026-09-24"
   },
   "page:/pricing": {
-    "hash": "77a4681be557bccd",
-    "date": "2026-09-13"
+    "hash": "7575aea8d252afc0",
+    "date": "2026-09-24"
   },
   "page:/guides": {
-    "hash": "dfbcd71db01a0304",
-    "date": "2026-09-13"
+    "hash": "eb432e2ac7be5bea",
+    "date": "2026-09-24"
   },
   "page:/contact": {
-    "hash": "9c82aaaa49b25948",
-    "date": "2026-09-13"
+    "hash": "f4eec74c5d43309d",
+    "date": "2026-09-24"
   },
   "page:/tools": {
-    "hash": "9352717510349068",
-    "date": "2026-09-13"
+    "hash": "da424f69e901dded",
+    "date": "2026-09-24"
   },
   "page:/tools/proxy-checker": {
-    "hash": "ee8c6fd7f87b0568",
-    "date": "2026-09-13"
+    "hash": "df91e77288810567",
+    "date": "2026-09-24"
   },
   "page:/tools/account-checker": {
-    "hash": "440e48d0b864e77e",
-    "date": "2026-09-13"
+    "hash": "6cdf2e5592cfaf34",
+    "date": "2026-09-24"
   },
   "page:/privacy": {
-    "hash": "13143263cb10131d",
-    "date": "2026-09-13"
+    "hash": "44f73aa3a6dccfd3",
+    "date": "2026-09-24"
   },
   "page:/terms": {
-    "hash": "159c38ea45db0e79",
-    "date": "2026-09-13"
+    "hash": "eda2b00efa71ebf4",
+    "date": "2026-09-24"
   },
   "page:/refund": {
-    "hash": "6815bd0e4dcc3072",
-    "date": "2026-09-13"
+    "hash": "c2ff8141f41e0d77",
+    "date": "2026-09-24"
   },
   "page:/referral-program": {
-    "hash": "c7d043616e83f89f",
-    "date": "2026-09-13"
-  },
-  "page:/blog": {
-    "hash": "09c8657a9b00ab28",
-    "date": "2026-09-13"
-  },
-  "blogcat:accounts-and-proxies": {
-    "hash": "433315315a07d1d3",
-    "date": "2026-09-13"
+    "hash": "76d852ea0604a791",
+    "date": "2026-09-24"
   },
   "guide:buying-telegram-accounts": {
-    "hash": "df7b18a967510b6b",
-    "date": "2026-09-13"
+    "hash": "487dcf1435e4e4e8",
+    "date": "2026-09-24"
   },
   "guide:proxies-for-telegram-accounts": {
-    "hash": "8099d0472b924985",
-    "date": "2026-09-13"
+    "hash": "80009ca10def9357",
+    "date": "2026-09-24"
   },
   "guide:billing": {
     "hash": "5edf1796a1f6d0f0",
     "date": "2026-08-29"
   },
   "guide:account-manager": {
-    "hash": "d0935d88584b4b7e",
-    "date": "2026-08-29"
+    "hash": "0603cbb83d38d756",
+    "date": "2026-09-24"
   },
   "guide:account-protection": {
-    "hash": "0a24d30c9aa44f7b",
-    "date": "2026-09-23"
+    "hash": "c6f6c0285883bbe6",
+    "date": "2026-09-24"
   },
   "guide:spamblock-frozen-shadowban": {
-    "hash": "e06e984751534a09",
-    "date": "2026-09-23"
+    "hash": "3bd04c3d70f84db8",
+    "date": "2026-09-24"
   },
   "guide:profile-templates": {
-    "hash": "45e650e65ae2e840",
-    "date": "2026-08-29"
+    "hash": "5822904bcbd4d3c9",
+    "date": "2026-09-24"
   },
   "guide:active-warmup": {
-    "hash": "af613dffe2f0e24b",
-    "date": "2026-08-29"
+    "hash": "62384e0fbe6b4121",
+    "date": "2026-09-24"
   },
   "guide:channel-parser": {
     "hash": "1c78cf4e6b8026bc",
@@ -96,23 +88,23 @@
     "date": "2026-08-29"
   },
   "guide:neurocommenting": {
-    "hash": "99129cfed73dfa3f",
-    "date": "2026-08-29"
+    "hash": "8d2d305a851a3bf7",
+    "date": "2026-09-24"
   },
   "guide:neurodialogs": {
-    "hash": "93c33ff664322b9a",
-    "date": "2026-08-29"
+    "hash": "03d3c17dfeb3349f",
+    "date": "2026-09-24"
   },
   "guide:mass-reactions": {
-    "hash": "82fb7e28bd251838",
-    "date": "2026-08-29"
+    "hash": "51c61d0451bfadb4",
+    "date": "2026-09-24"
   },
-  "post:telegram-account-aging-claims-tested": {
-    "hash": "3f72e6d5b52bff29",
-    "date": "2026-09-13"
+  "guide:telegram-account-aging-claims-tested": {
+    "hash": "d9e0934095ce3f37",
+    "date": "2026-09-24"
   },
-  "post:telegram-session-killed-by-ip-change": {
-    "hash": "5e0c668038c894fe",
-    "date": "2026-09-13"
+  "guide:telegram-session-killed-by-ip-change": {
+    "hash": "808e00e627cc8cfa",
+    "date": "2026-09-24"
   }
 }

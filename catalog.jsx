@@ -101,7 +101,7 @@ const MODULES = [
     problem:
       "A fresh Telegram account with no history that starts posting comments on day one is the single most common way to lose a batch of accounts. The account has nothing behind it: no reading, no joins, no reactions, no reason to exist. Telegram notices.",
     does:
-      "Active Warmup has the account do human-shaped things — reading channels, opening dialogs, reacting, joining — on a schedule, in your timezone, before and alongside the modules that actually earn. It doesn't pause during an account's rest window; it drops to its most conservative floor and keeps going, because an account that goes completely silent for three days is its own signal.",
+      "Active Warmup has the account do human-shaped things — reading channels, opening dialogs, reacting, joining — on a schedule, in your timezone, before and alongside the modules that actually earn. Its schedule, intensity and action-specific age checks govern that activity. Supervise is configured separately in Accounts and gates only the three outreach modules.",
     steps: [
       ['Enrol', 'Turn it on per account. The starting intensity is picked from the account\'s real age — under a week Careful, under a month Normal, older than that Aggressive.'],
       ['Schedule', 'Activity only happens inside the windows you set, in the timezone you set, with optional random breaks so the pattern is not a metronome.'],
@@ -120,7 +120,7 @@ const MODULES = [
       ['Profile template', 'Bind a template so an enrolled account gets a face at the same time it gets a history.'],
       ['Live status', 'Per account: resting, in-window, next window, current caps, and a 30-day action history with the outcome of each one.'],
     ],
-    guard: 'While an account is inside its 3-day rest window, no setting overrides the floor: only reading-type actions fire, at Careful\'s numbers, with joins and messages capped to zero. Aggressive intensity and a fully-ticked action list change nothing until the window ends.',
+    guard: 'Keep the action-specific age checks, schedule and intensity caps in mind. Supervise in Accounts does not pause this module or impose a passive resting floor; it gates Neurocommenting, Neurodialogs and Mass Reactions only.',
   },
   {
     key: 'profile-templates',
@@ -659,7 +659,7 @@ const GUIDES = [
               ],
             },
           ]],
-          ['linkout', { href: '/blog/telegram-session-killed-by-ip-change', label: 'A dead session is not a banned account: how to tell them apart' }],
+          ['linkout', { href: '/guides/telegram-session-killed-by-ip-change', label: 'A dead session is not a banned account: how to tell them apart' }],
         ],
       },
       {
@@ -772,7 +772,7 @@ const GUIDES = [
             ". That is an affiliate link: we receive a share of what you spend there, and that is not why we name them - it is the provider our own Argentine accounts run through. Check that your provider actually offers the country before you buy the accounts.",
           ]],
           ['p', "The exact settings to use when generating your list:"],
-          ['linkout', { href: '/blog/telegram-session-killed-by-ip-change', label: 'Why a missing hold time kills sessions: one case, traced' }],
+          ['linkout', { href: '/guides/telegram-session-killed-by-ip-change', label: 'Why a missing hold time kills sessions: one case, traced' }],
           ['callout', [
             "Type: Sticky. Not rotating.",
             "This is the most important setting on this page, and an earlier version of this guide got it wrong. A rotating proxy changes its exit IP on a timer, underneath a session that is already logged in. To Telegram that looks like the account moving to a different address mid-session, which is one of the clearest signals it acts on.",
@@ -1009,7 +1009,7 @@ const GUIDES = [
         title: 'What this page is',
         blocks: [
           ['p', "Account Manager is the second item in the sidebar and the page every other module depends on. Accounts enter the system here, get a proxy here, and are checked here; the modules that earn — Neurocommenting, NeuroDialogs, Mass Reactions — draw from the pool this page maintains. It is included with any purchase because none of the others can run without it."],
-          ['p', "It is a single page, not a set of tabs. Everything below is a region of that one screen, in the order it appears, plus the five dialogs that open on top of it."],
+          ['p', "It is a single page, not a set of tabs. Everything below is a region of that screen, including the Accounts, Checks and Protection groups in its bulk actions menu."],
           ['callout', [
             "Everything on this page is explicit. None of the three checks runs on a schedule or in the background — each one happens because you pressed a button, and each is read-only on the Telegram side: no messages, no profile writes, nothing that could itself get an account flagged.",
           ]],
@@ -1024,10 +1024,10 @@ const GUIDES = [
             { name: 'Capability summary', holds: 'A banner counting how much of the pool has passed, failed or never had a capability check.' },
             { name: 'Shared-proxy warning', holds: 'Appears only when two or more active accounts sit behind the same proxy. Carries its own Reassign now button.' },
             { name: 'Status tiles', holds: 'Seven counts — Active, Busy, Cooldown, Needs Reauth, Banned, Flagged, Dead. Each one is also a filter for the list below.' },
-            { name: 'Bulk actions bar', holds: 'Eight actions over the current selection. Always visible; the buttons disable at zero selected rather than the bar disappearing.' },
-            { name: 'Account list', holds: 'One row per account: name, Comments, Last used, Added, Proxy, Days, Progress, Check, Status. Clicking a row opens its detail dialog.' },
+            { name: 'Bulk actions bar', holds: 'Three groups: Accounts, Checks and Protection. Delete accounts is at the bottom of Accounts.' },
+            { name: 'Account list', holds: 'One row per account: name, Protected, Comments, Last used, Added, Proxy, Days, Check, Status. Clicking a row opens its detail dialog.' },
             { name: 'Banned cleanup bar', holds: 'A floating bar at the bottom, only when the selection contains banned accounts.' },
-            { name: 'Dialogs', holds: 'Add account · Bulk import (Paste text / TData) · Reassign proxies · Reauth · Account detail (Overview / Profile).' },
+            { name: 'Dialogs', holds: 'Add account · Bulk import (Paste text / TData) · Reassign proxies · Reauthenticate · Account detail (Overview / Profile / Protection).' },
           ]],
         ],
       },
@@ -1164,7 +1164,7 @@ const GUIDES = [
                 ['Breakdown', 'Hovering the tile lists the reasons behind the number: floodwait, peerflood, profile update, discovery.'],
               ] },
             { id: 'ctl-tile-reauth', name: 'Needs Reauth', where: 'Status tiles', kind: 'tile', value: '1',
-              rows: [['Counts', 'Accounts whose status is disabled — a dead session. These are the only accounts the Reauth button will act on.']] },
+              rows: [['Counts', 'Accounts whose status is disabled because their working session needs recovery. Inspect the account and use the recovery flow with valid credentials.']] },
             { id: 'ctl-tile-banned', name: 'Banned', where: 'Status tiles', kind: 'tile', tone: 'bad', value: '0',
               rows: [['Counts', 'Accounts Telegram has banned. Selecting any of these brings up the cleanup bar at the bottom of the page.']] },
             { id: 'ctl-tile-flagged', name: 'Flagged', where: 'Status tiles', kind: 'tile', tone: 'warn', value: '0',
@@ -1185,10 +1185,9 @@ const GUIDES = [
             rows: [
               ['Comments', 'How many comments this account has posted. Clicking the number opens a histogram.'],
               ['Last used', 'When the engine last used this account.'],
-              ['Added', 'When the account entered the pool. This is the anchor every warmup calculation counts from.'],
+              ['Added', 'When the account was imported (added_at). Supervise counts its seven-day window from this timestamp.'],
               ['Proxy', 'The proxy currently assigned, with a warning marker when another active account shares it.'],
-              ['Days', 'Days rested before the first neurocommenting session, out of the required 3. Only populated while Auto-Warmup is on.'],
-              ['Progress', 'How far through the full 23-day warmup the account is — 3 resting days plus 20 ramp days. Reaches 100% once both are done.'],
+              ['Days', 'Supervise age as x/7, measured from import and capped at 7/7. A dash means the account has not been supervised.'],
               ['Check', 'The verdict from the last capability check. Hover for the raw result and when it ran.'],
               ['Status', 'The account\'s state in the pool. A dead capability verdict overrides it here, since such an account cannot be used whatever its status says.'],
             ],
@@ -1199,6 +1198,8 @@ const GUIDES = [
         id: 'bulk-actions',
         title: 'Acting on a selection',
         blocks: [
+          ['p', 'The menu groups actions under Accounts, Checks and Protection. Checks holds the health, proxy and capability checks. Protection holds Terminate other sessions, Reauthenticate, Download new tdata and Set 2FA, in that order.'],
+          ['linkout', { href: '/guides/account-protection#running-it', label: 'The four Protection actions and the five-step shield sequence' }],
           ['p', "Tick rows and the bar under the tiles comes alive. One bulk operation runs at a time — while one is in flight the rest disable, rather than letting several overlapping batches run at once."],
           ['controls', [
             {
@@ -1206,16 +1207,6 @@ const GUIDES = [
               rows: [
                 ['What it does', 'Applies a saved profile template across the selected accounts. The template itself is built on the Profile Templates page.'],
                 ['When to use it', 'After import, once accounts have rested — giving a batch a face is part of warming it up.'],
-              ],
-            },
-            {
-              id: 'ctl-reauth', name: 'Reauth', where: 'Bulk actions bar', kind: 'button', tone: 'warn', value: 'Reauth',
-              rows: [
-                ['What it does', 'Opens a dialog to upload a fresh tdata export, as a single zip containing exactly one tdata folder, replacing a dead session on an existing account.'],
-                ['Selection rule', 'Exactly one account, and its status must be disabled. Any other selection disables the button and the tooltip says why.'],
-                ['Safety', 'The new session is validated with a real connection — through this account\'s own proxy, using its existing api_id and api_hash — before anything is written. If that fails you get a clear error and the existing session is left untouched.'],
-                ['On success', 'The session string is replaced; api_id and api_hash are not. Status returns to active unless the account was deliberately paused, cooldowns are cleared, and both check timers reset so the next health and proxy checks run fresh instead of waiting out a stale five minutes.'],
-                ['When to use it', 'When an account lands in Needs Reauth and you still have a working tdata for it.'],
               ],
             },
             {
@@ -1230,22 +1221,20 @@ const GUIDES = [
               ],
             },
             {
-              id: 'ctl-warmup-on', name: 'Auto-Warmup ON', where: 'Bulk actions bar', kind: 'button', tone: 'warn', value: 'Auto-Warmup ON',
+              id: 'ctl-warmup-on', name: 'Supervise', where: 'Bulk actions · Accounts', kind: 'button', value: 'Supervise',
               rows: [
-                ['What it does', 'Turns on the per-account warmup lifecycle: a hard block on commenting, parsing and template application for the first 72 hours after the account was added, then a tightening daily comment cap from day 4 through day 23.'],
-                ['Default', 'Off. A newly added account is not warming up until you switch it on.'],
-                ['Anchored to', 'When the account was added, not when you flipped the switch. Turning it on for an already-aged account applies whatever stage its real age implies rather than re-locking it for three days.'],
-                ['Cost', 'A plain database write. No Telegram traffic, so it completes immediately.'],
-                ['When to use it', 'On every fresh batch, before anything else touches it.'],
+                ['What it does', 'Enables a seven-day supervision window that gates Neurocommenting, Neurodialogs and Mass Reactions until the account has rested.'],
+                ['Anchored to', 'The import timestamp, added_at. Enabling it later does not start a new seven-day timer; an account imported seven days ago already shows 7/7.'],
+                ['Days', 'The account list shows x/7, capped at 7/7. At seven days the supervision rest gate ends.'],
+                ['Once enabled', 'The seven-day rest lock runs until import plus seven days. There is no off toggle to bypass it.'],
+                ['Separate module', 'Active Warmup runs configured reading and activity. Supervise itself is a passive rest gate, not that module.'],
               ],
             },
             {
-              id: 'ctl-warmup-off', name: 'Auto-Warmup OFF', where: 'Bulk actions bar', kind: 'button', tone: 'bad', value: 'Auto-Warmup OFF',
+              id: 'ctl-delete-accounts', name: 'Delete accounts', where: 'Bulk actions · Accounts · bottom', kind: 'button', tone: 'bad', value: 'Delete accounts',
               rows: [
-                ['What it does', 'Removes the resting lockout and the ramp cap. The accounts become immediately available for commenting, parsing and template application at full limits.'],
-                ['Confirmation', 'Asks first, and says plainly that accounts flagged or banned as a result are on you.'],
-                ['Side effect', 'The Days and Progress columns go back to showing a dash, the same as an account that never opted in.'],
-                ['When to use it', 'On accounts that are genuinely already aged and that you have decided do not need the ramp.'],
+                ['What it does', 'Deletes the selected accounts after confirmation. Check the selection before confirming.'],
+                ['Where to find it', 'At the bottom of Accounts, below the other account actions.'],
               ],
             },
             {
@@ -1264,7 +1253,7 @@ const GUIDES = [
         id: 'one-account',
         title: 'One account up close',
         blocks: [
-          ['p', "Clicking a row opens its dialog, which has two tabs: Overview and Profile. Overview holds four blocks in order — Info, Proxy, Actions, Danger zone."],
+          ['p', "Clicking a row opens its dialog with Overview, Profile and Protection tabs. Overview holds four blocks in order — Info, Proxy, Actions, Danger zone."],
           ['controls', [
             {
               id: 'ctl-display-name', name: 'Display name', where: 'Detail → Overview → Info', kind: 'field', value: 'Acc 101',
@@ -1312,8 +1301,8 @@ const GUIDES = [
             "If you imported without proxies, run Reassign proxies now, before anything connects. One distinct proxy per account, or the request is refused outright.",
             "Select everything and press Check health. Anything that comes back banned on its first contact with a new IP was never going to survive; note the seller.",
             "Select everything again and press Check capability. This is the check that catches a frozen account while every other signal still reads clean.",
-            "Select the survivors and press Auto-Warmup ON. It is off by default, and this is the step that buys the accounts their first 72 hours of rest.",
-            "Wait out the rest, then use Apply template to give the batch a face.",
+            "Select the survivors and press Supervise in Accounts. The seven-day window is measured from import, and the Days column shows x/7.",
+            "Use the Protection group to complete the five ordered security steps, and apply your profile template. Wait until Supervise reaches 7/7 before running Neurocommenting, Neurodialogs or Mass Reactions.",
           ]],
           ['p', "After that the pool is ready for a module to claim from. The tiles are the thing to watch day to day: a rising Cooldown count is pacing, a rising Dead count is the accounts themselves."],
           ['note', "Account changes reach the engine on their own: it re-reads the pool from the database every poll round, so an account you add, park or re-proxy is picked up within one poll interval without you doing anything else.",
@@ -1329,10 +1318,10 @@ const GUIDES = [
     group: 'module',
     short: 'Make a bought session yours',
     title: 'How to protect a Telegram account after purchase: the full Atreox scheme',
-    summary: "A bought account arrives logged in on the seller's key. This is the scheme that turns that shared session into one only you hold — pinned proxy, settling rest, two resets, your own session, 2FA — and where each step lives in the panel.",
+    summary: "A bought account arrives logged in on the seller's key. This is the scheme that turns that shared session into one only you hold — two resets, your own working session, a separate backup, and 2FA — and where each step lives in the panel.",
     seoTitle: 'Protect a bought Telegram account: the full scheme',
     seoDescription:
-      "A purchased Telegram session shares the seller's auth key. The five-step Atreox protection scheme — pinned proxy, settling, terminate other sessions, own session, 2FA — and how to run it from the Account Manager.",
+      "A purchased Telegram session shares the seller's auth key. The five-step Atreox protection scheme — terminate, reauthenticate, terminate again, export a new backup, set 2FA — and how to run it from the Account Manager.",
     module: null,
     video: null,
     body: [
@@ -1343,131 +1332,120 @@ const GUIDES = [
           ['p', "When you buy a Telegram account you do not get a fresh login — you get the seller's login. Whether it arrives as a tdata folder or a session string, what is inside is one authorization key: the credential Telegram created when the account was first signed in, on the seller's device. Importing it into ATREOX hands you that same key. Nothing about the purchase creates a new one."],
           ['p', "This is the UseCurrentSession model. The account is authorized once, and every place that holds a copy of that session — your import, and any copy the seller kept — is the same authorization as far as Telegram is concerned. So the day you import it, the seller can still be logged in beside you, reading and acting on the account, with no error or warning to say so."],
           ['callout', [
-            "Protection is the process of ending that. It makes the session exclusively yours: it removes every authorization except one, and that one is created by you, on your proxy, and locked with a password only you know. Until you have done it, treat a freshly bought account as shared.",
+            "Protection is the process of ending that. It makes the session exclusively yours: it removes the seller's authorizations, creates your own working and backup sessions on your proxy, and adds a password only you know. Until you have done it, treat a freshly bought account as shared.",
           ]],
         ],
       },
       {
         id: 'the-five-steps',
-        title: 'The five steps, in order',
+        title: 'The five successful steps, in order',
         blocks: [
-          ['p', "The scheme is five measures in a fixed order. Each depends on the one before it, and the order is what the Protected shield counts. An optional sixth step gives you a spare."],
+          ['p', "Assign one stable pinned proxy before starting. The shield counts successful operations in the order below; assigning a proxy or waiting does not earn a protection step."],
           ['steps', [
-            "Give the account one stable, pinned proxy. Pinned means it holds a single exit IP for the whole session instead of rotating it underneath a live connection. This is measure 1, and every later step runs over it.",
-            "Let it settle. Rest the account for 2 to 24 hours before you touch its sessions — 24 hours is the recommended window. This is measure 2, the Settling state.",
-            "Terminate all other sessions. From the imported session, end every authorization except the one in use. This clears the seller's older devices and any stale logins.",
-            "Create your own fresh session. Sign the account in again, on your proxy, producing a new authorization key that no one else has ever held.",
-            "Set two-step verification (2FA). A password of your own, so the account cannot be re-added or reset by whoever registered it.",
+            "Terminate other sessions from the imported session. Telegram ends every other authorization; the imported key itself remains in use.",
+            "Reauthenticate. ATREOX creates a new authorization and switches the working account to that new session.",
+            "After the new session is at least 24 hours old, press Terminate other sessions again. This time the new session removes the imported authorization as well.",
+            "Download new tdata. ATREOX creates a separate backup session and exports its tdata and session files. The engine keeps using the working session from step 2.",
+            "Set 2FA. Supply the current password when one already exists, then set your own two-step verification password and keep it securely.",
           ]],
-          ['note', "Optional step 6: once the account is protected, export a clean backup session. Keep two — a working session the engine runs on, and a reserve you store untouched. The Backup and recovery section below explains why that reserve is cheap insurance."],
-          ['callout', [
-            "Steps 1 and 2 — the pinned proxy and the settling rest — are applied today. Steps 3, 4 and 5 are the scheme the panel is built around: the buttons for them are in place and their execution is being enabled. Where a step's executor is still rolling out, the control says so rather than pretending it ran — so do not assume an account is fully reset until its shield says so.",
-          ]],
+          ['note', "Shield 5/5 requires all five successful steps in this order. A click, queued job, failed attempt, or waiting period never counts as a completed step. Repeating or performing an operation out of order cannot skip the sequence."],
         ],
       },
       {
         id: 'why-second-reset-24h',
-        title: 'Why it takes two resets, 24 hours apart',
+        title: 'Why the second reset waits for 24 hours',
         blocks: [
-          ['p', "There is a catch in step 3 that the scheme is designed around, and it is worth understanding because it is why protection is not instant."],
-          ['p', "A brand-new session is not allowed to terminate the others straight away. For roughly the first 24 hours of its life, Telegram refuses the request with FRESH_RESET_AUTHORISATION_FORBIDDEN — a young session cannot reset the rest. This is Telegram's own anti-theft rule: if someone steals a login and immediately kicks everyone else off, the delay buys the real owner a day to notice."],
-          ['p', "So the reset happens in two passes. The first terminate-all, run from the imported session, clears the seller's older devices — but the imported session is still the seller's key, so that key is not gone yet. Then you create your own session (step 4) and wait. About 24 hours later a second terminate-all, run from your new session, is finally allowed to revoke everything else, the imported session included. That second pass is the one that cuts the key you shared with the seller."],
+          ['p', "Telegram prevents a new session from resetting the others for its first 24 hours, returning FRESH_RESET_AUTHORISATION_FORBIDDEN. The timer is the age of the Telegram authorization, not the date the account was imported into ATREOX."],
+          ['p', "The first reset clears other devices but leaves the imported key alive. Reauthenticate creates and switches to your own key. The second reset, issued from that key after Telegram allows it, revokes the imported authorization. This is the step that separates the working session from the seller's copy."],
           ['kv', [
-            ['First reset', "From the imported (seller) session. Clears older authorizations. The seller's key is still live."],
-            ['Wait ~24h', 'A fresh session may not reset the others until it has aged past FRESH_RESET_AUTHORISATION_FORBIDDEN.'],
-            ['Second reset', 'From your own new session. Revokes the imported session. The account is now on a key only you hold.'],
+            ['First reset', 'Run Terminate other sessions from the imported authorization.'],
+            ['New authorization', 'Run Reauthenticate, then let that new session age for at least 24 hours.'],
+            ['Second reset', 'Run Terminate other sessions again from the new working authorization.'],
           ]],
-          ['note', "This is why the scheme schedules the second reset for you rather than asking you to remember it. The 24-hour timer starts from the settling deadline, and the pipeline holds the job until it is due."],
+          ['note', "If Telegram still rejects a reset, leave the account on its stable proxy and retry when the restriction expires. The failed operation does not advance the shield. Run each action explicitly and check its result before continuing."],
         ],
       },
       {
         id: 'the-protected-shield',
         title: 'The Protected shield',
         blocks: [
-          ['p', "Every account carries a Protected shield, shown as its own column in the Account Manager list — right after the account name and before Comments. It is a running score of how much of the scheme is done."],
+          ['p', "The Protected column is beside the account name. Its shield counts five ordered, successful protection operations and opens the details of what has completed and what remains."],
           ['controls', [
             {
               id: 'ctl-shield-partial', name: 'Protected shield — partial', where: 'Account list · after the name', kind: 'badge', value: 'Shield 2/5',
               rows: [
-                ['What it shows', 'A hollow shield in a grey ring, with a count out of five. Some measures are applied and some are not yet.'],
-                ['Reading it', 'The number is how many of the five measures are done. A fresh import that has a pinned proxy and a settling window set reads 2 of 5.'],
-                ['Click it', 'Opens a list of all five measures with a done or pending tick against each, plus the settling countdown while it is running.'],
-                ['Details link', 'The grey shield’s tooltip ends in a Details link that opens this guide.'],
+                ['What it shows', 'A partial shield with the number of completed steps out of five. At 2/5, the first termination and reauthentication have succeeded; the second termination, backup and 2FA remain.'],
+                ['Reading it', 'Only confirmed successes count. A stable proxy, Supervise, a settling period or an existing 2FA password alone does not complete the sequence.'],
+                ['Details link', 'Open the shield details to see the completed and pending steps and the link to this guide.'],
               ],
             },
             {
               id: 'ctl-shield-protected', name: 'Protected shield — full', where: 'Account list · after the name', kind: 'badge', tone: 'ok', value: 'Shield 5/5',
               rows: [
-                ['What it shows', 'A solid shield in a blue ring. Every one of the five measures is applied: the account is on a key only you hold, behind a pinned proxy, with 2FA set.'],
-                ['When it turns', 'Only at five of five. Four of five is still a grey, hollow shield — the scheme is not finished until the last measure lands.'],
+                ['What it shows', 'All five operations succeeded in order: Terminate, Reauthenticate, Terminate again, Download new tdata, Set 2FA.'],
+                ['When it turns', 'Only after the final successful step. A failed or out-of-order operation does not award full protection.'],
               ],
             },
           ]],
-          ['p', "The column header, Protected, carries an info tooltip that summarises the five-step scheme and links back to this guide. The shield reads its state from data already loaded with the account list, so it is always current without a separate check."],
+          ['p', "Protection records session security. Supervise is a separate seven-day rest gate for outreach, and neither replaces the other."],
         ],
       },
       {
         id: 'running-it',
-        title: 'Running it: the Protect button',
+        title: 'Running it: four Protection actions',
         blocks: [
-          ['p', "One button runs the whole scheme. Select the accounts, open the Protection group in the Account Manager bulk actions bar, and press Protect."],
+          ['p', "Select the accounts and open Protection in the bulk actions menu. Its four buttons appear in this order. Run the termination button twice at the points described above; each operation reports its own result."],
           ['controls', [
             {
-              id: 'ctl-protect', name: 'Protect (run pipeline)', where: 'Bulk actions bar · Protection group', kind: 'button', value: 'Protect',
+              id: 'ctl-terminate-sessions', name: 'Terminate other sessions', where: 'Bulk actions · Protection', kind: 'button', value: 'Terminate other sessions',
               rows: [
-                ['What it does', 'Runs the protection pipeline over the selected accounts: confirms the pinned proxy (measure 1), sets or checks the settling window (measure 2), and schedules the session reset, own-session and 2FA steps (measures 3 to 5) in order.'],
-                ['It replaces Supervise', 'This is the button that used to be Supervise. Auto-Warmup, which Supervise used to toggle, now lives in the Accounts group as its own switch.'],
-                ['Safe to press twice', 'The action is idempotent. Pressing it again picks up wherever the account is, never repeats a completed step, and never terminates the last remaining session.'],
-                ['Rolling out', 'Measures 1 and 2 apply immediately. The executors for measures 3 to 5 are being enabled; until one is live for your account, Protect records the step as pending and the control for it is marked as such rather than acting silently.'],
-                ['When to use it', 'On every batch, once it has a pinned proxy and has rested. It is the single entry point to the whole scheme.'],
+                ['What it does', 'Uses Telegram ResetAuthorizations to terminate every authorization except the current working session.'],
+                ['Use it twice', 'First from the imported session, then from the new working session after reauthentication and the 24-hour restriction.'],
+                ['Fresh session', 'Telegram refuses this operation during the first 24 hours of a new authorization. A refusal is reported and does not advance protection.'],
               ],
             },
             {
-              id: 'ctl-protect-reauth', name: 'Reauth', where: 'Bulk actions bar · Protection group', kind: 'button', tone: 'warn', value: 'Reauth',
+              id: 'ctl-protect-reauth', name: 'Reauthenticate', where: 'Bulk actions · Protection', kind: 'button', value: 'Reauthenticate',
               rows: [
-                ['What it does', 'Opens the reauth flow to replace a dead session from a fresh tdata export, single or in a batch. It sits in the Protection group because reauthorizing is part of keeping a session yours.'],
+                ['What it does', 'Creates a fresh Telegram authorization and switches the account to the new working session after it is validated.'],
+                ['Credentials', 'The existing working session approves the new login. Provide the current 2FA password if the account requires it.'],
+                ['On failure', 'The operation reports the error; a failed login never counts as a completed protection step. A dead session cannot approve a new login; recover it through the existing tdata upload recovery flow first.'],
               ],
             },
             {
-              id: 'ctl-terminate-sessions', name: 'Terminate other sessions', where: 'Bulk actions bar · Protection group', kind: 'button', tone: 'plain', value: 'Terminate other sessions',
+              id: 'ctl-download-session', name: 'Download new tdata', where: 'Bulk actions · Protection', kind: 'button', value: 'Download new tdata',
               rows: [
-                ['What it will do', 'Measure 3, on demand: end every authorization on the account except the one in use.'],
-                ['Status', 'Rolling out. The control is in the Protection group and shows as coming soon until its executor is enabled. Protect schedules this step in the meantime.'],
+                ['What it does', 'Creates a separate backup session and exports tdata and session files for it.'],
+                ['Working session', 'The engine keeps its current working authorization. Creating this backup does not switch the active session.'],
+                ['When to run it', 'After the second termination succeeds, so that termination does not revoke the backup you just created. Store the download securely and keep it idle.'],
               ],
             },
             {
-              id: 'ctl-set-2fa', name: 'Set 2FA', where: 'Bulk actions bar · Protection group', kind: 'button', tone: 'plain', value: 'Set 2FA',
+              id: 'ctl-set-2fa', name: 'Set 2FA', where: 'Bulk actions · Protection', kind: 'button', value: 'Set 2FA',
               rows: [
-                ['What it will do', 'Measure 5: set two-step verification with a password of yours, so the account cannot be reset by whoever registered it.'],
-                ['Status', 'Rolling out. Shown as coming soon until enabled.'],
-              ],
-            },
-            {
-              id: 'ctl-download-session', name: 'Download session / tdata', where: 'Bulk actions bar · Protection group', kind: 'button', tone: 'plain', value: 'Download session',
-              rows: [
-                ['What it will do', 'Export a clean backup session — the optional sixth step — so you hold one working copy and one reserve.'],
-                ['Status', 'Rolling out. Shown as coming soon until enabled.'],
+                ['What it does', 'Enter your new Telegram two-step verification password, its confirmation and an optional hint. If a password already exists, supply the current one to change it.'],
+                ['Completion', 'A successful password change after the first four successful steps completes Shield 5/5.'],
               ],
             },
           ]],
-          ['p', "Per-account progress is on the account itself. Open any account and its detail dialog has a Protection tab: the five measures with their current state, and the full history of every protection step that has run, newest first."],
+          ['p', "Open an account's Protection detail tab for the recorded results. Confirm success before moving to the next step; the shield reflects the completed sequence, not the number of times you pressed a button."],
         ],
       },
       {
         id: 'backup-and-recovery',
         title: 'Backup session and recovery after de-authorization',
         blocks: [
-          ['p', "Two sessions per account is the habit that turns a scare into a five-minute fix. One is the working session the engine runs on. The other is a reserve you export once, after protection, and never touch — its own clean copy of the account's login, stored away from everything that runs."],
+          ['p', "Keep the backup from Download new tdata separate from the working session. It is a new authorization, not a copy of the working key. The engine does not switch to it during export. Store its files securely and keep it idle until recovery is needed."],
           ['p', "The reason is a failure that looks worse than it is. A session can stop working overnight with the account behind it completely intact — most often when a proxy's exit IP moves under a live connection and Telegram reads the same key arriving from two places at once. It revokes the key and returns AUTH_KEY_DUPLICATED. The panel can only show you that the session stopped; at a glance it looks like a ban."],
           ['callout', [
-            "A killed session is not a lost account. AUTH_KEY_DUPLICATED revokes the login, not the account — a fresh login creates a fresh key and the account carries on. That is exactly what the reserve session, or a new reauth from tdata, is for: you re-log in, you do not start over.",
+            "A killed session is not a lost account. AUTH_KEY_DUPLICATED revokes the login, not the account — a fresh login creates a fresh key and the account carries on. A valid reserve session or a new login can restore access. Fix the proxy behavior before reconnecting, and verify the recovered session before using the account again.",
           ]],
           ['plink', [
             "The full mechanism — the exact error, the two ways it happens, and one case traced from the proxy setting to the moment the session was killed — is in ",
-            { href: '/blog/telegram-session-killed-by-ip-change#the-error', text: 'why Telegram sessions die on a moving IP' },
+            { href: '/guides/telegram-session-killed-by-ip-change#the-error', text: 'why Telegram sessions die on a moving IP' },
             ". Read it before you blame a seller for an account that a proxy setting killed.",
           ]],
-          ['note', "The rule that prevents most of this: one live session, one stable pinned proxy. Protection sets that up, and the proxy guard keeps a protected account from being moved onto a different proxy identity without an explicit override."],
+          ['note', "The rule that prevents most of this: one live session, one stable pinned proxy. Keep each working session on its assigned stable proxy and leave the separate backup idle."],
           ['linkout', { href: '/guides/spamblock-frozen-shadowban', label: 'When it goes wrong: spamblock, freeze and shadow-ban' }],
         ],
       },
@@ -1561,7 +1539,7 @@ const GUIDES = [
           ]],
           ['plink', [
             "Write-bans in particular travel with the proxy. The traced case, the exact error a moving exit produces, and the setting that prevents it are in ",
-            { href: '/blog/telegram-session-killed-by-ip-change', text: 'why Telegram sessions die on a moving IP' },
+            { href: '/guides/telegram-session-killed-by-ip-change', text: 'why Telegram sessions die on a moving IP' },
             ".",
           ]],
           ['linkout', { href: '/guides/account-protection', label: 'The protection scheme that prevents most of this' }],
@@ -1671,16 +1649,15 @@ const GUIDES = [
               ],
             },
           ]],
-          ['p', "Three things can make an individual account come back unchanged, and all three are reported per account rather than failing the batch:"],
+          ['p', "These conditions can leave an account unchanged; each is reported per account rather than failing the batch:"],
           ['table', {
             head: ['Reason', 'What it means', 'What to do'],
             rows: [
-              ['Resting', 'The account is inside the 72-hour lockout that Auto-Warmup applies on the Accounts page. Template application is blocked for the whole window, and the message says how many hours are left.', 'Wait it out, or apply to the rest of the batch and come back.'],
               ['Rate limited', 'This account had a profile change less than an hour ago. The message says roughly how many minutes remain.', 'Retry after the hour. This is per account, not pool-wide.'],
               ['Floodwait', 'Telegram asked the engine to slow down. Three of these in a row pauses the run for 30 minutes.', 'Nothing — it resumes on its own.'],
             ],
           }],
-          ['p', "Note the asymmetry in the resting rule: the 72-hour lockout blocks the bulk template path only. Editing one account's profile by hand on the Accounts page is deliberately still allowed during rest."],
+          ['p', "Supervise gates outreach in Neurocommenting, Neurodialogs and Mass Reactions. Template application follows its own profile-change rate limits."],
         ],
       },
       {
@@ -1710,7 +1687,7 @@ const GUIDES = [
             "Fill in Name and, if you want one, Surname. Both go on every account identically.",
             "Write the bio and watch the second counter, the interpolated one, not the first. That is the number Telegram sees.",
             "Add an avatar if you have one. It is optional, and a template with no picture still applies names and bio.",
-            "Go to the Accounts page, select a batch that is past its 72-hour rest, and use Apply template.",
+            "Go to the Accounts page, select the batch, and use Apply template.",
           ]],
           ['p', "If you are running more than one niche, build more than one template. One template across the whole pool gives every account the same face, which is fine for a small batch and obvious on a large one."],
           ['note', "Templates are also used by Active Warmup. Its Gradual profile updates action re-applies an account’s assigned template on a schedule, through this same pipeline and these same cooldowns — which is why that action stays switched off until a template exists to apply.",
@@ -1740,7 +1717,7 @@ const GUIDES = [
           ['p', "Active Warmup has an account do human-shaped things — read channels, scroll, mark things read, react, join — so that when it eventually starts commenting it has a history behind it instead of nothing. It is the opposite motion to the lockout on the Accounts page: that one says do not work yet, this one says do something human meanwhile."],
           ['p', "Enrolling an account supervises it indefinitely, not for one run. It works only inside its schedule window, gets lighter as it matures, and stops when you disable it."],
           ['callout', [
-            "Three different things in this panel are called warmup, and they are genuinely separate mechanisms. On the Dashboard, the Warmup switch beside Start is an owner-wide ramp on posting rate — off by default. On the Accounts page, Auto-Warmup ON/OFF is the per-account lockout: 72 hours of no commenting, then a tightening comment cap through day 23 — off by default. This page is the third: the account doing human activity, also off by default. All three are opt-in, all three are switched on separately, and they compose rather than replace each other.",
+            "Active Warmup is this module: accounts perform the reading and activity you configure. Supervise in Accounts is separate: it gates Neurocommenting, Neurodialogs and Mass Reactions until seven days after import. The Dashboard Warmup switch is a separate posting-rate ramp. Configure each where it lives; enabling one does not enable the others.",
           ]],
         ],
       },
@@ -1750,7 +1727,7 @@ const GUIDES = [
         blocks: [
           ['p', "Nine sections, with a jump-nav across the top in this order."],
           ['map', [
-            { name: 'Control', holds: 'Running/stopped state, four counts — Supervised, Active now, Resting, Outside window — the per-account status list, and the Enable button.' },
+            { name: 'Control', holds: 'Running/stopped state, enrollment and activity counts, the per-account status list, and the Enable button.' },
             { name: 'Accounts', holds: 'Which accounts the configuration below applies to when you press Enable. Replaced by a single account when you are editing one already enrolled.' },
             { name: 'Intensity', holds: 'Auto-adapt by account stage, and the manual preset picker it hides.' },
             { name: 'Schedule', holds: 'Activity windows, client timezone, random breaks.' },
@@ -1776,9 +1753,9 @@ const GUIDES = [
               ],
             },
             {
-              id: 'ctl-stat-tiles', name: 'Supervised / Active now / Resting / Outside window', where: 'Control', kind: 'tile', value: '12',
+              id: 'ctl-stat-tiles', name: 'Supervised / Active now / Outside window', where: 'Control', kind: 'tile', value: '12',
               rows: [
-                ['What they count', 'Supervised is everything enrolled. Active now is what is working this moment. Resting is accounts inside the Accounts page’s 72-hour lockout, which forces this module down to its floor. Outside window is accounts idle because their schedule is closed.'],
+                ['What they count', 'Supervised is everything enrolled in Active Warmup. Active now is what is working this moment. Outside window is accounts idle because their schedule is closed. This enrollment count is separate from Supervise in Accounts.'],
                 ['Module state', 'The module reads as running whenever at least one account is supervised, and stopped when none is.'],
               ],
             },
@@ -2012,11 +1989,11 @@ const GUIDES = [
       },
       {
         id: 'floors',
-        title: 'Two things you cannot configure past',
+        title: 'Limits that still apply',
         blocks: [
-          ['p', "Most of this page is yours to set. Two overrides are not, and both are enforced in the engine rather than left to the form."],
+          ['p', "Your schedule and intensity settings work alongside action-specific age checks and the maintenance ceiling. These are enforced in the engine."],
           ['plates', [
-            { tone: 'bad', label: 'The resting floor', text: "While an account is inside the Accounts page’s 72-hour lockout, this module drops to its floor no matter what is configured: Careful’s numeric caps, joins and messages forced to zero, and only Reading actions allowed. Aggressive intensity and every action switched on have no effect during that window." },
+            { tone: 'warn', label: 'Action-specific checks', text: "Each action keeps its own minimum age and safety requirements. Choosing an aggressive preset does not bypass those checks. The Supervise gate in Accounts applies to the three outreach modules, not to Active Warmup." },
             { tone: 'ok', label: 'Maintenance graduation', text: "Once an account has been enrolled here for 60 days, its caps are forced down to the Maintenance preset — 2 an hour, 6 a day, one join, one message — regardless of preset, auto-adapt or progressive increase. It is a ceiling for efficiency, not a safety floor, and it never disables the account." },
           ]],
           ['p', "A run of three consecutive floodwaits pauses that one account for 30 minutes. It does not stop the others — every account runs its own schedule."],
@@ -2035,8 +2012,8 @@ const GUIDES = [
             "Leave the action checklist on its Reading-only default, Economy mode on, and own channels off.",
             "Press Enable. The accounts are supervised from that moment, inside their windows, ramping from 30% of their caps to full over the first week.",
           ]],
-          ['p', "Watch the Control section rather than the logs day to day: Resting means the lockout on the Accounts page is still in force, Outside window means the schedule is simply closed, and Active with an intensity beside it means the account is working."],
-          ['note', "Turning an account’s warmup off is done from the status list on this page, not from the Accounts page. The Auto-Warmup buttons there control the separate 72-hour lockout, and switching those off does not stop an account being supervised here.",
+          ['p', "Watch the Control section day to day: Outside window means the schedule is closed, and Active with an intensity beside it means the account is working."],
+          ['note', "Stop Active Warmup from the status list on this page. Changing Supervise in Accounts changes only the outreach rest gate; it does not change enrollment in this module.",
           ],
           ['linkout', { href: '/guides/channel-parser', label: 'Next: find channels worth commenting in' }],
         ],
@@ -2531,7 +2508,7 @@ const GUIDES = [
                 ['What it does', 'Ramps an account’s hourly and daily comment caps up gradually instead of letting a fresh account post at the full rate from its first hour.'],
                 ['Default', 'Off. Without it every account posts at the full configured rate immediately.'],
                 ['The ramp', 'Fourteen days, counted from when the account was added, moving linearly from 1 comment an hour and 3 a day up to the engine’s configured ceiling. Never below 1, never above the ceiling, and an account already older than fourteen days simply sits at the ceiling.'],
-                ['Not the same warmup', 'Three separate things carry this name. This switch is the rate ramp. The Accounts page’s Auto-Warmup is a per-account 72-hour lockout with its own 23-day cap schedule. Active Warmup is a whole module that has accounts read and react. All three are off by default and switched on separately.'],
+                ['Not the same warmup', 'This switch is the posting-rate ramp. Supervise in Accounts is the seven-day outreach rest gate measured from import. Active Warmup is the separate module that has accounts read and react.'],
                 ['Takes effect', 'Next poll round. No restart.'],
               ],
             },
@@ -2572,7 +2549,7 @@ const GUIDES = [
               rows: [
                 ['What it does', 'Moves the account into the commenting pool and claims it for this module.'],
                 ['One module at a time', 'An account may be driven by one behavioural module only. One already held by NeuroDialogs, Mass Reactions or Active Warmup is refused and named in the message, and the rest of the batch still goes through — a refusal never fails the whole request.'],
-                ['Also refused', 'An account currently reserved by a running discovery search, and one still inside the Accounts page’s 72-hour resting window. Both come back as a reason rather than an error, and both clear on their own.'],
+                ['Also refused', 'An account currently reserved by discovery, or one still within its seven-day Supervise window, is refused with a reason. The supervision window is measured from import, not when supervision was enabled.'],
                 ['Removing releases it', 'Taking an account out of the pool frees it for another module immediately.'],
                 ['Unhealthy accounts', 'An account that goes banned or dead-session while pooled is pulled out automatically and reported, rather than sitting there posting into nothing.'],
               ],
@@ -3788,6 +3765,34 @@ const BLOCK_KINDS = [
   'checklist', 'note', 'bullets', 'linkout', 'toolcta', 'plink',
 ];
 
+
+/* Public guide folders are shared by the index, reader and prerenderer. */
+GUIDES.push(...window.RESEARCH_GUIDES.map(g => ({
+  ...g, url: g.slug, group: 'research', module: null, video: null,
+  path: g.slug === 'telegram-account-aging-claims-tested' ? '/blog/' + g.slug : undefined,
+  short: g.slug === 'telegram-account-aging-claims-tested' ? 'Aging claims, tested' : 'When a session dies',
+  navTitle: g.slug === 'telegram-account-aging-claims-tested' ? 'Account aging: our test' : 'Session killed by a moving IP',
+})));
+const GUIDE_FOLDER_SPECS = [
+  { id: 'start', title: 'Start here', lede: 'Choose accounts, connect proxies, and set up your plan.',
+    urls: ['buying-telegram-accounts', 'proxies-for-telegram-accounts', 'billing', 'telegram-account-aging-claims-tested'] },
+  { id: 'protection', title: 'Protection', lede: 'Prepare your accounts, secure their sessions, and keep them ready.',
+    urls: ['account-manager', 'account-protection', 'spamblock-frozen-shadowban', 'profile-templates', 'active-warmup', 'telegram-session-killed-by-ip-change'] },
+  { id: 'modules', title: 'Modules', lede: 'Find your audience and run each outreach module.',
+    urls: ['channel-parser', 'group-parser', 'neurocommenting', 'neurodialogs', 'mass-reactions'] },
+];
+const GUIDE_NAV_TITLES = {
+  'account-protection': 'Account protection',
+  'spamblock-frozen-shadowban': 'Spamblock, frozen & shadowban',
+  'profile-templates': 'Profile templates',
+  'active-warmup': 'Active Warmup',
+  neurocommenting: 'Neurocommenting', neurodialogs: 'Neurodialogs', 'mass-reactions': 'Mass Reactions',
+};
+for (const g of GUIDES) if (GUIDE_NAV_TITLES[g.url]) g.navTitle = GUIDE_NAV_TITLES[g.url];
+const GUIDE_FOLDERS = GUIDE_FOLDER_SPECS.map(f => ({
+  ...f, guides: f.urls.map(url => GUIDES.find(g => g.url === url)),
+}));
+
 const GUIDE_BY_SLUG = Object.fromEntries(GUIDES.map(g => [g.slug, g]));
 const GUIDE_BY_URL  = Object.fromEntries(GUIDES.map(g => [g.url, g]));
 const GUIDE_BY_MODULE = Object.fromEntries(
@@ -3800,12 +3805,14 @@ const GUIDE_BY_MODULE = Object.fromEntries(
    files can never point at each other wrongly. Takes a guide or a slug. */
 const guideHref = g => {
   const guide = typeof g === 'string' ? GUIDE_BY_SLUG[g] : g;
-  return guide ? '/guides/' + guide.url : '/guides';
+  return guide ? (guide.path || '/guides/' + guide.url) : '/guides';
 };
 
 /* Reverse of the above, for the router: a pathname back to a guide.
    Unknown last segments return null, which the page treats as the index. */
 const guideFromPath = pathname => {
+  const legacy = GUIDES.find(g => g.path === (pathname || '').replace(/\/$/, ''));
+  if (legacy) return legacy;
   const m = /^\/guides\/([^/?#]+)\/?$/.exec(pathname || '');
   if (!m) return null;
   let seg = m[1];
@@ -3817,7 +3824,7 @@ Object.assign(window, {
   MODULES, MODULE_BY_KEY, PRICED_MODULES, INCLUDED_MODULES,
   FULL_MONTHLY, FULL_YEARLY, YEARLY_SAVING, CHEAPEST_MODULE, eur,
   PIPELINE,
-  GUIDES, GUIDE_BY_SLUG, GUIDE_BY_URL, GUIDE_BY_MODULE,
+  GUIDES, GUIDE_FOLDERS, GUIDE_BY_SLUG, GUIDE_BY_URL, GUIDE_BY_MODULE,
   guideHref, guideFromPath,
   TOOLS, TOOL_BY_ID, BLOCK_KINDS,
 });

@@ -44,9 +44,9 @@
       /* slug -> address, written from catalog.jsx by prerender.mjs.
          An unknown slug is left alone: the index is a better landing
          than a 404 on a guide that does not exist. */
-      var moved = /* SLUG-MAP */{"buying-accounts":"buying-telegram-accounts","proxies":"proxies-for-telegram-accounts","billing":"billing","account-manager":"account-manager","account-protection":"account-protection","spamblock-frozen-shadowban":"spamblock-frozen-shadowban","profile-templates":"profile-templates","active-warmup":"active-warmup","channel-parser":"channel-parser","group-parser":"group-parser","neurocommenting":"neurocommenting","neurodialogs":"neurodialogs","mass-reactions":"mass-reactions"}/* /SLUG-MAP */;
+      var moved = /* SLUG-MAP */{"buying-accounts":"buying-telegram-accounts","proxies":"proxies-for-telegram-accounts","billing":"billing","account-manager":"account-manager","account-protection":"account-protection","spamblock-frozen-shadowban":"spamblock-frozen-shadowban","profile-templates":"profile-templates","active-warmup":"active-warmup","channel-parser":"channel-parser","group-parser":"group-parser","neurocommenting":"neurocommenting","neurodialogs":"neurodialogs","mass-reactions":"mass-reactions","telegram-account-aging-claims-tested":"/blog/telegram-account-aging-claims-tested","telegram-session-killed-by-ip-change":"telegram-session-killed-by-ip-change"}/* /SLUG-MAP */;
       if (!moved[slug]) return;
-      location.replace('/guides/' + moved[slug]);
+      location.replace(moved[slug].charAt(0) === '/' ? moved[slug] : '/guides/' + moved[slug]);
     } catch (_) {}
   })();
   </script>
@@ -1097,18 +1097,31 @@
     }
 
     /* guide reader: the rail of every other guide */
-    .guide-nav-item {
-      background: none;
-      cursor: pointer;
-      transition: background 0.16s ease, border-color 0.16s ease;
-    }
-    .guide-nav-item:hover { background: rgba(0,217,255,0.07); }
-    .guide-nav-item:focus-visible { outline: 1px solid var(--g); outline-offset: 1px; }
+    .guide-nav-folders { min-width: 0; padding: 10px; scrollbar-width: thin; scrollbar-color: rgba(0,217,255,.25) transparent; overscroll-behavior: contain; }
+    .guide-nav-folders.is-desktop { flex: 0 0 250px; position: sticky; top: 92px; max-height: calc(100vh - 190px); max-height: calc(100dvh - 190px); overflow-y: auto; }
+    .guide-nav-folders.is-compact { margin-top: 8px; max-height: 65vh; max-height: 65dvh; overflow-y: auto; }
+    .guide-nav-compact { flex: 1 1 100%; width: 100%; margin-bottom: 14px; }
+    .guide-folder { margin-bottom: 6px; border: 1px solid rgba(0,217,255,.10); border-radius: 7px; overflow: hidden; background: rgba(0,217,255,.025); }
+    .guide-folder:last-child { margin-bottom: 0; }
+    .guide-folder.has-active { border-color: rgba(0,217,255,.25); background: rgba(0,217,255,.04); }
+    .guide-folder-toggle, .guide-folder > summary { width: 100%; display: flex; align-items: center; gap: 9px; padding: 12px 10px; border: 0; background: transparent; color: rgba(174,246,255,.8); font-family: 'JetBrains Mono',monospace; font-size: .64rem; font-weight: 500; letter-spacing: .07em; cursor: pointer; text-align: left; }
+    .guide-folder-toggle > span:first-of-type { flex: 1; }
+    .guide-folder-toggle:hover { background: rgba(0,217,255,.06); color: white; }
+    .guide-folder-toggle:focus-visible { outline: 2px solid var(--g); outline-offset: -3px; border-radius: 5px; }
+    .guide-folder-count { font-size: .58rem; color: rgba(174,246,255,.45); }
+    .guide-folder-chevron { transition: transform 220ms ease; flex-shrink: 0; }
+    .guide-folder-toggle[aria-expanded="true"] .guide-folder-chevron { transform: rotate(90deg); }
+    .guide-folder-content { display: grid; grid-template-rows: 0fr; visibility: hidden; transition: grid-template-rows 240ms ease, visibility 240ms; }
+    .guide-folder-content.is-open { grid-template-rows: 1fr; visibility: visible; }
+    .guide-folder-inner { min-height: 0; overflow: hidden; }
+    .guide-folder-links { list-style: none; padding: 0 6px 7px; margin: 0; }
+    .guide-nav-item { display: block; padding: 9px 10px; border: 1px solid transparent; border-radius: 4px; color: rgba(255,255,255,.62); font-family: Barlow,sans-serif; font-size: .88rem; line-height: 1.3; text-decoration: none; transition: background 150ms,color 150ms; }
+    .guide-nav-item:hover { background: rgba(0,217,255,.07); color: white; }
+    .guide-nav-item[aria-current="page"] { color: var(--g-bright); border-color: rgba(0,217,255,.3); background: rgba(0,217,255,.10); font-weight: 500; }
+    .guide-nav-item:focus-visible { outline: 2px solid var(--g); outline-offset: -2px; }
+    @media (max-width: 1039px) { .guide-nav-item { padding: 12px 10px; font-size: .95rem; } }
+    @media (prefers-reduced-motion: reduce) { .guide-folder-content, .guide-folder-chevron { transition: none; } }
 
-    /* The narrow-screen guide picker: the list collapsed down to the
-       one name that matters, sized as a thumb target rather than a
-       row of text. Opening it pushes the article down; it never
-       covers what you were reading. */
     .guide-picker {
       display: flex; align-items: center; gap: 12px;
       width: 100%; padding: 13px 14px; border-radius: 6px;
@@ -2179,20 +2192,22 @@
 <article>
 <p style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:#00d9ff;margin:0 0 12px">Guides</p>
 <h1 style="font-family:'Playfair Display',Georgia,serif;font-weight:500;font-size:2.6rem;line-height:1.1;letter-spacing:-0.015em;color:#fff;margin:0 0 18px">Learn it once, then run it.</h1>
-<p style="font-family:Barlow,sans-serif;font-weight:300;font-size:1rem;line-height:1.8;color:rgba(255,255,255,0.72);margin:0 0 14px;font-size:1.05rem;color:rgba(255,255,255,0.78)">Two things to get right before you start, and one guide per module. Open any of them — each one walks the panel end to end.</p>
-<h2 style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px">Before you start</h2>
-<p class="g-p">The things you buy elsewhere and bring with you.</p>
+<p style="font-family:Barlow,sans-serif;font-weight:300;font-size:1rem;line-height:1.8;color:rgba(255,255,255,0.72);margin:0 0 14px;font-size:1.05rem;color:rgba(255,255,255,0.78)">Start with the essentials, protect your accounts, then open the guide for the module you want to run.</p>
+<h2 style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px">Start here</h2>
+<p class="g-p">Choose accounts, connect proxies, and set up your plan.</p>
 <div class="g-card"><span class="g-kicker">What to buy, what to avoid</span><p class="g-p">What to buy, where, and how to tell a usable account from one that will die in a week — before you spend anything.</p>
 <a href="/guides/buying-telegram-accounts" class="quiet-link" style="margin-bottom:16px">Buying Telegram accounts →</a></div>
 <div class="g-card"><span class="g-kicker">One per account, done right</span><p class="g-p">Fifty accounts on one IP look like a farm to Telegram. The right proxy type, a GEO that matches, and a sticky exit that doesn't log you out.</p>
 <a href="/guides/proxies-for-telegram-accounts" class="quiet-link" style="margin-bottom:16px">Proxies for Telegram accounts →</a></div>
 <div class="g-card"><span class="g-kicker">What you pay and how to stop</span><p class="g-p">What you are on, what it costs, when the next charge lands, where the receipts are, and how to cancel without losing the time you have paid for.</p>
 <a href="/guides/billing" class="quiet-link" style="margin-bottom:16px">Billing, plans and cancelling →</a></div>
-<h2 style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px">Module guides</h2>
-<p class="g-p">One per module, in the order the pipeline runs them.</p>
+<div class="g-card"><span class="g-kicker">Aging claims, tested</span><p class="g-p">We bought two Argentine batches on the same day from different sellers. One advertised thirty days of aging, the other claimed nothing we recorded. Seven days later the aged batch was the dead one.</p>
+<a href="/blog/telegram-account-aging-claims-tested" class="quiet-link" style="margin-bottom:16px">Telegram account aging: does the seller’s claim predict survival? →</a></div>
+<h2 style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px">Protection</h2>
+<p class="g-p">Prepare your accounts, secure their sessions, and keep them ready.</p>
 <div class="g-card"><span class="g-kicker">Import, check, keep alive</span><p class="g-p">Every control on the Accounts page, what it actually does in the engine, and the order to touch them in on day one.</p>
 <a href="/guides/account-manager" class="quiet-link" style="margin-bottom:16px">Managing Telegram accounts →</a></div>
-<div class="g-card"><span class="g-kicker">Make a bought session yours</span><p class="g-p">A bought account arrives logged in on the seller's key. This is the scheme that turns that shared session into one only you hold — pinned proxy, settling rest, two resets, your own session, 2FA — and where each step lives in the panel.</p>
+<div class="g-card"><span class="g-kicker">Make a bought session yours</span><p class="g-p">A bought account arrives logged in on the seller's key. This is the scheme that turns that shared session into one only you hold — two resets, your own working session, a separate backup, and 2FA — and where each step lives in the panel.</p>
 <a href="/guides/account-protection" class="quiet-link" style="margin-bottom:16px">How to protect a Telegram account after purchase: the full Atreox scheme →</a></div>
 <div class="g-card"><span class="g-kicker">Three blocks, three fixes</span><p class="g-p">Three different restrictions get called &quot;blocked,&quot; and each has its own fix. What spamblock, a freeze and a shadow-ban actually are, how each one shows up in the dashboard, and the practical remedy for each.</p>
 <a href="/guides/spamblock-frozen-shadowban" class="quiet-link" style="margin-bottom:16px">Spamblock, freeze and shadow-ban: what to do in Atreox →</a></div>
@@ -2200,6 +2215,10 @@
 <a href="/guides/profile-templates" class="quiet-link" style="margin-bottom:16px">Setting up Telegram profiles in bulk →</a></div>
 <div class="g-card"><span class="g-kicker">History before it earns</span><p class="g-p">Every control on the Active Warmup page, the caps the engine actually enforces, and the two floors you cannot configure your way past.</p>
 <a href="/guides/active-warmup" class="quiet-link" style="margin-bottom:16px">Warming up Telegram accounts →</a></div>
+<div class="g-card"><span class="g-kicker">When a session dies</span><p class="g-p">A Telegram session can die with the account behind it untouched: the proxy’s exit address changes under a live connection, Telegram reads that as a stolen key and revokes it, and most tools then call the account dead.</p>
+<a href="/guides/telegram-session-killed-by-ip-change" class="quiet-link" style="margin-bottom:16px">Your Telegram account is not banned. Its session was killed by a moving IP. →</a></div>
+<h2 style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px">Modules</h2>
+<p class="g-p">Find your audience and run each outreach module.</p>
 <div class="g-card"><span class="g-kicker">Build the target list</span><p class="g-p">Finding channels worth commenting into — the two search modes, the filters that decide what survives, and what the score means.</p>
 <a href="/guides/channel-parser" class="quiet-link" style="margin-bottom:16px">Finding Telegram channels by keyword →</a></div>
 <div class="g-card"><span class="g-kicker">Rooms worth walking into</span><p class="g-p">Finding groups that are actually alive and that you can actually post in — the filters, the score, and where a promoted group goes.</p>
@@ -2212,7 +2231,7 @@
 <a href="/guides/mass-reactions" class="quiet-link" style="margin-bottom:16px">Adding reactions to Telegram posts →</a></div>
 </article>
 <nav aria-label="Site" style="margin-top:56px;padding-top:22px;border-top:1px solid rgba(255,255,255,0.10)">
-<ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px 22px"><li><a href="/" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Home</a></li><li><a href="/functions" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">What each module does</a></li><li><a href="/pricing" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Pricing</a></li><li><a href="/tools" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Free tools</a></li><li><a href="/guides" aria-current="page" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:#00d9ff;text-decoration:none">Guides</a></li><li><a href="/blog" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Blog</a></li><li><a href="/contact" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Contact</a></li><li><a href="/referral-program" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Referral programme</a></li><li><a href="/privacy" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Privacy</a></li><li><a href="/terms" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Terms</a></li><li><a href="/refund" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Refunds</a></li></ul>
+<ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px 22px"><li><a href="/" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Home</a></li><li><a href="/functions" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">What each module does</a></li><li><a href="/pricing" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Pricing</a></li><li><a href="/tools" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Free tools</a></li><li><a href="/guides" aria-current="page" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:#00d9ff;text-decoration:none">Guides</a></li><li><a href="/contact" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Contact</a></li><li><a href="/referral-program" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Referral programme</a></li><li><a href="/privacy" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Privacy</a></li><li><a href="/terms" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Terms</a></li><li><a href="/refund" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Refunds</a></li></ul>
 </nav>
 </div>
   <div id="root"></div>

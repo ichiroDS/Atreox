@@ -1834,7 +1834,6 @@ Object.assign(window, { HomePage });
     { title: 'Where to go next', blocks: [
       ['linkout', { href: '/tools', label: 'Free proxy and account checkers — no account needed' }],
       ['linkout', { href: '/guides', label: 'Guides — setup, limits and safety' }],
-      ['linkout', { href: '/blog', label: 'Blog' }],
       ['linkout', { href: '/contact', label: 'Contact' }],
     ] },
   ],

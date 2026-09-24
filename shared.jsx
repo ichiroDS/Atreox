@@ -593,7 +593,6 @@ function FooterBar({ setPage }) {
     { id: 'functions', label: 'Functions' },
     { id: 'pricing',   label: 'Pricing' },
     { id: 'guides',    label: 'Guides' },
-    { id: 'blog',      label: 'Blog' },
   ];
   const colHead = { fontFamily: "'JetBrains Mono', monospace", fontWeight: 500, fontSize: '0.6rem', color: `rgba(${ACCENT_RGB},0.55)`, letterSpacing: '0.24em', textTransform: 'uppercase', marginBottom: 18 };
   return (

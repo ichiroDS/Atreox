@@ -11,3 +11,6 @@ ds-bundle/
 # accident and pointed at one developer's absolute paths.
 .claude/
 CLAUDE.md
+
+# Local scratch (never committed)
+.local/

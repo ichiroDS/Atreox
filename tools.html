@@ -44,9 +44,9 @@
       /* slug -> address, written from catalog.jsx by prerender.mjs.
          An unknown slug is left alone: the index is a better landing
          than a 404 on a guide that does not exist. */
-      var moved = /* SLUG-MAP */{"buying-accounts":"buying-telegram-accounts","proxies":"proxies-for-telegram-accounts","billing":"billing","account-manager":"account-manager","account-protection":"account-protection","spamblock-frozen-shadowban":"spamblock-frozen-shadowban","profile-templates":"profile-templates","active-warmup":"active-warmup","channel-parser":"channel-parser","group-parser":"group-parser","neurocommenting":"neurocommenting","neurodialogs":"neurodialogs","mass-reactions":"mass-reactions"}/* /SLUG-MAP */;
+      var moved = /* SLUG-MAP */{"buying-accounts":"buying-telegram-accounts","proxies":"proxies-for-telegram-accounts","billing":"billing","account-manager":"account-manager","account-protection":"account-protection","spamblock-frozen-shadowban":"spamblock-frozen-shadowban","profile-templates":"profile-templates","active-warmup":"active-warmup","channel-parser":"channel-parser","group-parser":"group-parser","neurocommenting":"neurocommenting","neurodialogs":"neurodialogs","mass-reactions":"mass-reactions","telegram-account-aging-claims-tested":"/blog/telegram-account-aging-claims-tested","telegram-session-killed-by-ip-change":"telegram-session-killed-by-ip-change"}/* /SLUG-MAP */;
       if (!moved[slug]) return;
-      location.replace('/guides/' + moved[slug]);
+      location.replace(moved[slug].charAt(0) === '/' ? moved[slug] : '/guides/' + moved[slug]);
     } catch (_) {}
   })();
   </script>
@@ -1097,18 +1097,31 @@
     }
 
     /* guide reader: the rail of every other guide */
-    .guide-nav-item {
-      background: none;
-      cursor: pointer;
-      transition: background 0.16s ease, border-color 0.16s ease;
-    }
-    .guide-nav-item:hover { background: rgba(0,217,255,0.07); }
-    .guide-nav-item:focus-visible { outline: 1px solid var(--g); outline-offset: 1px; }
+    .guide-nav-folders { min-width: 0; padding: 10px; scrollbar-width: thin; scrollbar-color: rgba(0,217,255,.25) transparent; overscroll-behavior: contain; }
+    .guide-nav-folders.is-desktop { flex: 0 0 250px; position: sticky; top: 92px; max-height: calc(100vh - 190px); max-height: calc(100dvh - 190px); overflow-y: auto; }
+    .guide-nav-folders.is-compact { margin-top: 8px; max-height: 65vh; max-height: 65dvh; overflow-y: auto; }
+    .guide-nav-compact { flex: 1 1 100%; width: 100%; margin-bottom: 14px; }
+    .guide-folder { margin-bottom: 6px; border: 1px solid rgba(0,217,255,.10); border-radius: 7px; overflow: hidden; background: rgba(0,217,255,.025); }
+    .guide-folder:last-child { margin-bottom: 0; }
+    .guide-folder.has-active { border-color: rgba(0,217,255,.25); background: rgba(0,217,255,.04); }
+    .guide-folder-toggle, .guide-folder > summary { width: 100%; display: flex; align-items: center; gap: 9px; padding: 12px 10px; border: 0; background: transparent; color: rgba(174,246,255,.8); font-family: 'JetBrains Mono',monospace; font-size: .64rem; font-weight: 500; letter-spacing: .07em; cursor: pointer; text-align: left; }
+    .guide-folder-toggle > span:first-of-type { flex: 1; }
+    .guide-folder-toggle:hover { background: rgba(0,217,255,.06); color: white; }
+    .guide-folder-toggle:focus-visible { outline: 2px solid var(--g); outline-offset: -3px; border-radius: 5px; }
+    .guide-folder-count { font-size: .58rem; color: rgba(174,246,255,.45); }
+    .guide-folder-chevron { transition: transform 220ms ease; flex-shrink: 0; }
+    .guide-folder-toggle[aria-expanded="true"] .guide-folder-chevron { transform: rotate(90deg); }
+    .guide-folder-content { display: grid; grid-template-rows: 0fr; visibility: hidden; transition: grid-template-rows 240ms ease, visibility 240ms; }
+    .guide-folder-content.is-open { grid-template-rows: 1fr; visibility: visible; }
+    .guide-folder-inner { min-height: 0; overflow: hidden; }
+    .guide-folder-links { list-style: none; padding: 0 6px 7px; margin: 0; }
+    .guide-nav-item { display: block; padding: 9px 10px; border: 1px solid transparent; border-radius: 4px; color: rgba(255,255,255,.62); font-family: Barlow,sans-serif; font-size: .88rem; line-height: 1.3; text-decoration: none; transition: background 150ms,color 150ms; }
+    .guide-nav-item:hover { background: rgba(0,217,255,.07); color: white; }
+    .guide-nav-item[aria-current="page"] { color: var(--g-bright); border-color: rgba(0,217,255,.3); background: rgba(0,217,255,.10); font-weight: 500; }
+    .guide-nav-item:focus-visible { outline: 2px solid var(--g); outline-offset: -2px; }
+    @media (max-width: 1039px) { .guide-nav-item { padding: 12px 10px; font-size: .95rem; } }
+    @media (prefers-reduced-motion: reduce) { .guide-folder-content, .guide-folder-chevron { transition: none; } }
 
-    /* The narrow-screen guide picker: the list collapsed down to the
-       one name that matters, sized as a thumb target rather than a
-       row of text. Opening it pushes the article down; it never
-       covers what you were reading. */
     .guide-picker {
       display: flex; align-items: center; gap: 12px;
       width: 100%; padding: 13px 14px; border-radius: 6px;
@@ -2196,7 +2209,7 @@
 <a href="/guides/proxies-for-telegram-accounts" class="quiet-link" style="margin-bottom:16px">Proxies for Telegram accounts: which type, and matching the GEO →</a>
 </article>
 <nav aria-label="Site" style="margin-top:56px;padding-top:22px;border-top:1px solid rgba(255,255,255,0.10)">
-<ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px 22px"><li><a href="/" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Home</a></li><li><a href="/functions" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">What each module does</a></li><li><a href="/pricing" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Pricing</a></li><li><a href="/tools" aria-current="page" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:#00d9ff;text-decoration:none">Free tools</a></li><li><a href="/guides" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Guides</a></li><li><a href="/blog" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Blog</a></li><li><a href="/contact" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Contact</a></li><li><a href="/referral-program" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Referral programme</a></li><li><a href="/privacy" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Privacy</a></li><li><a href="/terms" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Terms</a></li><li><a href="/refund" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Refunds</a></li></ul>
+<ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px 22px"><li><a href="/" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Home</a></li><li><a href="/functions" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">What each module does</a></li><li><a href="/pricing" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Pricing</a></li><li><a href="/tools" aria-current="page" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:#00d9ff;text-decoration:none">Free tools</a></li><li><a href="/guides" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Guides</a></li><li><a href="/contact" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Contact</a></li><li><a href="/referral-program" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Referral programme</a></li><li><a href="/privacy" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Privacy</a></li><li><a href="/terms" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Terms</a></li><li><a href="/refund" style="font-family:Barlow,sans-serif;font-weight:300;font-size:0.88rem;color:rgba(255,255,255,0.6);text-decoration:none">Refunds</a></li></ul>
 </nav>
 </div>
   <div id="root"></div>

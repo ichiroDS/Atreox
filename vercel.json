@@ -8,6 +8,36 @@
       "source": "/go/floppydata",
       "destination": "https://floppydata.com?ref=H9UGH5",
       "permanent": false
+    },
+    {
+      "source": "/blog/telegram-session-killed-by-ip-change",
+      "destination": "/guides/telegram-session-killed-by-ip-change",
+      "permanent": true
+    },
+    {
+      "source": "/blog/telegram-session-killed-by-ip-change.html",
+      "destination": "/guides/telegram-session-killed-by-ip-change",
+      "permanent": true
+    },
+    {
+      "source": "/blog",
+      "destination": "/guides",
+      "permanent": true
+    },
+    {
+      "source": "/blog.html",
+      "destination": "/guides",
+      "permanent": true
+    },
+    {
+      "source": "/blog/category/:slug",
+      "destination": "/guides",
+      "permanent": true
+    },
+    {
+      "source": "/blog/category/:slug.html",
+      "destination": "/guides",
+      "permanent": true
     }
   ],
   "rewrites": [
@@ -26,18 +56,6 @@
     {
       "source": "/guides/:slug",
       "destination": "/guides/:slug.html"
-    },
-    {
-      "source": "/blog",
-      "destination": "/blog.html"
-    },
-    {
-      "source": "/blog/category/:slug",
-      "destination": "/blog/category/:slug.html"
-    },
-    {
-      "source": "/blog/:slug",
-      "destination": "/blog/:slug.html"
     },
     {
       "source": "/tools",
@@ -70,6 +88,10 @@
     {
       "source": "/contact",
       "destination": "/contact.html"
+    },
+    {
+      "source": "/blog/telegram-account-aging-claims-tested",
+      "destination": "/blog/telegram-account-aging-claims-tested.html"
     }
   ],
   "headers": [
