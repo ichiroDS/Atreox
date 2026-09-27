@@ -100,8 +100,8 @@ console.log('\n2. each way the two can disagree stops the build');
 const edited = withMutation(
   'catalog.jsx',
   src => src.replace(
-    "['p', \"The foundation of everything in ATREOX is your accounts.",
-    "['p', \"TEMPORARY VERIFY MUTATION. The foundation of everything in ATREOX is your accounts.",
+    "['p', \"Accounts are the one part of the setup you cannot fix later.",
+    "['p', \"TEMPORARY VERIFY MUTATION. Accounts are the one part of the setup you cannot fix later.",
   ),
   'content edited without regenerating',
 );
