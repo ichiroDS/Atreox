@@ -39,10 +39,6 @@
     {
       "source": "/contact",
       "destination": "/index.html"
-    },
-    {
-      "source": "/blog/telegram-account-aging-claims-tested",
-      "destination": "/blog/telegram-account-aging-claims-tested.html"
     }
   ],
   "redirects": [
@@ -114,6 +110,16 @@
     {
       "source": "/blog/category/:slug.html",
       "destination": "/guides",
+      "type": 301
+    },
+    {
+      "source": "/blog/telegram-account-aging-claims-tested",
+      "destination": "/guides/buying-telegram-accounts#aging",
+      "type": 301
+    },
+    {
+      "source": "/blog/telegram-account-aging-claims-tested.html",
+      "destination": "/guides/buying-telegram-accounts#aging",
       "type": 301
     }
   ]

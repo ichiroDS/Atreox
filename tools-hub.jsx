@@ -114,8 +114,6 @@ const HERO = {
    the only outbound links on the page, and a crawler that arrives here
    should find them in the HTML rather than after React mounts. */
 const READS = [
-  { href: '/blog/telegram-account-aging-claims-tested', page: 'blog',
-    label: 'Telegram account aging: does the seller’s claim predict survival?' },
   { href: '/guides/buying-telegram-accounts',
     label: 'The full buying guide: TData, GEO, rest time, testing a seller' },
   { href: '/guides/proxies-for-telegram-accounts',

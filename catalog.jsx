@@ -346,11 +346,11 @@ const GUIDES = [
         id: 'what-to-buy',
         title: 'What to buy',
         blocks: [
-          ['p', "Accounts are the one part of the setup you cannot fix later. Buy by the criteria below, test a small batch, and only buy more from a seller whose batch held up."],
+          ['p', "Accounts are the one part of the setup you cannot fix later. Buy by the criteria below, test a batch of 30, and only buy more from a seller whose batch held up."],
           ['checklist', [
             {
               tone: 'ok',
-              title: 'Look for',
+              title: 'Required - skip any offer that misses one',
               items: [
                 ['tdata format.', 'See the next section for why.'],
                 ['Aging.', 'The longer the accounts rested after registration, the better.'],
@@ -392,6 +392,7 @@ const GUIDES = [
               ['Up to 3', 'Ideal'],
               ['Up to 10', 'OK'],
               ['Up to 50', 'Acceptable'],
+              ['51 to 100', 'Worse than average'],
               ['Over 100', 'Stay away'],
             ],
           }],
@@ -402,7 +403,7 @@ const GUIDES = [
         id: 'testing',
         title: 'Testing a new batch',
         blocks: [
-          ['p', "Start every new seller with a small batch and give it two weeks before you buy more."],
+          ['p', "Start every new seller with a test batch of 30 accounts and give it two weeks before you buy more."],
           ['steps', [
             "Import the batch with one proxy per account. Under About this purchase, fill in Seller and Layover (the aging the seller claimed). They can only be recorded at import, and they are how you compare sellers later.",
             "Select the new accounts and run Checks → Check health and Check capability.",
@@ -442,7 +443,7 @@ const GUIDES = [
       'Which proxies to buy for your accounts, and how to add and check them in ATREOX.',
     seoTitle: 'Proxies for Telegram accounts: which type to buy',
     seoDescription:
-      'One proxy per account, sticky with a hold time, in the same country as the phone number, mobile preferred. How to add, reassign and check proxies.',
+      'One SOCKS5 proxy per account, sticky with a hold time, in the same country as the phone number; server proxies preferred for a stable connection. How to add, reassign and check proxies.',
     module: null,
     video: null,
     body: [
@@ -455,8 +456,8 @@ const GUIDES = [
             ['One per account', 'Never put two accounts behind one IP. Account Manager warns you when two active accounts share an exit IP.'],
             ['Sticky, with a hold time', 'The IP must not change while the account is connected. Details below.'],
             ['Same country', "The proxy must be in the same country as the account's phone number."],
-            ['Mobile preferred', 'Mobile first, residential second, datacenter last. See below.'],
-            ['SOCKS5', 'A proxy line without a type is read as SOCKS5.'],
+            ['Server proxies preferred', 'A stable connection matters more than the IP type. See below.'],
+            ['SOCKS5 only', 'Use SOCKS5, never HTTP. A proxy line without a type is read as SOCKS5.'],
           ]],
           ['figure', {
             src: '/public/screenshots/proxies-for-telegram-accounts/connection.png',
@@ -471,10 +472,10 @@ const GUIDES = [
         title: 'Which type',
         blocks: [
           ['options', [
-            { text: 'Mobile: IPs of mobile carriers, shared with real phone users. The most natural for Telegram, and the most expensive.', badge: 'Preferred' },
-            { text: 'Residential: home internet IPs. Looks like a normal user, costs less than mobile.' },
-            { text: 'Datacenter: server IPs. The cheapest and the least trusted. If you use them, keep activity very conservative.' },
+            { text: 'Server (datacenter): a fixed IP on a stable line. The connection does not drop or jump, which is what keeps sessions alive.', badge: 'Preferred' },
+            { text: 'Mobile: carrier IPs. They work, but the connection is less stable - drops and IP changes are what kill sessions.' },
           ]],
+          ['p', "Telegram does not treat server IPs as suspicious: a large share of its users connect through VPNs, which are servers too. What it does react to is a login that keeps losing its connection or changing its address. So pick the proxy that holds the most stable connection."],
           ['p', "Compare what a working account costs you, not what a proxy costs. A cheaper proxy that loses more accounts is not cheaper."],
         ],
       },
@@ -519,7 +520,7 @@ const GUIDES = [
           ]],
           /* SHOT: Account Manager → Reassign proxies dialog after Preview pairing: Pairing order list on the left, proxy lines on the right, and the preview table (Line, Account, Country, New proxy, Exit = held). Demo proxy lines only, no real provider hostnames. */
           ['p', "For a single account: click its row, and in Overview → Proxy press Edit proxy, paste the line and press Save proxy."],
-          ['p', "Accepted formats (the type is socks5 or http; without one, SOCKS5 is assumed):"],
+          ['p', "Accepted formats (use socks5; without a type, SOCKS5 is assumed):"],
           ['bullets', [
             'type:host:port:user:pass',
             'host:port:user:pass',
@@ -793,7 +794,6 @@ const GUIDES = [
             "Reauthenticate. Creates a brand-new session of your own and switches ATREOX to it. The key you bought is no longer used.",
             "Wait 24 hours. Telegram does not let a session younger than 24 hours log others out.",
             "Terminate other sessions again. Now it runs from your own session, so it also logs out the imported key — including every copy the seller kept. This is the step that makes the account yours.",
-            "Wait 24 hours.",
             "Download new tdata. Creates a separate backup login and downloads it as a zip. It comes after the second Terminate because that step would have logged the backup out too.",
             "Set 2FA. Adds a cloud password, so a code sent to the phone number is no longer enough to log in. It goes last: a password set while the seller still shares the session does not remove them.",
           ]],

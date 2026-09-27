@@ -78,6 +78,16 @@
       "source": "/blog/category/:slug.html",
       "destination": "/guides",
       "permanent": true
+    },
+    {
+      "source": "/blog/telegram-account-aging-claims-tested",
+      "destination": "/guides/buying-telegram-accounts#aging",
+      "permanent": true
+    },
+    {
+      "source": "/blog/telegram-account-aging-claims-tested.html",
+      "destination": "/guides/buying-telegram-accounts#aging",
+      "permanent": true
     }
   ],
   "rewrites": [
@@ -128,10 +138,6 @@
     {
       "source": "/contact",
       "destination": "/contact.html"
-    },
-    {
-      "source": "/blog/telegram-account-aging-claims-tested",
-      "destination": "/blog/telegram-account-aging-claims-tested.html"
     }
   ],
   "headers": [
