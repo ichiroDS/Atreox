@@ -411,7 +411,12 @@ const GUIDES = [
             "Week 2: add them to Neurocommenting with a limit of 3 comments per account per day. Raise the limit by 1 every day.",
             "Compare batches in Account Manager → History: how many are still alive, frozen or unable to post, per seller.",
           ]],
-          /* SHOT: Account Manager → History tab, the Batches table with two or three demo imports (Seller, Layover, Bought, Alive now, Frozen, Can't post columns). Seller and provider cells must be neutral demo names that do not resemble real shops or proxy providers. */
+          ['figure', {
+            src: '/public/screenshots/buying-telegram-accounts/import-history.png',
+            w: 1400, h: 282,
+            alt: 'Account Manager History tab: the Batches table with seller, layover, bought, alive, frozen and cannot-post counts per import',
+            caption: 'History → Batches: how each batch is doing, per seller.',
+          }],
           ['note', "The comment limit is a daily limit. It resets at 00:00 UTC, and accounts that reach it resume on their own after that."],
           ['linkout', { href: '/guides/active-warmup', label: 'Active Warmup' }],
           ['linkout', { href: '/guides/account-protection', label: 'Account Protection' }],
@@ -518,7 +523,12 @@ const GUIDES = [
               ],
             },
           ]],
-          /* SHOT: Account Manager → Reassign proxies dialog after Preview pairing: Pairing order list on the left, proxy lines on the right, and the preview table (Line, Account, Country, New proxy, Exit = held). Demo proxy lines only, no real provider hostnames. */
+          ['figure', {
+            src: '/public/screenshots/proxies-for-telegram-accounts/reassign-proxies.png',
+            w: 1400, h: 1575,
+            alt: 'Reassign proxies dialog after Preview pairing: accounts in pairing order, pasted proxy lines and the preview table',
+            caption: 'Preview pairing shows which account gets which line before anything changes.',
+          }],
           ['p', "For a single account: click its row, and in Overview → Proxy press Edit proxy, paste the line and press Save proxy."],
           ['p', "Accepted formats (use socks5; without a type, SOCKS5 is assumed):"],
           ['bullets', [
@@ -534,7 +544,12 @@ const GUIDES = [
         title: 'Checking a proxy',
         blocks: [
           ['p', "Select accounts and run Checks → Check proxy, or open one account and press Check proxy under Actions. You get a verdict (Works with Telegram, Proxy works, Telegram refused, or No connection to the proxy), the country of the exit IP and the country Telegram sees."],
-          /* SHOT: Account detail → Overview → Actions after Check proxy: the "Works with Telegram" verdict line with latency, exit IP country and "Telegram sees" country. */
+          ['figure', {
+            src: '/public/screenshots/proxies-for-telegram-accounts/check-proxy-result.png',
+            w: 1244, h: 428,
+            alt: 'Check proxy result in the account detail: works with Telegram, exit IP country and the country Telegram sees',
+            caption: 'Check proxy: the country of the exit IP should match what Telegram sees.',
+          }],
           ['p', "If the two countries differ, Telegram goes by the one it sees. Fix the proxy before the account does any work."],
           ['p', "Account Manager also shows a warning when accounts sit on a proxy that does not hold its IP, and offers to move them to new proxies."],
           ['toolcta', {
@@ -598,7 +613,7 @@ const GUIDES = [
           ]],
           ['figure', {
             src: '/public/screenshots/account-manager/import-dialog.png',
-            w: 1344, h: 515,
+            w: 1344, h: 1424,
             alt: 'Bulk import accounts dialog with Bulk import and Single import tabs and a Select Files field for the purchase zip',
             caption: 'Bulk import takes the zip exactly as the seller sent it.',
           }],
