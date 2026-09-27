@@ -44,19 +44,21 @@ const {
    system in the first place, so they're in this table for Functions
    and Guides but filtered out of the Pricing picker.
 
-   EVERY claim in `steps` / `config` / `guard` is checked against
-   atreox-engine, not against what the site used to say. Nothing that
-   lives in that repo's RESERVED_CONFIG_FIELDS belongs here: those are
-   settings the API refuses to write, so describing them sells
-   something that silently does nothing.
+   `summary` (one or two sentences) and `can` (short bullets) are the
+   Functions page: what the module is for, and what you can do with it
+   in the panel. Every bullet names something that exists in the
+   dashboard today (atreox-dashboard/app/<module>) — a setting, a
+   button, a section. Keep them short; the guide is where the detail
+   lives. Nothing that lives in atreox-engine's RESERVED_CONFIG_FIELDS
+   belongs here: those are settings the API refuses to write.
 
-   `guard` is optional — the one non-obvious limit a buyer worried
-   about losing accounts should read before paying, rendered as its own
-   block on Functions.
+   `desc` is the one-liner Home and Pricing show; `tagline` is the pill
+   over a module's guide.
 
-   `anchor` / `guide` are the cross-page link targets:
-     Functions section  → #fn-<key>
-     Guides card        → #guide-<guide>
+   `guide` is the slug of the guide that teaches the module, and
+   `guideSection` (optional) the section id inside it when the module is
+   taught as part of another guide; moduleGuideHref() below joins them.
+   The Functions section for a module is #fn-<key>.
 ─────────────────────────────────────────────────────────────────── */
 const MODULES = [
   {
@@ -68,25 +70,15 @@ const MODULES = [
     guide: 'account-manager',
     desc: 'Import, check, proxy and monitor every account the modules run on.',
     tagline: 'Included with everything',
-    problem:
-      "Every module here runs on Telegram accounts, and accounts are the part that breaks. They get flood-waited, restricted, frozen, or quietly lose the ability to resolve anything at all while every flag Telegram reports stays clean. Without one place to see that, you find out when a campaign stops producing.",
-    does:
-      "The Account Manager is where accounts enter the system and where their health is tracked afterwards. It is not sold separately — you cannot use any other module without it, so it comes with any purchase, down to a single module.",
-    steps: [
-      ['Import', 'Add accounts one at a time, in bulk up to 100 per request, or by converting tdata folders.'],
-      ['Proxy', 'Paste a proxy list in whatever format you have it in. The engine reparses and validates it server-side, then assigns one per account.'],
-      ['Check', 'Two different checks: Telegram\'s own restricted/scam/fake flags, and a capability probe that resolves a real public username and reads its history — which is what catches an account that is frozen while every flag stays clean.'],
-      ['Watch', 'Status per account — active, cooldown, banned, disabled, paused — with the cause attached: floodwait, peerflood, profile update, discovery, or a limit it reached.'],
-      ['Assign', 'Accounts go into module pools from here. One account has one driver: a module refuses an account another module already holds, and says which one.'],
-    ],
-    config: [
-      ['Bulk import', 'CSV, paste or tdata conversion, with a per-row success or failure reason.'],
-      ['Proxy assignment', 'Bulk paste, per-account reassignment, and a live proxy check with latency.'],
-      ['Health checks', 'Status check and capability check, run per account or across a selection.'],
-      ['Comment limits', 'Set or clear a per-account cap in bulk, and reset counters.'],
-      ['Profile editing', 'First name, last name, bio, username and avatar per account — with the 48h username cooldown and 1h profile-change cooldown surfaced rather than hit blindly.'],
-      ['Pause and resume', 'Manual pause and automatic pause on limit, kept visibly distinct.'],
-      ['Per-account history', 'Comments per day for the week, cooldown reasons, last used, and flag state as of the last check.'],
+    summary: 'Where your Telegram accounts come in and where you see their health. Every other module runs on the accounts you import here.',
+    can: [
+      'Import one account or a whole batch, from session strings or tdata folders',
+      'Give each account its own proxy, reassign proxies and check them',
+      'Run checks on any selection: health, proxy, capability and spamblock',
+      'See every account’s state at a glance: active, cooldown, spamblock, frozen, needs reauth',
+      'Protect bought accounts: Terminate other sessions, Reauthenticate, Download new tdata, Set 2FA',
+      'Apply a profile template, reset comment counts, recover from tdata or delete, in bulk',
+      'Import history: how each purchased batch is doing',
     ],
   },
   {
@@ -98,29 +90,15 @@ const MODULES = [
     guide: 'active-warmup',
     desc: 'Runs scheduled activity on your accounts so a new one behaves like a used one.',
     tagline: 'History, before you need it',
-    problem:
-      "A fresh Telegram account with no history that starts posting comments on day one is the single most common way to lose a batch of accounts. The account has nothing behind it: no reading, no joins, no reactions, no reason to exist. Telegram notices.",
-    does:
-      "Active Warmup has the account do human-shaped things — reading channels, opening dialogs, reacting, joining — on a schedule, in your timezone, before and alongside the modules that actually earn. Its schedule, intensity and action-specific age checks govern that activity. Supervise is configured separately in Accounts and gates only the three outreach modules.",
-    steps: [
-      ['Enrol', 'Turn it on per account. The starting intensity is picked from the account\'s real age — under a week Careful, under a month Normal, older than that Aggressive.'],
-      ['Schedule', 'Activity only happens inside the windows you set, in the timezone you set, with optional random breaks so the pattern is not a metronome.'],
-      ['Act', 'The account works through its enabled action list at the pace its intensity preset allows.'],
-      ['Adapt', 'With progressive increase on, a newly enrolled account starts at 30% of its caps and reaches 100% over its first week — measured from when you enrolled it, not from how old the account is.'],
-      ['Settle', 'After 60 days enrolled the account moves to the maintenance tier and its limits are lowered to a small holding level. It stays warm without accumulating activity it no longer needs.'],
+    summary: 'Gives accounts a normal-looking history before they start working: reading channels, reacting, viewing stories and joining groups, on a schedule you set.',
+    can: [
+      'Intensity presets: Careful, Normal or Aggressive',
+      'Work windows in your timezone, with random breaks',
+      'Pick which actions run: reading, reactions, story views, joining groups and more',
+      'Hourly and daily caps, with a gradual ramp-up for newly added accounts',
+      'Economy mode skips traffic-heavy actions (on by default)',
+      'Choose the target channels and save your setup as a preset',
     ],
-    config: [
-      ['Intensity preset', 'Careful, Normal or Aggressive — each a full set of hourly and daily action, join and message caps rather than a single dial.'],
-      ['Action checklist', 'Every action type toggled individually, each carrying its own minimum account age and a flag for whether it is traffic-heavy.'],
-      ['Schedule', 'Any number of start/end windows, a timezone, and random breaks.'],
-      ['Caps', 'Actions per hour, actions per day, joins per day, messages per day — overridable on top of the preset.'],
-      ['Auto-adapt & progressive increase', 'Let the engine move the caps as the account matures, or hold them fixed.'],
-      ['Economy mode', 'On by default. Drops every action marked traffic-heavy outright rather than reordering them — the setting to turn off when accounts sit behind metered proxies and you want the full action list anyway.'],
-      ['Target channels', 'Where the warmup activity happens, and whether your own channels count.'],
-      ['Reapply template', "An optional warmup action that re-applies each account's own template on a schedule; nothing to pick here."],
-      ['Live status', 'Per account: resting, in-window, next window, current caps, and a 30-day action history with the outcome of each one.'],
-    ],
-    guard: 'Keep the action-specific age checks, schedule and intensity caps in mind. Supervise in Accounts does not pause this module or impose a passive resting floor; it gates Neurocommenting, Neurodialogs and Mass Reactions only.',
   },
   {
     key: 'profile-templates',
@@ -128,26 +106,18 @@ const MODULES = [
     price: 0,
     included: true,
     icon: Palette,
-    guide: 'profile-templates',
+    /* No guide of its own: it is taught as a section of Account Manager. */
+    guide: 'account-manager',
+    guideSection: 'profile-templates',
     desc: 'One face, applied across a batch of accounts.',
     tagline: 'Included with everything',
-    problem:
-      "Fifty accounts with no avatar, no bio and a default name are fifty accounts that read as one bot farm. Fixing that by hand is an afternoon per batch, and doing it too fast trips Telegram's own profile-change limits.",
-    does:
-      "A Profile Template is a name, a bio and an avatar you define once and apply to a selection of accounts as a background job. Like the Account Manager, it ships with any purchase — it's how accounts stop looking identical, not a feature you should have to buy separately.",
-    steps: [
-      ['Define', 'Name, first name, last name, bio and an avatar image.'],
-      ['Interpolate', 'The bio can reference the account\'s own first name, so a shared template does not produce a shared sentence.'],
-      ['Apply', 'Select accounts and run it. The apply is a tracked background task, not a fire-and-forget loop.'],
-      ['Pace', 'Accounts are done one at a time with a 30–90 second gap between them. Three floodwaits in a row and the run pauses itself for half an hour instead of pushing on.'],
-      ['Keep', "Active Warmup's Reapply account's template action refreshes the face on a schedule - each account keeps the template Apply gave it."],
-    ],
-    config: [
-      ['Template fields', 'Name, first name, last name, bio and avatar.'],
-      ['Bio interpolation', 'A {first_name} token. The panel holds you to 200 characters of raw template and 70 characters once the token is filled in, counted live as you type.'],
-      ['Avatar upload', 'One image per template, reused across every account it is applied to.'],
-      ['Bulk apply', 'Any selection of accounts, tracked as a task with per-account results.'],
-      ['Cooldown awareness', 'One profile change per account per hour and one username change per 48 hours, reported as reasons rather than silent failures. The cooldowns are per account, so a bulk rollout scales with the size of your pool instead of queueing behind itself.'],
+    summary: 'A name, surname, bio and avatar you set once and apply to many accounts, so a batch does not look like the same empty profile fifty times.',
+    can: [
+      'Templates with name, surname, bio and avatar',
+      'Use {first_name} in the bio so every account reads differently',
+      'Apply a template to any selection of accounts in Account Manager',
+      'Runs in the background, paced to Telegram’s profile-change limits',
+      'Active Warmup can re-apply each account’s template on a schedule',
     ],
   },
   {
@@ -159,29 +129,16 @@ const MODULES = [
     guide: 'neurocommenting',
     desc: 'Watches the channels you choose and writes a comment under every new post.',
     tagline: 'The engine that posts',
-    problem:
-      "Manual commenting is the only Telegram growth channel that actually converts, and it's the one that doesn't scale. One person can watch maybe five channels and still write something worth reading. At fifty channels you're either late to every post or posting filler that gets deleted.",
-    does:
-      "Neurocommenting watches your target channels for new posts and writes a comment under each one from an account in your commenting pool. Every comment is generated against that specific post — the model reads the post text and answers it, in the channel's own language and register. It can also decline: a post the persona has nothing to say about comes back as a skip instead of filler.",
-    steps: [
-      ['Watch', 'The engine polls every channel in your list and picks up new posts as they appear.'],
-      ['Match', 'Auto-assignment picks which account comments where, spreading channels across the pool so no single account is the one that always shows up.'],
-      ['Generate', 'The post text goes to the model along with your persona prompt. What comes back is a reply to that post, not a template with the channel name pasted in.'],
-      ['Filter', 'Before anything is sent, the safety rule runs on top of your persona: posts about death, violent crime, war, disasters, mourning or partisan politics come back declined and are logged under their own reason.'],
-      ['Post', 'The comment goes out after a randomised delay, through that account\'s own proxy, inside its own rate-limit budget.'],
-      ['Log', 'Every generation, skip, rate-limit and failure lands in the live log with the post it belongs to — so a bad comment is traceable to the post that produced it.'],
+    summary: 'Watches your target channels and comments under new posts from your accounts. Each comment is written for that post by the AI model and persona you choose.',
+    can: [
+      'Add channels one by one, paste a list, load a preset, or send them over from the Parser',
+      'Organise channels into Telegram folders and let the pool work by folders',
+      'Personas: build a prompt from fields or write your own, and pick the AI model',
+      'Sensitive-content filter skips posts about tragedies, war and politics',
+      'Daily comment limit per account (resets at 00:00 UTC) and a delay range between comments',
+      'Every comment in a log with its post; channels that refuse comments collected in a blacklist',
+      'AI Protection, AI Autoreply for private messages, and advanced join and pace settings',
     ],
-    config: [
-      ['Persona presets — two modes', 'Structured mode builds the prompt from named fields: identity, tone, relevance, length, language strategy, hard rules, skip conditions and worked examples. Raw mode takes one freeform prompt and sends it as written. Six presets ship built in; swap between them without touching the channel list.'],
-      ['Sensitive-content filter', 'An owner-level safety rule, on by default, that applies on top of whichever preset is active and in either mode — including a raw prompt that never mentions safety. Sensitive declines are counted separately from ordinary skips.'],
-      ['Channel list', 'Add channels one at a time, bulk-paste them, or promote them straight from a parser run. Save any list as a reusable preset.'],
-      ['Commenting pool', 'Which accounts are allowed to comment. An account driven by another module is refused with the reason, never silently double-booked.'],
-      ['Delay range', 'Min/max seconds between comments, with Min / Recommended / Max presets (60–180s, 480–1500s, 1800–3600s).'],
-      ['Per-account comment cap', 'A successful-comment ceiling after which an account pauses itself. Set in bulk, cleared in bulk.'],
-      ['Hourly and daily rate limits', 'A live window showing what each account has spent this hour and today against its cap.'],
-      ['Blacklist', 'Channels that refused a comment are grouped by cause — sending forbidden, no access, username not found, kicked from the discussion group — and prunable in one action.'],
-    ],
-    guard: 'Structured mode enforces its skip conditions for you. A raw prompt only skips if you write a skip instruction into it — the six built-in raw presets all include one, a prompt you write yourself is yours to get right. The sensitive-content filter applies either way.',
   },
   {
     key: 'neurodialogs',
@@ -192,29 +149,15 @@ const MODULES = [
     guide: 'neurodialogs',
     desc: 'Answers direct messages and chat replies in context, from your own accounts.',
     tagline: 'The half nobody staffs',
-    problem:
-      "Commenting works, and then the replies arrive in your DMs at 3am. Most of them are the same four questions. Answer them twelve hours later and the lead is gone; answer them instantly, twenty times in a row, and you look exactly like a bot.",
-    does:
-      "NeuroDialogs answers private messages from your own accounts, using the conversation so far rather than the last line alone. It runs in sessions — the account comes online, reads its inbox, answers what's there, and goes away again — because an account that replies within four seconds at every hour of the day is the easiest thing in Telegram to spot.",
-    steps: [
-      ['Wake', 'Sessions are pulled by demand, not a timer: an inbox with people waiting brings the next one forward, an empty one lets it drift. Sessions only happen inside that account\'s own waking day, never at four in the morning.'],
-      ['Read', 'It opens a capped number of dialogs and picks up what came in since last time.'],
-      ['Answer', 'Each reply is generated from the last N messages of that thread plus your prompt and, if you attached one, your knowledge file.'],
-      ['Pace', 'A cold first reply to a stranger waits longer than a follow-up inside a live conversation. Typing simulation runs while it waits, and a session extends itself while the other person is still writing back.'],
-      ['Stop', 'The thread stops on its own terms: link sent, reply cap reached, blacklisted, blocked, or escalated to you.'],
+    summary: 'Answers the private messages your accounts receive, in context. It works in rotation: a few accounts come online, answer the people waiting, and go offline again.',
+    can: [
+      'Start a run (8 hours by default); it stops by itself',
+      'Choose how many accounts are online at once and how many chats each answers per turn',
+      'People who are waiting are answered first; older unanswered messages only if you turn on the backlog',
+      'Prompt presets with an optional knowledge file, and a choice of AI model',
+      'Inbox of conversations and a live log of every reply',
+      'AI Protection: accounts also read, scroll and browse while they work',
     ],
-    config: [
-      ['Prompt presets', 'Named scenarios with their own system prompt and max reply length — a sales one and a support one can run side by side on different accounts.'],
-      ['Knowledge file', 'Attach a document to a prompt; the engine tells you if it was longer than the budget and got truncated.'],
-      ['Context depth', 'How many previous messages of the thread the model sees.'],
-      ['Language', 'Auto-match the person writing to you, or pin one language.'],
-      ['Session rhythm', 'Idle and hot gap ranges between sessions, session length range, and a max extension when the inbox is still busy.'],
-      ['Reply delays', 'Separate min/max ranges for the first reply to a stranger and for replies inside a live thread, plus typing simulation and a skip probability.'],
-      ['Limits', 'Replies per thread, per session and per day; new threads per day; dialogs read per session. Zero means no limit anywhere.'],
-      ['Link gate', 'How many exchanges must happen before a link may be sent, and whether the thread stops once it has been.'],
-      ['Safety valves', 'A block-rate threshold that pauses an account, a daily spend cap, a blacklist, and a switch for whether conversations older than the module get answered at all.'],
-    ],
-    guard: 'New threads per day is the limit that matters most: how many strangers one account opens a conversation with is the closest thing to what actually trips Telegram\'s spam detection. An account that has spent its daily replies still runs its session — it comes online, reads, marks things read, and writes nothing.',
   },
   {
     key: 'mass-reactions',
@@ -223,33 +166,17 @@ const MODULES = [
     price: 30,
     icon: Sparkles,
     guide: 'mass-reactions',
-    demo: 'arrival-curve',
     desc: 'Reacts from a pool of your accounts — to posts, or to the comments under them.',
     tagline: 'The first hour decides',
-    problem:
-      "A post with no reactions reads as a post nobody saw, and Telegram's own surfacing leans the same way. The window that matters is the first hour after publication — exactly the window you cannot cover by hand across a network of channels.",
-    does:
-      "Mass Reactions watches your target channels and reacts to what appears there from a pool of your accounts, arriving the way a real audience arrives: not all at once, not evenly spaced, and not from every account you own. One switch decides what it reacts to — the channel's posts, or the first few comments people left under each post. It is one or the other, not both at once.",
-    steps: [
-      ['Target', 'Pick the channels. The engine probes each one for which reactions it actually allows — and separately probes its linked discussion group, which has its own membership and its own allowed set.'],
-      ['Choose the surface', 'Post mode reacts to new posts as they appear. Comment mode ignores the posts and reacts to the first few real comments under each one instead, skipping the channel\'s own auto-forwarded copy. In comment mode the accounts join the discussion group first, because Telegram will not let them react there otherwise.'],
-      ['Spread', 'A coverage range decides what share of the pool reacts at all, and the arrival curve decides when — human-shaped by default, uniform if you want it flat.'],
-      ['React', 'Each account waits out its own delay and reacts once. One account gets one reaction per message, structurally — no retry can produce a second.'],
-      ['Back off', 'Floodwait pauses the account for a set period; a streak of them stops it rather than grinding through.'],
+    summary: 'Adds reactions from a pool of your accounts to new posts in the channels you choose, or to the first comments under them, spread out over time like a real audience.',
+    can: [
+      'React to the posts, or to the first comments under each post',
+      'Choose the emoji, used at random or in order',
+      'Control how many accounts react and how the reactions spread over time',
+      'Limits per hour, per day, per channel and per account',
+      'Pauses an account after a FloodWait instead of pushing on',
+      'React without joining, skip messages already reacted to, or do a dry run',
     ],
-    config: [
-      ['Reaction surface', 'React to the posts themselves, or to the first N comments under each post. One or the other.'],
-      ['Emoji set', 'Which reactions, random or sequential, weighted if you want an uneven spread — all checked against what that specific chat permits before anything is sent.'],
-      ['Coverage', 'Min/max share of the pool that reacts to any given post, overridable per channel.'],
-      ['Arrival curve', 'Human or uniform, with a first-reaction delay range and a spread window.'],
-      ['Volume caps', 'Reactions per hour, per day, per channel per day, and per account per run.'],
-      ['React probability', 'A chance to simply not react, so coverage never looks mechanical.'],
-      ['Skip threshold', 'Leave posts alone that already have more reactions than a number you set.'],
-      ['Max post age', 'How old a post can be and still be worth reacting to.'],
-      ['Floodwait policy', 'Pause length and the streak limit that stops an account.'],
-      ['Dry run', 'Do the whole pass for real — eligibility, ordering, cap evaluation — and report exactly what it would have done, withholding only the reaction itself. A rehearsal, not a separate code path.'],
-    ],
-    guard: 'On a channel you do not administer, coverage is capped at 35% of your pool no matter what you set. Telegram lets that channel\'s admins list exactly who reacted to a post, so a full-pool reaction on someone else\'s channel hands them your entire network in one call. Accounts younger than three days never react at all.',
   },
   {
     key: 'channel-parser',
@@ -258,30 +185,16 @@ const MODULES = [
     price: 20,
     icon: Globe,
     guide: 'channel-parser',
-    demo: 'parser-funnel',
     desc: 'Finds channels by keyword and exports them as a target list.',
     tagline: 'Where your audience already is',
-    problem:
-      "Everything downstream depends on the target list, and most target lists are guesses — a dozen channels somebody found by searching Telegram manually, half of them dead, a quarter of them with comments switched off. Commenting into a dead channel costs exactly as much as commenting into a live one.",
-    does:
-      "The Channel Parser searches Telegram for channels matching your keywords, checks each candidate against thresholds you set, and gives you a scored, filtered list you can promote straight into the commenting engine. It also runs the other way: give it channels you already like and it finds ones like them.",
-    steps: [
-      ['Search', 'Keywords go out across your accounts in parallel, round-robin, so no single account carries the whole search. Telegram caps any one query at about ten results, so each keyword is also queried as several rephrasings to get past that ceiling.'],
-      ['Evaluate', 'Each candidate is measured — members, posts in the last 7 days, comments on the last post, language — and accepted, rejected or skipped with the reason recorded.'],
-      ['Score', 'Survivors get a score and land in a results table you can sort, filter and page through.'],
-      ['Decide', 'Promote a channel into the commenting pool or reject it. Rejected ones stay rejected on later runs.'],
-      ['Reuse', 'Export the list, or save it as a preset the commenting engine can load whole.'],
-    ],
-    config: [
-      ['Keywords', 'A keyword list, with optional AI-suggested endings to widen a niche in the language you are targeting.'],
-      ['Comments-closed filter', 'On by default: a channel with no linked discussion group is dropped, because there is nowhere to comment. It is the harshest filter in the pipeline — on live runs it accounts for roughly three quarters of everything rejected — so it has a switch, and the run tallies exactly how many candidates each filter cost you.'],
-      ['Member range', 'Minimum and maximum subscribers — the upper bound matters as much as the lower one.'],
-      ['Language filter', 'Ten languages, multi-select.'],
-      ['Minimum comments on the last post', 'The single filter that separates a channel with an audience from a channel with a number.'],
-      ['Result cap', 'Default 500, or uncapped up to the engine\'s 5000 safety ceiling.'],
-      ['Accounts', 'Restrict the search to specific accounts, or let it use every validated one.'],
-      ['Similar-channel search', 'Seed it with channels you already have and search one or two levels out from them.'],
-      ['Live search log', 'Every candidate as it is evaluated, with the metric that decided it — cancellable mid-run.'],
+    summary: 'Finds Telegram channels by keyword, or channels similar to ones you already have, and filters out the ones that are too small, in the wrong language or have no comments.',
+    can: [
+      'Keyword search, with suggested word endings to widen it',
+      'Similar-channel search from channels you already use',
+      'Filters: member range, languages, minimum comments on the last post',
+      'Watch the search live and stop it at any time',
+      'Send a channel straight to Neurocommenting, or reject it',
+      'Copy the results as t.me links',
     ],
   },
   {
@@ -293,26 +206,12 @@ const MODULES = [
     guide: 'group-parser',
     desc: 'Finds active public groups by keyword and exports them.',
     tagline: 'Rooms, not broadcasts',
-    problem:
-      "A group and a channel look alike in search results and behave nothing alike. A group can have forty thousand members and three people talking, or need admin approval to join, or be read-only for anyone who just walked in. You find all of that out after you have joined with fifty accounts.",
-    does:
-      "The Group Parser searches for public groups the same way the Channel Parser searches for channels, but measures the thing that actually matters in a group: how much was said recently, and by how many different people. It checks the access rules before you commit accounts to a room you cannot post in.",
-    steps: [
-      ['Search', 'Two different searches are combined: one matches a group\'s name, the other matches what people are actually saying inside it. They overlap far less than you would expect, so both are used.'],
-      ['Measure', 'Messages in the last 7 days and distinct senders behind them — the pair that separates a conversation from one person talking to themselves.'],
-      ['Gate', 'Groups needing admin approval to join, or that a new member cannot post in, are dropped before they reach you.'],
-      ['Report', 'Results carry slow-mode duration, join-request status and where the group was found.'],
-      ['Promote', 'Promote or reject, same as channels, into the same downstream lists.'],
-    ],
-    config: [
-      ['Keywords', 'Same keyword and chunking model as the Channel Parser.'],
-      ['Member range', 'Minimum and maximum members.'],
-      ['Minimum messages in the last 7 days', 'Raw recent volume.'],
-      ['Minimum unique senders', 'The real activity filter — volume alone is trivially faked.'],
-      ['Language filter', 'Same ten languages.'],
-      ['Open join required', 'Drop groups where joining needs an admin to approve it.'],
-      ['Can-post required', 'Drop read-only groups where a new member could not send anything.'],
-      ['Result cap and accounts', 'Same controls as the Channel Parser.'],
+    summary: 'Finds public Telegram groups by keyword and keeps the ones where people actually talk and a new member can post.',
+    can: [
+      'Keyword search, the same way as the Channel Parser',
+      'Filters: member range, messages in the last 7 days, unique senders, languages',
+      'Only groups anyone can join, and only groups members can post in',
+      'Promote or reject each group, and export the results as CSV',
     ],
   },
 ];
@@ -865,133 +764,6 @@ const GUIDES = [
     ],
   },
   {
-    slug: 'billing',
-    url: 'billing',
-    group: 'setup',
-    title: 'Billing, plans and cancelling',
-    short: 'What you pay and how to stop',
-    summary:
-      'What you are on, what it costs, when the next charge lands, where the receipts are, and how to cancel without losing the time you have paid for.',
-    seoTitle: 'ATREOX billing: plans, invoices and cancelling',
-    seoDescription:
-      'Modules or a full licence, what a grandfathered price means, where to find receipts, and how cancelling at the end of a paid period actually works.',
-    module: null,
-    video: null,
-    body: [
-      {
-        id: 'what-it-is',
-        title: 'What this page is',
-        blocks: [
-          ['p', 'Everything about money lives on one page: what you are subscribed to, what card pays for it, every invoice we have raised, and the way out. Nothing here needs support to action - cancelling included.'],
-          ['p', 'There are two ways to buy, and they are alternatives rather than tiers. Either you pick individual modules and pay for those, or you take the full licence and get every module including anything released while it is active. Two things - the Account Manager and Profile Templates - come with any purchase at all.'],
-          ['callout', [
-            'A subscription is not a licence to a fixed set of features. When a module is added to the product, a full licence covers it the day it ships, with no migration and no repurchase. That is the difference you are paying for above a couple of modules.',
-          ]],
-        ],
-      },
-      {
-        id: 'summary',
-        title: 'The line at the top',
-        blocks: [
-          ['p', 'Three facts, in one row: what you are on, what it costs per period, and the date of the next charge. If a cancellation is pending, the same row says the date access ends instead, in amber.'],
-          ['controls', [
-            {
-              id: 'bl-plan', name: 'Plan name', where: 'Billing, top', kind: 'field', value: 'Legacy Starter plan',
-              rows: [
-                ['What it shows', 'Full licence, a legacy plan, or a count of the modules you hold.'],
-                ['Where it comes from', 'What your subscription actually grants in Stripe, expanded the same way the access check expands it - not a label stored separately that could disagree with your access.'],
-              ],
-            },
-            {
-              id: 'bl-amount', name: 'The amount', where: 'Billing, top right', kind: 'field', value: '29 EUR / month',
-              rows: [
-                ['What it shows', 'What your subscription actually bills per period, read from Stripe.'],
-                ['Not the list price', 'Deliberately. If you are on an older price, the figure here is yours, not the one on the pricing page. Showing you the current catalogue price would be showing you somebody else\'s bill.'],
-                ['If it is missing', 'A subscription set up before we started recording the amount shows no figure until its next renewal, rather than a guess. The plan and the date are still shown.'],
-                ['More than one line', 'Stripe allows a single billing interval per subscription, so an annual licence cannot sit on the same subscription as monthly modules. When you hold both, each is listed with its own amount and its own date - adding a yearly figure to a monthly one would be arithmetic on different units.'],
-              ],
-            },
-            {
-              id: 'bl-locked', name: 'Your price is locked in', where: 'Billing, under the amount', kind: 'button', value: 'Shown on older plans',
-              rows: [
-                ['Who sees it', 'Anyone on a plan from before modules were sold separately.'],
-                ['What it promises', 'The price you signed up at does not change when the public pricing does, and you are not moved onto a new plan unless you choose to move.'],
-                ['What it does not do', 'It does not freeze the product. A grandfathered plan keeps everything it always covered and keeps getting fixes; it just does not automatically gain modules that were carved out after it.'],
-              ],
-            },
-          ]],
-        ],
-      },
-      {
-        id: 'payment-method',
-        title: 'The card',
-        blocks: [
-          ['p', 'The card that will be charged at the next renewal, shown by brand and last four digits. It is read straight from Stripe every time the page loads rather than cached, because a card can change through Stripe\'s own surfaces without telling us - and a stale card here would be somebody believing they had fixed a payment problem when they had not.'],
-          ['p', 'It is deliberately read-only. Card details never pass through this application; payment always goes through Stripe\'s own form. A button here that could not actually work would be worse than no button.'],
-          ['callout', [
-            'If the card has expired, the page says so before the renewal fails rather than after. An expired card fails silently at renewal time, and the first thing you would otherwise notice is your access stopping - which is the worst possible moment to find out and the hardest to explain.',
-          ]],
-        ],
-      },
-      {
-        id: 'history',
-        title: 'Payment history',
-        blocks: [
-          ['p', 'Every invoice we have raised, newest first, with the amount and a link to the Stripe-hosted receipt. The receipt is the point of the section: what was taken and when is answerable from the row above, but something an accountant will accept is not.'],
-          ['p', 'The history outlives the subscription. If your plan lapses, the receipts stay reachable - somebody whose plan ended still has a bookkeeper, and dropping their invoices the day access stopped would turn every past payment into a support request.'],
-        ],
-      },
-      {
-        id: 'cancelling',
-        title: 'Cancelling',
-        blocks: [
-          ['p', 'Cancelling stops the next charge. It does not stop your access: you keep everything until the end of the period you have already paid for, and the confirmation names that date before you commit to anything.'],
-          ['controls', [
-            {
-              id: 'bl-cancel', name: 'Cancel subscription', where: 'Billing, last section', kind: 'button', value: 'Cancel subscription',
-              rows: [
-                ['What it does', 'Marks every active subscription to end when its paid period does. Nothing is charged after that.'],
-                ['What you keep until then', 'Everything. The modules keep running, the engine keeps posting, and the date is stated in the dialog and again on the page afterwards.'],
-                ['No refund for the remainder', 'And no charge for the next period either. It is the same policy module removal follows.'],
-                ['Your data', 'Untouched. Accounts, channels, personas and history stay exactly as they are.'],
-                ['What we do not do', 'Offer you a discount, ask why, or put a survey in the way. The dialog states the date and the consequence and gets out of the way.'],
-              ],
-            },
-            {
-              id: 'bl-resume', name: 'Keep my subscription', where: 'Billing, after cancelling', kind: 'button', value: 'Keep my subscription',
-              rows: [
-                ['What it does', 'Undoes a pending cancellation while the period is still running. The subscription renews as normal and nothing is scheduled to end.'],
-                ['Why it is not in the cancel dialog', 'Because offering it while you are deciding would be pressure wearing a different hat. It is here for the day after, so changing your mind does not require emailing us.'],
-                ['After the period ends', 'There is nothing left to resume - the subscription is closed and buying again is a fresh purchase.'],
-              ],
-            },
-          ]],
-          ['note', 'Cancelling is the last section on the page rather than the first, and it is a heading like any other - not hidden behind an extra click, not competing with the rest. A cancel button somebody has to hunt for becomes a support ticket; one at the top is a page that keeps suggesting it.'],
-        ],
-      },
-      {
-        id: 'changing',
-        title: 'Adding and removing modules',
-        blocks: [
-          ['p', 'A module added mid-period is charged the prorated difference on the card already on file, and unlocks as soon as the payment lands - usually without leaving the page.'],
-          ['p', 'A module removed mid-period is scheduled to drop at the end of the paid period, not immediately. You keep it until then, you are not charged for it again, and there is no refund for the days remaining. A pending removal can be cancelled from the same card while it is still pending.'],
-          ['callout', [
-            'A module that came as part of a licence or an older bundle cannot be removed on its own - there is no separate line item to remove. The card says so rather than offering a button that would fail.',
-          ]],
-        ],
-      },
-      {
-        id: 'trouble',
-        title: 'When something looks wrong',
-        blocks: [
-          ['p', 'Right after a payment the page waits on Stripe confirming it to us, which normally takes a moment. If it takes more than a minute you get a way out rather than a spinner: a button to check again, a way back to the rest of the page, and an address to write to. Your payment went through in that situation - what has not finished is our side of the setup.'],
-          ['p', 'If the page says you have no subscription while you believe you do, that is worth reporting rather than working around. Our own access check is deliberately built to fail in your favour: when we cannot reach the record, your access keeps working rather than being revoked.'],
-          ['linkout', { href: '/contact', label: 'Contact us about a billing question' }],
-        ],
-      },
-    ],
-  },
-  {
     slug: 'account-manager',
     url: 'account-manager',
     group: 'module',
@@ -1534,253 +1306,6 @@ const GUIDES = [
             "Blaming every loss on the seller. Not every seller steals. Accounts from one seller vanishing a few days in is a pattern; sessions dying on one proxy is the proxy.",
           ]],
           ['linkout', { href: '/guides/spamblock-frozen-shadowban', label: 'When it goes wrong: spamblock, freeze and shadow-ban' }],
-        ],
-      },
-    ],
-  },
-  {
-    slug: 'spamblock-frozen-shadowban',
-    url: 'spamblock-frozen-shadowban',
-    group: 'module',
-    short: 'Three blocks, three fixes',
-    title: 'Spamblock, freeze and shadow-ban: what to do in Atreox',
-    summary: 'Three different restrictions get called "blocked," and each has its own fix. What spamblock, a freeze and a shadow-ban actually are, how each one shows up in the dashboard, and the practical remedy for each.',
-    seoTitle: 'Telegram spamblock, freeze and shadow-ban: the fixes',
-    seoDescription:
-      'Tell a spamblock from a freeze from a shadow-ban: what each restriction is, how it surfaces in the Atreox dashboard, and the practical remedy — rest, appeal via @SpamBot, and proxy hygiene.',
-    module: null,
-    video: null,
-    body: [
-      {
-        id: 'three-states',
-        title: 'Three states people call "blocked"',
-        blocks: [
-          ['p', "Three different things get lumped together as 'the account is blocked,' and the fix is different for each. Telling them apart is most of the work."],
-          ['cards', [
-            {
-              kicker: 'Spamblock (limited)',
-              blocks: [
-                ['p', "A restriction Telegram places on an account that has sent too much, too fast, or drawn reports. The account still works, but its messages to people who have not added it are held back or refused. Telegram's own @SpamBot is the source of truth: it says whether an account is limited and, when it is, until when."],
-              ],
-            },
-            {
-              kicker: 'Frozen',
-              blocks: [
-                ['p', "A harder, request-level restriction. A frozen account often cannot even resolve a public username or read a channel — the operations the engine needs before it can do anything. Freezing is enforced when a request is made, not written onto the account as a flag, so a plain health check cannot see it. It lifts only through Telegram's own verification flow."],
-              ],
-            },
-            {
-              kicker: 'Shadow-ban / write-ban',
-              blocks: [
-                ['p', "The quiet one. The account reports success, but its writes never actually land: comments and messages are silently refused with no error to catch. There is no status Telegram hands you for this — it shows up reactively, when a send that looked fine turns out to have gone nowhere."],
-              ],
-            },
-          ]],
-        ],
-      },
-      {
-        id: 'in-the-dashboard',
-        title: 'How each one surfaces',
-        blocks: [
-          ['p', "All three surface in the status tiles at the top of the Account Manager — spamblock and a reported write-ban under Spamblock, a freeze under Frozen — once the matching check has run."],
-          ['controls', [
-            {
-              id: 'ctl-tile-spamblock', name: 'Spamblock', where: 'Status tiles', kind: 'tile', tone: 'warn', value: '2',
-              rows: [
-                ['Counts', 'Accounts whose last spamblock check came back limited, plus accounts whose capability check came back can\'t post. Both mean Telegram is blocking the account from posting; the row\'s status says which. Amber, because such an account is restricted, not gone.'],
-                ['Filter', 'Click it to show only limited accounts, click again to clear, like every other tile.'],
-              ],
-            },
-            {
-              id: 'ctl-tile-frozen', name: 'Frozen', where: 'Status tiles', kind: 'tile', value: '1',
-              rows: [
-                ['Counts', 'Accounts whose last capability check came back frozen or can\'t resolve. Shown with a snowflake in a blue tile, a status of its own rather than a general failure.'],
-                ['Filter', 'Click to show only frozen accounts.'],
-              ],
-            },
-            {
-              id: 'ctl-check-spamblock', name: 'Check spamblock', where: 'Bulk actions bar · Checks group', kind: 'button', tone: 'ok', value: 'Check spamblock',
-              rows: [
-                ['What it does', "Asks @SpamBot, through the account's own pinned proxy on its own claimed connection, whether the account is limited. Writes the verdict — none, limited, unknown or not checked — to the account and to the Spamblock tile."],
-                ['Where it lives', 'In the Checks folder of the bulk actions bar, alongside Check health, Check proxy and Check capability.'],
-                ['Not read-only', 'Unlike the other three, it sends one message per account — to @SpamBot, Telegram\'s own bot.'],
-                ['In bulk', 'Up to ten accounts per press, checked one after another. An account a running module is using is skipped and keeps its previous verdict.'],
-                ['When to use it', 'On a fresh batch before you scale, and whenever posts stop landing without any account reporting an error.'],
-              ],
-            },
-          ]],
-          ['p', "A write-ban that Telegram reports shows as can't post in the Check column after Check capability. The quiet kind reports nothing: a comment returns success and never appears, an account stops producing results. A real send is how you confirm that one."],
-        ],
-      },
-      {
-        id: 'fixing-each',
-        title: 'The remedy for each',
-        blocks: [
-          ['p', "The remedy follows the diagnosis. None of the three is fixed by working the account harder; all three start with taking work off it."],
-          ['kv', [
-            ['Spamblock / limited', 'Stop sending from it and let it rest — take it out of its module\'s pool. Many limits are temporary and clear on their own, and @SpamBot will tell you the date. If it is a hard limit, open @SpamBot, press Start, and follow its prompts to request a review. Confirm the proxy is clean and pinned before you put the account back to work.'],
-            ['Frozen', "Do not delete it on the day of the verdict. Give it a long rest — around three weeks — then run Check capability again; a frozen account can come back on its own. A freeze lifts only through Telegram's own verification, so there is nothing in the panel that removes it directly."],
-            ['Shadow-ban / write-ban', 'Treat it as a proxy-hygiene problem first. Put the account on one stable, pinned proxy, rest it, and confirm the one-live-session rule holds — a write-ban often follows an account being run from two places at once, or over an exit that moved. Then verify with Check capability and a single real send before trusting it again.'],
-          ]],
-          ['callout', [
-            "The common thread is pacing and proxies, not the individual account. A batch that keeps producing spamblocks and write-bans is usually being sent too hard, or is sharing IPs — fix the pace and the proxy assignment and the states stop appearing.",
-          ]],
-          ['plink', [
-            "Write-bans in particular travel with the proxy. The traced case, the exact error a moving exit produces, and the setting that prevents it are in ",
-            { href: '/guides/telegram-session-killed-by-ip-change', text: 'why Telegram sessions die on a moving IP' },
-            ".",
-          ]],
-          ['linkout', { href: '/guides/account-protection', label: 'The protection scheme that prevents most of this' }],
-        ],
-      },
-    ],
-  },
-  {
-    slug: 'profile-templates',
-    url: 'profile-templates',
-    group: 'module',
-    short: 'One face across a batch',
-    title: 'Setting up Telegram profiles in bulk',
-    summary: 'What a template holds, what applying one actually does to an account, and the cooldowns that pace a rollout across a pool.',
-    seoTitle: 'Set up Telegram profiles in bulk: names, avatars',
-    seoDescription:
-      'Build a name, bio and avatar once and roll it across a batch. Character limits, the rename cooldown, and how fast you can apply one safely.',
-    module: 'profile-templates',
-    video: null,
-    body: [
-      {
-        id: 'what-it-is',
-        title: 'What this module is',
-        blocks: [
-          ['p', "The profile is what someone sees after clicking the name on a comment. An account with no picture, no bio and a default name reads as exactly what it is. A template is that profile built once and applied across a batch: name, surname, bio and avatar, stored as one reusable object."],
-          ['p', "It is included with any purchase, and it is the smallest of the modules — one page holding a grid of templates, plus the Apply template action over on the Accounts page. Everything expensive about it happens on the engine side, in the pacing."],
-          ['callout', [
-            "A template applies identically to every account it touches. The same first name, the same surname, the same bio, the same picture. There is no per-account variation built into this — if you want a batch that does not look like one batch, that is several templates applied to several groups, not one template with randomness in it.",
-          ]],
-        ],
-      },
-      {
-        id: 'map',
-        title: 'Map of the page',
-        blocks: [
-          ['p', "Two places, not one. The templates themselves live on their own page; applying them happens where the accounts are."],
-          ['map', [
-            { name: 'Templates page — toolbar', holds: 'A single New template button, top right.' },
-            { name: 'Templates page — grid', holds: 'One card per template, three across on a wide screen. Clicking a card opens it for editing; each card also carries its own delete button. With no templates yet, an empty state stands in with the same create button.' },
-            { name: 'Create / Edit dialog', holds: 'Template name, Name, Surname, Description, Avatar. The same dialog for both, with the title and wording changing.' },
-            { name: 'Accounts page — Apply template', holds: 'In the Accounts folder of the bulk actions bar. Pick a template, apply it to the current selection, watch a progress step report per-account results.' },
-          ]],
-        ],
-      },
-      {
-        id: 'building-one',
-        title: 'Building a template',
-        blocks: [
-          ['controls', [
-            {
-              id: 'ctl-template-name', name: 'Template name', where: 'Create / Edit dialog', kind: 'field', value: 'Western tech enthusiasts',
-              rows: [
-                ['What it does', 'Names the template inside ATREOX. It is a label for you — never applied to any account.'],
-                ['Required', 'Yes. It is the only required field; the Save button stays disabled while it is empty.'],
-              ],
-            },
-            {
-              id: 'ctl-first-name', name: 'Name', where: 'Create / Edit dialog', kind: 'field', value: 'Alex',
-              rows: [
-                ['What it does', 'The Telegram first name written onto every account this template is applied to.'],
-                ['Applied how', 'Identically. Every account in the batch ends up with this exact first name.'],
-                ['Also used by', 'The {first_name} token in the Description below, which substitutes this value.'],
-              ],
-            },
-            {
-              id: 'ctl-last-name', name: 'Surname', where: 'Create / Edit dialog', kind: 'field', value: 'Morgan',
-              rows: [
-                ['What it does', 'The Telegram last name, applied identically to every account in the batch.'],
-                ['Optional', 'Yes — leave it blank and accounts get a first name only, which is ordinary on Telegram.'],
-              ],
-            },
-            {
-              id: 'ctl-description', name: 'Description', where: 'Create / Edit dialog', kind: 'field', value: "hi, I'm {first_name} — into crypto and AI",
-              rows: [
-                ['What it does', 'The account bio. This is the one field with room for a call to action, since it is what a reader sees after clicking through from a comment.'],
-                ['The token', '{first_name} is replaced with the template’s own Name field. It does not vary per account — it is a convenience for writing the bio once, not a source of variation.'],
-                ['Two limits', 'The dialog counts twice: the raw text against 200 characters, and the text after substitution against 70. Both must pass or Save stays disabled.'],
-                ['Why 70', 'That is the length that actually reaches Telegram after the token is filled in. A long token and a short-looking template can still overflow it, which is why the second counter exists.'],
-              ],
-            },
-            {
-              id: 'ctl-avatar', name: 'Avatar', where: 'Create / Edit dialog', kind: 'button', tone: 'plain', value: 'Choose file',
-              rows: [
-                ['What it does', 'One image, shared by every account the template is applied to.'],
-                ['Formats', 'PNG or JPEG.'],
-                ['Size', 'Up to 5 MB.'],
-                ['Optional', 'Yes. Leave it out and the template applies names and bio only, touching no picture.'],
-                ['On edit', 'Choosing a new file replaces the current avatar for the template; accounts pick it up the next time it is applied.'],
-              ],
-            },
-          ]],
-        ],
-      },
-      {
-        id: 'applying',
-        title: 'Applying one to a batch',
-        blocks: [
-          ['p', "Applying happens on the Accounts page, not here. Select the accounts, open the Accounts folder in the bulk actions bar and press Apply template, choose which template, and the rollout starts as a background task with a progress readout."],
-          ['controls', [
-            {
-              id: 'ctl-apply', name: 'Apply template', where: 'Accounts page → bulk actions → Accounts', kind: 'button', value: 'Apply template',
-              rows: [
-                ['What it does', 'Writes the template’s name, surname, bio and avatar onto every selected account, one at a time.'],
-                ['Progress', 'The dialog switches to a progress step with a per-account result. Closing it does not stop the run — a corner widget keeps the task and takes you back to it.'],
-                ['No templates yet', 'The picker is replaced by a note pointing at the Profile Templates page.'],
-                ['What it does not touch', 'Usernames. A template has no username field; that is a per-account edit on the Accounts page, and it has its own much slower cooldown.'],
-              ],
-            },
-          ]],
-          ['p', "These conditions can leave an account unchanged; each is reported per account rather than failing the batch:"],
-          ['table', {
-            head: ['Reason', 'What it means', 'What to do'],
-            rows: [
-              ['Rate limited', 'This account had a profile change less than an hour ago. The message says roughly how many minutes remain.', 'Retry after the hour. This is per account, not pool-wide.'],
-              ['Floodwait', 'Telegram asked the engine to slow down. Three of these in a row pauses the run for 30 minutes.', 'Nothing — it resumes on its own.'],
-            ],
-          }],
-          ['p', "Supervise gates outreach in Neurocommenting, Neurodialogs and Mass Reactions. Template application follows its own profile-change rate limits."],
-        ],
-      },
-      {
-        id: 'pacing',
-        title: 'How a rollout is paced',
-        blocks: [
-          ['p', "Nothing here is configurable — the pacing is fixed in the engine, and it is the reason a template applied across a hundred accounts is not a hundred simultaneous profile writes."],
-          ['table', {
-            head: ['Rule', 'Value', 'Scope'],
-            rows: [
-              ['Profile change cooldown', 'One change per hour', 'Per account'],
-              ['Username change cooldown', 'One change per 48 hours', 'Per account'],
-              ['Gap between accounts in a rollout', '30 to 90 seconds, randomised', 'Per run'],
-              ['Floodwait tolerance', '3 in a row pauses the run for 30 minutes', 'Per run'],
-              ['Connections', 'One account connected at a time, then disconnected', 'Whole module'],
-            ],
-          }],
-          ['p', "The username cooldown is deliberately slower than the others. A username is the most visible and searchable thing on a profile, so it is worth changing far less often than a bio — and it is counted per account, so rolling a change across a pool scales with the pool rather than queueing behind one shared timer."],
-        ],
-      },
-      {
-        id: 'first-run',
-        title: 'First run',
-        blocks: [
-          ['steps', [
-            "Create one template. Name it for the audience it is meant to read as, not for the batch it will go on — you will reuse it.",
-            "Fill in Name and, if you want one, Surname. Both go on every account identically.",
-            "Write the bio and watch the second counter, the interpolated one, not the first. That is the number Telegram sees.",
-            "Add an avatar if you have one. It is optional, and a template with no picture still applies names and bio.",
-            "Go to the Accounts page, select the batch, and use Apply template.",
-          ]],
-          ['p', "If you are running more than one niche, build more than one template. One template across the whole pool gives every account the same face, which is fine for a small batch and obvious on a large one."],
-          ['note', "Templates are also used by Active Warmup. Its Reapply account's template action re-applies each account’s own assigned template on a schedule, through this same pipeline and these same cooldowns. On an account no template was ever applied to, it does nothing.",
-          ],
-          ['linkout', { href: '/guides/active-warmup', label: 'Next: warm the accounts before they post anything' }],
         ],
       },
     ],
@@ -4003,31 +3528,29 @@ const BLOCK_KINDS = [
 ];
 
 
-/* Public guide folders are shared by the index, reader and prerenderer. */
+/* The research article: rendered by the Guides reader at its own public
+   address under /blog, but in no folder - its conclusions are taught in
+   the Buying accounts guide, and the article stays as the evidence. */
 GUIDES.push(...window.RESEARCH_GUIDES.map(g => ({
   ...g, url: g.slug, group: 'research', module: null, video: null,
-  path: g.slug === 'telegram-account-aging-claims-tested' ? '/blog/' + g.slug : undefined,
-  short: g.slug === 'telegram-account-aging-claims-tested' ? 'Aging claims, tested' : 'When a session dies',
-  navTitle: g.slug === 'telegram-account-aging-claims-tested' ? 'Account aging: our test' : 'Session killed by a moving IP',
+  path: '/blog/' + g.slug,
 })));
+
+/* Public guide folders are shared by the index, reader and prerenderer.
+   Every guide in GUIDES except the research article sits in exactly one
+   folder (scripts/verify-guide-navigation.mjs holds that). A url listed
+   here with no guide behind it is dropped rather than crashing the page;
+   the same script fails the build on it, so it never ships. */
 const GUIDE_FOLDER_SPECS = [
-  { id: 'start', title: 'Start here', lede: 'Choose accounts, connect proxies, and set up your plan.',
-    urls: ['buying-telegram-accounts', 'proxies-for-telegram-accounts', 'billing', 'telegram-account-aging-claims-tested'] },
-  { id: 'protection', title: 'Protection', lede: 'Prepare your accounts, secure their sessions, and keep them ready.',
-    urls: ['account-manager', 'account-protection', 'spamblock-frozen-shadowban', 'profile-templates', 'active-warmup', 'telegram-session-killed-by-ip-change'] },
-  { id: 'modules', title: 'Modules', lede: 'Find your audience and run each outreach module.',
+  { id: 'start', title: 'Start here',
+    urls: ['buying-telegram-accounts', 'proxies-for-telegram-accounts'] },
+  { id: 'protection', title: 'Protection',
+    urls: ['account-manager', 'account-protection', 'active-warmup'] },
+  { id: 'modules', title: 'Modules',
     urls: ['channel-parser', 'group-parser', 'neurocommenting', 'neurodialogs', 'mass-reactions'] },
 ];
-const GUIDE_NAV_TITLES = {
-  'account-protection': 'Account protection',
-  'spamblock-frozen-shadowban': 'Spamblock, frozen & shadowban',
-  'profile-templates': 'Profile templates',
-  'active-warmup': 'Active Warmup',
-  neurocommenting: 'Neurocommenting', neurodialogs: 'Neurodialogs', 'mass-reactions': 'Mass Reactions',
-};
-for (const g of GUIDES) if (GUIDE_NAV_TITLES[g.url]) g.navTitle = GUIDE_NAV_TITLES[g.url];
 const GUIDE_FOLDERS = GUIDE_FOLDER_SPECS.map(f => ({
-  ...f, guides: f.urls.map(url => GUIDES.find(g => g.url === url)),
+  ...f, guides: f.urls.map(url => GUIDES.find(g => g.url === url)).filter(Boolean),
 }));
 
 const GUIDE_BY_SLUG = Object.fromEntries(GUIDES.map(g => [g.slug, g]));
@@ -4043,6 +3566,14 @@ const GUIDE_BY_MODULE = Object.fromEntries(
 const guideHref = g => {
   const guide = typeof g === 'string' ? GUIDE_BY_SLUG[g] : g;
   return guide ? (guide.path || '/guides/' + guide.url) : '/guides';
+};
+
+/* Where a module is taught: its guide's address, plus the section when
+   the module is a chapter of another guide (Profile Templates lives in
+   Account Manager). null when no guide covers it. */
+const moduleGuideHref = m => {
+  const guide = m && GUIDE_BY_SLUG[m.guide];
+  return guide ? guideHref(guide) + (m.guideSection ? '#' + m.guideSection : '') : null;
 };
 
 /* Reverse of the above, for the router: a pathname back to a guide.
@@ -4062,6 +3593,6 @@ Object.assign(window, {
   FULL_MONTHLY, FULL_YEARLY, YEARLY_SAVING, CHEAPEST_MODULE, eur,
   PIPELINE,
   GUIDES, GUIDE_FOLDERS, GUIDE_BY_SLUG, GUIDE_BY_URL, GUIDE_BY_MODULE,
-  guideHref, guideFromPath,
+  guideHref, guideFromPath, moduleGuideHref,
   TOOLS, TOOL_BY_ID, BLOCK_KINDS,
 });

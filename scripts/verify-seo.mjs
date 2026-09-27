@@ -51,13 +51,20 @@ const check = (name, ok, detail = '') => {
 };
 
 /* The guide addresses as of the day the blog landed. A guide may be
-   ADDED freely; one that disappears from this list has been renamed or
-   deleted, and both break every link anyone has ever shared to it. */
+   ADDED freely; one that disappears must leave a permanent redirect in
+   vercel.json behind it, or every link anyone has ever shared to it
+   breaks. (2026-09-27: billing, profile-templates, spamblock-frozen-
+   shadowban and telegram-session-killed-by-ip-change were retired that
+   way - merged into other guides or /pricing.) */
 const GUIDE_URLS_AT_BLOG_LAUNCH = [
   'buying-telegram-accounts', 'proxies-for-telegram-accounts', 'billing',
   'account-manager', 'profile-templates', 'active-warmup', 'channel-parser',
   'group-parser', 'neurocommenting', 'neurodialogs', 'mass-reactions',
+  'spamblock-frozen-shadowban', 'telegram-session-killed-by-ip-change',
 ];
+const REDIRECTS = JSON.parse(fs.readFileSync(path.join(ROOT, 'vercel.json'), 'utf8')).redirects || [];
+const redirectedPermanently = url =>
+  REDIRECTS.some(r => r.source === '/guides/' + url && r.permanent === true);
 
 /* Every generated page, as [address, file]. Derived from the files on
    disk rather than from a list here, so a new prerendered route is
@@ -168,11 +175,21 @@ const guideUrls = new Set(
     .filter(f => f.endsWith('.html'))
     .map(f => f.replace(/\.html$/, '')),
 );
-const missing = GUIDE_URLS_AT_BLOG_LAUNCH.filter(u => !guideUrls.has(u));
+const missing = GUIDE_URLS_AT_BLOG_LAUNCH.filter(u => !guideUrls.has(u) && !redirectedPermanently(u));
 check(
-  'every guide that existed before still does',
+  'every guide that existed before still does, or 301s to where it went',
   !missing.length,
-  missing.length ? `gone: ${missing.join(', ')}` : `${guideUrls.size} guide page(s)`,
+  missing.length ? `gone with no redirect: ${missing.join(', ')}` : `${guideUrls.size} guide page(s)`,
+);
+const servedAndRedirected = [...guideUrls].filter(redirectedPermanently);
+check(
+  'no built guide page is shadowed by a redirect',
+  !servedAndRedirected.length,
+  servedAndRedirected.join(', '),
+);
+check(
+  'negative control: a retired guide with no redirect IS reported',
+  !redirectedPermanently('definitely-not-a-guide'),
 );
 
 /* index.html's legacy #guide-<slug> redirect reads this map; a guide
@@ -202,7 +219,7 @@ check(
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'content-lastmod.json'), 'utf8'));
 check(
   'the lastmod manifest exists and covers the guides',
-  GUIDE_URLS_AT_BLOG_LAUNCH.every(u => manifest[`guide:${u}`]),
+  GUIDE_URLS_AT_BLOG_LAUNCH.filter(u => guideUrls.has(u)).every(u => manifest[`guide:${u}`]),
   `${Object.keys(manifest).length} tracked entries`,
 );
 check(
