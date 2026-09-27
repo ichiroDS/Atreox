@@ -33,5 +33,5 @@ assert.match(JSON.stringify(controls), /separate backup session/);
 const catalog = read('catalog.jsx');
 assert.ok(!/Auto-Warmup|23-day warmup|72-hour lockout|Protect \(run pipeline\)/.test(catalog), 'Obsolete passive lifecycle and pipeline copy are removed');
 assert.match(catalog, /x\/7/);
-assert.match(catalog, /added_at/);
+assert.match(catalog, /seven days after import/, 'Supervise is explained as counted from import');
 console.log('PASS: guide folders, legacy addresses, protection controls and supervision copy');
