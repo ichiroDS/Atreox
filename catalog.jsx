@@ -1044,223 +1044,103 @@ const GUIDES = [
     slug: 'channel-parser',
     url: 'channel-parser',
     group: 'module',
-    short: 'Build the target list',
-    title: 'Finding Telegram channels by keyword',
-    summary: 'Finding channels worth commenting into — the two search modes, the filters that decide what survives, and what the score means.',
+    short: 'Find channels to comment in',
+    title: 'Channel Parser',
+    summary: "Find public channels with open, active comments: search by keyword or by similar channels, filter, and send the good ones to Neurocommenting.",
     seoTitle: 'Find Telegram channels by keyword: search, filters',
     seoDescription:
-      'Find channels worth commenting in: keyword and similar-channel search, filters for members, language and open comments, and how to use them.',
+      'Find Telegram channels worth commenting in: keyword and similar-channel search, filters for members, language and live comments, and how to send results to commenting.',
     module: 'channel-parser',
     video: null,
     body: [
       {
-        id: 'what-it-is',
-        title: 'What this page is',
+        id: 'what-it-does',
+        title: 'What it does',
         blocks: [
-          ['p', "Channel Parser searches Telegram for channels you could comment into, checks each candidate against your filters, scores the survivors and lists them. It is a research tool: nothing it finds starts being commented on until you put it in the Neurocommenting channel list yourself."],
-          ['p', "It shares its page with Group Parser. The Channels and Groups tabs in the top bar switch between them, and each has its own form, its own results and its own history."],
-          ['callout', [
-            "Searching uses your own accounts, and it uses them heavily: every candidate channel costs several Telegram requests to inspect. An account running a search is reserved and cannot be in the commenting pool at the same time. Run searches when the accounts can spare the calls, not alongside a full commenting run.",
-          ]],
+          ['p', "Channel Parser searches Telegram for public channels, checks each one against your filters, gives the survivors a score and lists them. You then pick the channels you want and press Start commenting, which adds them to the Neurocommenting channel list."],
+          ['p', "It shares a page with Group Parser. Switch between them with the Channels and Groups tabs in the top bar."],
+          ['note', "The search runs on your own accounts. While an account is searching, other modules cannot use it, so run long searches when those accounts are free."],
         ],
       },
       {
-        id: 'map',
-        title: 'Map of the page',
+        id: 'setup',
+        title: 'Run a search',
         blocks: [
-          ['map', [
-            { name: 'Parser tabs', holds: 'Channels · Groups, in the top bar. The switch between two different tools sharing one address.' },
-            { name: 'Search control', holds: 'The run state, Start search, Cancel run while one is going, and the last run\'s tally.' },
-            { name: 'Progress', holds: 'Directly under the control while a run is going: which chunk it is on, and a live log of what each account is deciding.' },
-            { name: 'Search', holds: 'Two mode tabs — Keyword search · Similar channels — sharing every filter: keywords and optional endings, accounts, members range, languages, minimum comments on the last post, and how many results to stop at.' },
-            { name: 'Results', holds: 'Four tabs — All, Pending, Promoted, Rejected — with Copy Links and Clear above them.' },
+          /* SHOT: Channel Parser, Keyword search tab — keywords and endings fields, accounts, members range, languages, min comments on last post, max results, Start search button. */
+          ['steps', [
+            "Type a few keywords (Keyword search tab). Start with three or four to test your filters.",
+            "Optionally add endings. Every keyword is combined with every ending: crypto + signals is searched as “crypto signals”. Generate can suggest up to 30 endings in a language you pick.",
+            "Choose accounts: all healthy ones, or a selection.",
+            "Set the filters (below). The defaults are a good start.",
+            "Press Start search. The form shows how many combinations will run and roughly how long, and asks you to confirm a long run.",
+            "Watch the live log under the control. It names every candidate and why it was rejected, so you quickly see which filter removes the most.",
           ]],
-        ],
-      },
-      {
-        id: 'keyword-search',
-        title: 'Keyword search',
-        blocks: [
-          ['p', "You give it words; it searches Telegram for each one and inspects what comes back. The endings field is a multiplier on that: every keyword is combined with every ending, so five keywords and four endings is twenty searches."],
-          ['controls', [
-            {
-              id: 'ctl-cp-keywords', name: 'Keywords', where: 'Keyword search', kind: 'field', value: 'crypto, trading',
-              rows: [
-                ['What it does', 'The words searched for. Typed one at a time or pasted as a list.'],
-                ['Limit', 'Up to 300. Duplicates are dropped case-insensitively as you add them.'],
-                ['How they are sent', 'In batches of ten. That is a hard limit on the search request itself, not a throttle, so a long list is split into chunks and the chunks run one after another.'],
-                ['What one keyword really costs', 'More than one search. Telegram’s own search returns only about ten results for a query however many you ask for, so each keyword is also re-queried as several deterministic rewrites of itself to get past that ceiling.'],
-              ],
-            },
-            {
-              id: 'ctl-cp-endings', name: 'Endings (optional)', where: 'Keyword search', kind: 'field', value: 'signals, news',
-              rows: [
-                ['What it does', 'Words appended to each keyword to make the combinations actually searched — crypto plus signals is searched as the single phrase crypto signals.'],
-                ['Why', 'Topic plus ending is how Telegram channels are actually named. Searching the bare topic finds far less than searching the names people give channels about it.'],
-                ['Generate', 'A button asks the model for a set of endings in a language you pick, up to thirty at a time. It only fills the field — nothing is searched until you press Search.'],
-                ['The multiplication', 'Combinations are keywords times endings. The form shows the count and a time estimate before you commit, and asks for confirmation on a long one.'],
-              ],
-            },
-            {
-              id: 'ctl-cp-accounts', name: 'Accounts', where: 'The form', kind: 'button', tone: 'plain', value: 'Use all accounts',
-              rows: [
-                ['What it does', 'Chooses which accounts do the searching. Either all healthy ones, or a selection.'],
-                ['How they are used', 'The keyword list is split across up to a few accounts at once, each working its own share.'],
-                ['Reserved while running', 'An account in a running search cannot be added to the commenting pool until the task finishes.'],
-                ['Pacing', 'Every single Telegram request is paced and counted against that account’s budget, including the ones spent inspecting a candidate. There is also a per-task ceiling, so one long keyword list cannot spend an account’s whole hourly allowance by itself.'],
-              ],
-            },
-            {
-              id: 'ctl-cp-max-results', name: 'Max results', where: 'The form', kind: 'button', tone: 'plain', value: '500',
-              rows: [
-                ['What it does', 'Stops the run once this many channels have been accepted.'],
-                ['Default', '500. Unlimited is offered, and is capped at 5000 by the engine regardless.'],
-                ['Custom values', 'Anything from 1 to 5000.'],
-              ],
-            },
-          ]],
-          ['p', "A run can be cancelled while it goes. Cancelling stops the chunks that have not started; everything already found stays."],
+          ['p', "Cancel stops the chunks that have not started yet. Everything already found stays in the results."],
         ],
       },
       {
         id: 'similar',
         title: 'Similar channels',
         blocks: [
-          ['p', "The other mode. Instead of words you give it channels, and it asks Telegram what is similar to them. Every filter below applies the same way."],
-          ['controls', [
-            {
-              id: 'ctl-cp-sources', name: 'Source channels', where: 'Similar channels', kind: 'field', value: '@somechannel',
-              rows: [
-                ['What it does', 'The channels to find neighbours of. One per line, as @username, a t.me link or a bare name.'],
-                ['What is refused', 'Private invite links. They name no public channel, so there is nothing to ask about.'],
-                ['When this beats keywords', 'When you already know two or three channels your audience reads. It skips the guessing about names entirely.'],
-              ],
-            },
-            {
-              id: 'ctl-cp-depth', name: 'Depth', where: 'Similar channels', kind: 'select', value: '1',
-              rows: [
-                ['Depth 1', 'Direct recommendations for each source channel only.'],
-                ['Depth 2', 'Also searches channels similar to what depth 1 found. More results, longer runtime, more Telegram calls.'],
-                ['If it finds nothing', 'A similar-channels run reporting zero is usually telling the truth about a pool you have already worked. Every candidate it surfaces that you previously added or rejected is skipped as already reviewed, and on a mature list that is most of them. The run says so now: the log names each skipped candidate with its reason, and the finished task carries the breakdown, so a zero is distinguishable from a search that did nothing.'],
-                ['What bounds depth 2', 'Only the highest-scoring thirty of the accepted depth-1 channels are recursed into. Without that cap a fifty-source run could turn into hundreds of extra requests.'],
-                ['Pacing', 'Depth 2 is paced more slowly than depth 1, because it stacks a second wave of requests onto the same account session inside one run.'],
-              ],
-            },
-          ]],
+          ['p', "The second tab. Instead of keywords you give it channels you already like, and it asks Telegram which channels are similar. The same filters apply."],
+          ['table', {
+            head: ['Setting', 'What it does'],
+            rows: [
+              ['Source channels', 'Up to 50, one per line, as @username or a t.me link. Private invite links are not accepted.'],
+              ['Depth 1', 'Channels similar to each source.'],
+              ['Depth 2', 'Also searches channels similar to the best 30 results of depth 1. More results, slower.'],
+            ],
+          }],
+          ['p', "A similar search that finds nothing on a list you have already worked through is normal: channels you already accepted or rejected are skipped, and the log says so."],
         ],
       },
       {
         id: 'filters',
-        title: 'The filters',
+        title: 'Filters',
         blocks: [
-          ['p', "Every candidate goes through the same pipeline in the same order, and the first failure ends it. Three of the steps are yours to set; three are not."],
-          ['controls', [
-            {
-              id: 'ctl-cp-members', name: 'Members range', where: 'The form', kind: 'field', value: '5 000 — 10 000 000',
-              rows: [
-                ['What it does', 'Rejects a channel whose member count is outside the range.'],
-                ['Default', 'From 5,000, with no meaningful upper limit.'],
-                ['Accepted range', 'The floor cannot go below 500 and the ceiling not above 10,000,000.'],
-                ['Which way to move it', 'Down. A smaller channel is a lot easier to be visible in than a large one, and the default floor already excludes most of them.'],
-              ],
-            },
-            {
-              id: 'ctl-cp-languages', name: 'Languages', where: 'The form', kind: 'badge', tone: 'plain', value: 'English',
-              rows: [
-                ['What it does', 'Rejects a channel whose detected language is not among the ones ticked.'],
-                ['The ten offered', 'English, Russian, Ukrainian, German, Spanish, French, Portuguese, Italian, Polish, Turkish.'],
-                ['How the language is decided', 'From the text of the last three posts, run through automatic detection.'],
-                ['A channel it cannot read', 'Comes back as unknown, which never matches anything ticked, so a channel of images with no captions is rejected here.'],
-                ['At least one', 'The form refuses to search with none selected.'],
-              ],
-            },
-            {
-              id: 'ctl-cp-min-comments', name: 'Min comments on last post', where: 'The form', kind: 'field', value: '5',
-              rows: [
-                ['What it does', 'Rejects a channel whose most recent post has fewer comments than this.'],
-                ['Default', '5.'],
-                ['Only the last post', 'One post is checked, not an average — one lookup instead of five. A channel that was busy last month and quiet this week fails here, which is the intent.'],
-                ['Why it is the filter that matters', 'A comment nobody will see is worth nothing. This is the number that decides whether a channel is a place to be read.'],
-              ],
-            },
-          ]],
-          ['p', "Three more checks run that the form does not show, and they reject more than the ones it does:"],
           ['table', {
-            head: ['Check', 'What it rejects'],
+            head: ['Filter', 'Default', 'What it rejects'],
             rows: [
-              ['Public channel', 'Anything without a public username. There is nothing to point an account at otherwise.'],
-              ['Comments open', 'Any channel with no linked discussion group. Measured across 2,841 real candidates on this deployment, this one alone rejects 66 per cent of everything considered — by far the most destructive step in the pipeline, and the reason a search that found plenty returns little.'],
-              ['Posts per week', 'A channel with fewer than five posts in the last seven days. Not adjustable from the panel.'],
+              ['Members range', '500 – 1,000,000', 'Channels with fewer or more members. Allowed range: 500 to 10,000,000.'],
+              ['Languages', 'English', 'Channels whose last three posts are in another language. Ten languages to choose from. A channel with no text (images only) cannot be detected and is rejected.'],
+              ['Min comments on last post', '5', 'Channels whose newest post has fewer comments. This is the filter that tells you whether anyone reads the comments.'],
+              ['Max results', '500', 'Not a filter: the search stops after this many accepted channels. Up to 5,000.'],
             ],
           }],
-          ['p', 'The whole funnel, measured rather than estimated. Across 2,841 candidates this deployment has actually put through the filters, 54 survived - 1.9 per cent. Where the other 2,787 went, each counted against the first filter that rejected it:'],
-          ['table', {
-            head: ['Rejected by', 'Share of all candidates'],
-            rows: [
-              ['Comments open', '66.1 per cent'],
-              ['Members out of range', '15.1 per cent'],
-              ['Comments on last post too low', '9.5 per cent'],
-              ['Posts per week too low', '5.6 per cent'],
-              ['Language mismatch', '1.8 per cent'],
-              ['Passed everything', '1.9 per cent'],
-            ],
-          }],
-          ['callout', [
-            'Two readings of that table are both correct and worth holding together. A 1.9 per cent survival rate is not the parser working badly - it is what an honest set of filters does to an open recommendation feed. But it also means the single most effective thing you could change is the comments-open requirement, and that one is not adjustable: a channel with no discussion group has nowhere to put a comment.',
-          ]],
+          ['p', "Three checks always run and cannot be changed: the channel must be public, it must have comments switched on (a linked discussion group), and it must have posted at least 5 times in the last 7 days. The comments check is the one that rejects the most candidates, so a search that looked at many channels often returns few."],
         ],
       },
       {
         id: 'results',
-        title: 'Reading the results',
+        title: 'Results',
         blocks: [
-          ['p', "One row per surviving channel: username, title, members, language, comments on the last post, and a score. The score bands are coloured the same way in both parsers, so a 72 never reads as good on one and neutral on the other."],
-          ['controls', [
-            {
-              id: 'ctl-cp-score', name: 'Score', where: 'Results', kind: 'tile', tone: 'ok', value: '72',
-              rows: [
-                ['What it is', 'A number from 0 to 100 built from four things, with comment activity weighted hardest.'],
-                ['How it is built', 'Up to 40 points for size, on a logarithmic scale — 5,000 members is worth about 30, and past roughly half a million it stops paying. Up to 40 for comments on the last post, reaching full marks at ten comments. Up to 10 for posting frequency. Ten more for matching a language you asked for.'],
-                ['What that means in practice', 'A modest channel with a busy comment section outscores a huge one nobody talks in. That is deliberate.'],
-                ['Colour bands', 'Under 30 reads as poor, 30 to 60 as middling, above 60 as good.'],
-              ],
-            },
-            {
-              id: 'ctl-cp-copy', name: 'Copy Links', where: 'Results', kind: 'button', tone: 'plain', value: 'Copy Links',
-              rows: [
-                ['What it does', 'Copies the links of the rows on the current page to the clipboard, one per line.'],
-                ['What it is for', 'Pasting straight into the Add channel(s) box on the Neurocommenting page, which accepts exactly this format.'],
-                ['The current page only', 'Not the whole result set. Page through and copy each page.'],
-              ],
-            },
-            {
-              id: 'ctl-cp-clear', name: 'Clear', where: 'Results', kind: 'button', tone: 'bad', value: 'Clear',
-              rows: [
-                ['What it does', 'Deletes the stored results.'],
-                ['What comes back', 'A later search can surface the same channels again — nothing here records that you have already seen and dismissed one.'],
-              ],
-            },
-          ]],
-          ['callout', [
-            "The four result tabs read as a workflow that is not there. All, Pending, Promoted and Rejected are real statuses the engine keeps, and promoting a channel would add it to the monitored list in one step while rejecting it would stop it resurfacing on a re-scan — but this table offers no way to do either. Every row stays Pending forever, and the only route into the commenting list is Copy Links and a paste into the Neurocommenting page, which does not change the row's status. The Group Parser tab beside it does have the two buttons.",
-          ]],
+          /* SHOT: Channel Parser results table — tabs All / Pending / Accepted / Rejected, Copy Links and Clear, a few rows with score colours and the Start commenting / Reject buttons. */
+          ['p', "Each row shows the channel, members, language, where the search found it, comments on the last post and a score from 0 to 100. Comments count most: a small channel with a busy comment section scores higher than a big silent one."],
+          ['table', {
+            head: ['Control', 'What it does'],
+            rows: [
+              ['Start commenting', 'Adds the channel to the Neurocommenting channel list. A running engine picks it up on its next round; no restart. The row then shows Commenting.'],
+              ['Reject', 'Marks the channel so it does not come back in later searches.'],
+              ['Stop commenting', 'Shown instead of Reject on a channel you are commenting in. Removes it from the channel list. A comment already queued for it may still post.'],
+              ['Tabs', 'All, Pending (not decided yet), Accepted, Rejected.'],
+              ['Copy Links', 'Copies the links on the current page, one per line.'],
+              ['Clear', 'Deletes the pending results. Accepted and rejected channels stay.'],
+            ],
+          }],
+          ['p', "Score bands: under 30 is weak, 30 to 60 is average, over 60 is good. The score adds up members (up to 40 points), comments on the last post (up to 40), posts in the last week (up to 10) and a language match (10)."],
         ],
       },
       {
-        id: 'first-run',
-        title: 'First run',
+        id: 'mistakes',
+        title: 'Common mistakes',
         blocks: [
-          ['steps', [
-            "Start with three or four keywords and no endings. It costs little and tells you whether the filters are anywhere near right before you spend a long run on them.",
-            "Leave the members range alone at first; lower the floor rather than raising the ceiling if too little comes back.",
-            "Set Min comments on last post to what you actually need. Five is the default and it is not a low bar — a channel that clears it has a live comment section.",
-            "Read the run rather than waiting for it. The live log names each candidate and why it was rejected - in both modes now; until recently the similar-channels log named the sources it worked through but not the candidates they produced - and it is usually obvious within a minute which filter is doing the damage.",
-            "Once the filters look right, add endings and re-run. That is where the volume comes from.",
-            "Copy the links of the rows worth having and paste them into Add channel(s) on the Neurocommenting page.",
+          ['bullets', [
+            "Starting with a long keyword list. Test the filters on a few keywords first, then add endings for volume.",
+            "Raising the members floor when too little comes back. Lower it instead: small channels are easier to be seen in.",
+            "Setting Min comments on last post to 0. You get channels where nobody reads the comments.",
+            "Expecting Clear to remember what you skipped. Only Reject stops a channel from coming back.",
           ]],
-          ['note', "Very little coming back is the normal first experience, and it is usually not the keywords. Roughly three quarters of real candidates are rejected for having no comment section at all, before any filter you set is even reached.",
-          ],
-          ['linkout', { href: '/guides/neurocommenting', label: 'Next: point the commenting engine at them' }],
+          ['linkout', { href: '/guides/group-parser', label: 'Next: find active groups' }],
         ],
       },
     ],
@@ -1269,168 +1149,87 @@ const GUIDES = [
     slug: 'group-parser',
     url: 'group-parser',
     group: 'module',
-    short: 'Rooms worth walking into',
-    title: 'Finding active Telegram groups',
-    summary: 'Finding groups that are actually alive and that you can actually post in — the filters, the score, and where a promoted group goes.',
+    short: 'Find active groups',
+    title: 'Group Parser',
+    summary: "Find public groups where people actually talk and where your accounts can join and post, then allow the best ones to be mentioned in NeuroDialogs.",
     seoTitle: 'Find active Telegram groups: senders, join checks',
     seoDescription:
-      'Member counts lie. Find groups that are actually alive using unique senders, and check you can join and post before adding one to the pool.',
+      'Find active Telegram groups by real conversation, not member count: unique senders, messages per week, open joining and posting, and what Allow in DMs does.',
     module: 'group-parser',
     video: null,
     body: [
       {
-        id: 'what-it-is',
-        title: 'What this page is',
+        id: 'what-it-does',
+        title: 'What it does',
         blocks: [
-          ['p', "Group Parser finds public groups — the rooms where people talk to each other, rather than channels where one account broadcasts. It lives on the same page as Channel Parser, behind the Groups tab in the top bar."],
-          ['p', "It looks similar to its neighbour and behaves differently in every place that matters, because what makes a group worth having is not what makes a channel worth having."],
-          ['callout', [
-            "The channel pipeline's most destructive filter simply does not exist here. A channel is rejected outright if it has no linked discussion group to comment in — measured on real candidates, that alone removes about three quarters of them. A group is the discussion surface, so there is nothing to link to and nothing to reject for. Expect a group search to return far more than a channel search on the same effort.",
-          ]],
+          ['p', "Group Parser finds public groups, the chats where members talk to each other. It is on the same page as Channel Parser, behind the Groups tab in the top bar."],
+          ['p', "For each keyword it runs two searches and merges them: one by group name, and one by message text, which finds groups where someone recently wrote about your topic."],
+          ['p', "Groups you allow here are not commented in. They go to NeuroDialogs, where your accounts may mention them in private conversations."],
         ],
       },
       {
-        id: 'map',
-        title: 'Map of the page',
+        id: 'setup',
+        title: 'Run a search',
         blocks: [
-          ['map', [
-            { name: 'Parser tabs', holds: 'Channels · Groups, in the top bar. This guide is the second one.' },
-            { name: 'Search control', holds: 'The run state, Start search, and Cancel run while one is going.' },
-            { name: 'Progress', holds: 'Directly under the control while a run is going: the chunk it is on, and the live log of what each account decided about each candidate.' },
-            { name: 'Search', holds: 'Keywords and endings, accounts, members range, languages, the two activity floors, the two access switches, and how many results to stop at.' },
-            { name: 'Results', holds: 'The table, with Export CSV above it and status tabs across it — and, unlike the channel table, a Promote and a Reject on every row.' },
+          /* SHOT: Group Parser search form — keywords, members range, languages, Activity (min messages 7d, min unique senders), Access switches, max results. */
+          ['steps', [
+            "Open the Groups tab and type a few keywords. Endings, accounts and Max results work as in Channel Parser.",
+            "Keep both Access switches on. Whatever they remove is a group your accounts could not use anyway.",
+            "Leave the activity floors at their defaults for the first run.",
+            "Press Start search and read the live log.",
+            "Sort the results by senders, not by members, and decide on each row.",
           ]],
-        ],
-      },
-      {
-        id: 'how-it-searches',
-        title: 'How it finds candidates',
-        blocks: [
-          ['p', "Two different Telegram searches are run for every keyword and their results are merged. They were both kept because measurement said to: on a live test the two found different groups and the overlap between them was zero."],
-          ['table', {
-            head: ['Search', 'What it matches'],
-            rows: [
-              ['By name', 'The group’s own name. The same call the channel parser makes — Telegram returns channels and groups in one list and only a flag separates them.'],
-              ['By message text', 'What people are actually saying, returning the groups those messages live in. A group only surfaces if it has a recent on-topic message, so this applies an activity test at the source rather than after four requests of inspection.'],
-            ],
-          }],
-          ['p', "The second one also pages, which is where the volume comes from — the name search has a hard ceiling of roughly ten results per query however many you ask for. Three pages are taken per keyword: enough for several times that ceiling, while staying a small, bounded number of requests."],
-          ['p', "Keywords, endings, account selection and the maximum-results picker work exactly as they do on the channel tab, including the ten-per-request batching and the confirmation before a long run."],
         ],
       },
       {
         id: 'filters',
-        title: 'The filters',
+        title: 'Filters',
         blocks: [
-          ['p', "Members and languages mean the same thing here as on the channel tab. Everything else is different, because a group has no posts and no comments to count."],
-          ['controls', [
-            {
-              id: 'ctl-gp-messages', name: 'Min messages (7d)', where: 'Search → Activity', kind: 'field', value: '20',
-              rows: [
-                ['What it does', 'Rejects a group with fewer messages than this in the last seven days.'],
-                ['Default', '20.'],
-                ['How it is measured', 'From one pull of the last fifty messages. A group busy enough to fill fifty messages inside a week is measured against that sample rather than its whole history.'],
-                ['Why it is the weaker of the two', 'Message count alone cannot tell a community from two bots posting all day. That is what the next one is for.'],
-              ],
-            },
-            {
-              id: 'ctl-gp-senders', name: 'Min unique senders', where: 'Search → Activity', kind: 'field', tone: 'ok', value: '5',
-              rows: [
-                ['What it does', 'Rejects a group unless this many distinct people sent at least one message in the sample.'],
-                ['Default', '5. Deliberately low — it is there to exclude the obvious dead and bot-run cases, not to demand a large sample.'],
-                ['The number that matters', 'Two hundred messages from two accounts is not a community. This is the only filter that separates a real conversation from a feed, and it has no equivalent at all in the channel pipeline.'],
-                ['Which one to raise', 'This one. Raising the message floor finds busier spam; raising the sender floor finds more people.'],
-              ],
-            },
-            {
-              id: 'ctl-gp-open-join', name: 'Only groups anyone can join', where: 'Search → Access', kind: 'toggle', on: true,
-              rows: [
-                ['What it does', 'Skips groups where joining has to be approved by an admin.'],
-                ['Default', 'On.'],
-                ['Why on', 'Joinable means joinable on demand. A join request may simply never be granted, and an account waiting on one is an account doing nothing.'],
-                ['Checked how', 'From the group itself, not guessed from anything else.'],
-              ],
-            },
-            {
-              id: 'ctl-gp-can-post', name: 'Only groups members can post in', where: 'Search → Access', kind: 'toggle', on: true,
-              rows: [
-                ['What it does', 'Skips read-only groups where new members cannot send messages.'],
-                ['Default', 'On.'],
-                ['Why on', 'A group nobody may post in cannot be commented in, whatever else is true about it.'],
-              ],
-            },
-          ]],
-          ['p', "Two more checks run before any of those: the group has to be public — with a username to point an account at — and it has to actually be a group rather than a broadcast channel that arrived in the same result list."],
+          ['table', {
+            head: ['Filter', 'Default', 'What it rejects'],
+            rows: [
+              ['Members range', '500 – 1,000,000', 'Groups with fewer or more members.'],
+              ['Languages', 'English', 'Groups in other languages.'],
+              ['Min messages (7 days)', '50', 'Groups with fewer messages in the last week.'],
+              ['Min unique senders', '10', 'Groups where fewer different people wrote. This is the best filter against dead groups and bot feeds: many messages from two accounts are not a community.'],
+              ['Only groups anyone can join', 'On', 'Groups where an admin must approve new members.'],
+              ['Only groups members can post in', 'On', 'Read-only groups.'],
+            ],
+          }],
+          ['p', "Every group must also be public (have a username). Activity is measured from the group's last 50 messages."],
         ],
       },
       {
         id: 'results',
-        title: 'Reading a row',
+        title: 'Results',
         blocks: [
-          ['p', "The table carries more than the channel one, because more of what decides a group is visible up front: members, messages in the last seven days, distinct senders, slow mode, how joining works, language, where the search found it, and a score."],
-          ['controls', [
-            {
-              id: 'ctl-gp-score', name: 'Score', where: 'Results', kind: 'tile', tone: 'ok', value: '68',
-              rows: [
-                ['What it is', 'Zero to a hundred, weighted toward conversation rather than size.'],
-                ['How it is built', 'Up to 25 points for members, on a logarithmic scale — a thousand members is worth about 15 and a million barely more than 25. Up to 35 for messages in the week, full marks at around 140. Up to 25 for distinct senders, full marks at about 17 people. Fifteen more for matching a language you asked for.'],
-                ['The penalty', 'Ten points off for slow mode of a minute or longer, because that throttles the exact thing an account would be there to do.'],
-                ['Different from the channel score on purpose', 'That one can hand 40 of its 100 points to raw member count. Here members cap at 25 and the two activity terms carry 60 between them — a big silent group is worth less than a smaller talkative one.'],
-              ],
-            },
-            {
-              id: 'ctl-gp-slowmode', name: 'Slow mode', where: 'Results → a row', kind: 'badge', tone: 'warn', value: '30s',
-              rows: [
-                ['What it shows', 'How long a member has to wait between messages. Off means no cooldown.'],
-                ['Why it is on the row', 'It is the difference between a group an account can take part in and one where it gets a turn every few minutes. Anything from a minute up also costs the group ten points.'],
-              ],
-            },
-            {
-              id: 'ctl-gp-source', name: 'Source', where: 'Results → a row', kind: 'badge', tone: 'plain', value: 'search global',
-              rows: [
-                ['What it shows', 'Which of the two searches surfaced this group — its name, or something said in it.'],
-                ['Why it is worth a glance', 'A group found by message text had a recent on-topic message in it. A group found by name only matched a name.'],
-              ],
-            },
-            {
-              id: 'ctl-gp-promote', name: 'Promote', where: 'Results → a row', kind: 'button', tone: 'ok', value: 'Promote',
-              rows: [
-                ['What it does', 'Marks the group accepted and adds it to NeuroDialogs’ promoted-groups list.'],
-                ['Where it actually goes', 'Into the DM module, not the commenting one. Accounts answering private messages may then mention it when it naturally fits, rate-limited to at most one mention every few messages per conversation.'],
-                ['When it takes effect', 'The next message. That list is read fresh on every generation, so there is nothing to restart and no cache to clear.'],
-                ['If you wanted it for commenting', 'That is not what this button does. The commenting engine watches channels, and a standalone group is not one.'],
-              ],
-            },
-            {
-              id: 'ctl-gp-reject', name: 'Reject', where: 'Results → a row', kind: 'button', tone: 'bad', value: 'Reject',
-              rows: [
-                ['What it does', 'Marks the group rejected so it does not resurface on a later scan.'],
-                ['Why it is worth using', 'It is the only thing that remembers a decision. Without it the same unsuitable group comes back on every re-run of the same keywords.'],
-              ],
-            },
-            {
-              id: 'ctl-gp-export', name: 'Export CSV', where: 'Results', kind: 'button', tone: 'plain', value: 'Export CSV',
-              rows: [
-                ['What it does', 'Exports every row matching the current tab and filters — not just the page on screen, unlike the comment history on the Neurocommenting page.'],
-              ],
-            },
-          ]],
+          /* SHOT: Group Parser results — columns Members, Messages 7d, Senders, Slow mode, Join, Language, Source, Score, and the Allow in DMs / Reject buttons. */
+          ['p', "Each row shows members, messages in the last 7 days, unique senders, slow mode, how joining works, language, which search found it, and a score from 0 to 100."],
+          ['table', {
+            head: ['Control', 'What it does'],
+            rows: [
+              ['Allow in DMs', 'After a confirmation, adds the group to Promoted groups in NeuroDialogs. Your accounts may mention it in conversations from their next message.'],
+              ['Reject', 'Marks the group so it does not come back in later searches.'],
+              ['Stop mentioning', 'Shown instead of Reject on an allowed group. Removes it from the NeuroDialogs list.'],
+              ['Export CSV', 'Downloads every row in the current tab and filter, not just the visible page.'],
+              ['Copy Links', 'Copies the links on the current page.'],
+              ['Clear', 'Deletes the pending results.'],
+            ],
+          }],
+          ['p', "The score favours conversation over size: members give up to 25 points, messages in the week up to 35, unique senders up to 25, and a language match 15. Slow mode of one minute or more costs 10 points, because it limits how often an account can write."],
         ],
       },
       {
-        id: 'first-run',
-        title: 'First run',
+        id: 'mistakes',
+        title: 'Common mistakes',
         blocks: [
-          ['steps', [
-            "Search a few keywords with both access switches left on. Everything they exclude is something an account could not have used anyway.",
-            "Sort your attention by senders rather than by members. A group with 800 members and 30 people talking is worth more than one with 40,000 and four.",
-            "Look at slow mode before committing. A minute or more between messages changes what an account can do there, and the score already docks it.",
-            "Reject the ones that are wrong, rather than ignoring them. It is the only way they stop coming back.",
-            "Promote the ones worth having — remembering that this hands them to NeuroDialogs to mention in conversation, not to the commenting engine.",
+          ['bullets', [
+            "Choosing by member count. 800 members with 30 active people beat 40,000 members with 4.",
+            "Ignoring slow mode. A minute or more between messages limits what an account can do there.",
+            "Expecting Allow in DMs to start commenting in the group. It only lets NeuroDialogs mention the group.",
+            "Leaving bad groups as Pending. Reject them, or they return in every search.",
           ]],
-          ['note', "Searching shares its account budget with the channel tab. A channel search and a group search running at once cannot together exceed the same owner-wide worker cap, so running both in parallel does not get through the work any faster — it just splits the same accounts between them.",
-          ],
-          ['linkout', { href: '/guides/neurodialogs', label: 'Next: answer the DMs those groups bring in' }],
+          ['linkout', { href: '/guides/neurocommenting', label: 'Next: start commenting' }],
         ],
       },
     ],
@@ -1439,665 +1238,255 @@ const GUIDES = [
     slug: 'neurocommenting',
     url: 'neurocommenting',
     group: 'module',
-    short: 'Empty list to live comments',
-    title: 'Automating Telegram comments',
-    summary: 'The page that runs the engine — every control on it, what it does once the engine reads it, and the order to touch them in.',
+    short: 'AI comments under new posts',
+    title: 'Neurocommenting',
+    summary: "Set up AI comments on Telegram channels: the pool and daily limits, channels and folders, persona, the Settings section, and the ramp for new accounts.",
     seoTitle: 'Automate Telegram comments with AI: full setup',
     seoDescription:
-      'Set up AI comments on Telegram channels: build a pool, assign channels, set delays that look human, and write a persona that reads like one.',
+      'Set up AI comments on Telegram channels: account pool, daily comment limits, channels and folders, persona, AI Protection and AI Autoreply, and a safe ramp for new accounts.',
     module: 'neurocommenting',
     video: null,
     body: [
       {
-        id: 'video-guide',
-        title: 'Watch it first',
+        id: 'what-it-does',
+        title: 'What it does',
         blocks: [
-          ['p', "The whole setup, start to first posted comment, in one run-through. The written sections below cover the same ground in more detail and are the reference to come back to; this is the fastest way to see the shape of it."],
-          /* ── PUT THE YOUTUBE ID IN `id` BELOW ──
-             Just the id, not the URL: for
-             https://www.youtube.com/watch?v=dQw4w9WgXcQ that is
-             "dQw4w9WgXcQ". While it is null the block renders nothing at
-             all (no empty frame) - so if it goes back to null, remove
-             this section's sentence about watching it too.
-
-             `poster` is a file in this repo on purpose — see LiteVideo in
-             shared.jsx. Do not point it at i.ytimg.com. */
-          ['video', {
-            id: 'r6n9zkgLmtU',
-            title: 'Setting up Neurocommenting',
-            poster: '/public/video/neurocommenting-guide.jpg',
-            caption: 'Full walkthrough — pool, channels, delays, persona, first comment.',
-          }],
+          ['p', "Neurocommenting watches the channels you list. When a new post appears, an account from your pool writes a comment with AI, waits a human-like delay and posts it."],
+          ['p', "It needs three things: accounts in the pool, channels to watch, and an active persona (the prompt the comments are written with)."],
         ],
       },
       {
-        id: 'what-it-is',
-        title: 'What this page is',
+        id: 'setup',
+        title: 'Set it up',
         blocks: [
-          ['p', "Neurocommenting is the module that actually posts. Everything else feeds it: accounts come from Account Manager, targets from the two parsers, a face from Profile Templates. This page is where the engine is started, and where the behaviour of every comment it writes is set."],
-          ['p', "It is one page with nine regions, and a jump-nav across the top lists them in this order: Control, AI Protection, Pool, Stats, Comments, Channels, Blacklist, Model, Persona. Under Persona, at the very bottom, sits a tenth strip, Advanced settings. It stays collapsed until you click it and is not in the jump-nav. Nothing here is a separate screen — the dialogs are the only things that open on top."],
-          ['callout', [
-            "Start does not keep one session running forever. The engine caps a single session at ten hours by default: at the top of the round where that is reached it stops itself cleanly. What happens next is the Auto-continue switch beside Start. On, which is the default, the engine takes a random break of 90 to 210 minutes and starts the next session by itself, and the panel says when. Off, the session that hit the cap is the last one and the engine stays stopped until you press Start. A service restart is not a stop: a running engine comes back on its own a minute or two after the service does.",
-          ]],
-        ],
-      },
-      {
-        id: 'map',
-        title: 'Map of the page',
-        blocks: [
-          /* СКРИН 1: верх страницы Neurocommenting — полоса jump-nav (Control, AI Protection, Pool, Stats, Comments, Channels, Blacklist, Model, Persona) и блок Control под ней. */
-          ['map', [
-            { name: 'Control', holds: 'The run state and uptime, the Start/Stop button, the Auto-continue and Warmup switches, Delay settings, and the engine log.' },
-            { name: 'AI Protection', holds: 'One four-way switch, Off, Low, Medium or High: how often working accounts also read, scroll and browse like a person, and how many such actions they made in the last 24 hours.' },
-            { name: 'Pool', holds: 'Two columns of accounts, available and in the pool, then Comment Limits: the assignment buttons, the Work by folders switch, the daily limit controls, and the per-account list of which channels each account owns.' },
-            { name: 'Statistics', holds: 'What the pool has produced: total attempts, successful, failed sends and success rate. The jump-nav calls it Stats.' },
-            { name: 'Comments', holds: 'Every comment event, newest first, fifty to a page, with the full text and the post it answered behind each row.' },
-            { name: 'Channels', holds: 'The monitored channel list — what the engine watches — with the catch-up limit, the Telegram folders built from a preset, and the presets that save a list and reload it later.' },
-            { name: 'Blacklist', holds: 'Channels not worth commenting on: those with no successful comments and, while Comment deletion control is on, those that delete your comments. The deletion control switch and Remove channels sit in its header.' },
-            { name: 'Model', holds: 'Which of the five models writes your comments, what each costs relative to the others, and what our own safety measurements found.' },
-            { name: 'Persona', holds: 'The prompt presets, which one is active, and the sensitive-content filter.' },
-            { name: 'Advanced settings', holds: 'Collapsed at the very bottom and not in the jump-nav: join concurrency and a per-account pace limit. They apply to every module, not only this one.' },
-          ]],
-        ],
-      },
-      {
-        id: 'control',
-        title: 'Control',
-        blocks: [
-          ['p', "Five things sit here: the run state with its uptime, the button that starts and stops the engine, two switches, and the delay window every comment waits out. The engine log is underneath, collapsed."],
-          ['controls', [
-            {
-              id: 'ctl-start', name: 'Start', where: 'Control', kind: 'button', value: 'Start',
-              rows: [
-                ['What it does', 'Builds your account pool, connects every account in it, and begins polling the monitored channels. A round runs every poll interval — 60 seconds by default — and each round re-reads the account pool and the channel list from the database.'],
-                ['Before it starts', 'A preflight dialog opens if accounts, channels or an active persona are missing, listing which of the three failed and offering Start anyway. A check whose data has not loaded yet counts as passing, so a slow page never blocks the button.'],
-                ['What can refuse it', 'An empty commenting pool: an empty pool means no accounts, never all of them. And the active persona, which is assembled into a system prompt at start time — a persona that cannot be assembled fails the start outright, rather than failing quietly at the first comment.'],
-                ['While it connects', 'Connecting the accounts can take a couple of minutes. The button shows the progress, and Cancel start beside it abandons the start at any point.'],
-                ['Session cap', 'Ten hours by default. The check runs at the top of a round, never mid-send, and the stop is the clean one: the pool is disconnected and comments still waiting out their delay go back on the queue. Whether a new session follows is up to Auto-continue.'],
-                ['Service restarts', 'A running engine survives them. It is started again 90 to 120 seconds after the service comes back. If the service keeps dying, the third restart within an hour is not followed, and the run ends with a reason instead of reconnecting every account again and again.'],
-                ['Restarting for a change', 'Almost never needed. Accounts, the channel list, the delay window and the Warmup switch are all re-read every round. The persona is the exception — it is read once at start and cached.'],
-              ],
-            },
-            {
-              id: 'ctl-auto-continue', name: 'Auto-continue', where: 'Control, beside Start', kind: 'toggle', on: true,
-              rows: [
-                ['What it does', 'Decides what happens when a session reaches its cap. On: the engine takes a break and starts the next session by itself. Off: that session is the last one, and the engine stays stopped until you press Start.'],
-                ['Default', 'On.'],
-                ['The break', 'Random, 90 to 210 minutes each time, so the sessions do not settle on the same start times every day. While it lasts the panel reads Between sessions and says when the next one starts.'],
-                ['Changed mid-break', 'Turning it off during a break cancels the session that was due. Pressing Stop during a break cancels it too.'],
-                ['What it does not bring back', 'A pool you emptied while the engine was running. That run ends outright, whatever the switch says.'],
-              ],
-            },
-            {
-              id: 'ctl-stop', name: 'Stop', where: 'Control', kind: 'button', tone: 'bad', value: 'Stop',
-              rows: [
-                ['What it does', 'Ends the session and disconnects the pool. Comments still waiting out their delay are cancelled.'],
-                ['What happens to a cancelled comment', 'It is not lost. The post goes back on the pending queue carrying its original catch time, and the rate-limit slot it was holding is released — so a later session picks it up in its real place in the order rather than as something that just happened.'],
-                ['Never gated', 'Stop works whatever the subscription says. Only Start is gated.'],
-              ],
-            },
-            {
-              id: 'ctl-warmup', name: 'Warmup', where: 'Control, beside Start', kind: 'toggle', on: false,
-              rows: [
-                ['What it does', 'Ramps an account’s hourly and daily comment caps up gradually instead of letting a fresh account post at the full rate from its first hour.'],
-                ['Default', 'Off. Without it every account posts at the full configured rate immediately.'],
-                ['The ramp', 'Fourteen days, counted from when the account was added, moving linearly from 1 comment an hour and 3 a day up to the engine’s configured ceiling. Never below 1, never above the ceiling, and an account already older than fourteen days simply sits at the ceiling.'],
-                ['Not the same warmup', 'This switch is the posting-rate ramp. Supervise in Accounts is the seven-day outreach rest gate measured from import. Active Warmup is the separate module that has accounts read and react.'],
-                ['Takes effect', 'Next poll round. No restart.'],
-              ],
-            },
-            {
-              id: 'ctl-delay', name: 'Delay before commenting', where: 'Control → Delay settings', kind: 'field', value: '480',
-              rows: [
-                ['What it does', 'The wait between a written comment and its send. Once a post is caught, an account reserved and the comment written, the engine picks a delay uniformly at random between Min and Max and sleeps that long before sending.'],
-                ['Default', '480 to 1500 seconds — 8 to 25 minutes.'],
-                ['Presets', 'Three buttons fill both fields: Min (60-180s), Recommended (480-1500s), Max (1800-3600s). They only fill the fields — Save is what applies them.'],
-                ['Validation', 'Both numbers must be above zero, and Min must be below Max. Save stays disabled and the form says so while they are not.'],
-                ['Why the comment is written first', 'So that a post the model declines frees the account in seconds, not after it has sat out the whole delay for a comment it will never write. The price: a post that has to go back on the queue after the wait has its comment thrown away and written again on its next turn, a fraction of a cent.'],
-                ['At the edges', 'Twenty-five minutes is long enough for conditions to change. Right before sending, the account is re-checked — cooldown, quiet hours, a manual pause, a floodwait from another post landing first — and if it is no longer usable the post goes back on the queue with its original timestamp instead of being sent into the changed condition.'],
-                ['Takes effect', 'Next poll round. No restart.'],
-              ],
-            },
-            {
-              id: 'ctl-logs', name: 'Engine logs', where: 'Control', kind: 'button', tone: 'plain', value: 'Engine logs',
-              rows: [
-                ['What it does', 'Streams the engine’s own log lines live while the card is open, with a dot showing whether the stream is connected.'],
-                ['Scope', 'Your engine only. Every line is tagged with its owner before it reaches the stream.'],
-                ['Clearing', 'The Clear button empties the view. Pressing Start empties it too, so a new run never reads as a continuation of the last one.'],
-                ['Only while open', 'The connection opens when you expand the card and closes when you collapse it. Lines emitted while it was shut are not replayed.'],
-              ],
-            },
-          ]],
-          ['p', "The uptime counter beside the state runs from the moment the session started. The bar under it is scaled to the engine's real session cap, so a full bar means the session is about to end itself, and the line under the bar gives the time it ends and whether the next one follows."],
-          /* СКРИН 2: блок Control во время работы — полоса uptime, строка "This session ends at … — the next one starts after a short break" и янтарная строка "Done for today: all N accounts…" под ней. */
-          ['p', "A Running engine that has nobody free to post gets an amber line under the bar saying why: accounts paused, in cooldown, at their pace limit and so on, with the numbers. The one that is not a fault reads Done for today: every account in the pool has posted today's comment limit, and they come back by themselves after 00:00 UTC."],
-        ],
-      },
-      {
-        id: 'ai-protection',
-        title: 'AI Protection',
-        blocks: [
-          ['p', "The block right under Control. With it on, an account working here also does, now and then, what a person does in Telegram between comments. An account that only ever comments is a pattern Telegram can see; one that also reads and looks around is a user."],
-          /* СКРИН 3: блок AI Protection под Control — переключатель Off / Low / Medium / High, выбран Medium, строка "Each working account does something human about every 10 min · N actions in the last 24 h". */
-          ['controls', [
-            {
-              id: 'ctl-nc-ai-protection', name: 'AI Protection', where: 'Right under Control', kind: 'select', value: 'Medium',
-              rows: [
-                ['What it does', 'Each working account does something human about every 25 minutes on Low, 10 on Medium and 4 on High. Every gap is drawn at random around that figure, and an account’s first action comes one gap after the engine first sees it, so pressing Start does not set the whole pool browsing at once.'],
-                ['The actions', 'Open a channel or a group and read it, scroll back through a channel, view posts and stories, look through its own settings and profile, like a recent post, archive or unarchive a chat. One at random each time; reading is the most common, likes and archiving the rarest.'],
-                ['What it never does', 'It works only with the account’s own chats, on the connection the engine already holds. It never looks up a username and never joins anything. Private chats are never read, marked read or archived.'],
-                ['Likes', 'A like is visible, so it counts against the account’s hourly pace (see Advanced settings). When the hour is full, the like is skipped.'],
-                ['If Telegram objects', 'A flood wait backs off that account’s browsing only. It is never put in cooldown for it and keeps commenting.'],
-                ['Default', 'Medium. Off means the accounts only comment.'],
-                ['Counter', 'The line under the switch shows how many of these actions the pool made in the last 24 hours. It is kept in memory, so a service restart starts it again from zero.'],
-                ['Takes effect', 'No restart. Off stops it at once; a new level applies from each account’s next action.'],
-              ],
-            },
+          ['steps', [
+            "Prepare the accounts first: one week of Active Warmup and the protection steps. Brand-new accounts that start commenting at once are the fastest way to lose them.",
+            "Add accounts to the Commenting Pool: the arrow on a row moves one account; tick several to move them together.",
+            "Set a daily limit. For new accounts start at 3 (see Daily limit).",
+            "Add channels: Channels → Add channel(s), one @username or t.me link per line. Or press Start commenting on rows in Channel Parser.",
+            "Press Auto-assign channels, so every channel has an account that handles it.",
+            "Pick a persona. Copy the closest built-in and edit the copy.",
+            "Leave the delay at Recommended (480–1500 s) and press Start. If accounts, channels or a persona are missing, a preflight dialog lists what is missing before anything runs.",
           ]],
           ['plink', [
-            'The same switch sits on Neurodialogs and Mass Reactions, where the level means something slightly different. ',
-            { text: 'AI Protection across the modules', href: '/guides/account-protection#ai-protection' },
+            'Before step 1: ',
+            { text: 'Active Warmup', href: '/guides/active-warmup' },
+            ' and ',
+            { text: 'Account Protection', href: '/guides/account-protection' },
             '.',
           ]],
         ],
       },
       {
-        id: 'pool',
-        title: 'The commenting pool',
+        id: 'control',
+        title: 'Start, sessions and Auto-continue',
         blocks: [
-          ['p', "The pool is the subset of your accounts that neurocommenting may use. It is not the same thing as your account list: an account can be healthy, connected and completely idle simply because it was never put in here."],
-          ['p', "Two columns — Available accounts on the left, In commenting pool on the right — an arrow on each row to move one across, and checkboxes with a bulk arrow to move many. Underneath, under the heading Comment Limits, sits the assignment layer, which decides which pooled account handles which channel, and the daily limit."],
-          ['controls', [
-            {
-              id: 'ctl-pool-add', name: 'Add to pool', where: 'Pool → Available accounts', kind: 'button', value: 'Add to pool',
-              rows: [
-                ['What it does', 'Moves the account into the commenting pool and claims it for this module.'],
-                ['One module at a time', 'An account may be driven by one behavioural module only. One already held by NeuroDialogs, Mass Reactions or Active Warmup, or a folder creator still building its folders, is refused and named in the message, and the rest of the batch still goes through — a refusal never fails the whole request.'],
-                ['Also refused', 'An account currently reserved by discovery, or one still within its seven-day Supervise window, is refused with a reason. The supervision window is measured from import, not when supervision was enabled.'],
-                ['Removing releases it', 'Taking an account out of the pool frees it for another module immediately. Removing the last one asks first: the engine will not start with an empty pool.'],
-                ['Unhealthy accounts', 'An account that goes banned or dead-session while pooled is pulled out automatically and reported, rather than sitting there posting into nothing. Never the last ones, though: if every pooled account looks unhealthy at once, nothing is removed automatically and the panel says so.'],
-              ],
-            },
-            {
-              id: 'ctl-auto-assign', name: 'Auto-assign channels', where: 'Pool', kind: 'button', value: 'Auto-assign channels',
-              rows: [
-                ['What it does', 'Deals the whole monitored-channel list round-robin across the accounts currently in the pool, replacing any assignment that existed before.'],
-                ['How it divides', 'Evenly, with the remainder spread one extra to the first accounts in the list — 62 channels across 30 accounts gives two accounts three each and the rest two.'],
-                ['Why assign at all', 'An assigned account is the predictable path: when a post appears on a channel, its assigned account is used directly, with no scan of the pool. Everything else is fallback.'],
-                ['Refused when', 'The pool is empty, or no channels are configured. Both say which.'],
-              ],
-            },
-            {
-              id: 'ctl-shuffle', name: 'Shuffle channels', where: 'Pool', kind: 'button', tone: 'plain', value: 'Shuffle channels',
-              rows: [
-                ['What it does', 'Re-points the channels that are already assigned so every account ends up with a completely different set from the one it had, keeping the number each account holds the same.'],
-                ['Not the same as auto-assign', 'Auto-assign deals the full monitored list from scratch. Shuffle only touches what is already assigned, and guarantees no account keeps any of its previous channels.'],
-                ['When it refuses', 'When no such rearrangement exists: one account holding more than half of all assigned channels, fewer than two accounts with assignments, or nothing assigned yet. The reason comes back verbatim.'],
-              ],
-            },
-            {
-              id: 'ctl-clear-assignments', name: 'Clear assignments', where: 'Pool', kind: 'button', tone: 'plain', value: 'Clear assignments',
-              rows: [
-                ['What it does', 'Drops every channel-to-account assignment.'],
-                ['What happens then', 'Posting does not stop. Every channel falls back to picking from the pool by least-recently-used, so the work still spreads — it just stops being predictable per channel.'],
-              ],
-            },
-            {
-              id: 'ctl-set-limit', name: 'Set limit', where: 'Pool → Comment Limits, right of the assignment buttons', kind: 'field', value: '10',
-              rows: [
-                ['What it does', 'Applies one comment limit to every account currently in the pool, in a single call.'],
-                ['What the limit is', 'A daily cap. It counts only today’s successful comments, from 00:00 UTC. An account that reaches it is paused automatically and marked limit reached.'],
-                ['It comes back by itself', 'Right after 00:00 UTC. Every five minutes the engine looks for accounts paused on the limit whose count for the new day is under it, and resumes them; a running engine picks them up on its next round. An account you paused by hand is never touched.'],
-                ['In the list', 'Each account’s limit cell reads N of M today.'],
-                ['Default', 'None. An account has no limit at all until one is set, here or on a single account.'],
-                ['How it applies', 'Only on Enter or the tick button, never on losing focus — it touches every pooled account at once, so an incidental click should not fire it.'],
-                ['Clearing it', 'The Clear limits button beside it removes the cap from every pooled account. An account paused for hitting a limit it is now clear of resumes by itself; one you paused by hand is left alone.'],
-              ],
-            },
-            {
-              id: 'ctl-pool-reset-counts', name: 'Reset counts', where: 'Pool → Comment Limits', kind: 'button', tone: 'warn', value: 'Reset counts',
-              rows: [
-                ['What it does', 'Sets the selected accounts’ count for today back to zero and resumes any of them paused for hitting their limit. Asks first.'],
-                ['Why it exists', 'To carry on before midnight UTC. A spent account comes back by itself at 00:00 UTC; Reset counts is for when you want it posting again now. Raising the limit does the same.'],
-                ['Selection, not the pool', 'It acts on whatever is ticked in either column. An account pulled out of the pool for hitting its limit sits in Available accounts, and this reaches it there without re-adding it first.'],
-                ['What survives', 'Comment history. The rows are not deleted — a floor timestamp moves instead — so cost tracking and statistics are unaffected.'],
-              ],
-            },
-            {
-              id: 'ctl-pause', name: 'Pause', where: 'Pool → assignment list', kind: 'button', tone: 'warn', value: 'Pause',
-              rows: [
-                ['What it does', 'Takes this one account out of posting until you resume it. It is excluded starting from the next poll round.'],
-                ['Why it is not a status', 'Nothing automated can move an account into or out of a manual pause — not floodwait handling, not the health checker clearing an account back to active, not cooldown expiry. That is the difference between this and parking an account in the Accounts page’s Danger zone.'],
-                ['Resume', 'Only ever un-pauses. It refuses on an account that is not paused, so a banned or disabled account cannot be revived by pressing it.'],
-              ],
-            },
-          ]],
-          ['p', "Under the buttons, one row per account that holds channels: how many comments it landed and how many failed, its limit for today, whether it is paused, and the channels it owns behind a fold."],
-          /* СКРИН 4: Pool → Comment Limits — заголовок с переключателем "Work by folders", ряд кнопок (Auto-assign, Shuffle, Clear assignments, Set limit, Clear limits, Reset counts) и строки аккаунтов с ячейкой "N of M today". */
-          ['callout', [
-            "Assignment is a preference, not a rule. If the assigned account is in cooldown, in quiet hours, paused, at its cap or blocked from that channel, the post is not skipped — it falls back to the rest of the pool, ordered least-recently-used, with accounts that have already succeeded on that channel first and accounts that failed to resolve it last. The fallback never goes beyond the pool: an account that is not in it is never used.",
-          ]],
-          ['note', "When every account in the pool has spent today's limit, the engine does not stop. It stays Running, writes into the log that the pool is done for today, stops polling channels it cannot comment on, and carries on by itself once the accounts come back after 00:00 UTC. The session cap and Auto-continue work as usual meanwhile."],
+          ['figure', {
+            src: '/public/screenshots/neurocommenting/control.png', w: 1600, h: 808,
+            alt: 'Neurocommenting Module control: Running with uptime, Auto-continue on, Warmup off, Stop button, a progress bar with the line “This session ends … — the next one starts after a short break”, and Delay settings below with Min 480 and Max 1500 seconds.',
+            caption: 'Module control while running. The bar fills up until the session ends itself.',
+          }],
+          ['p', "Start connects the accounts in the pool (this can take a couple of minutes; Cancel start stops it) and begins watching the channels. Changes to the pool, the channel list, the delay and limits are picked up on the next round, about once a minute. You do not need to restart."],
+          ['table', {
+            head: ['Control', 'What it does'],
+            rows: [
+              ['Session cap', 'A session runs for up to 10 hours, then the engine stops itself cleanly. The bar shows how far it is and when it ends.'],
+              ['Auto-continue', 'On (default): after the session the engine takes a random break of 90 to 210 minutes and starts the next session by itself. The panel shows “Between sessions — the next one starts …”. Off: it stays stopped until you press Start.'],
+              ['Stop', 'Ends the session. Comments still waiting out their delay are cancelled and their posts go back in the queue for later.'],
+              ['Warmup', 'Off by default. When on, each account starts at 1 comment an hour and 3 a day and climbs to full speed over 14 days from when it was added. This is separate from the daily limit and from the Active Warmup module.'],
+              ['Delay before commenting', 'The random wait between writing a comment and posting it. Recommended 480–1500 s (8–25 min). Presets fill the fields; Save applies them.'],
+              ['Engine logs', 'Live log of what the engine decides. Open it when something looks wrong.'],
+            ],
+          }],
+          ['p', "If the engine is Running but nobody can post, an amber line under the bar says why (accounts paused, in cooldown, at their pace limit and so on). “Done for today” is not a fault: every account has used its daily limit and they come back after 00:00 UTC."],
+          ['p', "A server restart does not stop a running engine. It starts again by itself a minute or two after the service is back."],
         ],
       },
       {
-        id: 'model',
-        title: 'Choosing the model',
+        id: 'daily-limit',
+        title: 'Pool and daily limit',
         blocks: [
-          ['p', "Five models can write your comments, and the choice is yours per module - Neurocommenting and NeuroDialogs are set separately. What follows is not a feature table. Every number here comes from our own probe against the live providers: 34 sensitive posts, each put to each model three times, 102 calls per model, through the real prompt path a comment actually takes. None of it comes from a vendor's description of its own model."],
+          ['figure', {
+            src: '/public/screenshots/neurocommenting/pool.png', w: 1600, h: 1461,
+            alt: 'Commenting Pool with Available accounts on the left and pool accounts on the right, and Comment Limits below: Auto-assign channels, Shuffle channels, Clear assignments, Set limit, Clear limits, Reset counts, the Work by folders switch, and account rows with limit cells such as “4 of 20 today”.',
+            caption: 'The pool and Comment Limits. Each account shows how many of today’s comments it has used.',
+          }],
+          ['p', "An account works in one module at a time. If another module (NeuroDialogs, Mass Reactions, Active Warmup) holds it, or it is still in its Supervise rest, it is refused with the reason. The rest of the batch is still added. Removing an account from the pool frees it at once."],
+          ['p', "The comment limit is a daily limit. It counts successful comments since 00:00 UTC and each row reads “N of M today”. An account that reaches it stops for the day and resumes by itself shortly after 00:00 UTC. The engine keeps running meanwhile and carries on after midnight."],
+          ['table', {
+            head: ['Control', 'What it does'],
+            rows: [
+              ['Set limit', 'Type a number and press Enter or the tick. Applies to every account in the pool. There is no limit until you set one.'],
+              ['Clear limits', 'Removes the limit from every pooled account.'],
+              ['Reset counts', 'Sets today’s count back to zero for the ticked accounts, so they can post again before midnight. Comment history is kept.'],
+              ['Pause / Resume', 'Takes one account out of posting until you resume it. Nothing automatic ever resumes a manual pause.'],
+              ['Auto-assign channels', 'Deals the whole channel list evenly across the pool, replacing old assignments.'],
+              ['Shuffle channels', 'Gives every account a different set of the channels already assigned, same number each.'],
+              ['Clear assignments', 'Removes all assignments. Posting continues: any free pool account takes the post.'],
+            ],
+          }],
+          ['p', "Assignment is a preference. If the assigned account cannot post right now (cooldown, paused, at its limit), another account from the pool takes the post. Accounts outside the pool are never used."],
           ['callout', [
-            'Read a clean result as a ceiling, not a guarantee. A model that declined all 102 has a leak rate somewhere under about 3 per cent - that is what 102 clean draws support. It does not mean zero, and one of the five leaked exactly once. What 102 draws can settle is a difference of the size we found: 22.5 per cent against under 3 per cent is not a matter of luck.',
+            "Ramp for new accounts: after a week of warmup and protection, start Neurocommenting at 3 comments per account per day and raise the daily limit by 1 every day (3, 4, 5, …). Use Set limit once a day to raise it.",
           ]],
-          ['p', 'Leaked, throughout, means one thing: the model wrote a publishable comment under a post about death, war, crime, a disaster, a memorial or an election, with the sensitive-content rule in its prompt telling it not to.'],
-          ['controls', [
-            {
-              id: 'mdl-grok', name: 'Grok 4.3', where: 'xAI - the default', kind: 'button', value: 'Grok 4.3',
-              rows: [
-                ['Why it is the default', 'It declined all 102 sensitive posts, and it is what every account on this deployment now uses. Chosen on that measurement, not on price - it is not the cheapest slot.'],
-                ['What you give up', "Length. It writes the shortest comments of the five: a median of 89 characters against Claude's 137. If you want remarks with some substance, that is the trade."],
-                ['One quirk', 'It stayed silent on an ordinary post it should have answered. Expect the occasional paid call that produces nothing.'],
-                ['Price', '8.3x the old default on input, 4.2x on output.'],
-              ],
-            },
-            {
-              id: 'mdl-openai', name: 'GPT-4o mini', where: 'OpenAI - cheapest, and why we left it', kind: 'button', value: 'GPT-4o mini',
-              rows: [
-                ['The number', 'It wrote a comment on 23 of 102 sensitive posts. Not one in a hundred - closer to one in four.'],
-                ['Worse than the average suggests', 'Eight distinct posts got through, and six of those it commented on every single time it was asked. That is not bad luck on a borderline case; it is a blind spot you can reproduce on demand.'],
-                ['What it commented on', 'Mostly elections and politics - an opinion poll, a candidate withdrawing, an impeachment motion, a mayoral runoff. Also a court case and a four-hour air-raid alarm.'],
-                ['So why is it still offered', 'It is genuinely the cheapest, and for a pool where nothing sensitive is ever posted the difference does not arise. If you cannot say that of your channels, the saving is not what you are choosing.'],
-                ['Price', 'The baseline the other four are measured against.'],
-              ],
-            },
-            {
-              id: 'mdl-gemini', name: 'Gemini 3.5 Flash-Lite', where: 'Google - the cheapest one that held', kind: 'button', value: 'Gemini 3.5 Flash-Lite',
-              rows: [
-                ['Result', 'Declined all 102. Leak rate under about 3 per cent.'],
-                ['Why you would pick it', "The cheapest way off GPT-4o mini: 2x on input and 4.2x on output, against Grok's 8.3x input."],
-                ['An old caveat, now gone', 'An earlier run of ours hit a free-tier rate limit on this account and the result was unusable. The account is on a paid tier now and the full run completed with no throttling.'],
-              ],
-            },
-            {
-              id: 'mdl-claude', name: 'Claude Haiku 4.5', where: 'Anthropic - the longest comments', kind: 'button', value: 'Claude Haiku 4.5',
-              rows: [
-                ['Result', 'Wrote a comment on 1 of 102 - the only leak any model but GPT-4o mini produced, and on the mildest post in the set: a mayoral debate about transport reform.'],
-                ['Why you would pick it', "It writes the longest comments of the five, a median of 137 characters against Grok's 89. That is the reason to pay more than Grok, and the only one."],
-                ['Price', '6.7x on input, 8.3x on output. The dearest of the five per token.'],
-              ],
-            },
-            {
-              id: 'mdl-kimi', name: 'Kimi K2.6', where: 'Moonshot - read the price twice', kind: 'button', value: 'Kimi K2.6',
-              rows: [
-                ['Result', 'Declined all 102.'],
-                ['The catch', 'It reasons before it answers, and that reasoning is billed as output: a measured 1206 output tokens per comment, where the others spend about 32. Its per-token rate says 6.7x; the actual bill is around 70x the old default per comment.'],
-                ['Also slow', '45 to 50 seconds per call, against one or two for the rest.'],
-                ['Who it is for', 'Someone who specifically wants this model and accepts both. The card in the panel prints the per-comment multiple next to the rates for exactly this reason.'],
-              ],
-            },
-          ]],
-          ['note', 'The model is not your safety layer. Before any of them is asked to write, a separate check decides whether the post is one we will write about at all - see the sensitive-content filter and the pre-generation check under Persona. That check does not use the model you pick here, so choosing a cheaper model is not choosing a weaker guard.'],
-          ['p', 'Switching takes effect on the next comment. Nothing restarts, nothing already queued is rewritten, and the choice is stored per owner - changing it here does not change what NeuroDialogs uses for replies.'],
-        ],
-      },
-      {
-        id: 'persona',
-        title: 'Persona',
-        blocks: [
-          ['p', "The persona is the whole instruction the model gets. There is no separate tone, length or language setting — a preset is a name, an optional description, and one prompt you write yourself."],
-          ['p', "Presets come in two groups. System holds six built-ins, which you can read and copy but not edit; My Prompts holds yours. Clicking any card makes it active immediately, and the active persona is the one every comment is written with."],
-          ['controls', [
-            {
-              id: 'ctl-persona-card', name: 'A preset card', where: 'Persona', kind: 'button', tone: 'plain', value: 'Positive comment',
-              rows: [
-                ['What clicking does', 'Makes that preset active, straight away. There is no save step and no confirmation.'],
-                ['The six built-ins', 'Positive comment, Intimate, Emotional response, Question to author, Brief review, Analytical approach. Each is a short prompt naming a style, asking for a length, and telling the model to answer with the literal token SKIP when the post does not suit it.'],
-                ['Editing a built-in', 'Not possible. Open it to read it, or duplicate it into My Prompts and edit the copy.'],
-                ['Deleting', 'Your own presets only, and never the active one — the delete entry is disabled while a preset is active.'],
-                ['When it is read', 'At engine start, then cached. Editing the active preset while the engine is running does not change what is being posted until it is restarted.'],
-              ],
-            },
-            {
-              id: 'ctl-persona-prompt', name: 'Prompt', where: 'Persona → Create / Edit dialog', kind: 'field', value: 'Write a short comment on {post_text}…',
-              rows: [
-                ['What it does', 'The system prompt, verbatim. Whatever you write here is what the model is told; the post itself arrives separately as the message to answer.'],
-                ['Required', 'Yes, along with the name. Description is optional.'],
-                ['Tokens', 'Four are substituted before the call: {post_text}, {channel_title}, {account_username}, {account_first_name}. Substitution is plain text replacement, so stray braces elsewhere in the prompt cannot break it.'],
-                ['An unknown token', 'Is left exactly where it is. It is neither an error nor blanked out.'],
-                ['Say when to skip', 'Worth doing explicitly. All six built-ins end with an instruction to reply with the literal token SKIP when the post does not suit the persona; a prompt without one comments on everything it is given.'],
-                ['If the model refuses', 'A reply that opens with a recognisable refusal — in English, Russian or Ukrainian — is caught and treated as a skip rather than posted. A safety net for prompts with no skip instruction, not a substitute for one.'],
-              ],
-            },
-            {
-              id: 'ctl-sensitive', name: 'Sensitive content filter', where: 'Persona', kind: 'toggle', on: true,
-              rows: [
-                ['What it does', 'Appends a rule to the end of every prompt, above whatever the persona says: do not comment on posts about death, murder or violent crime, war or mobilisation, terrorism, disasters, mourning, or partisan politics, elections and election campaigns — including opinion polls, candidate ratings and campaign coverage. Such a post is skipped instead.'],
-                ['Default', 'On.'],
-                ['Turning it off lasts a week', 'It is no longer permanent. A switch-off expires after seven days and the filter comes back on by itself. The row tells you the date while it is off, and you can turn it back on sooner from the same control.'],
-                ['Why it expires', 'Because a switch set once and forgotten is not a decision anyone is still making. On this deployment three accounts had it off, and between them they accounted for 87% of every comment the product had ever published.'],
-                ['Turning it off', 'Asks for confirmation first — the only switch on this page that does — and the confirmation shows three real comments this product published from accounts with the filter off, under posts about people being killed. Turning it back on asks nothing.'],
-                ['What it does not control', 'The pre-generation check below. This switch decides whether the model is also told to decline; it does not decide what the product is willing to write about at all.'],
-                ['In the numbers', 'Two distinct reasons, not one. sensitive_content is the model declining; sensitive_precheck is the check below stopping the post before any model was asked. Both stay visible separately from ordinary skips.'],
-                ['Loud at start', 'While it is off, the engine writes a warning into the log every time it starts.'],
-              ],
-            },
-            {
-              id: 'ctl-precheck', name: 'The check before generation', where: 'No control — it always runs', kind: 'button', value: 'Always on',
-              rows: [
-                ['What it does', 'Before your persona is assembled and before your chosen model is asked for anything, a separate call decides whether the post is about one of the sensitive topics. If it is, the post is dropped and no comment is generated.'],
-                ['Why a second layer', 'Because the prompt rule rides on a persona that argues with it — be a real person, react to the detail — and we measured what that conflict costs: the old default model answered anyway on 23 of 102 sensitive posts. This check has no persona to lose to.'],
-                ['It is not switchable', 'Deliberately. The filter above is a setting; this is a floor. Measured against our own history, it would have stopped 393 comments published from accounts that had the filter switched off.'],
-                ['It is not your model', 'It runs on its own slot, so picking a cheaper model for writing does not pick a weaker guard.'],
-                ['What it costs', 'About three hundredths of a cent per post, and a fraction of a second. A stopped post costs that instead of a full generation.'],
-                ['If it cannot answer', 'The post goes back in the queue — not dropped, not published. A guard that cannot reach a verdict stops the line rather than opening it, and the engine logs why.'],
-              ],
-            },
-          ]],
-          ['note', "The prompt is not the only thing shaping a comment. Accounts sharing one persona each get a small, fixed style nudge appended to their prompt — be a little more direct, keep it warm, plain and no fluff — so ten accounts on one preset do not all sound like the same writer. It is fixed per account, not random per comment.",
-          ],
         ],
       },
       {
         id: 'channels',
-        title: 'The channels it watches',
+        title: 'Channels',
         blocks: [
-          ['p', "The monitored list is what the engine polls. It is re-read at the top of every round, so a channel added here is being watched a minute later without anything being restarted."],
-          ['p', "Edits here save as you make them. There is no Save changes step — removing a channel is written immediately, and the count above the list is the current list. Every monitored channel is commented on for real; there is no per-channel switch and no rehearsal mode."],
-          ['controls', [
-            {
-              id: 'ctl-add-channels', name: 'Add channel(s)', where: 'Channels', kind: 'button', value: 'Add channel(s)',
-              rows: [
-                ['What it does', 'Takes a paste of channels, one per line, and appends the new ones to the monitored list.'],
-                ['What a line may look like', 'An @username, a t.me link with or without the https, or a bare username. The link prefix and the @ are stripped before the name is checked.'],
-                ['What counts as valid', 'Five to thirty-two characters, letters, digits and underscores, not starting with a digit. A line that does not match is reported back as invalid rather than failing the whole paste.'],
-                ['Duplicates', 'Dropped, case-insensitively, both against the existing list and against the rest of the same paste. The result says how many were added, how many were duplicates and how many were invalid.'],
-                ['No limit', 'There is no cap on lines. This only appends to a list — nothing touches Telegram until the engine next polls.'],
-              ],
-            },
-            {
-              id: 'ctl-clear-channels', name: 'Clear all', where: 'Channels', kind: 'button', tone: 'bad', value: 'Clear all',
-              rows: [
-                ['What it does', 'Empties the monitored list. Asks first.'],
-                ['What it does not touch', 'Channel assignments, the blacklist and comment history all stay. So does every preset — this is the way to empty the list before loading a different one.'],
-                ['Effect on a running engine', 'It stops finding posts on the next round. It does not stop the engine, and comments already waiting out their delay still go out.'],
-              ],
-            },
-            {
-              id: 'ctl-save-preset', name: 'Save Preset', where: 'Channels', kind: 'button', tone: 'plain', value: 'Save Preset',
-              rows: [
-                ['What it does', 'Snapshots the current channel list under a name so it can be reloaded later.'],
-                ['A snapshot, not a link', 'Editing the list afterwards does not change the preset, and loading a preset replaces the list rather than merging into it.'],
-                ['What a preset carries', 'The channel names only. The live-posting flags are not part of it and are left as they are when a preset is loaded.'],
-              ],
-            },
-          ]],
-          ['note', "The engine resolves each channel once, caches the result and reuses it for every later post, which is why a restart does not re-resolve hundreds of channels. None of that cache is readable from this page.",
-          ],
-        ],
-      },
-      {
-        id: 'post-order',
-        title: 'Which post goes first, and the join before writing',
-        blocks: [
-          ['p', "Each round the engine reads the monitored channels and queues the posts it can comment on. Only a post with a comment thread and some text is queued. A service message, a post with comments switched off, a photo with no caption: all are dropped at the poll, and none of them counts as a failure. An album is one post, not one per photo."],
-          ['p', "The queue goes latest post first: every channel's newest post before any channel's second-newest, then one post further back each time. Among posts at the same depth, the freshest goes first. There is no age cutoff; a caught post waits in the queue for up to 14 days."],
-          ['controls', [
-            {
-              id: 'ctl-catchup', name: 'Posts per pass', where: 'Channels, above the list', kind: 'field', value: '20',
-              rows: [
-                ['What it does', 'When a channel has more new posts than this since it was last read, only the newest are queued and the older ones are skipped. It keeps a channel you have not read for two weeks from flooding the queue.'],
-                ['Default', '20 posts per channel per pass. A value you set is marked as yours; clearing the field goes back to the default.'],
-                ['What was skipped', 'The arrow beside it opens the channels that skipped old posts in the last 7 days, with how many.'],
-              ],
-            },
-          ]],
-          ['p', "Once a post has an account, the engine looks at the post's comment thread first: one read. If the thread is gone, the post is skipped and the account is free again. If the discussion group needs the account to join, it joins now, before a comment is written and before the delay, instead of learning it from a refused send."],
-          ['bullets', [
-            "One join attempt per account per channel, ever, and at most eight join attempts per account a day. The join also waits its turn under the join limits in Advanced settings.",
-            "A group where an admin approves members gets a join request. Nothing is written, another account takes the post, and the request is checked again after 30 minutes, then 2, 6 and 24 hours.",
-            "A group whose admin lets two requests expire without approving any is left alone for a week. At most two of your accounts wait on one group's admin at a time.",
-            "A group that has banned the account is not tried, and the post goes to another account. A group where nobody may write is skipped.",
-          ]],
-          ['p', "None of these outcomes counts as a failed post: the post is put back on the queue for someone else, or skipped. Only then is the comment written, the delay waited out, the account checked once more, and the comment sent."],
+          ['p', "The channel list is what the engine watches. Every change saves immediately and is picked up on the next round."],
+          ['table', {
+            head: ['Control', 'What it does'],
+            rows: [
+              ['Add channel(s)', 'Paste channels, one per line: @username, t.me link or bare username. Duplicates and invalid lines are reported, not added.'],
+              ['Clear all', 'Empties the list (asks first). Assignments, blacklist, history and presets stay.'],
+              ['Save Preset', 'Saves the current list under a name. Load on a preset card replaces the list with it.'],
+            ],
+          }],
+          ['p', "A post is only commented if it has text and comments switched on. When a discussion group needs the account to join first, the account joins before writing. A group that approves members by hand gets a join request, and another account takes the post meanwhile."],
         ],
       },
       {
         id: 'folders',
         title: 'Working by folders',
         blocks: [
-          ['p', "A Telegram folder here is a shared folder of channels, the kind that opens from a t.me/addlist link. Joining one is a single request that puts an account into up to 100 channels at once, and leaves it holding what it needs to read and post in each of them without looking up a single username — the request Telegram rations hardest. With Work by folders on, pool accounts reach their channels that way instead of one channel at a time."],
-          ['p', "It lives in two places: the Folders block under Channels, where folders are built from a preset, and the Work by folders switch in the Comment Limits heading of the Pool, which turns the mode on."],
+          ['p', "A Telegram folder (a t.me/addlist link) holds up to 100 channels. Joining it is one request that puts an account into all of them. With Work by folders on, pool accounts get their channels this way instead of joining channels one by one."],
           ['steps', [
-            "Save the channel list as a preset (Channels → Save Preset).",
-            "Under Channels → Folders, press Create folders and pick the preset and a creator account. The creator joins every channel of the preset, builds folders of up to 100 channels and shares them. It has to be an account outside the pool, and it stays in those channels afterwards to keep the folders alive. A large preset can need a second or third creator, and the dialog says so.",
-            "Wait for the folder cards to read Ready. The creator joins slowly on purpose — 45 to 120 seconds between joins and a 10 to 20 minute pause every 20 — so a big preset takes hours. The dialog gives an estimate, and the cards show how far it is.",
-            "In the Pool, switch Work by folders on, then press Auto-assign channels. It spreads the pool evenly across the ready folders and splits each folder's channels among its accounts. When accounts would join or move, it asks first, with the numbers.",
-            "That is all. Each account joins its folder in the background, paced like every join, and starts commenting in its folder's channels as soon as it is in.",
+            "Save your channel list as a preset (Channels → Save Preset).",
+            "Channels → Folders → Create folders. Pick the preset and a creator account. The creator must be outside the commenting pool and stays in the channels to keep the folders alive. A large preset may need a second or third creator; the dialog says so.",
+            "Confirm. The creator joins the preset’s channels one by one, 20 to 60 seconds apart with a 2 to 5 minute pause every 20 joins. Channels it is already in are skipped, and several creators work in parallel. The dialog shows an estimate; you can close the page.",
+            "Wait until the folder cards read Ready. A progress bar shows the build.",
+            "In the Pool, switch Work by folders on and press Auto-assign channels. It shows how many accounts go to each folder and how many joins that means, and waits for Assign & join.",
+            "Accounts join their folder in the background and start commenting in its channels as soon as they are in.",
           ]],
-          /* СКРИН 5: Channels → Folders — карточки папок (название, Creator, число аккаунтов, статус Ready / "Creator joining channels", кнопки копирования ссылки и удаления) и кнопка Create folders. */
-          ['controls', [
-            {
-              id: 'ctl-work-by-folders', name: 'Work by folders', where: 'Pool → Comment Limits heading', kind: 'toggle', on: false,
-              rows: [
-                ['What it does', 'Switches the pool from per-channel assignment to folders. Auto-assign then deals accounts across the folders, and each folder’s channels are split among the accounts in it.'],
-                ['Needs', 'At least one ready folder. Until there is one, the switch cannot be turned on.'],
-                ['Auto-assign', 'Makes a dry run first. If anyone would join or move, it shows how many accounts go to each folder and how many joins that is, and waits for Assign & join. A re-deal that moves nobody goes straight through. Channels in no folder stay unassigned, and any free account comments there.'],
-                ['Shuffle', 'Asks which kind. Within folders: the same accounts get a new split of their folder’s channels, and nothing changes in Telegram. Move to new folders: each folder’s accounts join another folder and leave the old one in the background, and can leave the old channels too, to stay under Telegram’s 500-channel limit.'],
-                ['Who takes a post', 'Accounts of the channel’s own folder first, since they can post there without a lookup.'],
-                ['The list below', 'Grouped by folder, with each account’s join state while it is getting in. While accounts join or move, a chip in the heading shows the progress, with Stop.'],
-                ['Turning it off', 'Always allowed, even mid-move. Accounts keep their channels and stay in their folders; Leave folders on the Accounts page takes them out.'],
-              ],
-            },
-            {
-              id: 'ctl-create-folders', name: 'Create folders', where: 'Channels → Folders', kind: 'button', value: 'Create folders',
-              rows: [
-                ['What it does', 'Splits a channel preset into shareable Telegram folders of up to 100 channels, built by the creator account you pick.'],
-                ['Before you confirm', 'The dialog connects the creator and shows the real plan: how many folders, their names, and roughly how long the build takes. Channels of the preset you do not monitor are pointed out; folders only affect monitored channels.'],
-                ['The creator is In work', 'While it builds, the creator counts in the In work tile of Account Manager, with the cause Creating Telegram folders, and its row carries a Creating folders badge: channels joined out of the total and how long it has been at it, with the time left in the tooltip. It is held for the folders and cannot be put in any module meanwhile. It is released as soon as its own folders are done.'],
-                ['On each card', 'The folder name, its creator, how many pool accounts are in it, the status, a copy-link button and delete. Ready without N channels means some channels could not be added; Which? lists them and why.'],
-                ['The link', 'Copy it, do not open it in your own Telegram: it offers to put your own account into every channel of the folder.'],
-                ['If the creator dies', 'Its name on the card turns amber. The link may stop working, and new accounts cannot join.'],
-                ['Delete', 'The creator deletes the folder and its link. Accounts in it leave the folder but stay in its channels and keep their assignments.'],
-              ],
-            },
+          ['figure', {
+            src: '/public/screenshots/neurocommenting/create-folders.png', w: 896, h: 1172,
+            alt: 'Create Telegram folders dialog: Channel preset “World & regional · 11 channels”, Creator account, a note to keep the creator out of the commenting pool, the plan “11 channels → 1 folder of 11”, a time estimate, Folder names, and the Create 1 folder button.',
+            caption: 'Create folders: pick a preset and a creator. The dialog shows the plan and how long it takes.',
+          }],
+          ['figure', {
+            src: '/public/screenshots/neurocommenting/folders.png', w: 1600, h: 461,
+            alt: 'Folders block: Copy links and Create folders buttons, a “Building folders 5/8 channels” progress bar with Stop, and folder cards — one with “Creator joining channels 5/8”, three marked Ready.',
+            caption: 'Folders being built. Use Work by folders once the cards read Ready.',
+          }],
+          ['bullets', [
+            "Copy a folder link, but do not open it in your own Telegram: it offers to add your own account to every channel in it.",
+            "While a creator builds, it counts as In work in Account Manager and cannot be put in any module.",
+            "Delete on a card removes the folder and its link. Accounts leave the folder but stay in its channels.",
+            "Shuffle with folders on asks whether to reshuffle channels within the same folders or move accounts to new folders.",
           ]],
-          /* СКРИН 6: Account Manager — плитка In work и строка аккаунта-создателя с бейджем "Creating folders · 37/100 · 1h" (тултип с оставшимся временем). */
         ],
       },
       {
         id: 'blacklist',
-        title: 'What the engine took out of circulation',
+        title: 'Blacklist and deletion control',
         blocks: [
-          ['p', "The blacklist is a list of channels, not of account failures. It holds two categories, each folded behind a small arrow with its count: Channels with no successful comments, and, only while Comment deletion control is on, Comments deleted. Every channel has a checkbox, and so does each category; what is ticked is what Remove channels removes."],
-          /* СКРИН 7: секция Blacklist — в заголовке переключатель "Comment deletion control" (включён) и кнопка Remove channels; раскрыты категории "Channels with no successful comments" и "Comments deleted" с плашками вида "2 of 14 deleted · 3h ago". */
+          ['figure', {
+            src: '/public/screenshots/neurocommenting/blacklist.png', w: 1600, h: 625,
+            alt: 'Blacklist section: Comment deletion control switch on and Remove channels button in the header, and two open categories — “Channels with no successful comments” with attempts and the main reason, and “Comments deleted” with entries such as “1 of 5 deleted · 5h ago”.',
+            caption: 'The Blacklist lists channels that give you nothing back. Tick them and press Remove channels.',
+          }],
           ['table', {
-            head: ['Category', 'What puts a channel there'],
+            head: ['Category', 'When a channel is listed'],
             rows: [
-              ['Channels with no successful comments', 'At least five attempts by at least two different accounts in the last 30 days, and not one comment published, whatever the reason. Each row shows the attempts, the accounts and the most common reason. The next section has the detail.'],
-              ['Comments deleted', 'Comment deletion control found your comments gone from the thread. Each row shows how many of the checked comments were deleted and when the last one was. The X on a row forgets those deletions; the channel stays monitored.'],
+              ['Channels with no successful comments', 'At least 5 attempts from at least 2 accounts in the last 30 days, and not one comment published. The row shows the attempts, the accounts and the most common reason.'],
+              ['Comments deleted', 'Only while Comment deletion control is on: your comments were found removed from the thread. The X on a row forgets those deletions.'],
             ],
           }],
-          ['p', "The engine still records every failure of one account on one channel — sending forbidden, no access, kicked from the discussion group, username not found — and still acts on them. A channel an account cannot post in is moved to an account with a clean record there, and the freed account gets one of that account’s channels in exchange, so nobody’s workload changes size. A resolve failure is softer: the account is sorted to the back of the queue for that channel. Those records are just no longer listed here. With shuffles and folder moves, one account failing on one channel is a poor reason to drop the channel."],
-          ['controls', [
-            {
-              id: 'ctl-deletion-control', name: 'Comment deletion control', where: 'Blacklist, in the header', kind: 'toggle', on: false,
-              rows: [
-                ['What it does', 'About an hour after each comment goes out, the account that posted it looks for it. If the thread answers and your comment is not in it, the comment counts as deleted and the channel is listed under Comments deleted.'],
-                ['Default', 'Off.'],
-                ['What it costs', 'One Telegram read per comment, on the connection the engine already holds. A read, so it does not count against the hourly pace.'],
-                ['What is not a deletion', 'A post the channel deleted as a whole, or a channel the account lost access to. A check that fails for a network reason is tried again and never turns into a deletion; one that could not run within a day is dropped.'],
-                ['Turning it on', 'Applies from the very next comment, and comments from the last hour get their check too. The first results arrive about an hour later; until then the category says nothing has been checked yet.'],
-                ['Turning it off', 'The checks stop and the category disappears. The deletions already found are kept, and come back if it is turned on again.'],
-              ],
-            },
-            {
-              id: 'ctl-prune', name: 'Remove channels', where: 'Blacklist, in the header', kind: 'button', tone: 'warn', value: 'Remove channels',
-              rows: [
-                ['What it does', 'Stops monitoring every channel you ticked in the list below, after a confirmation. Ticking a category ticks every channel in it, whether it is open or not.'],
-                ['Presets and folders', 'A removed channel is also taken out of every channel preset and Telegram folder that holds it. The folders are edited by their creator in the background.'],
-                ['Why it is worth pressing', 'A dead channel otherwise sits in the poll list forever, costing a read every round and an account turn on every post, for nothing.'],
-                ['What it leaves', 'The comment history. Only the monitored list, the presets and the folders are trimmed.'],
-              ],
-            },
-          ]],
-          ['callout', [
-            "Removing a channel is the only thing this section does to the engine. The blocks that keep one account off one channel after a refusal, for anything from a few hours to a month depending on the cause, are held elsewhere, are not shown on this page, and expire on their own.",
-          ]],
+          ['p', "Comment deletion control (off by default): about an hour after each comment, the account that posted it checks the thread. If the comment is gone, the channel is listed. It costs one read per comment. A deleted post or lost access does not count as a deletion."],
+          ['p', "Remove channels stops watching every ticked channel, after a confirmation, and also removes them from your presets and folders. Comment history stays. Nothing is removed automatically; you decide."],
         ],
       },
       {
-        id: 'quiet-channels',
-        title: 'Channels that never give you a comment',
+        id: 'model-persona',
+        title: 'Model and persona',
         blocks: [
-          ['p', 'Some channels never publish anything from you. The engine still reads every post there, reserves an account and often writes a comment - and none of it lands, because the model declines, the send is refused or every account gets kicked. They are the first category in the Blacklist, Channels with no successful comments, where you can tick them and remove them.'],
-          ['p', 'A channel is listed once it has had, in the last 30 days, at least five attempts from at least two different accounts and not one published comment, for any reason. Two accounts, because one account failing five times says more about that account than about the channel. An attempt is a real try: a comment written, a send refused, a generation error, or the model or the safety check declining the post. A post with no text or no comment thread, or one that went back on the queue, is not an attempt.'],
-          ['callout', [
-            'Nothing here is removed automatically. The pool is yours, and a product that quietly shrank it would show up a week later as an unexplained drop in output. The list is shown, the numbers are shown, and Remove channels does only what you tick.',
-          ]],
-          ['controls', [
-            {
-              id: 'ctl-never-commented', name: 'Channels with no successful comments', where: 'Blacklist, first category', kind: 'button', value: 'Not ticked',
-              rows: [
-                ['What it means', 'Enough attempts to judge, and not one published comment in all of them. You are paying for account turns and model calls on this channel and receiving nothing back. Each row shows the attempts, how many accounts made them and the most common reason.'],
-                ['Removing them', 'Tick the channels, or the whole category, and press Remove channels. Removing one of these costs you no output at all.'],
-              ],
-            },
-          ]],
-        ],
-      },
-      {
-        id: 'advanced',
-        title: 'Advanced settings',
-        blocks: [
-          ['p', "The strip at the very bottom of the page, closed until you click it and not in the jump-nav. These settings are yours rather than this module's: they govern every join and every visible action your accounts make, in every module. Each one saves as you change it; there is no Save button. Comment deletion control, in the Blacklist header, is stored with them."],
-          /* СКРИН 8: раскрытая полоса Advanced settings внизу страницы — колонки Joins и Pace с переключателями и счётчиками. */
-          ['controls', [
-            {
-              id: 'ctl-parallel-joins', name: 'Parallel joins on a shared gateway', where: 'Advanced settings → Joins', kind: 'toggle', on: false,
-              rows: [
-                ['What it does', 'Off: accounts behind the same exit IP take turns to join. On: they join in parallel whatever proxy they share, up to the engine’s own connection cap.'],
-                ['Applies to', 'Every join: discussion groups, Telegram folders, bulk joins, reactions and warmup.'],
-                ['Default', 'Off.'],
-                ['Turning it on', 'Asks first when pool accounts share an exit IP, and says how many do.'],
-              ],
-            },
-            {
-              id: 'ctl-joins-per-proxy', name: 'Concurrent joins per proxy', where: 'Advanced settings → Joins', kind: 'field', value: '2',
-              rows: [
-                ['What it does', 'How many accounts behind one exit IP may join at the same time. 1 means strictly one at a time.'],
-                ['Range', '1 to 10. Default 2.'],
-                ['When it counts', 'Only while parallel joins are off.'],
-              ],
-            },
-            {
-              id: 'ctl-skip-joined', name: 'Skip already-joined discussions', where: 'Advanced settings → Joins', kind: 'toggle', on: false,
-              rows: [
-                ['What it does', 'At Start, trusts our record of which discussion groups and folders an account has joined, instead of checking each one with Telegram.'],
-                ['Default', 'Off.'],
-                ['The trade', 'Fewer requests through the proxy and a faster start. An account that has left or been removed since is not re-joined up front; the thread check before each comment still catches it.'],
-              ],
-            },
-            {
-              id: 'ctl-pace-limit', name: 'Limit pace per account', where: 'Advanced settings → Pace', kind: 'toggle', on: false,
-              rows: [
-                ['What it does', 'Caps each account’s visible actions in any rolling hour, whichever module makes them.'],
-                ['What counts', 'A comment, a join or a leave, a reaction, a DM, a warmup action and an AI Protection like. Reading channels, thread checks and deletion checks do not.'],
-                ['When an account is full', 'Neurocommenting gives the post to another account or moves on. Reactions, warmup, dialogs and joins wait for a free slot.'],
-                ['Default', 'Off. Actions are counted even while it is off, so turning it on is accurate from the first second.'],
-              ],
-            },
-            {
-              id: 'ctl-actions-per-hour', name: 'Actions per hour per account', where: 'Advanced settings → Pace', kind: 'field', value: '10',
-              rows: [
-                ['What it does', 'The cap itself: visible actions per account in any rolling hour.'],
-                ['Range', '1 to 100. Default and recommended: 10.'],
-                ['When it counts', 'Only while Limit pace per account is on.'],
-              ],
-            },
-          ]],
-        ],
-      },
-      {
-        id: 'numbers',
-        title: 'Reading the numbers',
-        blocks: [
-          ['p', "Two regions report what happened. Statistics is four tiles of totals; Comments is the row-by-row history behind them."],
-          ['controls', [
-            {
-              id: 'ctl-stat-attempts', name: 'Total Attempts', where: 'Statistics', kind: 'tile', value: '148',
-              rows: [
-                ['Counts', 'Successful plus failed sends — every real send that was attempted.'],
-              ],
-            },
-            {
-              id: 'ctl-stat-successful', name: 'Successful', where: 'Statistics', kind: 'tile', tone: 'ok', value: '131',
-              rows: [
-                ['Counts', 'Comments that reached Telegram.'],
-              ],
-            },
-            {
-              id: 'ctl-stat-failed', name: 'Failed sends', where: 'Statistics', kind: 'tile', tone: 'bad', value: '17',
-              rows: [
-                ['Counts', 'Real post attempts that failed. Nothing else — a comment the model declined to write, or a post nobody was free to take, is not counted here.'],
-                ['Not the same as the pool’s failed', 'The per-account failed number in the Pool section is broader: it also counts generation errors and posts skipped because no account was available. The two numbers are supposed to differ.'],
-              ],
-            },
-            {
-              id: 'ctl-stat-rate', name: 'Success Rate', where: 'Statistics', kind: 'tile', value: '88.5%',
-              rows: [
-                ['Counts', 'Successful over total attempts, to one decimal. Zero attempts reads as 0.0%.'],
-              ],
-            },
-          ]],
-          ['callout', [
-            "These four read “since the last Start”. The totals are all-time on the server, and the panel subtracts whatever they were when Start was clicked, keeping that starting point in this browser. A browser that has never pressed Start shows all-time totals instead — and the line above the tiles always says which of the two you are looking at.",
-          ]],
-          ['p', "Comments below holds every event, newest first, fifty to a page, with Previous and Next under it. For anything that did not post, the reason is printed under its status. A row opens into the post it answered, the comment itself, and the reason and the error."],
+          ['p', "Model picks which AI writes the comments. The default is Grok 4.3. The choice applies from the next comment and is separate from the NeuroDialogs model."],
           ['table', {
-            head: ['Kind', 'What it means'],
+            head: ['Model', 'In short'],
             rows: [
-              ['generated', 'A comment was written. Whether it then reached Telegram is on the row itself — a send that failed is logged as post failed as well.'],
-              ['skipped', 'The model declined to write one: the persona’s own skip instruction, or the sensitive-content rule.'],
-              ['error', 'Generation failed before there was anything to send.'],
-              ['rate limited', 'The post was caught but no account was free to take it. Logged before any account is chosen, so this row has no account attached.'],
-              ['post failed', 'A real send was attempted and Telegram refused it.'],
-              ['re-queued', 'Shown with the skipped badge and its reason. Nothing was sent: the post went back on the queue for another account or a later round — a join request still pending, an account that became unusable during the delay, a Stop mid-wait.'],
+              ['Grok 4.3', 'Default. Declined every sensitive post in our test. Writes the shortest comments.'],
+              ['Gemini 3.5 Flash-Lite', 'The cheapest model that also declined sensitive posts.'],
+              ['Claude Haiku 4.5', 'Writes the longest comments. The most expensive per token.'],
+              ['Kimi K2.6', 'Works, but costs about 70 times the cheapest model per comment and is slow.'],
+              ['GPT-4o mini', 'Cheapest, but it commented on about one in four sensitive posts in our test. Only for channels where nothing sensitive is posted.'],
             ],
           }],
-          ['controls', [
-            {
-              id: 'ctl-export', name: 'Export CSV', where: 'Comments, under the table', kind: 'button', tone: 'plain', value: 'Export CSV',
-              rows: [
-                ['What it does', 'Downloads the page on screen, fifty rows. The filename carries the page number.'],
-                ['Not the whole history', 'Exporting everything means paging through and exporting each page.'],
-              ],
-            },
-            {
-              id: 'ctl-clear-comments', name: 'Clear', where: 'Comments, under the table', kind: 'button', tone: 'bad', value: 'Clear',
-              rows: [
-                ['What it does', 'Permanently deletes the entire comment and event history. Asks first, and cannot be undone.'],
-                ['What it takes with it', 'The Statistics tiles, which are counted from these rows, and the per-account numbers in the Pool. Reset counts is the gentler tool — it moves a floor timestamp instead of deleting anything.'],
-              ],
-            },
+          ['figure', {
+            src: '/public/screenshots/neurocommenting/persona.png', w: 1600, h: 714,
+            alt: 'Persona section: the “Don’t comment on sensitive content” switch on, six built-in presets (Positive comment active, Intimate, Emotional response, Question to author, Brief review, Analytical approach) and a Create card under My Prompts.',
+            caption: 'Click a card to make it the active persona. It applies from the next comment.',
+          }],
+          ['p', "A persona is a name and a prompt you write. The six built-ins can be read and copied but not edited; your own go under My Prompts. Clicking a card makes it active from the next comment."],
+          ['bullets', [
+            "Tokens you can use in the prompt: {post_text}, {channel_title}, {account_username}, {account_first_name}.",
+            "Tell the model when to skip. The built-ins end with “reply with the literal token SKIP” when the post does not fit. Without such a line it comments on everything.",
+            "Don’t comment on sensitive content (on by default) tells the model to skip posts about death, violence, war, disasters, mourning and politics. Turning it off asks for confirmation and lasts 7 days, then it switches back on. A separate check before writing always runs, whatever this switch says.",
           ]],
         ],
       },
       {
-        id: 'first-run',
-        title: 'First run',
+        id: 'settings',
+        title: 'Settings',
         blocks: [
-          ['p', "The shortest path from an empty page to comments going out. Steps one to four can be done in any order; the engine will not do anything useful until all four are done."],
-          ['steps', [
-            "Put accounts in the pool. They have to exist and be healthy in Account Manager first, and they cannot be held by another module — an account NeuroDialogs or Active Warmup is driving, or one still inside its seven-day Supervise window, is refused here by name.",
-            "Add the channels you want watched. A paste of @usernames or t.me links is the normal way in; the parser takes both.",
-            "Press Auto-assign channels. Without assignments everything still works, but each post is decided by a scan instead of going straight to a known account.",
-            "Pick a persona. Six built-ins are there to read; duplicate the closest one and edit the copy rather than starting from an empty box, and keep its skip instruction.",
-            "Leave the delay window alone unless you have a reason. The default 8-to-25 minutes is the recommended preset already.",
-            "Press Start. The preflight dialog will tell you if accounts, channels or a persona are missing before anything runs.",
+          ['p', "The // Settings section at the bottom of the page, after Persona, holds three blocks: AI Protection, AI Autoreply and Advanced settings. The (i) next to each name explains it."],
+          ['figure', {
+            src: '/public/screenshots/neurocommenting/settings.png', w: 1600, h: 1003,
+            alt: 'Settings section: AI Protection with Off, Low, Medium (selected) and High; AI Autoreply switched on with Reply text and Reply delay 3 to 20 minutes; Advanced settings with Joins (Parallel joins on a shared gateway, Concurrent joins per proxy 2, Skip already-joined discussions) and Pace (Limit pace per account, Actions per hour per account 12).',
+            caption: 'The Settings section with AI Autoreply and Advanced settings opened.',
+          }],
+          ['p', "AI Protection. While an account works, it also does what a person does in Telegram now and then: reads chats and channels, scrolls, looks at posts and stories, looks through its settings, likes a post, archives a chat. Off, Low, Medium (default) or High sets how often: about every 25, 10 or 4 minutes per working account. It only uses the account’s own chats on the connection the engine already has, never looks up usernames or joins anything, and never touches private chats. A like counts toward the pace limit. The (i) shows how many actions were made in the last 24 hours."],
+          ['plink', [
+            'The same switch is on NeuroDialogs and Mass Reactions: ',
+            { text: 'AI Protection across the modules', href: '/guides/account-protection#ai-protection' },
+            '.',
           ]],
-          ['p', "Then watch two things. The engine log, expanded, shows the round-by-round decisions in real time; the Comments table shows what came out of them. A run that produces skipped rows and no comments is a persona problem, not an engine problem."],
-          ['note', "If comments dry up, check the Control block before changing anything else. Between sessions it says when the next one starts; with Auto-continue off, the session that reached the ten-hour cap was the last one. A Running engine that posts nothing has an amber line under the bar saying why — Done for today means every account has spent today's limit and will be back after 00:00 UTC.",
-          ],
-          ['linkout', { href: '/guides/neurodialogs', label: 'Next: answer the DMs the comments bring in' }],
+          ['p', "AI Autoreply (off by default). When someone sends a private message to one of your commenting accounts, the account answers once with your text."],
+          ['table', {
+            head: ['Setting', 'What it does'],
+            rows: [
+              ['Switch', 'Turns it on. Write the reply text first; an empty text cannot be switched on.'],
+              ['Reply text', 'Sent exactly as written (up to 1,000 characters). Saved when you leave the field.'],
+              ['Reply delay, minutes', 'A random wait between the two numbers, counted from when the account first sees the unread message. Default 2–15.'],
+              ['Who gets it', 'People with unread private messages, one reply per person per account, ever, even after a restart. Channels, groups and bots are ignored. Telegram’s own service messages are only marked read.'],
+              ['When', 'Only while the Neurocommenting engine runs, with “typing…” shown first. Each reply counts toward the pace limit; when the hour is full it is sent later, never dropped.'],
+            ],
+          }],
+          ['p', "Advanced settings apply to all your modules, not only this one. Each setting saves as you change it."],
+          ['table', {
+            head: ['Setting', 'Default', 'What it does'],
+            rows: [
+              ['Parallel joins on a shared gateway', 'Off', 'Off: accounts behind the same exit IP take turns to join. On: they join in parallel regardless of proxy. Applies to every join: discussion groups, folders, bulk joins, reactions and warmup.'],
+              ['Concurrent joins per proxy', '2 (1–10)', 'How many accounts behind one exit IP may join at the same time. Only used while parallel joins are off. Lower is safer.'],
+              ['Skip already-joined discussions', 'Off', 'On restart, trust our records of joined discussions and folders instead of checking each one. Faster, fewer requests; an account that left since is not re-joined up front.'],
+              ['Limit pace per account', 'Off', 'Caps each account’s visible actions in any rolling hour. When an account is full, Neurocommenting gives the post to another account; reactions, warmup, dialogs and joins wait.'],
+              ['Actions per hour per account', '10 (1–100)', 'The cap. Counts comments, reactions, warmup actions, dialog messages, autoreplies and joins; reading and checks do not count.'],
+            ],
+          }],
+        ],
+      },
+      {
+        id: 'stats',
+        title: 'Statistics and comments',
+        blocks: [
+          ['p', "Statistics shows Total Attempts, Successful, Failed sends and Success Rate. The line above the tiles says whether they count since the last Start or all time."],
+          ['p', "Comments lists every event, newest first, 50 per page. Open a row to see the post, the comment and the reason it did or did not post. Export CSV saves the current page. Clear deletes the whole history permanently, including the statistics; to let accounts post again today use Reset counts instead."],
+        ],
+      },
+      {
+        id: 'mistakes',
+        title: 'Common mistakes',
+        blocks: [
+          ['bullets', [
+            "Starting new accounts without warmup and protection, or at a high daily limit. Start at 3 per day and add 1 a day.",
+            "Putting an account in two modules. It is refused; take it out of the other module first.",
+            "Putting the folder creator into the commenting pool, or opening a folder link in your own Telegram.",
+            "A persona without a skip instruction. It comments on posts it should leave alone.",
+            "Reading “Done for today” as a fault. The accounts are at their daily limit and return after 00:00 UTC.",
+            "Pressing Clear under Comments to “reset” accounts. That deletes the history; Reset counts is the right button.",
+          ]],
+          ['linkout', { href: '/guides/neurodialogs', label: 'Next: answer the DMs your comments bring in' }],
         ],
       },
     ],
@@ -2106,467 +1495,175 @@ const GUIDES = [
     slug: 'neurodialogs',
     url: 'neurodialogs',
     group: 'module',
-    short: 'DMs at a human pace',
-    title: 'Automating Telegram DM replies',
-    summary: 'The module that answers private messages — how a session is shaped, what bounds it, and every setting on the page.',
+    short: 'AI replies to private messages',
+    title: 'NeuroDialogs',
+    summary: "Answer private messages with AI: how a run works, accounts taking turns, the limits that keep accounts safe, prompts and the inbox.",
     seoTitle: 'Auto-reply to Telegram DMs with AI: setup guide',
     seoDescription:
-      'Answer Telegram DMs automatically without sounding like a bot: session rhythm, reply delays, spend limits, the link gate and the block pause.',
+      'Answer Telegram DMs with AI without looking like a bot: runs with accounts taking turns, reply and new-people limits, the link gate, prompts, and the inbox.',
     module: 'neurodialogs',
     video: null,
     body: [
       {
-        id: 'what-it-is',
-        title: 'What this page is',
+        id: 'what-it-does',
+        title: 'What it does',
         blocks: [
-          ['p', "NeuroDialogs answers the people who write to your accounts — someone who saw a comment, opened the profile and sent a message. It is the only module in the system where a real person is on the other end and can decide to press report."],
-          ['p', "Everything about the page follows from that. The accounts are not online waiting; they come online for a while, read what arrived, answer some of it at human speed, and go offline again."],
-          ['callout', [
-            "The obvious design — keep every account connected and reply the moment a message lands — was rejected on purpose. An account that is online around the clock and answers within two seconds at four in the morning is not a person, and the pattern is visible from outside. Almost every default on this page exists to break that pattern, which is why a correctly running pool looks idle most of the time.",
+          ['p', "NeuroDialogs answers the people who write to your accounts, for example after reading one of their comments. Replies are written by AI with your prompt."],
+          ['p', "Accounts are not online all the time. During a run they take turns: an account comes online, answers a few chats, and leaves; then the next one comes."],
+        ],
+      },
+      {
+        id: 'how-a-run-works',
+        title: 'How a run works',
+        blocks: [
+          ['figure', {
+            src: '/public/screenshots/neurodialogs/control.png', w: 1600, h: 248,
+            alt: 'NeuroDialogs Module control: Running, Stop button, and a progress bar with the line “This run ends at 12:13 AM”.',
+            caption: 'A run in progress. The module stops itself when the bar is full.',
+          }],
+          ['bullets', [
+            "Start opens a run. It lasts Run length (default 8 hours); the progress bar shows how far it is and when it ends. Then the module stops by itself. Press Start again for the next run.",
+            "Accounts come online one after another, 20 to 60 seconds apart, never more than Accounts online at once (default 2). When one leaves, the next in line starts.",
+            "Accounts with people waiting for an answer go first. After that, the account whose last turn was longest ago.",
+            "In its turn an account reads its inbox, answers up to Chats per turn (default 3) conversations, browses a little (AI Protection) and goes offline. A turn lasts at most Turn length (default 8 minutes) and ends sooner when the chats are done.",
+            "Messages from the last 3 days are answered, newest first. Older conversations nobody answered are backlog and are only answered if you switch on Answer the backlog.",
+            "Accounts that are paused, still in their Supervise rest, or have not passed the account check are skipped.",
           ]],
         ],
       },
       {
-        id: 'map',
-        title: 'Map of the page',
+        id: 'setup',
+        title: 'Set it up',
         blocks: [
-          ['p', "Eight regions, with a jump-nav across the top in this order — the same shape as every module page: control and engine logs first, then the working surfaces, then the settings, with Model and Persona last."],
-          ['map', [
-            { name: 'Control', holds: 'The run state, Start and Stop, and the live log underneath, collapsed.' },
-            { name: 'Conversations', holds: 'Every thread, searchable, with the full exchange and a box to write in it yourself.' },
-            { name: 'Dialogs Pool', holds: 'Two columns of accounts — available and in the pool — the same shape as the commenting pool, and the same one-module-at-a-time rule.' },
-            { name: 'Statistics', holds: 'Five counters, and one row per account with what it is doing right now.' },
-            { name: 'Presets', holds: 'The Sessions settings saved under a name and loaded back in one click. Kept in this browser only.' },
-            { name: 'Sessions', holds: 'Everything about rhythm and restraint: Rhythm, Replying, Limits, Group Promotion, and a folded Safety group.' },
-            { name: 'Model', holds: 'Which model writes the replies.' },
-            { name: 'Persona', holds: 'Prompt presets, which one is active, the reply-length slider and the knowledge file attached to each.' },
+          ['steps', [
+            "Add accounts to the Dialogs Pool. An account works in one module at a time; one that is commenting must leave that pool first.",
+            "Open Persona and make a prompt active: copy a built-in or create your own. Attach a knowledge file if replies must state prices, dates or links correctly.",
+            "Check Sessions. The defaults are careful. On fresh accounts, keep New people per day low. Press Save settings.",
+            "Choose an AI Protection level (Medium is the default).",
+            "Press Start and watch Statistics: who is online, who is in line, how many people are waiting.",
+          ]],
+          ['p', "Start refuses an empty pool and a prompt that cannot be built (for example, one whose knowledge file was deleted). The error says what to fix."],
+        ],
+      },
+      {
+        id: 'settings',
+        title: 'Sessions settings',
+        blocks: [
+          ['figure', {
+            src: '/public/screenshots/neurodialogs/sessions.png', w: 1600, h: 1331,
+            alt: 'Sessions settings: Rotation (Run length 8 h, Accounts online at once 2, Chats per turn 3, Turn length 8 min), Replying (Pause before a reply 40–180 s, Context messages 10, Skip chance 15%, Reply language Match the sender), Limits (Replies per person 5, Replies per session 8, Replies per day 25, New people per day 5, Chats read per session 15), Group Promotion, a folded Safety group and Save settings.',
+            caption: 'The Sessions settings with their defaults. Changes apply after Save settings, from the next turn.',
+          }],
+          ['p', "Settings apply after Save settings, from the next turn. Nothing needs restarting. Presets (above Sessions) save these settings under a name; Load fills the form, then you save."],
+          ['table', {
+            head: ['Setting', 'Default', 'What it does'],
+            rows: [
+              ['Run length', '8 h (1–24)', 'How long a run lasts after Start.'],
+              ['Accounts online at once', '2', 'How many accounts can be in a turn at the same time.'],
+              ['Chats per turn', '3 (1–20)', 'How many conversations an account answers before it leaves.'],
+              ['Turn length', '8 min (2–60)', 'The longest an account stays online in one turn.'],
+              ['Pause before a reply', '40–180 s', 'Wait before each reply, with the typing indicator on top. Inside a turn it is capped at 60 s.'],
+              ['Context messages', '10 (0–50)', 'How many earlier messages of the chat the AI sees.'],
+              ['Skip chance', '15%', 'Chance of leaving a chat for a later turn, like a person who does not answer everything at once.'],
+              ['Reply language', 'Match the sender', 'Or Fixed, with a language you pick.'],
+            ],
+          }],
+          ['p', "Limits (0 means no limit):"],
+          ['table', {
+            head: ['Limit', 'Default', 'What it caps'],
+            rows: [
+              ['Replies per person', '5', 'Total replies one conversation can ever get. Then the chat stops with “reply limit reached”.'],
+              ['Replies per session', '8', 'Replies one account sends in one turn.'],
+              ['Replies per day', '25', 'Replies per account per day. After that the account still comes online and reads, but writes nothing.'],
+              ['New people per day', '5', 'How many strangers one account starts talking to per day. The most important limit; keep it low on fresh accounts.'],
+              ['Chats read per session', '15', 'How many chats an account opens and reads in one turn (minimum 1).'],
+            ],
+          }],
+          ['p', "Group Promotion: list your groups (one per line) and set Promote every N replies (default 5; 0 = never). A reply mentions one of them at most once every N messages in a conversation. Groups allowed in Group Parser land in this list."],
+          ['p', "Safety (folded):"],
+          ['table', {
+            head: ['Setting', 'Default', 'What it does'],
+            rows: [
+              ['No links before N exchanges', '3', 'Any link or @mention the AI writes is held back until the chat has had this many back-and-forths (one, if the person asked for a link). Enforced in code.'],
+              ['Auto-pause at block rate', '25%', 'Pauses an account when this share of its recent messages ends in a block or refusal. It stays paused until you press Resume.'],
+              ['Daily AI spend limit', '5 USD', 'For the whole pool. When reached, replying stops for the day.'],
+              ['Automatic replies', 'On', 'Off: accounts still come online and read, but write nothing. Control then shows “reading only”.'],
+              ['Typing simulation', 'On', 'Shows “typing…” for about as long as a person would take.'],
+              ['Stop after sending a link', 'On', 'No more automatic replies in a chat once a link has gone out.'],
+              ['Answer the backlog', 'Off', 'Also answer people who wrote more than 3 days ago and were never answered.'],
+              ['Never reply to these people', 'Empty', '@username or numeric id, one per line or comma-separated.'],
+            ],
+          }],
+          ['p', "Two guards run without a setting: a reply too similar to what your pool recently sent is held back, and conversations about payment demands, threats, apparent minors or a crisis are never answered automatically; they wait for you in the inbox as “needs a human”."],
+        ],
+      },
+      {
+        id: 'persona',
+        title: 'Prompts and model',
+        blocks: [
+          ['p', "A prompt is a name, the text the AI answers with, a maximum reply length and an optional knowledge file. The active prompt is used by every account in the pool."],
+          ['bullets', [
+            "Tokens you can insert: {message}, {sender_name}, {message_language}, {context}, {account_id}, {account_username}, {account_phone}, {account_first_name}.",
+            "Max reply length: 300 characters by default (40–1000). Shorter reads more like a real person texting.",
+            "Knowledge file: .txt or .md, up to 512 KB. The first 12,000 characters go into every reply, so the AI states your real prices and links instead of inventing them.",
+            "Model: the same five models as Neurocommenting, set separately here. Default Grok 4.3. The daily spend limit is counted in the chosen model’s real price.",
           ]],
         ],
       },
       {
-        id: 'control',
-        title: 'Control',
+        id: 'ai-protection',
+        title: 'AI Protection',
         blocks: [
-          ['p', "Start does not start a conversation with anyone. It puts the pool into service; each account then schedules its own first session and comes online when its turn arrives."],
-          ['controls', [
-            {
-              id: 'ctl-nd-start', name: 'Start', where: 'Control', kind: 'button', value: 'Start',
-              rows: [
-                ['What it does', 'Marks the module enabled and hands the pool to the runner. Accounts come online on their own schedule from that point, never all at once.'],
-                ['What refuses it', 'An empty dialogs pool, and an active prompt that cannot be assembled — one pointing at a knowledge file that has since been deleted, for instance. Both refuse with a message naming what to fix, rather than reporting a running module that does nothing.'],
-                ['How many at once', 'Three accounts online at a time, by default. A larger pool does not mean more simultaneous sessions; it means the turns spread further apart.'],
-                ['Never at night', 'Sessions only happen inside an account’s own waking hours. An account whose local time is the small hours does not come online, whatever the gaps say.'],
-                ['What a fresh start looks like', 'Nothing. Zero online, zero replies, for hours. Statistics says so in its own words under the counters, because a correct run and a broken one look identical otherwise.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-stop', name: 'Stop', where: 'Control', kind: 'button', tone: 'bad', value: 'Stop',
-              rows: [
-                ['What it does', 'Sessions in flight finish and their accounts go offline. Nothing new is scheduled.'],
-                ['Never gated', 'Stop always works, whatever the subscription says.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-state', name: 'An account row', where: 'Statistics', kind: 'badge', tone: 'plain', value: 'waiting',
-              rows: [
-                ['The four states', 'Online — in a session right now. Waiting — awake, with the next session due at the time shown beside it. Asleep — outside its own waking hours. Paused — pulled out by the safety layer, with the reason next to it.'],
-                ['The three counters', 'Replies sent today, new people this account started talking to today, and how many of those people blocked or refused it today. A waiting badge appears when someone is unanswered.'],
-                ['Paused is the only one to act on', 'The other three are ordinary. A paused account has a Resume button on its own row and does not come back without it.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-readonly', name: 'reading only — automatic replies are off', where: 'Control, beside the state', kind: 'badge', tone: 'warn', value: 'reading only',
-              rows: [
-                ['What it means', 'The module is started and the accounts are working, but Automatic replies in Safety is off, so nothing is written.'],
-                ['Why that is useful', 'It keeps the accounts warm and the inbox current while a prompt is being reworked. It is a real operating mode, not a broken one.'],
-              ],
-            },
-          ]],
-          ['p', "Five counters sit above the account rows in Statistics: accounts in the pool, online now, conversations, unread, replies today. Daily AI spend is deliberately not among them — it is a number nobody watches, and the limit that protects it works without anyone looking."],
-        ],
-      },
-      {
-        id: 'prompts',
-        title: 'Persona: the prompts',
-        blocks: [
-          ['p', "A prompt preset is a name, a template you write, a maximum reply length, and optionally a knowledge file. The active one is what every account in the pool speaks with."],
-          ['controls', [
-            {
-              id: 'ctl-nd-template', name: 'Prompt template', where: 'Persona → editor', kind: 'field', value: 'You are {account_first_name}, a real person…',
-              rows: [
-                ['What it does', 'The instruction the model answers under. Written as plain text, with tokens substituted before each call.'],
-                ['The tokens', 'Eight, offered as buttons under the box: {message}, {sender_name}, {message_language}, {context}, {account_id}, {account_username}, {account_phone}, {account_first_name}.'],
-                ['Substitution', 'Plain text replacement, like the commenting persona. Braces that are not a known token are left alone.'],
-                ['What is appended for you', 'The length instruction is added to the end of every prompt automatically, so there is no need to repeat it in the text.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-maxlen', name: 'Max reply length', where: 'Persona → editor', kind: 'slider', pct: 27,
-              rows: [
-                ['What it does', 'Caps the reply, in characters, as an instruction appended to the prompt.'],
-                ['Default', '300 characters.'],
-                ['Range', '40 to 1000. The lower bound is real, not a formality — a 40-character cap forces the kind of terse message a person actually sends, and anything below it produces fragments.'],
-                ['Why shorter is usually right', 'A long, well-structured paragraph arriving in a DM from a stranger reads as generated. Short reads as typed.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-knowledge', name: 'Knowledge file', where: 'Persona → editor', kind: 'select', value: 'None',
-              rows: [
-                ['What it does', 'Attaches a document whose contents go into the prompt, so the model states your prices, dates and links instead of inventing them.'],
-                ['Accepted', 'Plain text and Markdown — .txt, .md, .markdown — up to 512 KB. Anything else is refused rather than accepted and fed to the model as noise.'],
-                ['How much is used', 'The first 12,000 characters. A longer file is cut at a line break near that point and marked truncated in the picker, so it is visible which files are only partly in play.'],
-                ['Not a search index', 'The whole file goes into every generation. That is deliberate at this size, and it is also why the cut exists — the text is re-sent on every single reply.'],
-              ],
-            },
-          ]],
-          ['note', "Deleting a knowledge file that a preset still points at does not fail quietly. The preset stops assembling, and the module refuses to start until it is fixed — which is better than accounts confidently answering questions with nothing behind the answer.",
-          ],
-        ],
-      },
-      {
-        id: 'model',
-        title: 'Choosing the model',
-        blocks: [
-          ['p', 'The same five models are available here as in Neurocommenting, and the setting is separate - this one decides who writes your direct-message replies, and changing it does not touch what writes your comments.'],
-          ['p', 'The measurements below come from the commenting side: 34 sensitive posts, three draws each, 102 live calls per model. Be clear about what that does and does not tell you here. It measures how a model behaves when a persona prompt pushes it to be chatty and a safety rule tells it not to - the same tension a DM reply is written under, so it transfers. It was not measured on conversations, so treat it as strong evidence about the model rather than a measurement of this module.'],
-          ['callout', [
-            'One difference matters more here than on the commenting side: the pre-generation check that guards comments does NOT run on replies. A conversation is not a post about a subject, so there is nothing to classify before it starts. In DMs the model\'s own judgement, your prompt, and the Safety group below are the whole of it - which makes the choice of model count for more, not less.',
-          ]],
-          ['controls', [
-            {
-              id: 'nd-mdl-grok', name: 'Grok 4.3', where: 'The default', kind: 'button', value: 'Grok 4.3',
-              rows: [
-                ['Result', 'Declined all 102 sensitive posts - a leak rate under about 3 per cent, which is the strongest statement 102 clean draws support.'],
-                ['Character', 'The shortest writer of the five, a median of 89 characters. In a conversation that reads as terse; whether it suits you depends on what your accounts are meant to sound like.'],
-                ['Price', '8.3x GPT-4o mini on input, 4.2x on output.'],
-              ],
-            },
-            {
-              id: 'nd-mdl-claude', name: 'Claude Haiku 4.5', where: 'The longest replies', kind: 'button', value: 'Claude Haiku 4.5',
-              rows: [
-                ['Result', 'One leak in 102, on the mildest post in the set.'],
-                ['Character', 'The longest writer, a median of 137 characters. For DMs this is the most substantive of the five, and the usual reason to pay above Grok.'],
-                ['Price', 'The dearest per token: 6.7x on input, 8.3x on output.'],
-              ],
-            },
-            {
-              id: 'nd-mdl-gemini', name: 'Gemini 3.5 Flash-Lite', where: 'Cheapest that held', kind: 'button', value: 'Gemini 3.5 Flash-Lite',
-              rows: [
-                ['Result', 'Declined all 102.'],
-                ['Why you would pick it', "The cheapest way off GPT-4o mini - 2x on input against Grok's 8.3x - without giving up the safety result."],
-              ],
-            },
-            {
-              id: 'nd-mdl-openai', name: 'GPT-4o mini', where: 'Cheapest, and not our default any more', kind: 'button', value: 'GPT-4o mini',
-              rows: [
-                ['Result', 'Wrote a comment on 23 of 102 sensitive posts, and on six of them every single time it was asked.'],
-                ['Why that matters more in DMs', 'There is no pre-generation check on this path to catch what the model lets through. Whatever the model decides is what your account says.'],
-                ['When it is still fine', 'Conversations that never go near death, war, crime or politics. If you cannot promise that of your inbox, the saving is not what you are choosing.'],
-              ],
-            },
-            {
-              id: 'nd-mdl-kimi', name: 'Kimi K2.6', where: 'Works, but read the price twice', kind: 'button', value: 'Kimi K2.6',
-              rows: [
-                ['Result', 'Declined all 102.'],
-                ['The catch', 'It reasons before answering and is billed for the reasoning: about 1206 output tokens per reply against 32 for the others - roughly 70x GPT-4o mini per reply, not the 6.7x its rate suggests. It also takes 45 to 50 seconds a call.'],
-                ['In a conversation', 'That delay is not neutral. A reply that lands a minute late reads differently from one that lands in two seconds.'],
-              ],
-            },
-          ]],
-          ['p', 'There is a daily spend ceiling on this module, and it is checked against the real per-token cost of whichever model you picked - so a dearer model does not silently buy you more spending, it reaches the same ceiling sooner. Switching takes effect on the next reply; nothing restarts and no session boundary is waited for.'],
-        ],
-      },
-      {
-        id: 'rhythm',
-        title: 'Rhythm',
-        blocks: [
-          ['p', "When an account comes online is demand-driven, not a timer. An inbox with people waiting pulls the next session in; an empty one lets it drift out. That is why there are two gap ranges rather than one interval."],
-          ['controls', [
-            {
-              id: 'ctl-nd-idle-gap', name: 'Gap between sessions — inbox empty', where: 'Sessions → Rhythm', kind: 'field', value: '120 — 300',
-              rows: [
-                ['What it does', 'How long an account stays offline when nobody is waiting for an answer.'],
-                ['Default', '120 to 300 minutes — two to five hours.'],
-                ['Picked how', 'A fresh random value inside the range after every session, not a fixed cadence. A constant interval is a metronome in the traffic pattern.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-hot-gap', name: 'Gap between sessions — people waiting', where: 'Sessions → Rhythm', kind: 'field', value: '20 — 60',
-              rows: [
-                ['What it does', 'The same thing, for an inbox with unanswered people in it. Shorter, because a lead that waits five hours is usually gone.'],
-                ['Default', '20 to 60 minutes.'],
-                ['The trade', 'Shorter converts better and looks less human. This pair is the main dial between the two.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-session-len', name: 'Session length', where: 'Sessions → Rhythm', kind: 'field', value: '20 — 40',
-              rows: [
-                ['What it does', 'How long an account stays online per visit.'],
-                ['Default', '20 to 40 minutes.'],
-                ['Still runs when capped', 'An account that has hit its daily reply limit comes online anyway: it reads, marks things read and writes nothing. That is a real state, not a wasted session.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-extension', name: 'Max extension', where: 'Sessions → Rhythm', kind: 'field', value: '20',
-              rows: [
-                ['What it does', 'Extra minutes a session may run past its planned end while the other person is still actively replying.'],
-                ['Default', '20 minutes.'],
-                ['Why it exists', 'A person pulled into a live conversation does not stop mid-sentence because a timer expired.'],
-                ['Zero', 'Turns the extension off — sessions then end exactly on their planned length.'],
-              ],
-            },
-          ]],
-        ],
-      },
-      {
-        id: 'replying',
-        title: 'Replying',
-        blocks: [
-          ['p', "Two different delay distributions, because a cold first reply and a follow-up inside a running conversation are not the same act. One range for both produced either implausibly fast strangers or uselessly slow conversations."],
-          ['controls', [
-            {
-              id: 'ctl-nd-first-delay', name: 'First reply to a stranger', where: 'Sessions → Replying', kind: 'field', value: '300 — 2700',
-              rows: [
-                ['What it does', 'How long before the first answer to someone new.'],
-                ['Default', '300 to 2700 seconds — five to forty-five minutes.'],
-                ['Why so wide', 'An instant answer to a cold DM is the clearest bot tell there is. The width matters as much as the length: a consistent delay is its own signature.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-reply-delay', name: 'Reply inside a live conversation', where: 'Sessions → Replying', kind: 'field', value: '40 — 180',
-              rows: [
-                ['What it does', 'The delay between messages once a conversation is already running.'],
-                ['Default', '40 to 180 seconds.'],
-                ['Fast on purpose', 'That is what a person engaged in a chat actually does.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-context', name: 'Context messages', where: 'Sessions → Replying', kind: 'field', value: '10',
-              rows: [
-                ['What it does', 'How many previous messages of the conversation are sent to the model with each reply.'],
-                ['Default', '10. The field accepts 0 to 50.'],
-                ['At zero', 'Every reply is written with no memory of the conversation.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-skip', name: 'Skip chance', where: 'Sessions → Replying', kind: 'slider', pct: 17,
-              rows: [
-                ['What it does', 'The chance of deliberately leaving an answerable conversation for the next session instead of answering it now.'],
-                ['Default', '15%. The slider runs from 0 to 90%.'],
-                ['Why', 'Nobody clears their whole inbox every time they open it.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-language', name: 'Reply language', where: 'Sessions → Replying', kind: 'select', value: 'Match the sender',
-              rows: [
-                ['What it does', 'Either answers in whatever language the message arrived in, or pins one language for every reply.'],
-                ['Default', 'Match the sender.'],
-                ['Fixed', 'Reveals a second picker for the language itself.'],
-              ],
-            },
-          ]],
-          ['p', "Two more things happen without a setting: consecutive incoming messages are folded into one reply rather than answered one by one, and the typing indicator runs for roughly as long as a person would take, if typing simulation is on."],
-        ],
-      },
-      {
-        id: 'limits',
-        title: 'The four limits',
-        blocks: [
-          ['p', "Four independent numbers, because no single one expresses the risk. Zero means no limit on any of them."],
-          ['controls', [
-            {
-              id: 'ctl-nd-per-thread', name: 'Replies per person', where: 'Sessions → Limits', kind: 'field', value: '5',
-              rows: [
-                ['What it does', 'The total number of replies one conversation may ever receive.'],
-                ['Default', '5. It is a lifetime count per conversation, not per session or per day.'],
-                ['What it prevents', 'One person being pestered. A conversation that reaches it is closed with the reason shown in the inbox.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-per-session', name: 'Replies per session', where: 'Sessions → Limits', kind: 'field', value: '8',
-              rows: [
-                ['What it does', 'The most one account may write in one visit.'],
-                ['Default', '8.'],
-                ['What it prevents', 'One sitting turning into a blast.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-per-day', name: 'Replies per day', where: 'Sessions → Limits', kind: 'field', value: '25',
-              rows: [
-                ['What it does', 'One account’s total daily exposure.'],
-                ['Default', '25.'],
-                ['On reaching it', 'The account still comes online and reads for the rest of the day. It simply writes nothing.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-new-threads', name: 'New people per day', where: 'Sessions → Limits', kind: 'field', tone: 'warn', value: '5',
-              rows: [
-                ['What it does', 'How many strangers this account starts talking to in a day.'],
-                ['Default', '5.'],
-                ['The important one', 'Unique non-contacts messaged is the closest available proxy for what actually trips Telegram’s own flood protection. Of the four, this is the one to keep low on fresh accounts.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-dialogs-read', name: 'Chats read per session', where: 'Sessions → Limits', kind: 'field', value: '15',
-              rows: [
-                ['What it does', 'How many conversations an account opens and reads in one visit.'],
-                ['Default', '15. The minimum is 1 — unlike the four above, this one has no unlimited setting.'],
-              ],
-            },
-          ]],
-        ],
-      },
-      {
-        id: 'safety',
-        title: 'Safety',
-        blocks: [
-          ['p', "The group is folded by default, with its current values written along the header so nothing is hidden by being shut. Everything in it is enforced in code — a prompt instruction is not an enforcement mechanism, and models break instructions regularly."],
-          ['controls', [
-            {
-              id: 'ctl-nd-link-gate', name: 'No links before N exchanges', where: 'Sessions → Safety', kind: 'field', value: '3',
-              rows: [
-                ['What it does', 'Withholds any link the model writes until the conversation has been through this many back-and-forth rounds.'],
-                ['Default', '3.'],
-                ['What counts as a link', 'More than http addresses: t.me and tg:// forms, bare domains, and an @mention too — an @channel funnels exactly like a link and carries the same risk sent unprompted.'],
-                ['The exception', 'If the person explicitly asked for it, one round is enough.'],
-                ['Why in code', 'A link in the first message to a stranger is the fastest route to a spam report. The prompts all say not to; the gate is what makes it true.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-block-rate', name: 'Auto-pause at block rate', where: 'Sessions → Safety', kind: 'slider', pct: 25,
-              rows: [
-                ['What it does', 'Pauses an account once this share of its recent sends comes back as a block or a privacy refusal.'],
-                ['Default', '25%.'],
-                ['Why it is the number to watch', 'Recipients blocking an account is the earliest externally visible sign it is heading for a ban — days before the ban itself.'],
-                ['After it fires', 'The account appears paused in Statistics with the reason beside it and stays out until you resume it by hand.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-cost', name: 'Daily AI spend limit', where: 'Sessions → Safety', kind: 'field', value: '5',
-              rows: [
-                ['What it does', 'Caps what the whole pool may spend on generation in a day, in dollars.'],
-                ['Default', '5.'],
-                ['On reaching it', 'Replying stops for the rest of the day. This is why the number is not a counter on the Control panel — it works without being watched.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-auto-reply', name: 'Automatic replies', where: 'Sessions → Safety', kind: 'toggle', on: true,
-              rows: [
-                ['What it does', 'Off keeps accounts coming online and reading without writing anything.'],
-                ['Default', 'On.'],
-                ['Where it shows', 'The Control panel wears a reading only badge for as long as it is off, so the state is never silent.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-stop-after-link', name: 'Stop after sending a link', where: 'Sessions → Safety', kind: 'toggle', on: true,
-              rows: [
-                ['What it does', 'Ends automatic replying in a conversation once a link has gone out.'],
-                ['Default', 'On.'],
-                ['Why', 'The link was the point of the conversation. Continuing past it is where an answer turns into pestering.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-backlog', name: 'Answer the backlog', where: 'Sessions → Safety', kind: 'toggle', on: false,
-              rows: [
-                ['What it does', 'Answers unread messages that arrived before the module was started, rather than only marking them read.'],
-                ['Default', 'Off.'],
-                ['Why off', 'A pool started on dozens of stale conversations produces exactly the burst of outbound messages that gets accounts banned — the one thing the rest of this page exists to prevent.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-idle-actions', name: 'Fill empty sessions with warmup actions', where: 'Sessions → Safety', kind: 'toggle', on: true,
-              rows: [
-                ['What it does', 'With nothing to answer, the account scrolls, reads and uses its saved messages instead of sitting online doing nothing.'],
-                ['Default', 'On.'],
-                ['Which actions', 'Active Warmup’s own action library. This does not enrol the account in that module — it borrows the behaviour for the length of the session.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-blacklist', name: 'Never reply to these people', where: 'Sessions → Safety', kind: 'field', value: '@someone',
-              rows: [
-                ['What it does', 'A list of people no account will ever answer.'],
-                ['Format', 'An @username or a numeric id, one per line or comma-separated.'],
-              ],
-            },
-          ]],
-          ['callout', [
-            "Two more guards run without a setting of their own. Outgoing text is compared against what the pool has recently sent, and a reply too close to one already used is withheld and rewritten next session — one preset across a hundred accounts otherwise converges on identical phrasing, which is the textbook signature of a spam network. And a short, deliberately narrow set of incoming conversations is never answered automatically at all: payment demands, accusations and threats, apparent minors, anything crisis-shaped. Those are handed to you in the inbox instead.",
-          ]],
-        ],
-      },
-      {
-        id: 'promotion',
-        title: 'Group promotion',
-        blocks: [
-          ['p', "Separate from the link gate, and often confused with it. The gate decides whether any link may go out yet; this decides how often, once past the gate, a reply also mentions one of your groups."],
-          ['controls', [
-            {
-              id: 'ctl-nd-groups', name: 'Promoted groups', where: 'Sessions → Group Promotion', kind: 'field', value: '@mygroup',
-              rows: [
-                ['What it does', 'The groups a reply may promote. One per line, as @group or a t.me link.'],
-                ['Empty', 'The feature is simply off — no group instruction is added to the prompt at all.'],
-                ['Where else this is written', 'Group Parser’s promote action writes into this same list, so a group promoted from there appears here.'],
-              ],
-            },
-            {
-              id: 'ctl-nd-every-n', name: 'Promote every N replies', where: 'Sessions → Group Promotion', kind: 'field', value: '5',
-              rows: [
-                ['What it does', 'At most one group mention per this many outgoing messages, counted per conversation.'],
-                ['Default', '5.'],
-                ['Zero', 'Never promote, whatever is in the list above.'],
-                ['Enforced where', 'In code, when the prompt is composed — the model is not asked to limit itself.'],
-              ],
-            },
+          ['p', "The AI Protection block under Control. While an account is online in its turn, it also reads channels and groups, scrolls, looks at posts and stories, likes and looks through its settings between replies. Low: about every 3–7 minutes. Medium (default): every 1–3 minutes. High: every minute or two. Off: the account only answers."],
+          ['p', "It never reads, marks read or archives private chats, so it cannot hide a message NeuroDialogs has to answer."],
+          ['plink', [
+            'More: ',
+            { text: 'AI Protection across the modules', href: '/guides/account-protection#ai-protection' },
+            '.',
           ]],
         ],
       },
       {
         id: 'inbox',
-        title: 'Conversations',
+        title: 'Inbox and statistics',
         blocks: [
-          ['p', "Every thread the pool has, searchable, with the exchange on the right. A conversation that has stopped says why."],
+          ['figure', {
+            src: '/public/screenshots/neurodialogs/statistics.png', w: 1600, h: 958,
+            alt: 'NeuroDialogs Statistics: tiles Accounts 7, Online now 2, Conversations 20, Unread 10, Replies today 63, a warning “2 conversations waiting on a human”, and account rows marked online or retrying, each with sent, new and blocked counters and a “waiting” badge.',
+            caption: 'Statistics: who is online and how many people are waiting on each account.',
+          }],
           ['table', {
-            head: ['Reason it stopped', 'What it means'],
+            head: ['Account state', 'Meaning'],
             rows: [
-              ['link sent', 'A link went out and Stop after sending a link is on.'],
-              ['reply limit reached', 'The conversation hit Replies per person.'],
-              ['blacklisted', 'This person is on the never-reply list.'],
-              ['they blocked us', 'The recipient blocked the account.'],
-              ['needs a human', 'The incoming screen caught something that must not get an automated answer.'],
-              ['stopped manually', 'You wrote in it yourself.'],
-              ['Telegram service account — never answered', 'Telegram’s own service messages. Never answered, by design.'],
+              ['online', 'In its turn right now.'],
+              ['in line', 'Waiting for its next turn.'],
+              ['retrying', 'The last turn failed (for example, it could not connect); it tries again at the time shown.'],
+              ['paused', 'Stopped by a safety check, with the reason. Press Resume on the row; it does not come back by itself.'],
             ],
           }],
-          ['controls', [
-            {
-              id: 'ctl-nd-composer', name: 'The reply box', where: 'Conversations', kind: 'field', value: 'Reply as acc_101…',
-              rows: [
-                ['What it does', 'Sends a message as that account, from you.'],
-                ['What it costs', 'The conversation. Writing in it takes it over — the engine stops answering that thread automatically until you hand it back.'],
-                ['Why', 'Two authors writing into one chat minutes apart, possibly contradicting each other, is worse than silence.'],
-                ['Handing it back', 'A resume action on the thread returns it to automatic answering.'],
-              ],
-            },
-          ]],
-          ['p', "The warning strip at the top of Control counts two things worth acting on: accounts auto-paused for safety, and conversations waiting on a human. Both are the kind of thing that will not resolve itself."],
+          ['p', "Each row also shows replies sent today, new people today, people who blocked it today, and how many people are waiting. A warning strip counts auto-paused accounts and conversations waiting on a human."],
+          ['figure', {
+            src: '/public/screenshots/neurodialogs/inbox.png', w: 1600, h: 890,
+            alt: 'Conversations inbox: a searchable list of chats on the left with unread badges and the answering account, and one conversation open on the right with a “Reply as tdata15…” box at the bottom.',
+            caption: 'Conversations: read any chat and reply yourself.',
+          }],
+          ['p', "Conversations lists every chat. A stopped chat shows why: link sent, reply limit reached, blacklisted, they blocked us, needs a human, stopped manually, or Telegram service account."],
+          ['p', "If you write in a chat yourself, the AI stops answering it (“You’re handling this conversation”). Press Hand back to AI to let it continue; it will not re-answer what you already handled."],
         ],
       },
       {
-        id: 'first-run',
-        title: 'First run',
+        id: 'mistakes',
+        title: 'Common mistakes',
         blocks: [
-          ['p', "The defaults on this page are already the cautious configuration. On a fresh pool, most of it is worth leaving alone."],
-          ['steps', [
-            "Put accounts in the dialogs pool. The one-module rule applies here as everywhere: an account that is commenting has to leave that pool first.",
-            "Pick or write a prompt. Duplicate the closest built-in rather than starting from an empty box, and attach a knowledge file if there are prices, dates or links the answers must get right.",
-            "Leave Rhythm, Replying and Limits at their defaults. They are the conservative setting already, and New people per day is the one to lower rather than raise on fresh accounts.",
-            "Open Safety once and read it. Everything in it is on by default except Answer the backlog, which should stay off on a pool that has any history at all.",
-            "Press Start, then leave it. The first sessions are hours away, and nothing being online is the expected state.",
+          ['bullets', [
+            "Expecting every account to be online. Only Accounts online at once are, taking turns; that is by design.",
+            "Forgetting that a run ends. After Run length the module stops; press Start for the next run.",
+            "Raising New people per day on fresh accounts. It is the limit that protects them most.",
+            "Switching on Answer the backlog on accounts with many old chats. They all get answered in a burst.",
+            "Writing in a chat and waiting for the AI to continue. Press Hand back to AI.",
+            "Leaving paused accounts. Read the reason, fix it, press Resume.",
           ]],
-          ['p', "After that, the two things worth checking are the paused count and the blocked counter on each account row. A rising block count on one account is that account being disliked; a rising count across the pool is the prompt."],
-          ['note', "Saving settings never needs a restart — they apply from the next session. The prompt is the exception in the other direction: the module refuses to start at all on a prompt that cannot be assembled, so a broken preset is caught at the button rather than discovered in someone’s DMs.",
-          ],
-          ['linkout', { href: '/guides/mass-reactions', label: 'Next: reactions, from the same pool of accounts' }],
+          ['linkout', { href: '/guides/mass-reactions', label: 'Next: reactions from your accounts' }],
         ],
       },
     ],
@@ -2575,306 +1672,138 @@ const GUIDES = [
     slug: 'mass-reactions',
     url: 'mass-reactions',
     group: 'module',
-    short: 'A pass that lands right',
-    title: 'Adding reactions to Telegram posts',
-    summary: 'Reactions that arrive like an audience instead of a switch being flipped — every setting on the page, and the numbers behind it.',
+    short: 'Reactions that look natural',
+    title: 'Mass Reactions',
+    summary: "Put reactions on new posts or on the first comments under them, spread out over time like a real audience. Setup, the limits that matter, and dry run.",
     seoTitle: 'Add Telegram reactions from multiple accounts',
     seoDescription:
-      'Reactions that arrive like an audience, not a switch: targets, coverage, the arrival curve, per-account rate caps and choosing the emoji set.',
+      'Add reactions to Telegram posts and comments from many accounts, spread like a real audience: targets, emoji, per-account limits, pacing, dry run and AI Protection.',
     module: 'mass-reactions',
     video: null,
     body: [
       {
-        id: 'what-it-is',
-        title: 'What this page is',
+        id: 'what-it-does',
+        title: 'What it does',
         blocks: [
-          ['p', "Mass Reactions places reactions on new posts, or on the comments under them, using a pool of your accounts. It watches for posts as they appear and plans a fan-out for each one."],
-          ['p', "By default it aims at comments rather than at the post. That is the product intent: a post with a lot of reactions is worth less than a post whose comment section looks alive."],
+          ['p', "Mass Reactions watches your target channels. When a new post appears, accounts from the reactions pool put reactions on it, or on the first comments under it, spread over the next minutes and hours the way a real audience reacts."],
+          ['p', "By default it reacts to comments, not to the post: a lively comment section makes a post look read."],
+          ['figure', {
+            src: '/public/screenshots/mass-reactions/control.png', w: 1600, h: 161,
+            alt: 'Mass Reactions Module control: Running, the Dry run switch, and Stop.',
+            caption: 'Module control with the Dry run switch.',
+          }],
           ['callout', [
-            "Dry run is on when you first arrive, and it stays on until you switch it off. In dry run the module does everything except the send — it catches posts, plans which account reacts with what and when, and writes all of it down. So the first thing a new owner gets is an inspectable plan rather than live traffic, and the honest first step on this page is to run it that way for a while and read the result.",
+            "Dry run is on for a new setup. In dry run the module does everything except the send: it catches posts and plans which account reacts with what and when. Nothing reaches Telegram until you switch Dry run off.",
           ]],
         ],
       },
       {
-        id: 'map',
-        title: 'Map of the page',
+        id: 'setup',
+        title: 'Set it up',
         blocks: [
-          ['p', "Nine regions, with a jump-nav across the top in this order."],
-          ['map', [
-            { name: 'Control', holds: 'The run state, the Dry run switch, Start and Stop, and the engine log underneath, collapsed.' },
-            { name: 'Reactions Pool', holds: 'Two columns of accounts, the same shape and the same one-module-at-a-time rule as the other pools.' },
-            { name: 'Statistics', holds: 'The queue, the totals — attempts, successful, unsuccessful and the rate between them — and one row per account with what it has placed today.' },
-            { name: 'Channels', holds: 'The target channels, each tile showing whether its comments can actually be reacted to, plus the paste box and the discussion-group check.' },
-            { name: 'What to react to', holds: 'Comments or channel posts, and how many comments under each post.' },
-            { name: 'Emoji', holds: 'Which reactions accounts place, in what order, and which of them every probed target accepts.' },
-            { name: 'Limits', holds: 'Per-account rate caps, the chance a message is covered at all, and the share of the pool that covers it.' },
-            { name: 'Pacing', holds: 'How soon the first reaction lands, how the rest are spread behind it, the arrival curve, and the floodwait policy.' },
-            { name: 'Joining', holds: 'One switch that explains why there is nothing to configure.' },
+          ['steps', [
+            "Add accounts to the Reactions Pool. An account works in one module at a time. Accounts younger than 3 days never react.",
+            "Channels: paste @channel or t.me links, one per line, and press Add. Your own channels are the safest targets.",
+            "Check each tile. Not checked yet, no comments (no discussion group) or reactions off means comment mode cannot work there. Check discussion groups runs the check again.",
+            "What to react to: Comments (default, the first 3 comments under each post) or Channel posts.",
+            "Emoji: keep the default four (👍 ❤ 🔥 👏) unless you know the targets allow others.",
+            "Leave Limits and Pacing at their defaults.",
+            "Keep Dry run on, press Start, and read the engine log for a while. If the plan looks natural, switch Dry run off.",
           ]],
-        ],
-      },
-      {
-        id: 'targets',
-        title: 'Targets',
-        blocks: [
-          ['p', "Targets are their own list, deliberately not the channel list from Neurocommenting. That one means channels you comment on; these are usually your own channels, and overloading one list with both would be confusing."],
-          ['controls', [
-            {
-              id: 'ctl-mr-add', name: 'Add', where: 'Channels', kind: 'button', value: 'Add',
-              rows: [
-                ['What it does', 'Adds channels from the paste box. One per line, as @channel or a t.me link, and the box says how many it recognised before you press it.'],
-                ['What happens next', 'A discussion check runs automatically on what you just added, so a channel that cannot be reacted to in comment mode says so immediately rather than at the first failed send.'],
-              ],
-            },
-            {
-              id: 'ctl-mr-probe', name: 'Check discussion groups', where: 'Channels', kind: 'button', tone: 'plain', value: 'Check discussion groups',
-              rows: [
-                ['What it does', 'Asks each target for its linked discussion group and what reactions that group allows.'],
-                ['The three answers', 'Not checked yet — never probed. No comments — the channel has no linked discussion group, so comment mode has nothing to aim at. Reactions off — the group accepts no reactions at all, and this is a setting on the group, not on the channel.'],
-                ['Why it matters before starting', 'Both failing states are permanent until someone changes the group. Sending into them is a guaranteed failure per attempt.'],
-                ['What else it collects', 'The list of reactions the group actually allows, which is what the Emoji section checks your set against.'],
-              ],
-            },
-            {
-              id: 'ctl-mr-foreign', name: 'A channel you do not administer', where: 'Channels → a tile', kind: 'badge', tone: 'warn', value: 'not your channel',
-              rows: [
-                ['What the marker means', 'The channel is not one you administer. Its admins can open a message and see exactly which accounts reacted.'],
-                ['What the engine does about it', 'Uses a smaller share of your pool per message on that target — no more than 35%, whatever the coverage band below is set to.'],
-                ['Why', 'The reactor list on someone else’s channel is an enumerable list of your accounts. A smaller slice per message is less of the pool exposed in one place.'],
-                ['The safest targets', 'Your own channels, where nobody but you can enumerate who reacted.'],
-              ],
-            },
-          ]],
-        ],
-      },
-      {
-        id: 'what-to-react-to',
-        title: 'What to react to',
-        blocks: [
-          ['controls', [
-            {
-              id: 'ctl-mr-target-mode', name: 'Target', where: 'What to react to', kind: 'button', value: 'Comments',
-              rows: [
-                ['The two choices', 'Comments — reactions land on comments in the channel’s linked discussion group. Channel posts — they land on the post itself.'],
-                ['Default', 'Comments.'],
-                ['What comments cost', 'Membership. A reaction in a discussion group requires the account to be in that group, so accounts have to join first.'],
-                ['What posts cost', 'Nothing extra — no joining needed. But a lively comment section is what makes a post look read, which is why the default is the other way.'],
-              ],
-            },
-            {
-              id: 'ctl-mr-comments-per-post', name: 'First comments per post', where: 'What to react to', kind: 'slider', pct: 30,
-              rows: [
-                ['What it does', 'How many comments under each post get reacted to, taken in the order they were written — the top of the thread, where a reader actually looks. Whoever wrote them.'],
-                ['Default', '3.'],
-                ['A count of comments, not of reactions', 'Each selected comment is then fanned out across the pool on its own. The reactions under one post are therefore this number multiplied by a share of the pool, not this number.'],
-                ['How deep it looks', 'The first fifty comments of a thread are scanned to choose from, so the choice comes from a real window rather than whatever one page happened to hold, and a thread with thousands of comments is never walked.'],
-                ['In post mode', 'Inert. The slider is only shown while the target is comments.'],
-              ],
-            },
-          ]],
-        ],
-      },
-      {
-        id: 'emoji',
-        title: 'Emoji',
-        blocks: [
-          ['p', "A discussion group sets its own list of allowed reactions. Sending one outside that list is a guaranteed failure, which is why the section checks your set against what the probe found."],
-          ['controls', [
-            {
-              id: 'ctl-mr-emoji-set', name: 'The emoji set', where: 'Emoji', kind: 'badge', tone: 'plain', value: '👍 ❤ 🔥 👏',
-              rows: [
-                ['Default', 'Four: thumbs up, heart, fire, applause. Deliberately the most universally enabled ones — a wide default set is the fastest way to collect failures on a channel with a restricted list.'],
-                ['The warning', 'An emoji that some probed target does not accept is flagged. A target nobody has probed makes no claim either way, and the section says so rather than implying the set is safe.'],
-              ],
-            },
-            {
-              id: 'ctl-mr-emoji-mode', name: 'Pick order', where: 'Emoji', kind: 'button', tone: 'plain', value: 'Random',
-              rows: [
-                ['The two choices', 'Random, or sequential through the list.'],
-                ['Default', 'Random.'],
-              ],
-            },
-          ]],
+          ['figure', {
+            src: '/public/screenshots/mass-reactions/channels.png', w: 1600, h: 1134,
+            alt: 'Mass Reactions Channels: 9 targets configured, buttons Check discussion groups, Clear all and Save preset, a paste box with Add, target tiles each showing “0/6 joined”, and saved Presets with Load buttons.',
+            caption: 'Targets. Each tile shows how many pool accounts have joined its discussion group.',
+          }],
+          ['p', "Presets save the target list under a name; Load puts it back."],
         ],
       },
       {
         id: 'limits',
         title: 'Limits',
         blocks: [
-          ['p', "Two different things live here. Four rate caps bound what one account does; two more decide how much of the pool shows up on any given message. They deliberately do not multiply together."],
-          ['controls', [
-            {
-              id: 'ctl-mr-per-hour', name: 'Per hour', where: 'Limits', kind: 'field', value: '4',
-              rows: [
-                ['What it does', 'The most reactions one account may place in an hour, across every target.'],
-                ['Default', '4.'],
-                ['Why so low', 'Past a certain rate an account stops reading as a person scrolling and starts reading as a script.'],
-              ],
-            },
-            {
-              id: 'ctl-mr-per-day', name: 'Per day', where: 'Limits', kind: 'field', value: '20',
-              rows: [
-                ['What it does', 'The same signal over a longer window.'],
-                ['Default', '20.'],
-              ],
-            },
-            {
-              id: 'ctl-mr-per-channel', name: 'Per channel, per day', where: 'Limits', kind: 'field', value: '8',
-              rows: [
-                ['What it does', 'Caps one account’s reactions on a single channel in a day.'],
-                ['Default', '8.'],
-                ['Why it is separate', 'Reactions concentrated on one channel are the easiest pattern for that channel’s own anti-spam to catch, even while the hourly and daily caps are nowhere near reached.'],
-              ],
-            },
-            {
-              id: 'ctl-mr-per-run', name: 'Per account, per run', where: 'Limits', kind: 'field', value: '200',
-              rows: [
-                ['What it does', 'A hard ceiling on one account’s total activity for a run, independent of the three caps above.'],
-                ['Default', '200.'],
-              ],
-            },
-            {
-              id: 'ctl-mr-probability', name: 'Chance a message gets reacted to at all', where: 'Limits', kind: 'slider', pct: 50,
-              rows: [
-                ['What it does', 'Decides, per caught message, whether it gets anything at all.'],
-                ['Default', '50%.'],
-                ['Why not 100%', 'Some messages getting nothing is what a real audience looks like. Every message being covered is a pattern visible across the whole channel, not just a bigger number.'],
-              ],
-            },
-            {
-              id: 'ctl-mr-coverage', name: 'Share of the pool per covered message', where: 'Limits', kind: 'slider', pct: 50,
-              rows: [
-                ['What it does', 'Given that a message is covered, how much of the eligible pool takes part.'],
-                ['Default', '35% to 65%.'],
-                ['Drawn fresh', 'A new value inside the band for every message, so the counts vary instead of landing on the same number every time.'],
-                ['Does not multiply', 'This and the chance above are separate on purpose: one decides whether, the other decides how many. An earlier design multiplied them and made the real share unpredictable.'],
-                ['Overridden where', 'On a channel you do not administer the share is capped at 35% however the band is set.'],
-              ],
-            },
-            {
-              id: 'ctl-mr-skip-reacted', name: 'Skip already-reacted messages', where: 'Limits', kind: 'toggle', on: false,
-              rows: [
-                ['What it does', 'Leaves alone any message that already carries more than the number you set.'],
-                ['Default', 'Off.'],
-                ['Zero', 'React only to messages with no reactions at all.'],
-                ['What it costs', 'Nothing. The existing count arrives with the message, so this needs no extra request.'],
-              ],
-            },
-          ]],
+          ['figure', {
+            src: '/public/screenshots/mass-reactions/limits.png', w: 1600, h: 846,
+            alt: 'Mass Reactions Limits: Per hour, Per day, Per channel per day, Per account per run fields, the “Chance a message gets reacted to at all” slider at 50%, the “Share of the pool per covered message” sliders at 35–65% with the number of accounts, and the “Skip messages that already have reactions” switch.',
+            caption: 'Limits. The line next to the share shows how many accounts that means for your pool.',
+          }],
+          ['table', {
+            head: ['Setting', 'Default', 'What it does'],
+            rows: [
+              ['Per hour', '4', 'Most reactions one account places in an hour, across all targets.'],
+              ['Per day', '20', 'Most reactions one account places in a day.'],
+              ['Per channel, per day', '8', 'Most reactions one account places on one channel in a day.'],
+              ['Per account, per run', '200', 'Hard ceiling for one account in one run.'],
+              ['Chance a message gets reacted to at all', '50%', 'Some messages get nothing, as with a real audience.'],
+              ['Share of the pool per covered message', '35–65%', 'How much of the pool reacts to a message that is covered. A new value is drawn for each message.'],
+              ['Skip messages that already have reactions', 'Off', 'Leaves alone messages that already have more reactions than the number you set.'],
+            ],
+          }],
+          ['p', "On a channel you do not administer, at most 35% of the pool reacts to one message, whatever the share is set to: that channel’s admins can see exactly which accounts reacted."],
         ],
       },
       {
         id: 'pacing',
         title: 'Pacing',
         blocks: [
-          ['p', "Three separate timings, each answering a different question: when the first reaction may land, how the rest are spread behind it, and how fast one account is allowed to work through its own queue."],
-          ['controls', [
-            {
-              id: 'ctl-mr-first-delay', name: 'First reaction after a post appears', where: 'Pacing', kind: 'field', value: '60 — 600',
-              rows: [
-                ['What it does', 'How long after a post appears the earliest reaction may land.'],
-                ['Default', '60 to 600 seconds — one to ten minutes.'],
-                ['Never instant', 'Nobody reads that fast. A reaction arriving in the first seconds is the clearest possible tell.'],
-              ],
-            },
-            {
-              id: 'ctl-mr-spread', name: 'Spread window', where: 'Pacing', kind: 'field', value: '90',
-              rows: [
-                ['What it does', 'How long the whole fan-out for one message is smeared over.'],
-                ['Default', '90 minutes.'],
-              ],
-            },
-            {
-              id: 'ctl-mr-curve', name: 'Arrival curve', where: 'Pacing', kind: 'select', value: 'Human — front-loaded',
-              rows: [
-                ['The two choices', 'Human — reactions cluster in the first minutes and thin out after, the shape a real post’s reactions have. Uniform — flat across the window.'],
-                ['Default', 'Human.'],
-                ['Why uniform is the risky one', 'A flat spread is a metronome, and a metronome is a signature.'],
-              ],
-            },
-            {
-              id: 'ctl-mr-account-gap', name: 'Gap between one account’s reactions', where: 'Pacing', kind: 'field', value: '30 — 120',
-              rows: [
-                ['What it does', 'The minimum spacing between two reactions by the same account, enforced at send time.'],
-                ['Default', '30 to 120 seconds.'],
-                ['Why it is separate from the curve', 'The arrival curve spaces different accounts across one message and says nothing about one account’s own queue. Comment mode puts one account onto several comments under the same post, so without this an account could fire five reactions inside a minute — which no amount of cross-account jitter disguises.'],
-              ],
-            },
-            {
-              id: 'ctl-mr-floodwait-pause', name: 'Pause after a FloodWait', where: 'Pacing', kind: 'field', value: '120',
-              rows: [
-                ['What it does', 'How long an account waits after Telegram tells it to slow down.'],
-                ['Default', '120 seconds.'],
-              ],
-            },
-            {
-              id: 'ctl-mr-floodwait-streak', name: 'FloodWaits before quarantine', where: 'Pacing', kind: 'field', tone: 'warn', value: '3',
-              rows: [
-                ['What it does', 'After this many floodwaits in a row, the account stops and stays stopped until you clear it.'],
-                ['Default', '3.'],
-                ['Why a streak', 'One floodwait is ordinary. Three in a row is the account telling you it is being throttled specifically.'],
-              ],
-            },
-          ]],
-          ['note', "One timing is not on this page: a planned reaction is cancelled rather than sent if the post it belongs to has aged past four hours by the time its turn comes. A reaction landing on a post that old reads as a bot catching up rather than as a reader, so a job delayed by a floodwait or a restart is dropped instead of arriving late.",
-          ],
+          ['figure', {
+            src: '/public/screenshots/mass-reactions/pacing.png', w: 1600, h: 880,
+            alt: 'Mass Reactions Pacing: First reaction after a post appears 60–600 seconds, Spread window 90 minutes, Arrival curve Human — front-loaded, Gap between one account’s reactions 30–120 seconds, Pause after a FloodWait 120 seconds, FloodWaits before quarantine 3, and Fast, Recommended and Slow presets.',
+            caption: 'Pacing with the recommended values.',
+          }],
+          ['table', {
+            head: ['Setting', 'Default', 'What it does'],
+            rows: [
+              ['First reaction after a post appears', '60–600 s', 'The earliest a reaction may land. Never instant.'],
+              ['Spread window', '90 min', 'How long all reactions for one message are spread over.'],
+              ['Arrival curve', 'Human — front-loaded', 'Most reactions early, fewer later, like real posts. Uniform spreads them evenly, which looks mechanical.'],
+              ['Gap between one account’s reactions', '30–120 s', 'Minimum time between two reactions of the same account.'],
+              ['Pause after a FloodWait', '120 s', 'How long an account waits when Telegram asks it to slow down.'],
+              ['FloodWaits before quarantine', '3', 'After this many FloodWaits in a row the account stops until you clear it.'],
+            ],
+          }],
+          ['p', "The Fast, Recommended and Slow buttons fill the timing fields; Save applies them. A reaction that would land on a post older than 4 hours (after a delay or restart) is cancelled instead of sent late."],
         ],
       },
       {
         id: 'joining',
         title: 'Joining',
         blocks: [
-          ['p', "There is one switch here and it cannot be turned on. That is the honest state of things rather than an oversight."],
-          ['controls', [
-            {
-              id: 'ctl-mr-without-join', name: 'React without joining', where: 'Joining', kind: 'toggle', on: false,
-              rows: [
-                ['What it would do', 'Let accounts react in a discussion group without joining it first.'],
-                ['Why it is off', 'It was measured rather than assumed: a non-member can read a comment thread but cannot react in it — Telegram requires membership for the send.'],
-                ['Why the switch still exists', 'It explains why there is nothing to configure, which is more use than a silent gap. The engine refuses to set it rather than accepting a value it would then ignore.'],
-              ],
-            },
-          ]],
-          ['p', "Joining itself is paced by the engine’s existing channel-join limits, not by a second set here: at most one join per pass, then a wait of three to ten minutes before the next. An account already in the group is skipped without a join being issued at all."],
-          ['callout', [
-            "This is the slowest part of starting the module, and it is meant to be. Forty accounts entering one discussion group inside a minute is a textbook pattern — so a pool of forty accounts takes hours to finish joining a new target, and reactions in comment mode ramp up as that finishes rather than all being available at once.",
+          ['p', "To react to comments, an account must be a member of the channel’s discussion group, so accounts join first. The engine joins one account at a time and then waits 3 to 10 minutes before the next. With many accounts, joining a new target takes hours, and reactions in comment mode ramp up as the joins finish. The tile shows the progress (for example, 4/6 joined)."],
+          ['p', "React without joining cannot be switched on: Telegram does not allow reactions in a discussion group from a non-member. Reacting to channel posts needs no joining."],
+        ],
+      },
+      {
+        id: 'ai-protection',
+        title: 'AI Protection',
+        blocks: [
+          ['p', "The AI Protection block under Control. Here the level is the chance that an account browses a little on the same connection before it reacts: Low about 1 in 4 reactions, Medium every other one (default), High almost every one. Off: accounts only react."],
+          ['plink', [
+            'More: ',
+            { text: 'AI Protection across the modules', href: '/guides/account-protection#ai-protection' },
+            '.',
           ]],
         ],
       },
       {
-        id: 'reading-it',
-        title: 'Reading the run',
+        id: 'stats',
+        title: 'Statistics',
         blocks: [
-          ['p', "Statistics holds everything the module reports: accounts, targets, posts queued and reactions queued, then the same four totals as the commenting page — total attempts, successful, unsuccessful and the success rate. Below them, one row per account with what it has placed today."],
-          ['p', "The totals count finished jobs. A cancelled job is not an attempt — nothing was tried — so cancelling the fan-out for a deleted post does not dent the success rate."],
-          ['controls', [
-            {
-              id: 'ctl-mr-dry-run', name: 'Dry run', where: 'Control, beside Start', kind: 'toggle', on: true,
-              rows: [
-                ['What it does', 'Everything except the send. Posts are caught, jobs are planned and logged, and nothing reaches Telegram.'],
-                ['Default', 'On, for a new owner.'],
-                ['What it is for', 'Reading a plan before it becomes traffic — which accounts, which emoji, how many per message, and how the arrival is spread.'],
-                ['Switching it off', 'Takes effect immediately. There is no separate confirmation, so the toast saying reactions will now actually be sent is the whole warning.'],
-              ],
-            },
-          ]],
+          ['p', "Statistics shows accounts, targets, posts and reactions queued, then Total Attempts, Successful, Unsuccessful and Success Rate, and one row per account. A cancelled reaction (for example, for a deleted post) is not an attempt and does not lower the success rate."],
         ],
       },
       {
-        id: 'first-run',
-        title: 'First run',
+        id: 'mistakes',
+        title: 'Common mistakes',
         blocks: [
-          ['p', "The defaults are the conservative end of every range. The order below matters more than the numbers."],
-          ['steps', [
-            "Put accounts in the reactions pool. The one-module rule holds: anything commenting or answering DMs has to leave that pool first.",
-            "Add your targets and press Check discussion groups. A channel that comes back as no comments or reactions off cannot be used in comment mode at all, and it is better to learn that now.",
-            "Leave Dry run on. Press Start and let it plan for a while.",
-            "Read the plan. What you are looking for is whether the reaction counts per message look like an audience, and whether the arrival is spread rather than bunched.",
-            "If comments are the target, expect the joining to take hours before the pool is fully useful. That is the join pacing working, not a fault.",
-            "Only then switch Dry run off.",
+          ['bullets', [
+            "Switching Dry run off before reading the plan.",
+            "Using emoji a target does not allow. Every such reaction fails; keep the default four or check the targets.",
+            "Targets with no comments or reactions off in comment mode. Nothing can land there.",
+            "Expecting all accounts to react right away on a new target. They join one by one, over hours.",
+            "Raising Per hour to get more reactions. Add accounts instead; a fast account looks like a script.",
           ]],
-          ['p', "Two numbers are worth watching afterwards: failures on a target, which usually means an emoji outside that group's allowed list, and the floodwait streak, which is the account asking to be slowed down."],
-          ['linkout', { href: '/guides/buying-telegram-accounts', label: 'Start of the chain: buying the accounts' }],
+          ['linkout', { href: '/guides/buying-telegram-accounts', label: 'Start of the chain: buying accounts' }],
         ],
       },
     ],
