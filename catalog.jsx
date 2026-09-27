@@ -1066,7 +1066,12 @@ const GUIDES = [
         id: 'setup',
         title: 'Run a search',
         blocks: [
-          /* SHOT: Channel Parser, Keyword search tab — keywords and endings fields, accounts, members range, languages, min comments on last post, max results, Start search button. */
+          ['figure', {
+            src: '/public/screenshots/channel-parser/search.png',
+            w: 1400, h: 1544,
+            alt: 'Channel Parser keyword search form with keywords, accounts, members range, languages and max results',
+            caption: 'The search form: keywords, the accounts that search, and the filters.',
+          }],
           ['steps', [
             "Type a few keywords (Keyword search tab). Start with three or four to test your filters.",
             "Optionally add endings. Every keyword is combined with every ending: crypto + signals is searched as “crypto signals”. Generate can suggest up to 30 endings in a language you pick.",
@@ -1114,7 +1119,12 @@ const GUIDES = [
         id: 'results',
         title: 'Results',
         blocks: [
-          /* SHOT: Channel Parser results table — tabs All / Pending / Accepted / Rejected, Copy Links and Clear, a few rows with score colours and the Start commenting / Reject buttons. */
+          ['figure', {
+            src: '/public/screenshots/channel-parser/results.png',
+            w: 1400, h: 810,
+            alt: 'Channel Parser results table with members, language, score and Start commenting / Reject buttons',
+            caption: 'Results, best score first. Start commenting sends a channel straight to Neurocommenting.',
+          }],
           ['p', "Each row shows the channel, members, language, where the search found it, comments on the last post and a score from 0 to 100. Comments count most: a small channel with a busy comment section scores higher than a big silent one."],
           ['table', {
             head: ['Control', 'What it does'],
@@ -1171,7 +1181,12 @@ const GUIDES = [
         id: 'setup',
         title: 'Run a search',
         blocks: [
-          /* SHOT: Group Parser search form — keywords, members range, languages, Activity (min messages 7d, min unique senders), Access switches, max results. */
+          ['figure', {
+            src: '/public/screenshots/group-parser/search.png',
+            w: 1400, h: 1680,
+            alt: 'Group Parser search form with keywords, members range, languages, activity and access filters',
+            caption: 'The group search: size, language, activity and access filters.',
+          }],
           ['steps', [
             "Open the Groups tab and type a few keywords. Endings, accounts and Max results work as in Channel Parser.",
             "Keep both Access switches on. Whatever they remove is a group your accounts could not use anyway.",
@@ -1203,7 +1218,12 @@ const GUIDES = [
         id: 'results',
         title: 'Results',
         blocks: [
-          /* SHOT: Group Parser results — columns Members, Messages 7d, Senders, Slow mode, Join, Language, Source, Score, and the Allow in DMs / Reject buttons. */
+          ['figure', {
+            src: '/public/screenshots/group-parser/results.png',
+            w: 1400, h: 365,
+            alt: 'Group Parser results with members, messages in 7 days, senders, slow mode and Allow in DMs / Reject buttons',
+            caption: 'Group results with activity figures and the actions for each group.',
+          }],
           ['p', "Each row shows members, messages in the last 7 days, unique senders, slow mode, how joining works, language, which search found it, and a score from 0 to 100."],
           ['table', {
             head: ['Control', 'What it does'],
