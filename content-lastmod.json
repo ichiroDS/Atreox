@@ -12,8 +12,8 @@
     "date": "2026-09-24"
   },
   "page:/guides": {
-    "hash": "5fdbcd6abae48179",
-    "date": "2026-09-24"
+    "hash": "0b5c964ef9da6081",
+    "date": "2026-09-27"
   },
   "page:/contact": {
     "hash": "321fc8099228bf04",
@@ -48,63 +48,47 @@
     "date": "2026-09-24"
   },
   "guide:buying-telegram-accounts": {
-    "hash": "487dcf1435e4e4e8",
-    "date": "2026-09-24"
-  },
-  "guide:proxies-for-telegram-accounts": {
-    "hash": "c106d538f7b4dbd5",
-    "date": "2026-09-24"
-  },
-  "guide:billing": {
-    "hash": "90f13d582f01e2b8",
-    "date": "2026-09-24"
-  },
-  "guide:account-manager": {
-    "hash": "eb03a2017b7ee2d8",
-    "date": "2026-09-24"
-  },
-  "guide:account-protection": {
-    "hash": "a7e4167c26a5f347",
+    "hash": "9a4f4ed4088ac1ca",
     "date": "2026-09-27"
   },
-  "guide:spamblock-frozen-shadowban": {
-    "hash": "560fff302aeb6b7b",
-    "date": "2026-09-24"
+  "guide:proxies-for-telegram-accounts": {
+    "hash": "e4f19a2214e141df",
+    "date": "2026-09-27"
   },
-  "guide:profile-templates": {
-    "hash": "507ac309a4e5accf",
-    "date": "2026-09-24"
+  "guide:account-manager": {
+    "hash": "c1c918a255fd5d8a",
+    "date": "2026-09-27"
+  },
+  "guide:account-protection": {
+    "hash": "826dc614c0f67bb0",
+    "date": "2026-09-27"
   },
   "guide:active-warmup": {
-    "hash": "781ac59de36c9c5f",
-    "date": "2026-09-24"
+    "hash": "cf3a34dd27531a5b",
+    "date": "2026-09-27"
   },
   "guide:channel-parser": {
-    "hash": "d54f74d76250f812",
-    "date": "2026-09-24"
+    "hash": "4a09f5f56155a4e9",
+    "date": "2026-09-27"
   },
   "guide:group-parser": {
-    "hash": "fa344e222cd61623",
-    "date": "2026-09-24"
+    "hash": "8b7b082f42edd9c6",
+    "date": "2026-09-27"
   },
   "guide:neurocommenting": {
-    "hash": "b29823ffa02e0759",
+    "hash": "3f6698f25a7f8ec0",
     "date": "2026-09-27"
   },
   "guide:neurodialogs": {
-    "hash": "0727baa001e12333",
-    "date": "2026-09-24"
+    "hash": "54be2bd54aecefa9",
+    "date": "2026-09-27"
   },
   "guide:mass-reactions": {
-    "hash": "47453f93f95112a9",
-    "date": "2026-09-24"
+    "hash": "eb72bed4f987de46",
+    "date": "2026-09-27"
   },
   "guide:telegram-account-aging-claims-tested": {
-    "hash": "d9e0934095ce3f37",
-    "date": "2026-09-24"
-  },
-  "guide:telegram-session-killed-by-ip-change": {
-    "hash": "ed9976a44d010b9a",
-    "date": "2026-09-24"
+    "hash": "c030e318127fd5fd",
+    "date": "2026-09-27"
   }
 }
