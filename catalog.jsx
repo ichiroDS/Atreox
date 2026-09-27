@@ -332,241 +332,102 @@ const GUIDES = [
     slug: 'buying-accounts',
     url: 'buying-telegram-accounts',
     group: 'setup',
-    title: 'Buying Telegram accounts',
-    short: 'What to buy, what to avoid',
+    title: 'Buying accounts',
+    short: 'What to buy, how to test it',
     summary:
-      'What to buy, where, and how to tell a usable account from one that will die in a week — before you spend anything.',
-    seoTitle: 'How to buy Telegram accounts: TData, GEO, testing',
+      'What to look for in accounts and sellers, and how to test a new batch before you buy more.',
+    seoTitle: 'How to buy Telegram accounts: format, sellers, testing',
     seoDescription:
-      'Test a seller before you scale: TData format, GEO matched to your proxies, rest time, no spamblock, and the checks that catch a dead account.',
+      'What to buy (tdata, aged, no spamblock, proxy in the same country), how to judge a seller by negative reviews, and a two-week plan to test a new batch.',
     module: null,
     video: null,
     body: [
       {
-        id: 'hidden-mechanics',
-        title: 'The Hidden Mechanics of Telegram Accounts',
+        id: 'what-to-buy',
+        title: 'What to buy',
         blocks: [
-          ['p', "The foundation of everything in ATREOX is your accounts. They are your workforce, but here is the hard truth that beginners often miss: the biggest problem causing bans or limits is usually the accounts themselves. When you open a marketplace, you see millions of accounts and thousands of sellers. It is incredibly easy to spend a significant amount of money on a batch, watch them all get blocked immediately after their first neuro-commenting session, and assume either the software is broken or you did something terribly wrong. In reality, you just need to understand how to buy, verify, and test accounts properly."],
-          ['callout', [
-            "A common trap is assuming that two accounts with the exact same description from different sellers will yield the same results. They won't. Behind the scenes, Telegram evaluates an account based on over 100 hidden parameters to determine its trust score and lifespan. This includes the device ID used during registration, the specific version of the Telegram client, the quality of the phone number pool, and countless other microscopic details. The autoregers who create these accounts bake these parameters in from day one. Our team has analyzed massive volumes of accounts, and we've concluded that learning how to vet these hidden parameters by testing sellers is the most critical skill for anyone starting in Telegram traffic.",
-            "This directly ties into pricing. You cannot expect a $0.20 account to perform identically to a $0.90 account, even if both meet our recommended basic characteristics. Cheaper accounts often mean those hidden registration parameters are of lower quality, and they carry a higher risk of bans, more meticulous testing and a slower warmup.",
-            "But neither price on its own tells you which to buy, and reading the cheaper one as worse is the same error as reading it as better. Divide: at 25% survival the $0.20 account costs $0.80 per account that lives, and at 90% the $0.90 one costs $1.00 - so the cheap stock wins, narrowly, and would stop winning the moment its survival slipped a few points. Run that division on your own test batch instead of inferring quality from the price tag. Section 09 does the same arithmetic for whole countries.",
-          ]],
-        ],
-      },
-      {
-        id: 'why-blocked',
-        title: 'Why Telegram Accounts Get Blocked So Quickly',
-        blocks: [
-          ['p', "The stability of a Telegram account does not depend on one single factor, but on a set of parameters. In practice, it is not just a phone number and GEO, but a complete profile of where and how the account was created."],
-          ['p', "Account survival depends on:"],
-          ['bullets', [
-            "the account GEO;",
-            "the phone number pool used for registration;",
-            "the registration device ID;",
-            "the Telegram app version used during registration;",
-            "the account age;",
-            "the history of similar accounts with the same parameters;",
-            "current ban waves affecting specific combinations of parameters.",
-          ]],
-          ['p', "That is why Telegram accounts with the same description in a marketplace are not equal. Two lots may have the same country, similar aging period, and the same price, but the real risk of being blocked can be completely different."],
-        ],
-      },
-      {
-        id: 'testing-sellers',
-        title: 'Testing Sellers and Avoiding Instant Bans',
-        blocks: [
-          ['p', "Instead of buying 100 accounts from a single unknown seller right away, you need to run a testing protocol."],
-          ['steps', [
-            "Buy about 20 accounts each from a few different sellers that offer roughly the same parameters.",
-            "Let them rest for three days without doing anything heavy.",
-            "Apply your profile templates.",
-            "Then, put them into the Active Warmup module on very conservative settings up to day five.",
-            "Finally, run them through just one single neuro-commenting session.",
-          ]],
-          ['p', "The difference in survival rates between the sellers will usually be massive, instantly showing you who provides the actual quality you can scale with."],
-          ['card', {
-            kicker: 'Five to reject, twenty to measure',
-            blocks: [
-              ['p', "Five accounts tell you whether stock is catastrophic, not whether it is good. Nought or one alive out of five rejects a seller with confidence. Five out of five does not accept one - it earns a second, larger test. So: five to reject, twenty from the same listing to measure, and only then fifty. Buy the twenty as one purchase rather than spread over weeks, because stock rotates."],
-              ['p', "For the five-account screen: import them into ATREOX and immediately run the account checks."],
-              ['figure', {
-                src: '/public/screenshots/buying-telegram-accounts/02.png',
-                w: 1400, h: 697,
-                alt: 'ATREOX Account Manager running health and capability checks on imported Telegram accounts',
-                caption: 'Health check and capability check in the Account Manager',
-              }],
-              ['p', "Running a health check and capability check will update their status in the dashboard, ensuring you haven't bought accounts that are already heavily limited from the start."],
-            ],
-          }],
-          ['p', "You might wonder how an account can be banned immediately upon import if marketplaces have built-in checkers that verify validity right before purchase. The reality is that the marketplace checker only confirms the account is alive at that exact moment on their native IP. But the moment that account hits the new IP of your proxy inside the ATREOX dashboard, Telegram runs a minimal stress test. If the account's hidden trust score is too low, it will be banned instantly upon that IP change. When you see this happen, take it as a clear signal that the account couldn't even survive the most basic environmental shift, and you should abandon that seller entirely."],
-        ],
-      },
-      {
-        id: 'recheck-frequency',
-        title: 'How Often You Should Recheck an Account',
-        blocks: [
-          ['p', "Checking too often usually does not help. Account behavior does not change every minute."],
-          ['p', "The logic is simple:"],
-          ['bullets', [
-            "after the initial check, you make a decision about purchase or warm-up;",
-            "it makes sense to run a second check after a few days or after the warm-up stage;",
-            "for accounts that are already working, it is worth considering the date of the latest rating update.",
-          ]],
-        ],
-      },
-      {
-        id: 'evaluating-sellers',
-        title: 'Evaluating Marketplace Sellers',
-        blocks: [
-          ['p', "When evaluating sellers on LZT Market, you will notice that almost everyone has a perfect 100% rating."],
-          ['figure', {
-            src: '/public/screenshots/buying-telegram-accounts/03.png',
-            w: 816, h: 197,
-            alt: 'LZT Market seller ratings all showing 100 percent',
-            caption: 'Every seller shows 100% — the rating alone tells you nothing',
-          }],
-          ['p', "You must remember that these positive reviews are generated automatically if the buyer does not explicitly write a bad one. Therefore, a 100% rating is largely an illusion."],
-          ['p', "You must manually open each seller's profile and look exclusively for the presence of negative reviews."],
-          ['plates', [
-            { tone: 'bad', label: 'Avoid', text: "If a seller has 7 or more negative reviews, that is a massive red flag and you should avoid them." },
-            { tone: 'ok', label: 'Acceptable', text: "A count of 0 to 1 negative reviews is generally acceptable." },
-          ]],
-        ],
-      },
-      {
-        id: 'main-filters',
-        title: 'Main Filters When Buying Telegram Accounts',
-        blocks: [
-          ['p', "When purchasing Telegram accounts, you should primarily pay attention to the following factors:"],
-          ['bullets', [
-            "account origin (phishing, stealer, auto-registered, self-registered)",
-            "account country (GEO)",
-            "SpamBlock status (temporary, GEO-based, permanent)",
-          ]],
-          ['figure', {
-            src: '/public/screenshots/buying-telegram-accounts/accsexamples.jpg',
-            w: 1280, h: 583,
-            alt: 'Telegram account marketplace listings showing autoreg tags, no-spamblock badges and country of origin',
-            caption: 'Two listings with matching filters — autoreg, no spamblock, same country',
-          }],
-          ['p', "Different Telegram account marketplaces provide different filtering options and account characteristics. Understanding these criteria is important because otherwise you may not only purchase an account that is unsuitable for your intended use but could also violate local laws and regulations."],
-          ['callout', [
-            "Many Telegram account stores sell phishing or stealer accounts, meaning compromised accounts obtained without the owner's permission. Such accounts are popular among users involved in gray-area Telegram automation because they are inexpensive, available in large quantities, and have already been warmed up through real user activity. However, purchasing and using compromised accounts may violate applicable laws and platform policies.",
-          ]],
-          ['p', "For more legitimate use cases, buyers typically choose auto-registered accounts created specifically for resale. The account GEO and SpamBlock status are then selected based on the intended purpose. In most cases, users choose Telegram accounts from the same region where they plan to operate, advertise, communicate, or automate activities."],
-          ['callout', [
-            "These are two different questions and they have two different answers. The country of the channels you comment in is set by your audience. The country of the accounts you buy is set by what survives. They do not have to match, and for us they do not: we run Argentine accounts against channels that have nothing to do with Argentina. What must match is the account's country and its proxy's country.",
-          ]],
-        ],
-      },
-      {
-        id: 'marketplaces-and-geos',
-        title: 'Marketplaces, Formats, and GEOs',
-        blocks: [
-          ['p', "When buying accounts, ATREOX requires the TData format. TData is the local session data Telegram Desktop stores on a computer—a folder containing everything needed to log in without a phone number or SMS code. It ensures zero friction, no re-verification, and higher trust from Telegram."],
-          ['p', "When it comes to selecting a GEO for your accounts, the golden rule is that the account GEO must strictly match the GEO of the proxies you bought or plan to buy. USA accounts are not always the best option."],
-          ['p', "The ATREOX team currently buys Argentine accounts first and Uzbek accounts second, each paired with a proxy in the matching country."],
-          ['p', "That is a change from what this guide used to say. We previously recommended Indonesian stock on the grounds that it is cheap, and we no longer do. We are not going to dress that up as a measurement: we do not have a per-country survival table we can stand behind, and section 09 explains why we took the old one down. What changed our minds was our own buying - Indonesian batches cost us less per account and left us with fewer working accounts than the Argentine and Uzbek ones we buy now. That is one operator's experience over a few months, not a study, and we are telling you which it is."],
-          ['p', "The principle underneath it does survive without the table: stock bought because it is cheap is the mistake. The price you care about is the price of an account still working next month."],
-          ['p', "Treat this as our current best answer rather than a settled one. It rests on our own purchasing, not on a measured survival table - and section 09 says when the first real numbers land."],
-          ['p', "There are many stores, forums, and sellers in Telegram chats offering Telegram accounts for sale, but the following marketplaces are among the most popular:"],
-          ['p', "If your primary marketplace is ever down, you need untested backups. Established English-facing marketplaces include:"],
-          ['table', {
-            head: ['Marketplace', 'Role', 'What it is known for'],
-            rows: [
-              ['lzt.market', 'Primary', 'A large selection of accounts with account validity checks before purchase.'],
-              ['dark.shopping', 'Primary', 'A wide range of accounts, although prices may be above market average; replacement is available if an account is invalid.'],
-              ['AccsMarket', 'Backup', 'The most recognized bulk-TData market. A well-established marketplace that has been operating for years and has earned user trust.'],
-              ['BuyAccs', 'Backup', 'Cited for lower burn rates.'],
-              ['Accs Trading', 'Backup', 'TData + Session, crypto payments.'],
-            ],
-          }],
-        ],
-      },
-      {
-        id: 'proxies-role',
-        title: 'The Role of Proxies: Why Account Evaluation Is Incomplete Without Them',
-        blocks: [
-          ['p', "The final survival of an account depends not only on the account itself, but also on proxy quality. If you use a proxy with the same GEO as the account country, it looks more natural. But even then, the provider quality and connection stability matter. This means Telegram accounts cannot be evaluated separately from their environment. A good account with a bad proxy can perform poorly in real work."],
-          ['linkout', { href: '/guides/proxies-for-telegram-accounts', label: 'Full guide: Choosing and connecting proxies' }],
-        ],
-      },
-      {
-        id: 'best-geos',
-        title: 'Which Telegram Account GEOs Are Best to Use?',
-        blocks: [
-          ['p', "It is important to understand that GEO really matters."],
-          ['callout', [
-            "We do not have geo survival data yet, and we are not going to publish a chart we cannot reproduce.",
-            "An earlier version of this page carried a benchmark ranking countries by survival rate. We have removed it. We could not establish where its numbers came from, and our own system does not hold enough per-country history to have produced them. A ranking you cannot check is worth less than no ranking at all, and we would rather lose the chart than have you spend money on it.",
-          ]],
-          ['p', "What we do have is what we are buying ourselves right now, and why."],
-          ['p', "Argentina first, Uzbekistan second, with the proxy in the matching country. That is our judgement, based on price and on how our own purchases have gone so far. It is not a measured survival table, and you should treat it as our opinion until we can show you numbers."],
-          ['callout', [
-            "Day 7: what our own batches did",
-            "We said we would publish this on 11 September, with the sellers named, whatever it said. Here it is, a day late.",
-          ]],
-          ['p', "We tested two Argentine batches bought on the same day from different sellers - AbonTg and theblja - plus an Uzbek batch. Same country for the two Argentine ones, same import day, same proxy setup, same warmup, and no commenting load on any of them."],
-          ['p', "The result that matters: the seller's layover claim predicted nothing. theblja advertised thirty days of rest, and most of that batch was frozen inside the week. AbonTg made no claim we recorded, and almost all of it can still post. The Uzbek batch came through intact. Everything else about the two Argentine batches was the same, so if rest were the variable that mattered, this is the wrong way round."],
-          ['p', "What this does not tell you is whether AbonTg is a good seller. None of these accounts has posted a comment, so what we measured is survival at rest - and a pre-flagged account surfaces when it is used, not while it sits. Surviving a week untouched means not yet disproven, not proven good. The theblja half is the stronger one: those accounts froze having done nothing at all, so they were not worn out by use. They arrived that way."],
-          ['p', "The counts and the method are in the article below, with the sellers named. Day 30 is 3 October for the Uzbek batch and 4 October for both Argentine ones, and both this section and the article are updated on those dates."],
-          ['linkout', { href: '/blog/telegram-account-aging-claims-tested', label: 'The full day-7 numbers, method and caveats' }],
-          ['note', "One correction to this page: we wrote earlier that the Uzbek batch was imported on 4 September. It was imported on 3 September, so its day 30 falls on 3 October rather than the 4th."],
-          ['p', "Until then, the only survival figures worth acting on are the ones you produce yourself: buy five, wait a week, count what is left."],
-          ['callout', [
-            "Survival rate on its own is the wrong number to buy on.",
-            "What you are actually buying is a surviving account, and its price is what the seller charges divided by the share that lives. A geo that survives at 78% and costs four times more per account is the more expensive choice, not the better one.",
-            "That is why Ukraine and Poland are not our recommendation. They do survive well - that part we are not disputing. They also cost around $2 to $2.50 per account, which is several times what Argentine and Uzbek stock costs, for a survival rate that is barely different. The same budget buys you far more working accounts in AR or UZ.",
-          ]],
-          ['p', "The general point outlives the chart we took down. A survival rate is one input and never a buying order on its own, and there are two things it cannot tell you:"],
-          ['bullets', [
-            "What the stock costs. Divide the price by the survival share before you compare anything.",
-            "How long anyone has been watching. Our own Argentine batch was imported on 4 September, so it has no history at all yet - a batch that young cannot have died, whatever its numbers look like today. Ask that question of any survival figure you are shown, ours included.",
-          ]],
-        ],
-      },
-      {
-        id: 'the-checklist',
-        title: 'The Expanded Account Checklist',
-        blocks: [
-          ['p', "Before scaling your operations, run every new batch and seller against this expanded checklist to ensure your marketplace filters are set correctly."],
-          ['figure', {
-            src: '/public/screenshots/buying-telegram-accounts/01.png',
-            w: 814, h: 889,
-            alt: 'Telegram account marketplace filters for TData, GEO and rest time',
-            caption: 'Marketplace filters set to the parameters from the checklist',
-          }],
+          ['p', "Accounts are the one part of the setup you cannot fix later. Buy by the criteria below, test a small batch, and only buy more from a seller whose batch held up."],
           ['checklist', [
             {
               tone: 'ok',
-              title: 'The "Must-Have" Parameters',
+              title: 'Look for',
               items: [
-                ['Format & Ownership:', 'TData format exclusively, with "Not sold before" checked, and no account password set.'],
-                ['GEO Match:', 'The account origin country must perfectly match your proxy location.'],
-                ['Rest Time:', '14 to 30 days of rest time after registration is highly recommended for beginners. 7 days is the absolute minimum, reserved only for experienced users who know how to manage aggressive warmups.'],
-                ['Clean Record:', 'Absolutely no spamblock. A spam-blocked account cannot comment and is dead weight.'],
+                ['tdata format.', 'See the next section for why.'],
+                ['Aging.', 'The longer the accounts rested after registration, the better.'],
+                ['Not sold before.', 'A resold account may still be logged in somewhere else.'],
+                ['No spamblock.', 'An account that is already limited is no use for commenting.'],
+                ['Country you can match.', "You will need a proxy in the same country as the account's phone number."],
+                ['No 2FA password, or the password from the seller.', 'Telegram may ask for the current password when Account Protection creates a new login.'],
               ],
             },
             {
               tone: 'bad',
-              title: 'The "Red Flags" to Avoid',
+              title: 'Avoid',
               items: [
-                ['Instant IP Death:', "If a seller's accounts are frozen or banned the moment they first connect through your proxy, abandon that seller. Read the error first, though: \"the authorization key was used under two different IP addresses\" is not a ban. It means the proxy's exit moved under the session and Telegram revoked that login - fix the proxy's hold time and log the account in again before blaming the seller."],
-                ['0-Day / Fresh Accounts:', 'No rest time equals an instant ban.'],
-                ['"Sold Before" or Password-Protected:', 'Someone else holds the keys to the session or can recover it.'],
+                ['Sellers with many negative reviews.', 'Thresholds are below.'],
+                ['Resold accounts.', 'Someone else may still hold a working login.'],
+                ['Accounts with an unknown 2FA password.', 'You will not be able to secure them.'],
               ],
             },
           ]],
-          ['linkout', { href: '/guides/telegram-session-killed-by-ip-change', label: 'A dead session is not a banned account: how to tell them apart' }],
         ],
       },
       {
-        id: 'future-tools',
-        title: 'Future Tools and Final Expectations',
+        id: 'formats',
+        title: 'tdata or session',
         blocks: [
-          ['p', "In the future, the ability to register accounts directly inside ATREOX will be introduced as a separate Telegram Autoregistrar module. Until then, our team insists that you conduct your own research and develop a solid understanding of which accounts are worth buying and which are not. Without this foundational knowledge, an autoregistrar will not help you anyway. If you decide to purchase a third-party autoregistrar for mass registration in the meantime, we cannot provide any recommendations for those tools. You do so entirely at your own risk."],
-          ['note', "Finally, please keep in mind that these are general recommendations from the ATREOX team. There are no people in this world who drive Telegram traffic without constantly losing accounts. The goal of this guide is not to promise a magical zero-ban workflow, but to help you minimize those losses. By following these steps, you can reduce your ban rate so effectively that losing a few accounts out of a batch of 100 becomes completely unnoticeable to your overall operation."],
+          ['p', "Buy tdata. It is the folder Telegram Desktop keeps for a logged-in account, and it is what ATREOX imports in bulk: one .zip with a folder per account (zips per account inside it are fine), up to 100 accounts per import."],
+          ['p', "A session string can only be added one account at a time (Import accounts → Single import), together with its api_id and api_hash."],
+          ['p', "tdata also lets you log an account in again later. If its session ever dies, Recover from tdata in Account Manager creates a new one. A bare session string cannot be recovered this way."],
+        ],
+      },
+      {
+        id: 'sellers',
+        title: 'Choosing a seller',
+        blocks: [
+          ['p', "Seller ratings on account shops are almost always close to perfect, so ignore the score. Open the seller's profile and count the negative reviews."],
+          ['table', {
+            head: ['Negative reviews', 'Verdict'],
+            rows: [
+              ['Up to 3', 'Ideal'],
+              ['Up to 10', 'OK'],
+              ['Up to 50', 'Acceptable'],
+              ['Over 100', 'Stay away'],
+            ],
+          }],
+          ['p', "Then look at aging. Between two sellers with a similar review count, pick the one whose accounts rested longer. Treat the aging figure as the seller's claim, not a fact: the last section explains why."],
+        ],
+      },
+      {
+        id: 'testing',
+        title: 'Testing a new batch',
+        blocks: [
+          ['p', "Start every new seller with a small batch and give it two weeks before you buy more."],
+          ['steps', [
+            "Import the batch with one proxy per account. Under About this purchase, fill in Seller and Layover (the aging the seller claimed). They can only be recorded at import, and they are how you compare sellers later.",
+            "Select the new accounts and run Checks → Check health and Check capability.",
+            "Week 1: put the accounts in Active Warmup and run the protection steps from the Account Protection guide.",
+            "Week 2: add them to Neurocommenting with a limit of 3 comments per account per day. Raise the limit by 1 every day.",
+            "Compare batches in Account Manager → History: how many are still alive, frozen or unable to post, per seller.",
+          ]],
+          /* SHOT: Account Manager → History tab, the Batches table with two or three demo imports (Seller, Layover, Bought, Alive now, Frozen, Can't post columns). Seller and provider cells must be neutral demo names that do not resemble real shops or proxy providers. */
+          ['note', "The comment limit is a daily limit. It resets at 00:00 UTC, and accounts that reach it resume on their own after that."],
+          ['linkout', { href: '/guides/active-warmup', label: 'Active Warmup' }],
+          ['linkout', { href: '/guides/account-protection', label: 'Account Protection' }],
+        ],
+      },
+      {
+        id: 'aging',
+        title: 'What our aging test showed',
+        blocks: [
+          ['p', "We bought two batches on the same day, from two sellers, and ran them with the same proxy setup and the same warmup. One seller advertised a long aging period; the other claimed none. Within a week most of the long-aging batch was frozen, without having posted a single comment. The other batch held up."],
+          ['bullets', [
+            "A seller's aging claim on its own does not tell you whether the accounts will last.",
+            "Accounts that freeze while doing nothing arrived that way. That is the seller, not your setup.",
+            "Accounts that look fine while resting are not proven good yet. Problems often show up once they start working.",
+            "One bad batch from a usually decent seller looks exactly like a bad seller. Test every batch, not just every new seller.",
+          ]],
+          ['linkout', { href: '/guides/proxies-for-telegram-accounts', label: 'Next: Proxies' }],
         ],
       },
     ],
@@ -575,190 +436,111 @@ const GUIDES = [
     slug: 'proxies',
     url: 'proxies-for-telegram-accounts',
     group: 'setup',
-    title: 'Proxies for Telegram accounts',
-    short: 'One per account, done right',
+    title: 'Proxies',
+    short: 'One per account, sticky, same country',
     summary:
-      'Fifty accounts on one IP look like a farm to Telegram. The right proxy type, a GEO that matches, and a sticky exit that doesn\'t log you out.',
+      'Which proxies to buy for your accounts, and how to add and check them in ATREOX.',
     seoTitle: 'Proxies for Telegram accounts: which type to buy',
     seoDescription:
-      'Fifty accounts on one IP look like a farm. Datacenter, residential or mobile; sticky, never rotating; GEO matching, and a config that works.',
+      'One proxy per account, sticky with a hold time, in the same country as the phone number, mobile preferred. How to add, reassign and check proxies.',
     module: null,
     video: null,
     body: [
       {
-        id: 'why-proxies-matter',
-        title: 'Why Proxies Matter & The Three Core Types',
+        id: 'rules',
+        title: 'The rules',
         blocks: [
-          ['p', "Accounts without proxies are dead accounts before they even begin. If you attempt to connect fifty or a hundred Telegram accounts from a single server or home IP address, Telegram immediately identifies the entire cluster as an automated farm."],
+          ['p', "Every account connects to Telegram through its own proxy. Buy proxies that meet all of these:"],
+          ['kv', [
+            ['One per account', 'Never put two accounts behind one IP. Account Manager warns you when two active accounts share an exit IP.'],
+            ['Sticky, with a hold time', 'The IP must not change while the account is connected. Details below.'],
+            ['Same country', "The proxy must be in the same country as the account's phone number."],
+            ['Mobile preferred', 'Mobile first, residential second, datacenter last. See below.'],
+            ['SOCKS5', 'A proxy line without a type is read as SOCKS5.'],
+          ]],
           ['figure', {
             src: '/public/screenshots/proxies-for-telegram-accounts/connection.png',
             w: 1280, h: 472,
-            alt: 'Diagram showing a Telegram account connecting through a SOCKS5 proxy to the internet and then to the Telegram server',
-            caption: 'One proxy, one account, one path to the Telegram server',
+            alt: 'Diagram: a Telegram account connects through a SOCKS5 proxy to the internet and then to the Telegram server',
+            caption: 'One account, one proxy, one path to Telegram',
           }],
-          ['p', "One flag on a single account will instantly trigger a chain reaction, wiping out every session connected to that same IP address. This guide covers how to choose, buy, and connect the right proxies to ensure maximum account lifespan."],
-          ['p', "Search queries like \"best proxies for Telegram,\" \"Telegram SOCKS5,\" or \"cheap IPv4 for Telegram\" dominate the automation space for a reason. Proper proxy management directly dictates your account lifespan, ban frequency, operation speed, and capacity to scale."],
-          ['figure', {
-            src: '/public/screenshots/proxies-for-telegram-accounts/proxy.jpg',
-            w: 1280, h: 720,
-            alt: 'Three shields representing datacenter, residential and mobile proxies, over an IPv4 SOCKS5 network illustration',
-            caption: 'Datacenter, residential, mobile — three networks, three trust levels',
-          }],
-          ['p', "There are three distinct categories of proxies. Understanding the difference is critical because choosing the wrong network type for your specific task guarantees instant failure."],
-          ['table', {
-            head: ['Type', 'What it is', 'Behavior in Telegram Automation', 'Pros', 'Cons'],
-            rows: [
-              [
-                'Datacenter (IPv4)',
-                'IPs from data centers or hosting servers. Fast, cheap, bought in bulk.',
-                'Good for low-risk tasks and mass scaling. However, aggressive actions (spam patterns, mass logins) trigger limits much faster here.',
-                ['Cheapest option.', 'Stable speed/ping.', 'Easy to scale.'],
-                ['IPs are often "burned" by previous users.', 'Lowest trust level.', 'High risk during heavy automation.'],
-              ],
-              [
-                'Residential',
-                'Real home internet IPs. Looks like a standard user connecting from an apartment.',
-                'Excellent for account warmup, careful activity, and mimicking real human behavior. Long lifespan if limits are respected.',
-                ['High trust score.', 'Great for safe logins.', 'Fewer blocks.'],
-                ['More expensive than Datacenter.', 'Speed can fluctuate.', 'Quality depends on the provider\'s pool.'],
-              ],
-              [
-                'Mobile (4G/5G/LTE)',
-                'Mobile carrier IPs. Shared dynamically among thousands of real cellular users.',
-                'The most "alive" and natural IP possible. Excellent for mimicking mobile app usage, but requires careful GEO management.',
-                ['Maximum natural trust.', 'Highest survival rate.'],
-                ['Most expensive.', 'Unstable ping.', 'Bad IP/Country jumps cause suspicion.'],
-              ],
-            ],
-          }],
-          ['p', "The Practical Logic (Simply Put). Read the Pros and Cons columns as one sum rather than two lists: a proxy that costs twice as much and loses a third as many accounts is the cheaper proxy, and the table cannot show that on its own because it does not know what your accounts cost."],
+        ],
+      },
+      {
+        id: 'types',
+        title: 'Which type',
+        blocks: [
           ['options', [
-            { text: 'Need maximum savings and massive scale? Use Datacenter SOCKS5 (but keep your action tempo very conservative).' },
-            { text: 'Need a "normal user" history and smooth warmup? Use Residential.' },
-            { text: 'Need maximum natural behavior? Use Mobile proxies. They cost the most per line and they keep the most accounts alive, and those two facts have to be divided into each other rather than weighed against each other - what you are buying is a month of one account working, so compare the proxy line plus the account it carries, not the proxy line alone. On our own numbers mobile wins that division for a beginner, which is why we recommend it; if you are running datacenter proxies and losing accounts steadily, run the same division before concluding you are saving anything.', badge: 'Recommended for beginners' },
+            { text: 'Mobile: IPs of mobile carriers, shared with real phone users. The most natural for Telegram, and the most expensive.', badge: 'Preferred' },
+            { text: 'Residential: home internet IPs. Looks like a normal user, costs less than mobile.' },
+            { text: 'Datacenter: server IPs. The cheapest and the least trusted. If you use them, keep activity very conservative.' },
           ]],
+          ['p', "Compare what a working account costs you, not what a proxy costs. A cheaper proxy that loses more accounts is not cheaper."],
         ],
       },
       {
-        id: 'rotation-trap',
-        title: 'The Rotation Trap: Your Exit IP Must Not Change',
+        id: 'sticky',
+        title: 'Sticky, not rotating',
         blocks: [
-          ['p', "Telegram automation fundamentally requires the SOCKS5 protocol for stable, persistent connections. However, how that IP behaves over time introduces significant risks."],
-          ['callout', [
-            "What matters is that the exit IP does not change underneath a logged-in session. Two things give you that: a sticky session, where a rotating pool holds one IP for the length of your session, and a dedicated static IP. Either is fine. What is not fine is timed rotation - an exit that changes every N seconds or minutes regardless of what your account is doing. Providers call the safe option \"sticky\", so that is the word to look for.",
-          ]],
-          ['p', "Timed rotation causes instant account logouts. When the exit IP moves mid-session, Telegram reads it as a hijacked session and forcefully deauthorizes the account. A premium mobile proxy on timed rotation performs worse than a cheap sticky one, because what kills the account is the change itself, not the quality of the address it changes to."],
+          ['p', "A rotating proxy changes its IP on a timer. If that happens while an account is connected, Telegram sees one login used from two addresses, treats it as stolen and ends it. Never use timed rotation."],
+          ['p', "Buy sticky proxies, and set the hold time: how long a sticky session keeps one IP. Providers call it session time, TTL or lifetime. Set the longest your provider allows. Without it the provider's default applies, and it can be short."],
+          ['p', "If a login was already killed this way, the error reads \"The authorization key was used under two different IP addresses simultaneously\". The account is not banned; its session is dead. Fix the proxy first, then log in again with Recover from tdata."],
+          ['linkout', { href: '/guides/account-protection', label: 'Account Protection' }],
         ],
       },
       {
-        id: 'golden-rule-geo',
-        title: 'The Golden Rule: Exact GEO Matching',
+        id: 'adding',
+        title: 'Adding proxies in ATREOX',
         blocks: [
-          ['p', "A critical mistake beginners make is purchasing premium accounts from one region and running them through proxies from another."],
-          ['callout', [
-            "If you purchase Argentine accounts, you must run them exclusively through Argentine mobile proxies. When a Telegram session originally registered on a cellular network in Buenos Aires suddenly authenticates from a server in Frankfurt, the platform detects an anomalous location jump and flags the account instantly. Always align your account GEO and proxy GEO with strict precision.",
-          ]],
-        ],
-      },
-      {
-        id: 'dataimpulse-setup',
-        title: 'Buying Mobile Proxies',
-        blocks: [
-          ['p', "For reliable mobile proxies, the ATREOX team mostly uses DataImpulse. They offer a pay-as-you-go model billed by bandwidth (GB) with clean SOCKS5 outputs. The settings below are named the way DataImpulse names them, but every provider asks the same questions under labels of its own."],
-          ['plink', [
-            "A note on providers. DataImpulse is what we use for most geos, but it does not carry every country - Argentina, currently our first recommendation, is not available there at all. For Argentine proxies we use ",
-            { text: 'FloppyData', href: '/go/floppydata', rel: 'sponsored' },
-            ". That is an affiliate link: we receive a share of what you spend there, and that is not why we name them - it is the provider our own Argentine accounts run through. Check that your provider actually offers the country before you buy the accounts.",
-          ]],
-          ['p', "The exact settings to use when generating your list:"],
-          ['linkout', { href: '/guides/telegram-session-killed-by-ip-change', label: 'Why a missing hold time kills sessions: one case, traced' }],
-          ['callout', [
-            "Type: Sticky. Not rotating.",
-            "This is the most important setting on this page, and an earlier version of this guide got it wrong. A rotating proxy changes its exit IP on a timer, underneath a session that is already logged in. To Telegram that looks like the account moving to a different address mid-session, which is one of the clearest signals it acts on.",
-            "Every proxy the ATREOX team runs is sticky, and every proxy we recommend is sticky. If you are currently running accounts on rotating proxies because of the earlier version of this page, move them to sticky. Any survival results you collected on rotating proxies measured the proxy, not the stock.",
-          ]],
-          /* ADDED 2026-09-14, and it corrects this page rather than extending
-             it. "Sticky" on its own was the whole instruction, and on
-             DataImpulse a sticky PORT without a hold time is exactly the
-             setup whose exit was measured changing carrier inside 23 minutes
-             and whose session Telegram then killed. Following this guide to
-             the letter produced that setup. */
-          ['callout', [
-            "Sticky is not enough on its own: set the hold time.",
-            "On DataImpulse, Sticky gives the account a port that selects a session. How long that session keeps one exit address is set in the login, with sessttl: append ;sessttl.1440 to the login, with a dot, not a dash. Without it the session is held for the provider's default, which is short - we measured one such login move between three addresses on two carriers in 23 minutes, and the account's session died.",
-          ]],
-          ['kv', [
-            ['Type', 'Sticky. Not rotating.'],
-            ['Hold time', 'Append ;sessttl.1440 to the login, e.g. yourlogin__cr.us;sessttl.1440. A dot between sessttl and the number.'],
-            ['Targeting', 'Target Filters, and select the country there. Default targeting means no country selection at all, so it cannot satisfy the matching rule above.'],
-            ['Country', "Must exactly match the account's own country."],
-            ['Protocol', 'SOCKS5. Do not use HTTP or HTTPS.'],
-            ['Format', 'login:password@hostname:port or socks5://user:pass@ip:port'],
-            ['Quantity', 'One proxy line per account. Two accounts behind one exit is a shared-IP signal, and ATREOX now warns you about it in Account Manager.'],
-          ]],
-        ],
-      },
-      {
-        id: 'loading-proxies',
-        title: 'Loading Proxies into ATREOX',
-        blocks: [
-          ['p', "We frequently hear from users who say, \"I bought proxies, they work in my browser, but my Telegram accounts won't connect in ATREOX!\" This is almost always due to incorrect formatting (using HTTP instead of SOCKS5) or dead SOCKS ports."],
-          ['p', "ATREOX simplifies network distribution, ensuring you never accidentally overlap connections."],
-          ['figure', {
-            src: '/public/screenshots/proxies-for-telegram-accounts/reassign.png',
-            w: 678, h: 696,
-            alt: 'ATREOX Reassign Proxies dialog pasting a distinct proxy per account with format detection',
-            caption: 'Reassign Proxies: one distinct proxy per account, or the whole request is rejected',
-          }],
           ['cards', [
             {
-              kicker: '1. Manual Assignment (For Single Accounts)',
+              kicker: 'When you import',
               blocks: [
                 ['steps', [
-                  'Open the Account Manager and click the account\'s row.',
-                  'In the Overview tab, under Proxy, press Edit proxy.',
-                  'Paste your connection string (e.g., ip:port:login:password).',
-                  'Click Save proxy.',
+                  'Account Manager → Import accounts → Bulk import, and upload the zip.',
+                  'Paste the proxies into the Proxies box, one per line, at least as many as there are accounts.',
+                  'Leave Distribute proxies evenly across accounts ticked, and press Import.',
                 ]],
+                ['p', "Lines are handed out in order. If there are fewer lines than accounts, they are reused and some accounts end up sharing an IP."],
               ],
             },
             {
-              kicker: '2. Bulk Reassignment (Proxy Pool)',
+              kicker: 'For accounts you already have',
               blocks: [
-                ['p', "The Proxy Pool feature allows you to automatically distribute a large batch of proxies across hundreds of accounts in just two clicks."],
                 ['steps', [
-                  'Select your target accounts in the dashboard.',
-                  'Press Reassign proxies, top right.',
-                  'Paste your entire list of proxies in bulk.',
+                  'Account Manager → Reassign proxies (top right).',
+                  'Choose Selected accounts or All active accounts. Narrow the list by country if you need to.',
+                  'Paste exactly one line per account: line 1 goes to account 1 in the Pairing order list, line 2 to account 2, and so on.',
+                  'Press Preview pairing, check each account\'s country and new proxy, then Apply.',
                 ]],
-                ['p', "The engine strictly enforces one distinct proxy per account. It never reuses a proxy across two accounts in the same call. Note: If you do not provide enough distinct proxies for your selected target accounts, the engine will reject the whole request to protect your cluster."],
+                ['p', "Apply stays locked if a line does not hold its IP, or if an account would move to another country (unless you confirm it). Accounts connected right now are skipped. Changes take effect on each account's next connect."],
               ],
             },
           ]],
-        ],
-      },
-      {
-        id: 'bandwidth-budgeting',
-        title: 'Bandwidth Consumption and Campaign Budgeting',
-        blocks: [
-          ['p', "Unlike a dedicated static IP that is rented per monthly slot, mobile proxies are usually billed by traffic consumption. If your available data balance hits zero in the middle of an active campaign, your network connection drops and every running account goes dark simultaneously."],
-          ['p', "Rule of thumb: Budget approximately 1 GB of data per 100 accounts per full neuro-commenting session."],
-          ['stat', { value: '1 GB', label: 'per 100 accounts, per session' }],
-          ['p', "Running out of data will not get your accounts banned, but it will instantly freeze your campaign flow until the balance is refilled. Always maintain an adequate traffic buffer."],
-        ],
-      },
-      {
-        id: 'faq',
-        title: 'Frequently Asked Questions (FAQ)',
-        blocks: [
-          ['faq', [
-            { q: 'Which proxies are best for Telegram automation?', a: 'For automation, sticky proxies with anchored IPs are best. They provide predictable account behavior and drastically reduce the risk of the session being deauthorized. Whether they also affect bans is something we have tested and could not show either way.' },
-            { q: 'Why is it important to use a separate proxy for every account?', a: 'Sharing a single proxy across multiple accounts links their network footprint. If one account gets flagged for spam, Telegram will instantly ban all other accounts sharing that identical IP address. The rule is absolute: 1 Account = 1 Proxy.' },
-            { q: 'Can I use rotating proxies for Telegram?', a: "No. What matters is that the exit IP does not change underneath a logged-in session, and timed rotation — an exit that changes every N seconds or minutes regardless of what your account is doing — breaks exactly that: Telegram reads the change as a hijacked session and deauthorizes the account. A sticky session drawn from a rotating pool is fine, because it holds one IP for the length of your session. \"Sticky\" is the word providers use for it, and the one to look for." },
-            { q: 'How do proxies impact account security?', a: 'Proxies are the baseline of your operational security. Unstable, "dirty," or rapidly jumping IP addresses will force Telegram to initiate security checks, apply heavy limits, or permanently ban the session.' },
-            { q: 'How can I minimize ban risks when using proxies?', a: 'Always match the proxy GEO to the account GEO, strictly use SOCKS5 formats, respect action limits, utilize the Active Warmup module to gradually increase account activity, and never skimp on network quality.' },
+          /* SHOT: Account Manager → Reassign proxies dialog after Preview pairing: Pairing order list on the left, proxy lines on the right, and the preview table (Line, Account, Country, New proxy, Exit = held). Demo proxy lines only, no real provider hostnames. */
+          ['p', "For a single account: click its row, and in Overview → Proxy press Edit proxy, paste the line and press Save proxy."],
+          ['p', "Accepted formats (the type is socks5 or http; without one, SOCKS5 is assumed):"],
+          ['bullets', [
+            'type:host:port:user:pass',
+            'host:port:user:pass',
+            'user:pass@host:port',
+            'type://user:pass@host:port',
           ]],
-          ['linkout', { href: '/guides/account-manager', label: 'Next: import the accounts and check they are alive' }],
+        ],
+      },
+      {
+        id: 'checking',
+        title: 'Checking a proxy',
+        blocks: [
+          ['p', "Select accounts and run Checks → Check proxy, or open one account and press Check proxy under Actions. You get a verdict (Works with Telegram, Proxy works, Telegram refused, or No connection to the proxy), the country of the exit IP and the country Telegram sees."],
+          /* SHOT: Account detail → Overview → Actions after Check proxy: the "Works with Telegram" verdict line with latency, exit IP country and "Telegram sees" country. */
+          ['p', "If the two countries differ, Telegram goes by the one it sees. Fix the proxy before the account does any work."],
+          ['p', "Account Manager also shows a warning when accounts sit on a proxy that does not hold its IP, and offers to move them to new proxies."],
+          ['toolcta', {
+            tool: 'proxy-checker',
+            angle: 'Check a proxy before you put an account on it: the free checker says whether it works with Telegram and whether it holds its IP.',
+          }],
+          ['linkout', { href: '/guides/account-manager', label: 'Next: Account Manager' }],
         ],
       },
     ],
