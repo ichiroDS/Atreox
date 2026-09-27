@@ -9,11 +9,10 @@
    filling everything to the right of it. Nothing else — a page you
    came to read is not the place to sell you the next thing.
 
-   The reader builds its body from catalog.jsx. A guide with a `body`
-   there is a written guide and renders section by section; a module
-   guide without one is the module's own write-up, laid out as a lesson,
-   so a guide is never emptier than the Functions page it teaches.
-   Screens drop into the same sections without the layout changing.
+   The reader builds its body from catalog.jsx, section by section.
+   There is no chapter list beside or above the text: the guides are
+   short enough to read top to bottom, and every section heading still
+   carries its id, so a link to /guides/<url>#<section> lands on it.
 
    The page says nothing about which guides have been filmed. A video
    URL in the catalog adds a Watch button; no URL simply means no
@@ -30,9 +29,9 @@ const React = window.React;
 const { useRef, useState, useEffect } = React;
 const {
   motion, useInView,
-  ArrowUpRight, Play, BookOpen, ChevronRight, Shield, Zap, X,
-  PageHero, PageSection, SectionLockup, Pill, CrossLinks, FooterBar,
-  MONO, SERIF, GUIDES, GUIDE_FOLDERS, MODULE_BY_KEY, eur, REDUCED_MOTION,
+  ArrowUpRight, Play, BookOpen, ChevronRight,
+  Pill, CrossLinks, FooterBar, SectionBadge, DecryptText,
+  MONO, SERIF, GUIDES, GUIDE_FOLDERS, MODULE_BY_KEY, REDUCED_MOTION,
   TOOL_BY_ID,
   guideHref, guideFromPath, GUIDE_BY_SLUG, LiteVideo,
 } = window;
@@ -67,8 +66,8 @@ const plainClick = e =>
    sibling for every screenshot at build time, so normally this never
    matters; state (not a DOM patch) is what's used to drop the <source>
    on a failure, because a DOM patch doesn't survive this component's
-   next re-render — GuideReader's scrollspy causes plenty of those, and
-   each one would silently put the failed <source> right back. */
+   next re-render, and each one would silently put the failed <source>
+   right back. */
 function GuideFigure({ v }) {
   const [webpFailed, setWebpFailed] = useState(false);
   return (
@@ -88,93 +87,100 @@ function GuideFigure({ v }) {
 ══════════════════════════════════════════════════════════════════ */
 
 /* One guide, as little as it can say and still be chosen from: the
-   module's own icon, its name, four or five words, and what it costs. */
+   module's icon, the guide's short title and one line of what it is.
+   No chapter count and no price — the index is for choosing what to
+   read, and both were noise there. Small enough that all ten guides fit
+   on one desktop screen. */
 function GuideTile({ guide, index, inView, onOpen }) {
   const mod = guide.module ? MODULE_BY_KEY[guide.module] : null;
   const Icon = mod ? mod.icon : BookOpen;
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay: Math.min(index, 7) * 0.06 }}
+      initial={{ opacity: 0, y: 14 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.4, delay: Math.min(index, 9) * 0.04 }}
       className="guide-tile-wrap">
       <a href={guideHref(guide)}
         onClick={e => { if (plainClick(e)) { e.preventDefault(); onOpen(guide.slug); } }}
         className="panel panel-hover ticks guide-tile"
         style={{
-          width: '100%', textAlign: 'left', padding: '24px 22px 20px',
-          display: 'flex', flexDirection: 'column', gap: 14, background: 'transparent',
+          width: '100%', textAlign: 'left', padding: '14px 15px',
+          display: 'flex', alignItems: 'flex-start', gap: 11, background: 'transparent',
           textDecoration: 'none', color: 'inherit', cursor: 'pointer',
         }}>
         <span aria-hidden="true" className="guide-tile-chip" style={{
-          width: 44, height: 44, borderRadius: 6,
+          width: 32, height: 32, borderRadius: 5, flexShrink: 0,
           background: `rgba(${GREEN_RGB},0.09)`, border: `1px solid rgba(${GREEN_RGB},0.26)`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: `0 0 22px rgba(${GREEN_RGB},0.12)`,
         }}>
-          <Icon size={20} color={GREEN} />
+          <Icon size={15} color={GREEN} />
         </span>
-
-        <span style={{ display: 'block' }}>
-          <span style={{ display: 'block', fontFamily: SERIF, fontWeight: 500, fontSize: '1.22rem', color: 'white', lineHeight: 1.25, letterSpacing: '-0.01em', marginBottom: 7 }}>
-            {guide.title}
+        <span style={{ display: 'block', flex: 1, minWidth: 0 }}>
+          <span style={{ display: 'block', fontFamily: SERIF, fontWeight: 500, fontSize: '1.02rem', color: 'white', lineHeight: 1.25, letterSpacing: '-0.005em', marginBottom: 4 }}>
+            {guide.navTitle || guide.title}
           </span>
-          <span style={{ display: 'block', fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>
+          <span style={{ display: 'block', fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.4 }}>
             {guide.short}
           </span>
-        </span>
-
-        <span style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 'auto', paddingTop: 4 }}>
-          <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.42)' }}>
-            {(guide.body || guide.covers).length} chapters
-          </span>
-          {mod && (
-            <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: mod.included ? 'rgba(255,255,255,0.42)' : `rgba(${GREEN_RGB},0.8)` }}>
-              · {mod.included ? 'included' : eur(mod.price) + '/mo'}
-            </span>
-          )}
-          <ArrowUpRight size={15} color={GREEN} style={{ marginLeft: 'auto' }} />
         </span>
       </a>
     </motion.div>
   );
 }
 
-function GuideWall({ guides, offset, onOpen, fill }) {
+/* One folder: a small heading and its guides. auto-fill, not auto-fit,
+   so a folder of two keeps card-sized cards instead of two banners, and
+   the cards line up in the same columns from one folder to the next. */
+function GuideGroup({ group, offset, onOpen }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, amount: 0.03 });
+  const inView = useInView(ref, { once: true, amount: 0.05 });
   return (
-    /* auto-fill for the pair at the top, so two cards stay card-sized
-       instead of stretching to half the page and reading as banners */
-    <div ref={ref} style={{ display: 'grid', gridTemplateColumns: `repeat(${fill ? 'auto-fill' : 'auto-fit'}, minmax(min(250px, 100%), 1fr))`, gap: 18 }}>
-      {guides.map((g, i) => (
-        <GuideTile key={g.slug} guide={g} index={offset + i} inView={inView} onOpen={onOpen} />
-      ))}
-    </div>
+    <section ref={ref} style={{ marginTop: offset ? 26 : 0 }}>
+      <h2 style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, fontFamily: MONO, fontWeight: 500, fontSize: '0.66rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'white' }}>
+        <span aria-hidden="true" style={{ color: GREEN }}>{'//'}</span>
+        {group.title}
+        <span aria-hidden="true" className="section-rule" style={{ flex: '1 1 24px', minWidth: 24 }} />
+      </h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(208px, 100%), 1fr))', gap: 10 }}>
+        {group.guides.map((g, i) => (
+          <GuideTile key={g.slug} guide={g} index={offset + i} inView={inView} onOpen={onOpen} />
+        ))}
+      </div>
+    </section>
   );
 }
 
 /* The index's own words at module scope, so scripts/prerender.mjs can
-   put them in the HTML a crawler downloads. Every guide already has a
-   prerendered page of its own; /guides is the hub that links them, and
-   it was shipping an empty body. */
+   put them in the HTML a crawler downloads. */
 const HERO = {
   badge: 'Guides',
   title: 'Learn it once, then run it.',
-  sub: 'Start with the essentials, protect your accounts, then open the guide for the module you want to run.',
+  sub: 'Start with accounts and proxies, protect them, then open the guide for the module you run.',
 };
 
 const GROUPS = GUIDE_FOLDERS;
 
+/* A shorter head than PageHero's: the page is a list to choose from, and
+   PageHero's 170px + 84px of padding alone would push the last folder
+   below the fold. */
 function GuideIndex({ onOpen }) {
   return (
     <div>
-      <PageHero {...HERO} />
-      {GROUPS.map((group, index) => (
-        <PageSection key={group.id} style={{ paddingTop: index ? 0 : undefined, paddingBottom: 30 }}>
-          <SectionLockup title={group.title}>{group.lede}</SectionLockup>
-          <GuideWall guides={group.guides} offset={GROUPS.slice(0, index).reduce((n, f) => n + f.guides.length, 0)} onOpen={onOpen} fill />
-        </PageSection>
-      ))}
+      <header style={{ padding: '132px 5% 34px', textAlign: 'center' }}>
+        <SectionBadge>{HERO.badge}</SectionBadge>
+        <h1 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(2rem, 3.4vw, 2.8rem)', color: 'white', lineHeight: 1.1, letterSpacing: '-0.015em', margin: '18px 0 12px' }}>
+          <DecryptText text={HERO.title} />
+        </h1>
+        <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1rem', color: 'rgba(255,255,255,0.66)', maxWidth: 600, margin: '0 auto', lineHeight: 1.6, textWrap: 'balance' }}>
+          {HERO.sub}
+        </p>
+      </header>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 5% 64px' }}>
+        {GROUPS.map((group, index) => (
+          <GuideGroup key={group.id} group={group}
+            offset={GROUPS.slice(0, index).reduce((n, f) => n + f.guides.length, 0)}
+            onOpen={onOpen} />
+        ))}
+      </div>
     </div>
   );
 }
@@ -218,27 +224,6 @@ const readerProse = {
   fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '1.2rem',
   color: '#fff', lineHeight: 1.8, maxWidth: COLUMN,
 };
-
-/* A numbered step with the rail that makes a list read as a sequence. */
-function ReaderStep({ n, title, body, last }) {
-  return (
-    <div style={{ display: 'flex', gap: 16, paddingBottom: last ? 0 : 20 }}>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
-        <span style={{
-          width: 28, height: 28, borderRadius: 3, flexShrink: 0,
-          border: `1px solid rgba(${GREEN_RGB},0.34)`, background: `rgba(${GREEN_RGB},0.07)`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: MONO, fontWeight: 600, fontSize: '0.62rem', color: GREEN, lineHeight: 1,
-        }}>{String(n).padStart(2, '0')}</span>
-        {!last && <span aria-hidden="true" style={{ flex: 1, width: 1, marginTop: 6, background: `linear-gradient(180deg, rgba(${GREEN_RGB},0.3), rgba(${GREEN_RGB},0.05))` }} />}
-      </div>
-      <div style={{ minWidth: 0, paddingTop: 4 }}>
-        <h3 style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.72rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'white', marginBottom: 8 }}>{title}</h3>
-        <p style={{ ...readerProse, fontSize: '0.94rem', lineHeight: 1.75 }}>{body}</p>
-      </div>
-    </div>
-  );
-}
 
 /* One control, drawn to look like the panel's own. Deliberately inert:
    no state, no handlers, no value that can change — a switch is drawn
@@ -682,26 +667,10 @@ function ReaderNav({ slug, onOpen, compact }) {
   return <nav aria-label="Guides" className="guide-nav-folders is-desktop">{list}</nav>;
 }
 
-/* The chapter list, as links — shared between the sticky sidebar (wide
-   viewports) and the inline panel (compact ones, and the fallback for a
-   module guide with no `body`). `activeId` is only ever set on the
-   sidebar; passing it to the inline panel too costs nothing and keeps
-   the two in sync if a resize swaps one for the other mid-scroll. */
-function ChapterNav({ sections, activeId }) {
-  return sections.map((s, i) => (
-    <a key={s.id} href={'#' + s.id} aria-current={s.id === activeId ? 'true' : undefined}>
-      <span className="g-toc-n">{String(i + 1).padStart(2, '0')}</span>
-      <span className="g-toc-t">{s.title}</span>
-    </a>
-  ));
-}
-
 function GuideReader({ slug, onOpen, onClose }) {
   const guide = GUIDES.find(g => g.slug === slug) || GUIDES[0];
   const mod = guide.module ? MODULE_BY_KEY[guide.module] : null;
   const [compact, setCompact] = useState(window.innerWidth < 1040);
-  const [activeId, setActiveId] = useState(null);
-  const articleRef = useRef(null);
 
   useEffect(() => {
     const onResize = () => setCompact(window.innerWidth < 1040);
@@ -709,33 +678,14 @@ function GuideReader({ slug, onOpen, onClose }) {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  /* Which chapter is "active": the one whose heading is nearest the top
-     of a band just under the sticky nav, so the sidebar tracks the
-     section you're actually reading rather than the one that merely
-     touched the viewport in passing.
-     The sections are looked up inside this article, not by bare id:
-     on first load the prerendered copy of the guide (#prerendered, same
-     ids on its headings) is still in the document when this effect
-     runs - App removes it in its own effect, which React runs after
-     ours - so getElementById handed back the prerendered headings, the
-     observer watched nodes that were gone a moment later, and the
-     chapter list never lit up. */
-  useEffect(() => {
-    if (!guide.body || !articleRef.current) return;
-    const els = guide.body.map(s => articleRef.current.querySelector('#' + CSS.escape(s.id))).filter(Boolean);
-    if (!els.length) return;
-    const obs = new IntersectionObserver(entries => {
-      const visible = entries.filter(e => e.isIntersecting)
-        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-      if (visible.length) setActiveId(visible[0].target.id);
-    }, { rootMargin: '-100px 0px -70% 0px', threshold: 0 });
-    els.forEach(el => obs.observe(el));
-    return () => obs.disconnect();
-  }, [guide.slug]);
-
   return (
     <div style={{ paddingTop: 128, paddingBottom: 88 }}>
-      <div style={{ maxWidth: 1760, margin: '0 auto', padding: '0 6%' }}>
+      {/* One centred group, rail + article, at the same 1280 cap as every
+          other page. There used to be a chapter sidebar on the right as
+          well; with it gone the article sits beside the rail instead of
+          floating in the middle of a 1760px row with empty space on both
+          sides. The article itself keeps the reading measure (COLUMN). */}
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 5%' }}>
 
         <a href="/guides" onClick={e => { if (plainClick(e)) { e.preventDefault(); onClose(); } }}
           className="quiet-link quiet-link-dim" style={{ marginBottom: 26 }}>
@@ -743,28 +693,21 @@ function GuideReader({ slug, onOpen, onClose }) {
           All guides
         </a>
 
-        <div style={{ display: 'flex', gap: 30, alignItems: 'flex-start', flexWrap: compact ? 'wrap' : 'nowrap' }}>
+        <div style={{ display: 'flex', gap: compact ? 30 : 48, alignItems: 'flex-start', justifyContent: 'center', flexWrap: compact ? 'wrap' : 'nowrap' }}>
 
           {/* left rail — no wrapping div around it: sticky's containing
               block is its own parent, and a wrapper sized to fit only
               the nav (its one child) gives the nav nowhere to travel
-              before it has to stick. Direct flex-item, same as the
-              chapter sidebar on the right, whose sticking this same way
-              already worked. */}
+              before it has to stick. */}
           <ReaderNav slug={guide.slug} onOpen={onOpen} compact={compact} />
 
           {/* the guide */}
           {/* the id is what a link from Functions lands on; the margin
               leaves the way back out of the guide above the fold */}
-          {/* With no rail on the right, the freed width goes to the
-              guide — but to the guide's furniture (screens, tables, the
-              checklist), not to its sentences: prose inside stays capped
-              at COLUMN so a line never runs longer than the eye tracks.
-              The auto side margins matter on a guide with no chapter
-              sidebar (below): capped at READER_MAX with nothing beside
-              it, the column would otherwise hug the left rail and leave
-              the rest of the row empty on one side. */}
-          <article ref={articleRef} id={'guide-' + guide.slug} style={{ flex: '1 1 420px', minWidth: 0, maxWidth: READER_MAX, margin: '0 auto', scrollMarginTop: 150 }}>
+          {/* Capped at READER_MAX so a line never runs longer than the
+              eye tracks; on compact widths, where the rail is a picker
+              above it, the auto margins centre it. */}
+          <article id={'guide-' + guide.slug} style={{ flex: '1 1 420px', minWidth: 0, maxWidth: READER_MAX, margin: compact ? '0 auto' : 0, scrollMarginTop: 150 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18, flexWrap: 'wrap' }}>
               <Pill dot>{mod ? mod.tagline : 'Preparation'}</Pill>
               {guide.video && (
@@ -781,33 +724,24 @@ function GuideReader({ slug, onOpen, onClose }) {
               {guide.summary}
             </p>
 
-            {/* chapters — the map of the page, and the slots screens land in.
-                A written guide's own chapter list lives in the sticky
-                sidebar once there is room for one (below); here it only
-                falls back inline when that sidebar isn't showing —
-                compact widths, or a module guide with no `body` at all,
-                which still gets its plain "what this covers" list. */}
-            {(compact || !guide.body) && <ReaderHeading>In this guide</ReaderHeading>}
-            {guide.body ? (
-              compact && (
-                /* A written guide's chapters are its own sections, so the
-                   list is also the way into them — real hrefs, so a copied
-                   link lands on the section and not just on the page. */
-                <div className="panel g-toc" style={{ padding: '16px 18px' }}>
-                  <ChapterNav sections={guide.body} activeId={activeId} />
+            {/* No chapter list, at any width: the section headings carry
+                their ids (below), so a copied #anchor still lands on its
+                section. A module guide with no `body` yet still lists what
+                it covers, since that list is its only outline. */}
+            {!guide.body && guide.covers && (
+              <>
+                <ReaderHeading>In this guide</ReaderHeading>
+                <div className="panel" style={{ maxWidth: COLUMN, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {guide.covers.map((c, i) => (
+                    <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                      <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', color: `rgba(${GREEN_RGB},0.6)`, marginTop: 4, flexShrink: 0 }}>
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: '#fff', lineHeight: 1.6 }}>{c}</span>
+                    </div>
+                  ))}
                 </div>
-              )
-            ) : (
-              <div className="panel" style={{ maxWidth: COLUMN, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {guide.covers.map((c, i) => (
-                  <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                    <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', color: `rgba(${GREEN_RGB},0.6)`, marginTop: 4, flexShrink: 0 }}>
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-                    <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.95rem', color: '#fff', lineHeight: 1.6 }}>{c}</span>
-                  </div>
-                ))}
-              </div>
+              </>
             )}
 
             {guide.body && guide.body.map((s, i) => (
@@ -824,48 +758,6 @@ function GuideReader({ slug, onOpen, onClose }) {
               </>
             )}
 
-            {/* The module's catalog write-up, laid out as a lesson —
-                the fallback for a module guide that has not been written
-                out properly yet. A `body` supersedes it entirely; showing
-                both would say the same thing twice, in less detail the
-                second time. */}
-            {mod && !guide.body && (
-              <>
-                <ReaderHeading>Why it matters</ReaderHeading>
-                <p style={readerProse}>{mod.problem}</p>
-
-                <ReaderHeading>What the module does</ReaderHeading>
-                <p style={readerProse}>{mod.does}</p>
-
-                <ReaderHeading>Step by step</ReaderHeading>
-                <div>
-                  {mod.steps.map(([t, b], i) => (
-                    <ReaderStep key={t} n={i + 1} title={t} body={b} last={i === mod.steps.length - 1} />
-                  ))}
-                </div>
-
-                <ReaderHeading>What you can change</ReaderHeading>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(250px, 100%), 1fr))', gap: 12 }}>
-                  {mod.config.map(([t, b]) => (
-                    <div key={t} className="panel" style={{ padding: '16px 18px' }}>
-                      <span style={{ display: 'block', fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', letterSpacing: '0.13em', textTransform: 'uppercase', color: GREEN, marginBottom: 8 }}>{t}</span>
-                      <span style={{ display: 'block', fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: '#fff', lineHeight: 1.65 }}>{b}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {mod.guard && (
-                  <>
-                    <ReaderHeading>Read this before you turn it up</ReaderHeading>
-                    <div className="panel" style={{ maxWidth: COLUMN, padding: '20px 22px', display: 'flex', gap: 14, alignItems: 'flex-start', borderColor: `rgba(${GREEN_RGB},0.3)` }}>
-                      <Shield size={17} color={GREEN} style={{ marginTop: 3, flexShrink: 0 }} />
-                      <p style={{ ...readerProse, fontSize: '0.94rem', lineHeight: 1.75, margin: 0 }}>{mod.guard}</p>
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-
             <div style={{ marginTop: 44, paddingTop: 22, borderTop: `1px solid rgba(${GREEN_RGB},0.14)`, display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'center' }}>
               <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.92rem', color: 'rgba(255,255,255,0.55)' }}>
                 Something here not clear enough?
@@ -876,21 +768,6 @@ function GuideReader({ slug, onOpen, onClose }) {
             </div>
           </article>
 
-          {/* chapter sidebar: a third rail, sticky the same way the left
-              one is — a sibling in this same flex row, so it can stay
-              pinned for as long as the row (i.e. the article) is tall,
-              not just for the height of whatever block it started next
-              to. Only for a written guide, and only once there's room
-              beside the text rather than under it. */}
-          {guide.body && !compact && (
-            <nav aria-label="Chapters" className="panel g-toc g-toc-side"
-              style={{ flex: '0 0 220px', minWidth: 0, position: 'sticky', top: 92, padding: 12 }}>
-              <span className="g-toc-over">
-                In this guide
-              </span>
-              <ChapterNav sections={guide.body} activeId={activeId} />
-            </nav>
-          )}
         </div>
       </div>
     </div>
@@ -937,14 +814,7 @@ function GuidesPage({ setPage }) {
   );
 }
 
-/* ReaderBlocks and ChapterNav are exported, not moved.
-   blog.jsx renders the same block kinds and the same contents rail, and
-   the cheapest way to guarantee it renders them IDENTICALLY is for it
-   to use the same function object rather than a copy in a shared file.
-   Moving them would read tidier and would produce a diff that nothing
-   can verify behaviourally - the prerendered HTML this repo does check
-   comes from prerender.mjs, not from these components. */
-Object.assign(window, { GuidesPage, ReaderBlocks, ChapterNav, ReaderHeading });
+Object.assign(window, { GuidesPage, ReaderBlocks, ReaderHeading });
 
 /* ── The same words, as data, for scripts/prerender.mjs ───────────
    The guide list comes from GUIDES in catalog.jsx, and every address
@@ -957,14 +827,9 @@ Object.assign(window, { GuidesPage, ReaderBlocks, ChapterNav, ReaderHeading });
   lead: HERO.sub,
   sections: GROUPS.map((g) => ({
     title: g.title,
-    blocks: [
-      ['p', g.lede],
-      ...g.guides.flatMap((x) => [
-        ['card', { kicker: x.short, blocks: [
-          ['p', x.summary],
-          ['linkout', { href: guideHref(x), label: x.title }],
-        ] }],
-      ]),
-    ],
+    blocks: g.guides.map((x) => ['card', { kicker: x.short, blocks: [
+      ['p', x.summary],
+      ['linkout', { href: guideHref(x), label: x.navTitle || x.title }],
+    ] }]),
   })),
 };

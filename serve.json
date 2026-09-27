@@ -47,13 +47,53 @@
   ],
   "redirects": [
     {
+      "source": "/guides/billing",
+      "destination": "/pricing",
+      "type": 301
+    },
+    {
+      "source": "/guides/billing.html",
+      "destination": "/pricing",
+      "type": 301
+    },
+    {
+      "source": "/guides/spamblock-frozen-shadowban",
+      "destination": "/guides/account-manager#spamblock-frozen-shadowban",
+      "type": 301
+    },
+    {
+      "source": "/guides/spamblock-frozen-shadowban.html",
+      "destination": "/guides/account-manager#spamblock-frozen-shadowban",
+      "type": 301
+    },
+    {
+      "source": "/guides/profile-templates",
+      "destination": "/guides/account-manager#profile-templates",
+      "type": 301
+    },
+    {
+      "source": "/guides/profile-templates.html",
+      "destination": "/guides/account-manager#profile-templates",
+      "type": 301
+    },
+    {
+      "source": "/guides/telegram-session-killed-by-ip-change",
+      "destination": "/guides/account-protection#session-killed-by-ip",
+      "type": 301
+    },
+    {
+      "source": "/guides/telegram-session-killed-by-ip-change.html",
+      "destination": "/guides/account-protection#session-killed-by-ip",
+      "type": 301
+    },
+    {
       "source": "/blog/telegram-session-killed-by-ip-change",
-      "destination": "/guides/telegram-session-killed-by-ip-change",
+      "destination": "/guides/account-protection#session-killed-by-ip",
       "type": 301
     },
     {
       "source": "/blog/telegram-session-killed-by-ip-change.html",
-      "destination": "/guides/telegram-session-killed-by-ip-change",
+      "destination": "/guides/account-protection#session-killed-by-ip",
       "type": 301
     },
     {

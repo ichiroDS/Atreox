@@ -758,9 +758,9 @@ function Pill({ children, dot, muted }) {
    between them never costs a trip back to the navbar. ─── */
 const CROSS_DESTS = {
   functions: { label: 'Functions', head: 'What each module does',
-    body: 'Eight modules, one section each — the problem it solves, how it runs, and every setting you get.' },
+    body: 'Every module and free tool in a few lines: what it is for and what you can do with it.' },
   guides:    { label: 'Guides',    head: 'How to set it up',
-    body: 'Buying accounts, wiring proxies, and a walkthrough per module — video guides as they are recorded.' },
+    body: 'Buying accounts, proxies, protecting your accounts, and a short guide per module.' },
   pricing:   { label: 'Pricing',   head: 'What it costs',
     body: 'Take the modules you need or the whole licence. Account Manager and Profile Templates come with either.' },
 };

@@ -207,7 +207,6 @@ const esc = s => String(s)
    before React takes over don't look broken. */
 const P = 'font-family:Barlow,sans-serif;font-weight:300;font-size:1rem;line-height:1.8;color:rgba(255,255,255,0.72);margin:0 0 14px';
 const H2 = "font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px";
-const H3 = "font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:#fff;margin:0 0 6px";
 
 const section = (title, inner) => `<h2 style="${H2}">${esc(title)}</h2>\n${inner}`;
 
@@ -377,15 +376,14 @@ function renderGuide(guide, guides, mod) {
   parts.push(`<h1 style="font-family:'Playfair Display',Georgia,serif;font-weight:500;font-size:2.6rem;line-height:1.1;letter-spacing:-0.015em;color:#fff;margin:0 0 18px">${esc(guide.title)}</h1>`);
   parts.push(`<p style="${P};font-size:1.05rem;color:rgba(255,255,255,0.78)">${esc(guide.summary)}</p>`);
 
-  /* The chapter list is the guide's own sections when it has a body,
-     and the anchors are real: a search result deep-linking to one
-     lands on it before a line of JavaScript has run. */
-  parts.push(section('In this guide', guide.body
-    ? `<div class="g-toc panel" style="padding:16px 18px">${guide.body
-        .map((s, i) => `<a href="#${esc(s.id)}"><span class="g-toc-n">${String(i + 1).padStart(2, '0')}</span><span class="g-toc-t">${esc(s.title)}</span></a>`)
-        .join('')}</div>`
-    : `<ol style="margin:0 0 8px 1.15rem;padding:0">${guide.covers
-        .map(c => `<li style="${P};margin-bottom:8px">${esc(c)}</li>`).join('')}</ol>`));
+  /* No chapter list - the reader dropped it (2026-09-27), and this is
+     the same page. The section headings keep their ids, so a search
+     result deep-linking to one still lands on it. A guide with no body
+     yet lists what it covers, as the reader does. */
+  if (!guide.body && guide.covers) {
+    parts.push(section('In this guide', `<ol style="margin:0 0 8px 1.15rem;padding:0">${guide.covers
+      .map(c => `<li style="${P};margin-bottom:8px">${esc(c)}</li>`).join('')}</ol>`));
+  }
 
   /* A written guide carries its own text, section by section. */
   if (guide.body) {
@@ -394,25 +392,8 @@ function renderGuide(guide, guides, mod) {
     }
   }
 
-  /* A prep guide carries its own opening paragraph; a module guide is
-     its module's write-up, laid out as a lesson — same as the reader. */
+  /* A prep guide may carry its own opening paragraph - same as the reader. */
   if (guide.intro) parts.push(section('Why it matters', `<p style="${P}">${esc(guide.intro)}</p>`));
-
-  /* Superseded the moment the guide has a body of its own — same rule
-     as the reader, so the two never disagree about what a page holds. */
-  if (mod && !guide.body) {
-    parts.push(section('Why it matters', `<p style="${P}">${esc(mod.problem)}</p>`));
-    parts.push(section('What the module does', `<p style="${P}">${esc(mod.does)}</p>`));
-    parts.push(section('Step by step',
-      `<ol style="margin:0 0 8px 1.15rem;padding:0">${mod.steps
-        .map(([t, b]) => `<li style="margin-bottom:16px"><h3 style="${H3}">${esc(t)}</h3><p style="${P};font-size:0.94rem;margin:0">${esc(b)}</p></li>`)
-        .join('')}</ol>`));
-    parts.push(section('What you can change',
-      `<dl style="margin:0">${mod.config
-        .map(([t, b]) => `<dt style="${H3};color:#00d9ff;margin-top:14px">${esc(t)}</dt><dd style="${P};font-size:0.9rem;margin:0 0 4px">${esc(b)}</dd>`)
-        .join('')}</dl>`));
-    if (mod.guard) parts.push(section('Read this before you turn it up', `<p style="${P};font-size:0.94rem">${esc(mod.guard)}</p>`));
-  }
 
   /* Every other guide, as links. The reader shows this rail too; here
      it is also how a crawler gets from any one guide to the other nine. */
@@ -626,7 +607,7 @@ const SITE_PAGES = [
     title: 'Guides: Buying Telegram Accounts, Proxies, Warmup | ATREOX',
     heading: 'Guides',
     short: 'Ten walkthroughs, end to end',
-    desc: 'How to buy Telegram accounts that survive and set proxies up so they are not flagged. Plus what our own purchases did, including results that went against us.',
+    desc: 'Short, practical guides: buying Telegram accounts, proxies, protecting and warming up accounts, and running every ATREOX module step by step.',
   },
   {
     file: 'contact.html', route: '/contact', kicker: 'CONTACT',
@@ -984,7 +965,21 @@ let shell = read('index.html');
 if (!SLUG_MAP_RE.test(shell)) {
   throw new Error('index.html has no SLUG-MAP markers — the legacy #guide- redirect would go stale');
 }
-const slugMap = JSON.stringify(Object.fromEntries(GUIDES.map(g => [g.slug, g.path || g.url])));
+/* Retired guides are in the map too, pointing where vercel.json's 301
+   sends their page: an old /guides#guide-billing link should land where
+   /guides/billing does, not on the index. Read from vercel.json so the
+   two can never disagree. A live guide wins over a redirect of the same
+   name. */
+const RETIRED_GUIDES = Object.fromEntries(
+  (JSON.parse(read('vercel.json')).redirects || [])
+    .map(r => [/^\/guides\/([a-z0-9-]+)$/.exec(r.source), r.destination])
+    .filter(([m, dest]) => m && typeof dest === 'string' && dest.startsWith('/'))
+    .map(([m, dest]) => [m[1], dest]),
+);
+const slugMap = JSON.stringify({
+  ...RETIRED_GUIDES,
+  ...Object.fromEntries(GUIDES.map(g => [g.slug, g.path || g.url])),
+});
 shell = shell.replace(SLUG_MAP_RE, () => `/* SLUG-MAP */${slugMap}/* /SLUG-MAP */`);
 
 /* THE SAME TRAP AS THE JSON-LD ABOVE, one level down. index.html is both
