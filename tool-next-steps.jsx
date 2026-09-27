@@ -47,7 +47,7 @@ const TOOL_NEXT_STEPS = {
       title: 'It connects, but it does not hold its exit address',
       means: 'This proxy passed, and it can still move to a different exit while an account is connected. Telegram reads an address that changes under a live session as a stolen session key and revokes that login. This alone does not ban the account, but that login is gone and has to be redone - and most tools show the account as dead.',
       doing: [
-        'On DataImpulse, keep the sticky port and add a hold time to the login: yourlogin__cr.us;sessttl.1440, with a dot.',
+        'In your provider\'s panel, keep the sticky port and set the longest hold time (session TTL) it allows.',
         'On other providers, ask for a sticky session that holds one exit for the length of the session, not a country-only login.',
         'Re-check the new login here before connecting an account through it.',
       ],
@@ -81,7 +81,7 @@ const TOOL_NEXT_STEPS = {
         'Do not move it to a different proxy hoping it recovers.',
       ],
       links: [
-        { href: '/blog/telegram-account-aging-claims-tested', label: 'What a frozen batch looked like in our own test' },
+        { href: '/guides/buying-telegram-accounts#aging', label: 'What a frozen batch looked like in our own test' },
         { href: '/guides/buying-telegram-accounts', label: 'Guide: buying Telegram accounts' },
       ],
     },

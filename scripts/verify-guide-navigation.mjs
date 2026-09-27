@@ -30,7 +30,7 @@ for (const folder of box.GUIDE_FOLDERS) {
 const urls = box.GUIDE_FOLDERS.flatMap(f => f.guides.map(g => g.url));
 assert.equal(urls.length, new Set(urls).size, 'Folders do not repeat guides');
 const research = box.GUIDES.filter(g => g.group === 'research');
-assert.deepEqual(Array.from(research, g => g.url), ['telegram-account-aging-claims-tested'], 'only the aging article remains as research');
+assert.deepEqual(Array.from(research, g => g.url), [], 'no research articles remain (the aging article was retired)');
 assert.deepEqual(
   Array.from(box.GUIDES.filter(g => g.group !== 'research'), g => g.url).sort(),
   [...urls].sort(),
@@ -62,11 +62,10 @@ for (const r of redirects) {
   assert.ok(!sources.has(r.destination.replace(/#.*$/, '')), `${r.source} -> ${r.destination} is a redirect chain`);
 }
 
-/* The preserved article keeps its public address and does not redirect. */
-const aging = box.GUIDE_BY_URL['telegram-account-aging-claims-tested'];
-assert.equal(box.guideHref(aging), '/blog/telegram-account-aging-claims-tested', 'The aging article keeps its public address');
-assert.equal(box.guideFromPath('/blog/telegram-account-aging-claims-tested')?.slug, aging.slug);
-assert.ok(!redirects.some(r => r.source === box.guideHref(aging)), 'The preserved article must not redirect');
+/* The retired aging article 301s to the Buying guide's #aging section. */
+for (const src of ['/blog/telegram-account-aging-claims-tested', '/blog/telegram-account-aging-claims-tested.html']) {
+  assert.ok(redirects.some(r => r.source === src && r.destination === '/guides/buying-telegram-accounts#aging'), `${src} redirects to #aging`);
+}
 
 /* Profile Templates has no guide of its own; its module links into Account Manager. */
 assert.equal(box.moduleGuideHref(box.MODULE_BY_KEY['profile-templates']), '/guides/account-manager#profile-templates');

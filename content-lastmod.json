@@ -48,19 +48,19 @@
     "date": "2026-09-24"
   },
   "guide:buying-telegram-accounts": {
-    "hash": "9a4f4ed4088ac1ca",
+    "hash": "01b118ac2e102853",
     "date": "2026-09-27"
   },
   "guide:proxies-for-telegram-accounts": {
-    "hash": "e4f19a2214e141df",
+    "hash": "eea798bd040df887",
     "date": "2026-09-27"
   },
   "guide:account-manager": {
-    "hash": "c1c918a255fd5d8a",
+    "hash": "3cdf232f4a33957c",
     "date": "2026-09-27"
   },
   "guide:account-protection": {
-    "hash": "826dc614c0f67bb0",
+    "hash": "fad02eb1988736d7",
     "date": "2026-09-27"
   },
   "guide:active-warmup": {
@@ -85,10 +85,6 @@
   },
   "guide:mass-reactions": {
     "hash": "eb72bed4f987de46",
-    "date": "2026-09-27"
-  },
-  "guide:telegram-account-aging-claims-tested": {
-    "hash": "c030e318127fd5fd",
     "date": "2026-09-27"
   }
 }

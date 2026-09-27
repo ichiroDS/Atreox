@@ -599,7 +599,7 @@ function ProxyBatchWidget() {
             rows={4}
             spellCheck={false}
             autoComplete="off"
-            placeholder={['gw.dataimpulse.com:10000:user:pass', 'socks5://user:pass@1.2.3.4:1080', '1.2.3.4:8080'].join(String.fromCharCode(10))}
+            placeholder={['proxy.example.com:10000:user:pass', 'socks5://user:pass@1.2.3.4:1080', '1.2.3.4:8080'].join(String.fromCharCode(10))}
             style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6, fontFamily: MONO, minHeight: 96 }}
           />
         </Field>
