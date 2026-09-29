@@ -87,14 +87,17 @@ const YouTubeIcon = _brandIcon(
 /* Where to follow ATREOX. One list, used by the navbar, the footer and
    the home block, so a changed URL is changed once.
 
-   THE TELEGRAM ENTRY IS GONE, not forgotten. It was an invite link to a
-   private channel, and it outlived the 2026-09-12 removal of every other
-   channel link because it lives here rather than in page text: the
-   article, /catalog and the JSON-LD sameAs were cleaned, and the navbar,
-   the footer and the home "follow" block kept linking to the channel for
-   two more days. Nothing is substituted. scripts/verify-seo.mjs now fails
-   the build if a t.me link reappears anywhere in the bundle. */
+   THE TELEGRAM ENTRY is the owner's invite link (2026-09-29). It was
+   removed on 2026-09-12/14 as "a private channel with no public address";
+   the owner wants it back - an invite link is how people join a private
+   channel. scripts/verify-seo.mjs allows exactly this t.me address and
+   fails the build on any other, so a guessed handle cannot slip back in. */
+const TELEGRAM_CHANNEL_URL = 'https://t.me/+YfEU_fmwGJlmOGZi';
+
 const SOCIAL_LINKS = [
+  { key: 'telegram', label: 'Telegram', icon: TelegramIcon,
+    href: TELEGRAM_CHANNEL_URL,
+    blurb: 'The ATREOX channel — updates, new modules and results as they land.' },
   { key: 'youtube', label: 'YouTube', icon: YouTubeIcon,
     href: 'https://www.youtube.com/@atreoxai',
     blurb: 'Walkthroughs of the panel — setup, module by module, start to finish.' },
