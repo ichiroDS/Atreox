@@ -1637,9 +1637,8 @@ function FAQSection({ setPage }) {
 
 /* ══════════════════════════════════════
    3.5 — FOLLOW
-   The videos, given room rather than left as a glyph in the navbar.
-   (The Telegram channel card was removed on 2026-09-14 - the channel is
-   private; see SOCIAL_LINKS in shared.jsx.) Sits between the pipeline and the price: the
+   The channel and the videos, given room rather than left as glyphs in
+   the navbar (see SOCIAL_LINKS in shared.jsx). Sits between the pipeline and the price: the
    visitor has just seen how it runs, and following is the cheapest
    yes on the page to say before being asked for money.
 ══════════════════════════════════════ */

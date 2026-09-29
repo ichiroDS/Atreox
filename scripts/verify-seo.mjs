@@ -301,20 +301,30 @@ for (const f of articleFiles) {
   }
 }
 
-/* 8. No link to the Telegram channel, anywhere a visitor or a crawler can
-   reach it: the bundle, every generated page, the shell. Added 2026-09-14,
-   when the invite link turned out to have survived the channel's removal
-   from the pages for two days inside SOCIAL_LINKS - it was in app.js, not
-   in any page's text, so a page-text search missed it. A code comment that
-   names the old address is not a link; only an href-able t.me URL counts. */
-console.log('\n8. no Telegram channel links');
-const TG_LINK = /["'(=\s]https?:\/\/(?:t\.me|telegram\.me)\/[+\w]/;
+/* 8. Telegram links: the bundle, every generated page, the shell. Added
+   2026-09-14 to keep the channel link out; since 2026-09-29 the owner's
+   invite link is back in SOCIAL_LINKS, so it is the one t.me address
+   allowed and any other (a guessed handle) still fails. A code comment is
+   not a link; only an href-able t.me URL counts. */
+console.log("\n8. Telegram: the owner's channel invite and nothing else");
+// 2026-09-29: the owner put the invite link back. Only that address may
+// appear; any other t.me link (a guessed handle, a /c/ private link) fails.
+const TG_ALLOWED = 'https://t.me/+YfEU_fmwGJlmOGZi';
+const TG_LINK = /["'(=\s](https?:\/\/(?:t\.me|telegram\.me)\/[+\w][\w+\-/]*)/g;
 const tgScan = ['public/app.js',
   ...pages.map(([, f]) => f)].filter(f => fs.existsSync(path.join(ROOT, f)));
-const tgHits = tgScan.filter(f => TG_LINK.test(fs.readFileSync(path.join(ROOT, f), 'utf8')));
-check(`${tgScan.length} files, none links a t.me address`, tgHits.length === 0, tgHits.join(', '));
-check('NEGATIVE CONTROL: the pattern catches the old invite link',
-  TG_LINK.test(`href: 'https://t.me/+YfEU_fmwGJlmOGZi'`));
+const tgBad = [];
+for (const f of tgScan) {
+  for (const m of fs.readFileSync(path.join(ROOT, f), 'utf8').matchAll(TG_LINK)) {
+    if (m[1] !== TG_ALLOWED) tgBad.push(`${f}: ${m[1]}`);
+  }
+}
+check(`${tgScan.length} files, no t.me address but the channel invite`, tgBad.length === 0, tgBad.join(', '));
+check('the channel invite is in the bundle (navbar, footer, home)',
+  fs.existsSync(path.join(ROOT, 'public/app.js')) &&
+    fs.readFileSync(path.join(ROOT, 'public/app.js'), 'utf8').includes(TG_ALLOWED));
+check('NEGATIVE CONTROL: the pattern catches a guessed handle',
+  [...`href: 'https://t.me/atreoxai'`.matchAll(TG_LINK)].some(m => m[1] !== TG_ALLOWED));
 
 console.log('');
 if (failures) {
