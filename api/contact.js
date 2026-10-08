@@ -188,7 +188,7 @@ module.exports = async (req, res) => {
     message,
     '',
     '--',
-    'Sent from the contact form at atreoxai.com/contact',
+    'Sent from the contact form at atreox.ai/contact',
   ].join('\n');
 
   try {

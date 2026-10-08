@@ -1,5 +1,5 @@
 /* ── Referral capture ──────────────────────────────────────────────
-   atreoxai.com/?ref=CODE -> localStorage (90 days) -> every CTA that
+   atreox.ai/?ref=CODE -> localStorage (90 days) -> every CTA that
    points at app.atreoxai.com carries the code forward as ?ref=CODE.
 
    This is the marketing-site half of the handoff. It does no validation

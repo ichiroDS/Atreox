@@ -128,7 +128,7 @@ module.exports = async (req, res) => {
     'We do not have their proxy, login or session - ask them for what you need.',
     '',
     '--',
-    'Sent from the "ask a person" link under a checker result at atreoxai.com/tools',
+    'Sent from the "ask a person" link under a checker result at atreox.ai/tools',
   ].join('\n');
 
   try {

@@ -131,7 +131,7 @@ const TERMS = {
   sections: [
     {
       heading: 'What these terms cover',
-      body: 'These Terms govern use of ATREOX AI (the "Service") — the website at atreoxai.com, the dashboard at app.atreoxai.com, and the automation engine behind them. By creating an account or paying for a subscription you agree to them. If you are agreeing on behalf of a company, you confirm you are authorised to bind it.',
+      body: 'These Terms govern use of ATREOX AI (the "Service") — the website at atreox.ai (formerly atreoxai.com), the dashboard at app.atreoxai.com, and the automation engine behind them. By creating an account or paying for a subscription you agree to them. If you are agreeing on behalf of a company, you confirm you are authorised to bind it.',
     },
     {
       heading: 'What the Service does',

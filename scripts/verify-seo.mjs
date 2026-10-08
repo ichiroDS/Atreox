@@ -40,9 +40,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { ORIGIN, RETIRED_ORIGINS } from './site.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const ORIGIN = 'https://www.atreoxai.com';
 
 let failures = 0;
 const check = (name, ok, detail = '') => {
@@ -136,6 +136,13 @@ check(
 check(
   'a page with no canonical IS reported',
   auditPage(sampleAddress, sample.replace(/<link rel="canonical" href="[^"]*">/, '')).length > 0,
+);
+check(
+  'a page whose canonical is on the retired host IS reported',
+  auditPage(sampleAddress, sample.replace(
+    /<link rel="canonical" href="[^"]*"/,
+    `<link rel="canonical" href="${RETIRED_ORIGINS[0]}${sampleAddress}"`)).length > 0,
+  'right path, old domain - the shape a half-finished domain move takes',
 );
 check(
   'a page with two canonicals IS reported',
@@ -325,6 +332,34 @@ check('the channel invite is in the bundle (navbar, footer, home)',
     fs.readFileSync(path.join(ROOT, 'public/app.js'), 'utf8').includes(TG_ALLOWED));
 check('NEGATIVE CONTROL: the pattern catches a guessed handle',
   [...`href: 'https://t.me/atreoxai'`.matchAll(TG_LINK)].some(m => m[1] !== TG_ALLOWED));
+
+/* 9. The retired host. 2026-10 the site moved from www.atreoxai.com to
+   www.atreox.ai (scripts/site.mjs). A canonical is already pinned to
+   ORIGIN by check 1, but og:url, og:image, twitter:image, JSON-LD and
+   robots.txt are not - and any of them left on the old host is a page
+   that still introduces itself by its previous name. Only bare-site
+   URLs count: app./api./brain.atreoxai.com and hello@atreoxai.com are
+   other services that stay where they are, and the pattern does not
+   match them (it requires the scheme and then www. or nothing). */
+console.log('\n9. no generated file still names the retired host');
+const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const RETIRED_RE = new RegExp(`(?:${RETIRED_ORIGINS.map(escapeRe).join('|')})(?![\\w-])`, 'g');
+const retiredScan = ['sitemap.xml', 'robots.txt', ...pages.map(([, f]) => f)]
+  .filter(f => fs.existsSync(path.join(ROOT, f)));
+const retiredBad = [];
+for (const f of retiredScan) {
+  const hits = fs.readFileSync(path.join(ROOT, f), 'utf8').match(RETIRED_RE);
+  if (hits) retiredBad.push(`${f}: ${hits.length}x ${hits[0]}`);
+}
+check(`${retiredScan.length} files, every site URL on ${ORIGIN}`, !retiredBad.length, retiredBad.slice(0, 5).join('; '));
+check('every sitemap <loc> is on ORIGIN',
+  sitemapLocs.length > 0 && sitemapLocs.every(u => u === ORIGIN + '/' || u.startsWith(ORIGIN + '/')),
+  sitemapLocs.filter(u => !u.startsWith(ORIGIN + '/')).slice(0, 3).join(', '));
+check('NEGATIVE CONTROL: the pattern catches an og:url on the retired host',
+  (`<meta property="og:url" content="${RETIRED_ORIGINS[0]}/pricing">`.match(RETIRED_RE) || []).length === 1);
+check('NEGATIVE CONTROL: ...and leaves the dashboard and the mailbox alone',
+  !RETIRED_RE.test('https://app.atreoxai.com/billing mailto:hello@atreoxai.com https://api.atreoxai.com'));
+RETIRED_RE.lastIndex = 0;
 
 console.log('');
 if (failures) {

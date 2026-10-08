@@ -39,14 +39,11 @@ import {
   HEAD_RE, LASTMOD_FILE, SLUG_MAP_RE,
   diffManifest, driftMessage, readManifest, resolveDates, shellFingerprint,
 } from './lastmod.mjs';
+import { ORIGIN, DISPLAY_HOST } from './site.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-/* The host that answers 200. Vercel has www as the project's primary
-   domain, so the apex 307s to it — and a canonical, an og:url or a
-   sitemap entry pointing at a redirect is a worse signal than one
-   pointing at the page. If the apex is ever made primary instead, this
-   line is the only thing that has to change. */
-const ORIGIN = 'https://www.atreoxai.com';
+/* ORIGIN (the host that answers 200) lives in site.mjs, shared with
+   verify-seo.mjs so the build and the check name the same address. */
 const OG_FALLBACK = ORIGIN + '/public/apple-touch-icon.png';
 
 /* LF, for the same reason build-app.mjs normalises: the prerendered pages
@@ -693,7 +690,7 @@ const HOME_PAGE = {
    what the page itself renders.
 
    Article + BreadcrumbList on each guide. The breadcrumb is what turns
-   a result into "atreoxai.com > Guides > Buying Telegram accounts"
+   a result into "atreox.ai > Guides > Buying Telegram accounts"
    instead of a bare URL.
 
    No FAQPage and no Review: Google stopped showing FAQ rich results for
@@ -853,7 +850,7 @@ function ogSvg(card) {
 ${lines.map((l, i) => `<text x="80" y="${250 + i * 78}" font-family="Playfair Display" font-weight="500" font-size="70" fill="#ffffff">${esc(l)}</text>`).join('\n')}
 <text x="80" y="${276 + lines.length * 78}" font-family="JetBrains Mono" font-size="27" fill="#ffffff" opacity="0.55">${esc(sub)}</text>
 <text x="80" y="560" font-family="Marcellus" font-size="26" letter-spacing="9" fill="#00d9ff" opacity="0.9">ATREOX</text>
-<text x="1120" y="560" text-anchor="end" font-family="JetBrains Mono" font-size="20" fill="#ffffff" opacity="0.35">${esc(card.footer || 'atreoxai.com')}</text>
+<text x="1120" y="560" text-anchor="end" font-family="JetBrains Mono" font-size="20" fill="#ffffff" opacity="0.35">${esc(card.footer || DISPLAY_HOST)}</text>
 </svg>`;
 }
 
@@ -883,7 +880,7 @@ async function buildOgImages(guides, moduleByKey) {
     const mod = g.module ? moduleByKey[g.module] : null;
     render(g.url, {
       kicker: mod ? mod.name.toUpperCase() : 'BEFORE YOU START',
-      heading: g.title, short: g.short, footer: 'atreoxai.com/guides',
+      heading: g.title, short: g.short, footer: `${DISPLAY_HOST}/guides`,
     });
   }
   for (const page of [HOME_PAGE, ...SITE_PAGES]) {
