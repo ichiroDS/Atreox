@@ -1327,7 +1327,7 @@ const GUIDES = [
             rows: [
               ['Session cap', 'A session runs for up to 10 hours, then the engine stops itself cleanly. The bar shows how far it is and when it ends.'],
               ['Auto-continue', 'On (default): after the session the engine takes a random break of 90 to 210 minutes and starts the next session by itself. The panel shows “Between sessions — the next one starts …”. Off: it stays stopped until you press Start.'],
-              ['Stop', 'Ends the session. Comments still waiting out their delay are cancelled and their posts go back in the queue for later.'],
+              ['Stop', 'Ends the session. Comments still waiting out their delay are cancelled and their posts go back in the queue for later. The Queued posts card under Control shows the queue, and you can clear it there while Neurocommenting is stopped.'],
               ['Warmup', 'Off by default. When on, each account starts at 1 comment an hour and 3 a day and climbs to full speed over 14 days from when it was added. This is separate from the daily limit and from the Active Warmup module.'],
               ['Delay before commenting', 'The random wait between writing a comment and posting it. Recommended 480–1500 s (8–25 min). Presets fill the fields; Save applies them.'],
               ['Engine logs', 'Live log of what the engine decides. Open it when something looks wrong.'],
