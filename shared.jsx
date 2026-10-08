@@ -648,6 +648,21 @@ function FooterBar({ setPage }) {
           <span style={{ display: 'block', fontFamily: "'JetBrains Mono', monospace", fontWeight: 500, fontSize: '0.68rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: `rgba(${ACCENT_RGB},0.7)`, marginBottom: 5 }}>Mon–Fri · 08:00–20:00 CET</span>
           <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>Weekend messages are answered Monday</span>
         </div>
+        {/* Partner agencies: teams that run ATREOX campaigns for clients who do not
+            want to set it up themselves. External, followed link on purpose. */}
+        <div className="footer-col" style={{ flex: '0 0 auto' }}>
+          <h5 style={colHead}>Partners</h5>
+          <div className="footer-links" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <a href="https://nordlume.agency" target="_blank" rel="noopener"
+              style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.88rem', color: 'rgba(255,255,255,0.6)', textDecoration: 'none', transition: 'color 0.2s' }}
+              onMouseEnter={e => e.target.style.color = ACCENT}
+              onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.6)'}
+            >Nordlume</a>
+            <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', maxWidth: 180, lineHeight: 1.5 }}>
+              Agency that runs ATREOX campaigns for you
+            </span>
+          </div>
+        </div>
         <div className="footer-col" style={{ flex: '0 0 auto' }}>
           <h5 style={colHead}>Follow</h5>
           <div className="footer-links" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
