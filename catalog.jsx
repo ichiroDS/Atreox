@@ -282,6 +282,18 @@ const PIPELINE = [
   },
 ];
 
+/* ── Dashboard wording quoted by the guides ──────────────────────
+   The Check column's label for a capability check whose posting test
+   got no answer (the engine's write_probe_blind: usually Telegram
+   rate-limited the probe). It is the dashboard's wording, not ours:
+   atreox-dashboard/lib/account-ui.ts owns it, and the badge renders it
+   in capitals, which is why it is written in lower case here like every
+   other Check label the guides quote. The Account Manager guide quotes
+   it in more than one place, so a rename on the dashboard side is this
+   one line and not a search through the prose.
+─────────────────────────────────────────────────────────────────── */
+const CHECK_BLIND_LABEL = 'can post?';
+
 /* ── Guides ───────────────────────────────────────────────────────
    Each guide is a page of its own on the Guides reader: the index
    lists them, clicking one opens it with the chapter list beside it.
@@ -594,7 +606,7 @@ const GUIDES = [
               ['Added', 'When you imported it.'],
               ['Proxy', "The flag of the proxy's country from the last check. Green ring: worked in the last 24 hours. Red: the last check failed. Grey: not checked, or checked more than a day ago. Two flags with ≠ between them: Telegram sees the account in a different country than the proxy's exit IP."],
               ['Supervise', 'Days since import as x/7 when Supervise is on, a dash when it is off.'],
-              ['Check', 'The result of the last capability check: ok, not checked, check failed, frozen, can’t resolve or can’t post.'],
+              ['Check', `The result of the last capability check: ok, not checked, check failed, “${CHECK_BLIND_LABEL}”, frozen, no resolve or can’t post.`],
               ['Status', 'The account’s state: active, cooldown, paused, spamblock, banned and so on.'],
             ],
           }],
@@ -651,7 +663,7 @@ const GUIDES = [
             rows: [
               ['Check health', "Whether the session is still logged in, or the account is banned or deleted. It cannot see a spamblock or a freeze."],
               ['Check proxy', "Whether the proxy works and reaches Telegram, its speed, and which country Telegram sees. It never touches the account's session."],
-              ['Check capability', "Whether the account can do what the modules need: find a public channel by username, read it and post. Shows ok, frozen, can't resolve or can't post in the Check column. check failed means it could not decide (timeout, dead proxy); run it again."],
+              ['Check capability', `Whether the account can do what the modules need: find a public channel by username, read it and post. Shows ok, frozen, no resolve or can't post in the Check column. check failed means it could not decide (timeout, dead proxy); run it again. “${CHECK_BLIND_LABEL}” means the posting test got no answer, usually because Telegram rate-limited the check, so it is not a verdict. The engine re-checks it by itself about 6 to 12 hours after the check; you can also run Check capability yourself.`],
               ['Check spamblock', "Asks @SpamBot, Telegram's own bot, whether the account is limited. This one sends one message to @SpamBot; the other three send nothing."],
             ],
           }],
@@ -728,8 +740,8 @@ const GUIDES = [
             head: ['', 'What it is', 'How the dashboard shows it', 'What to do'],
             rows: [
               ['Spamblock', 'Telegram limits the account from sending, usually after too much activity or reports.', 'Spamblock tile; spamblock on the row after Check spamblock.', 'Take it out of its module and let it rest. Open @SpamBot in Telegram: it says whether the limit is temporary and until when, and lets you ask for a review.'],
-              ['Write-ban', 'Telegram refuses the account’s messages, while it can still read.', 'Spamblock tile; can’t post in the Check column after Check capability.', 'Modules stop using it. The engine re-checks it by itself a day after the verdict; if it can post again, it goes back to work.'],
-              ['Frozen', 'Telegram blocks the account from finding channels by username and reading them. Check health cannot see it.', 'Frozen tile; frozen or can’t resolve in the Check column after Check capability.', 'Do not delete it straight away. Modules stop using it, and the engine re-checks it by itself once the verdict is 7 days old; if it passes, it goes back to work.'],
+              ['Write-ban', 'Telegram refuses the account’s messages, while it can still read.', 'Spamblock tile; can’t post in the Check column after Check capability.', 'Modules stop using it. The engine re-checks it by itself a day after the verdict; if it can post again, it goes back to work. A re-check that gets no answer does not count: the account stays can’t post until a check shows it can post again.'],
+              ['Frozen', 'Telegram blocks the account from finding channels by username and reading them. Check health cannot see it.', 'Frozen tile; frozen or no resolve in the Check column after Check capability.', 'Do not delete it straight away. Modules stop using it, and the engine re-checks it by itself once the verdict is 7 days old; if it passes, it goes back to work.'],
               ['Shadow-ban', 'Comments look sent but nobody else sees them. Telegram gives no status for this.', 'Nothing directly: the account keeps posting, but its comments do not appear.', 'Look at the channel from another account. If the comments are missing, take the account out of work and run Check capability.'],
             ],
           }],
