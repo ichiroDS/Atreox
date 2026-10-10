@@ -179,7 +179,7 @@ of the code rather than described from memory, and the two must not drift.
 
 ## 8. How to request a refund
 
-Use the contact form on the site, or email **hello@atreoxai.com** from the
+Use the contact form on the site, or email **hello@atreox.ai** from the
 address on the account, and tell us why. Approved refunds are returned by
 Stripe to the original payment method, usually within 5–10 business days.
 

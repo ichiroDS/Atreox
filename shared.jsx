@@ -644,7 +644,7 @@ function FooterBar({ setPage }) {
             onMouseEnter={e => e.target.style.color = ACCENT}
             onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.6)'}
           >Contact form</span>
-          <a href="mailto:hello@atreoxai.com" className="footer-link" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.8rem', color: 'rgba(255,255,255,0.62)', textDecoration: 'none', display: 'block', marginBottom: 10 }}>hello@atreoxai.com</a>
+          <a href="mailto:hello@atreox.ai" className="footer-link" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400, fontSize: '0.8rem', color: 'rgba(255,255,255,0.62)', textDecoration: 'none', display: 'block', marginBottom: 10 }}>hello@atreox.ai</a>
           <span style={{ display: 'block', fontFamily: "'JetBrains Mono', monospace", fontWeight: 500, fontSize: '0.68rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: `rgba(${ACCENT_RGB},0.7)`, marginBottom: 5 }}>Mon–Fri · 08:00–20:00 CET</span>
           <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>Weekend messages are answered Monday</span>
         </div>

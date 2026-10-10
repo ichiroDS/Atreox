@@ -62,7 +62,7 @@ anything wrong with the current text**, and if it is wrong, sections 3 and
 ## 1. Who we are
 
 `[BLOCKED ON ENTITY]` — registered name, address and country go here.
-Contact: **hello@atreoxai.com**.
+Contact: **hello@atreox.ai**.
 
 > `[DECISION]` Is a **Data Protection Officer** required? Usually not at
 > this size, but the test is about the nature and scale of processing, not
@@ -188,7 +188,7 @@ delete, restrict or object to processing of your personal data, and to
 data portability. Where processing relies on consent, you can withdraw it
 at any time.
 
-Requests: **hello@atreoxai.com**. We respond within one month.
+Requests: **hello@atreox.ai**. We respond within one month.
 
 If a request concerns data we process **on a customer's behalf** (section
 3), we will direct it to that customer, who is the controller for it.
@@ -261,6 +261,6 @@ take effect, and the "Last updated" date above will change.
 
 ## 12. Contact
 
-**hello@atreoxai.com**
+**hello@atreox.ai**
 
 > Not the personal Gmail currently published here. See `README.md`.

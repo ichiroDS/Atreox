@@ -23,7 +23,7 @@
  * Fails closed with 503 if either key is missing.
  */
 
-const TO_DEFAULT = 'hello@atreoxai.com';
+const TO_DEFAULT = 'hello@atreox.ai';
 const FROM_DEFAULT = 'ATREOX AI <noreply@atreoxai.com>';
 
 const VERDICTS = {
@@ -145,7 +145,7 @@ module.exports = async (req, res) => {
     if (!r.ok) throw new Error(`Resend ${r.status}`);
   } catch (err) {
     console.error('tools/handoff: send failed', { tool, verdict, error: err.message });
-    return res.status(502).json({ detail: 'Could not send. Please write to hello@atreoxai.com.' });
+    return res.status(502).json({ detail: 'Could not send. Please write to hello@atreox.ai.' });
   }
   return res.status(200).json({ ok: true });
 };

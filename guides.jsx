@@ -38,7 +38,7 @@ const {
 
 const GREEN = window.ACCENT;
 const GREEN_RGB = window.ACCENT_RGB;
-const CONTACT = 'hello@atreoxai.com';
+const CONTACT = 'hello@atreox.ai';
 
 /* Which guide the current URL is asking for. The path is the answer;
    the hash is only still read because a link from before guides had

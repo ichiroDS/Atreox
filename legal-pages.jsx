@@ -85,7 +85,7 @@ function LegalPage({ badge, title, lastUpdated, intro, sections, setPage }) {
         <div className="panel" style={{ padding: '24px 28px', display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap', marginTop: 20 }}>
           <div style={{ flex: '1 1 220px' }}>
             <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 500, fontSize: '0.88rem', color: 'white', marginBottom: 4 }}>Questions about this policy?</p>
-            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>Use the contact form, or email <a href="mailto:hello@atreoxai.com" style={{ color: ACCENT, textDecoration: 'none' }}>hello@atreoxai.com</a></p>
+            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>Use the contact form, or email <a href="mailto:hello@atreox.ai" style={{ color: ACCENT, textDecoration: 'none' }}>hello@atreox.ai</a></p>
           </div>
           <GlassBtn onClick={() => setPage('contact')}>Contact Us <ArrowUpRight size={14} /></GlassBtn>
         </div>
@@ -222,7 +222,7 @@ const TERMS = {
     },
     {
       heading: 'Contact',
-      body: 'hello@atreoxai.com — Mon–Fri, 08:00–20:00 CET.',
+      body: 'hello@atreox.ai — Mon–Fri, 08:00–20:00 CET.',
     },
   ],
 };
@@ -316,7 +316,7 @@ const PRIVACY = {
       heading: 'Your rights',
       body: [
         'We treat customers as consumers (see the Terms). If you are in the EU/EEA or the UK, you have the right to access, correct, delete, restrict or object to processing of your personal data, and to data portability. Where processing relies on consent, you can withdraw it at any time.',
-        'Requests go to hello@atreoxai.com and we respond within one month. If a request concerns data we process on a customer’s behalf, we will direct it to that customer, who is the controller for it.',
+        'Requests go to hello@atreox.ai and we respond within one month. If a request concerns data we process on a customer’s behalf, we will direct it to that customer, who is the controller for it.',
         'You may also complain to the data protection supervisory authority where you live.',
       ],
     },
@@ -344,7 +344,7 @@ const PRIVACY = {
     },
     {
       heading: 'Contact',
-      body: 'hello@atreoxai.com',
+      body: 'hello@atreox.ai',
     },
   ],
 };
@@ -408,7 +408,7 @@ const REFUND = {
     },
     {
       heading: 'How to request a refund',
-      body: 'Use the contact form on this site, or email hello@atreoxai.com from the address on the account, and tell us why. Approved refunds are returned by Stripe to the original payment method, usually within 5–10 business days.',
+      body: 'Use the contact form on this site, or email hello@atreox.ai from the address on the account, and tell us why. Approved refunds are returned by Stripe to the original payment method, usually within 5–10 business days.',
     },
     {
       heading: 'Chargebacks',

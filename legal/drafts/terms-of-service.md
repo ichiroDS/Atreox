@@ -269,7 +269,7 @@ acceptance.
 
 ## 17. Contact
 
-**hello@atreoxai.com** — Mon–Fri, 08:00–20:00 CET.
+**hello@atreox.ai** — Mon–Fri, 08:00–20:00 CET.
 
 > Note: the live legal pages give a personal Gmail address instead. See
 > `README.md`.

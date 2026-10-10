@@ -52,7 +52,7 @@ Three consequences worth separating:
 2. **A personal Gmail is published as the legal contact.** Both the "Your
    Rights" section and the contact panel at the bottom of every legal page
    give `dsevcenko006@gmail.com`. The footer everywhere else on the site
-   says `hello@atreoxai.com`. This is almost certainly the answer to "one
+   says `hello@atreox.ai`. This is almost certainly the answer to "one
    client wrote to a personal email" — it is not that they found it
    somewhere obscure, it is that the Privacy Policy told them to use it,
    twice. It is also the address a GDPR erasure request is contractually
@@ -73,7 +73,7 @@ already wrong rather than new commitments (commit `e3aaa29`):
   including withdrawal are unaffected. `refund-policy.md` is meant to
   supersede it.
 - All four occurrences of the personal address are now
-  `hello@atreoxai.com`, including the one in "Your Rights".
+  `hello@atreox.ai`, including the one in "Your Rights".
 
 The "courses" language elsewhere in the live pages was left alone — it is
 wrong but not a liability, and rewriting it is what these drafts are for.

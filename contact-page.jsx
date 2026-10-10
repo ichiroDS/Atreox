@@ -2,7 +2,7 @@
    contact-page.jsx — /contact.
 
    One place for enquiries to land. Before this, the footer gave
-   hello@atreoxai.com, the legal pages gave a personal Gmail (fixed
+   hello@atreox.ai, the legal pages gave a personal Gmail (fixed
    2026-08-27), and customers wrote to whatever they found — one to a
    personal address, one waiting for a reply in Discord.
 
@@ -234,7 +234,7 @@ function ContactForm() {
       setStatus('sent');
     } catch (err) {
       setStatus('error');
-      setServerError('Could not reach the server. Please email hello@atreoxai.com.');
+      setServerError('Could not reach the server. Please email hello@atreox.ai.');
     }
   }
 
@@ -349,7 +349,7 @@ const HERO = {
   sub: 'One form, one inbox. Billing, something broken, a refund, or anything else.',
 };
 
-const EMAIL = 'hello@atreoxai.com';
+const EMAIL = 'hello@atreox.ai';
 const HOURS = 'Mon–Fri, 08:00–20:00 CET — weekend messages are answered Monday.';
 
 function ContactFallback() {
@@ -361,8 +361,8 @@ function ContactFallback() {
       }}>
         Email us and it reaches the same place.
       </p>
-      <a href="mailto:hello@atreoxai.com" className="btn-solid" style={{ display: 'inline-flex' }}>
-        hello@atreoxai.com <ArrowUpRight size={14} />
+      <a href="mailto:hello@atreox.ai" className="btn-solid" style={{ display: 'inline-flex' }}>
+        hello@atreox.ai <ArrowUpRight size={14} />
       </a>
     </div>
   );

@@ -1,7 +1,7 @@
 /* api/contact.js — the contact form's only backend.
  *
  * Exists because there was no single place for a customer to reach us.
- * The footer gave hello@atreoxai.com, the legal pages gave a personal
+ * The footer gave hello@atreox.ai, the legal pages gave a personal
  * Gmail (fixed 2026-08-27), and people were writing to whatever they
  * found — one to a personal address, one waiting in Discord. This puts
  * every enquiry in one inbox.
@@ -25,12 +25,12 @@
  *                           the send.
  *   TURNSTILE_SECRET_KEY  — Cloudflare Turnstile secret for the widget
  *                           whose site key is in the front-end.
- *   CONTACT_TO            — optional; defaults to hello@atreoxai.com.
+ *   CONTACT_TO            — optional; defaults to hello@atreox.ai.
  *   CONTACT_FROM          — optional; defaults to the address below, which
  *                           must be on the domain verified in Resend.
  */
 
-const TO_DEFAULT = 'hello@atreoxai.com';
+const TO_DEFAULT = 'hello@atreox.ai';
 const FROM_DEFAULT = 'ATREOX AI <noreply@atreoxai.com>';
 
 const TOPICS = {
@@ -208,7 +208,7 @@ module.exports = async (req, res) => {
     // enough to answer the person if the send failed, without becoming a
     // second store of enquiries: who, and about what, not the body.
     console.error('contact: send failed', { ip, email, topic, error: err.message });
-    return res.status(502).json({ error: 'Could not send your message. Please email hello@atreoxai.com.' });
+    return res.status(502).json({ error: 'Could not send your message. Please email hello@atreox.ai.' });
   }
 
   return res.status(200).json({ ok: true });

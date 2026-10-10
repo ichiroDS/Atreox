@@ -712,7 +712,7 @@ function orgAndSiteLd() {
         name: 'ATREOX',
         url: ORIGIN + '/',
         logo: ORIGIN + '/public/apple-touch-icon.png',
-        email: 'hello@atreoxai.com',
+        email: 'hello@atreox.ai',
         // NO sameAs. It claimed https://t.me/atreoxai as one of our profiles,
         // and that handle is not ours and not a channel - t.me serves a bare
         // contact page for it. sameAs is how a search engine links an entity to

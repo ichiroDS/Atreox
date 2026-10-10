@@ -671,7 +671,7 @@ function PricingPage({ setPage }) {
               style={{ color: GREEN, textDecoration: 'none' }}>Try them</a>.
           </p>
           <p style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.7rem', letterSpacing: '0.04em', color: 'rgba(255,255,255,0.38)' }}>
-            Running something bigger, or need a module that isn't here? <a href="mailto:hello@atreoxai.com" style={{ color: GREEN, textDecoration: 'none' }}>Get in touch</a>.
+            Running something bigger, or need a module that isn't here? <a href="mailto:hello@atreox.ai" style={{ color: GREEN, textDecoration: 'none' }}>Get in touch</a>.
           </p>
           <p style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.7rem', letterSpacing: '0.04em', color: 'rgba(255,255,255,0.38)' }}>
             Already a customer? Earn 25% of what anyone you refer pays, for as long as they stay
