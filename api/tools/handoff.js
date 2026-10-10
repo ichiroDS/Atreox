@@ -24,7 +24,7 @@
  */
 
 const TO_DEFAULT = 'hello@atreox.ai';
-const FROM_DEFAULT = 'ATREOX AI <noreply@atreoxai.com>';
+const FROM_DEFAULT = 'ATREOX AI <noreply@atreox.ai>';
 
 const VERDICTS = {
   proxy: ['tcp_failed', 'telegram_failed', 'exit_not_held'],

@@ -31,7 +31,7 @@
  */
 
 const TO_DEFAULT = 'hello@atreox.ai';
-const FROM_DEFAULT = 'ATREOX AI <noreply@atreoxai.com>';
+const FROM_DEFAULT = 'ATREOX AI <noreply@atreox.ai>';
 
 const TOPICS = {
   billing: 'Billing',
