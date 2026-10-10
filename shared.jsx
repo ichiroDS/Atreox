@@ -3,7 +3,7 @@ const React = window.React;
 const { useState, useEffect, useRef } = React;
 const { motion, AnimatePresence, useInView } = window.FramerMotion;
 
-const DASHBOARD_URL = 'https://app.atreoxai.com';
+const DASHBOARD_URL = 'https://app.atreox.ai';
 
 /* ── Brand accent — single source of truth, read via window.ACCENT / window.ACCENT_RGB elsewhere ── */
 const ACCENT = '#00d9ff';

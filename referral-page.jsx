@@ -21,7 +21,7 @@ const { PageHero, PageSection, Pill, CrossLinks, FooterBar, MONO, SERIF, ArrowUp
 
 const ACCENT = window.ACCENT;
 const ACCENT_RGB = window.ACCENT_RGB;
-const DASHBOARD_URL = 'https://app.atreoxai.com';
+const DASHBOARD_URL = 'https://app.atreox.ai';
 
 function ReferralStep({ n, children, last }) {
   return (

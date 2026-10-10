@@ -753,7 +753,7 @@ function Hero({ setPage }) {
               className="btn-solid cta-breathe" style={{ padding: '15px 28px', fontSize: '0.8rem' }} {...magneticHandlers(5)}>
               Build your licence <ArrowUpRight size={15} />
             </a>
-            <a href={window.withReferral('https://app.atreoxai.com')} target="_self" className="btn-outline" style={{ padding: '14px 24px' }}>
+            <a href={window.withReferral('https://app.atreox.ai')} target="_self" className="btn-outline" style={{ padding: '14px 24px' }}>
               Enter panel <ArrowUpRight size={14} />
             </a>
             <button className="btn-outline" onClick={() => {
@@ -1747,7 +1747,7 @@ function CtaBannerSection({ setPage }) {
           <button className="btn-solid" onClick={() => setPage('pricing')} style={{ padding: '15px 32px', fontSize: '0.82rem' }}>
             Choose your modules <ArrowUpRight size={15} />
           </button>
-          <a href={window.withReferral('https://app.atreoxai.com')} target="_self" className="btn-outline" style={{ padding: '14px 28px' }}>
+          <a href={window.withReferral('https://app.atreox.ai')} target="_self" className="btn-outline" style={{ padding: '14px 28px' }}>
             Open the panel <ArrowUpRight size={14} />
           </a>
         </div>

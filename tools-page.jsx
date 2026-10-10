@@ -27,7 +27,7 @@ const {
 
 const ACCENT = window.ACCENT;
 const ACCENT_RGB = window.ACCENT_RGB;
-const PANEL_URL = 'https://app.atreoxai.com/tools/proxy-checker';
+const PANEL_URL = 'https://app.atreox.ai/tools/proxy-checker';
 
 /* What the checker reports, in the order the page argues them: the
    Telegram view first, because it is the one nothing else gives you. */

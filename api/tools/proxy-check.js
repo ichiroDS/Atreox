@@ -21,7 +21,7 @@
  * something other than JSON counts as failed (fail closed).
  *
  * Environment (Vercel → Project → Settings):
- *   ENGINE_API_BASE_URL — the engine's base URL, e.g. https://api.atreoxai.com
+ *   ENGINE_API_BASE_URL — the engine's base URL, e.g. https://api.atreox.ai
  *   ENGINE_API_TOKEN    — the engine master bearer (API_AUTH_TOKEN on the
  *                         server). Server-only; never exposed to the client.
  *   TURNSTILE_SECRET_KEY — the same secret the contact form uses.

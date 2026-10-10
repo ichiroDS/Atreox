@@ -24,7 +24,7 @@ const {
 
 const ACCENT = window.ACCENT;
 const ACCENT_RGB = window.ACCENT_RGB;
-const PANEL_URL = 'https://app.atreoxai.com/tools/account-checker';
+const PANEL_URL = 'https://app.atreox.ai/tools/account-checker';
 
 const READINGS = [
   {

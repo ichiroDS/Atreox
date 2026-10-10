@@ -1883,7 +1883,7 @@ const TOOLS = [
       'Check a proxy against Telegram itself: whether it connects, the country and data centre Telegram reports through it, and the real exit IP with its network and type.',
     cta: 'Open the proxy checker',
     page: '/tools/proxy-checker',
-    panel: 'https://app.atreoxai.com/tools/proxy-checker',
+    panel: 'https://app.atreox.ai/tools/proxy-checker',
   },
   {
     id: 'account-checker',
@@ -1894,7 +1894,7 @@ const TOOLS = [
       + 'whether it is frozen or restricted from posting.',
     cta: 'Open the account checker',
     page: '/tools/account-checker',
-    panel: 'https://app.atreoxai.com/tools/account-checker',
+    panel: 'https://app.atreox.ai/tools/account-checker',
   },
 ];
 

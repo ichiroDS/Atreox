@@ -19,7 +19,7 @@ const {
   FULL_MONTHLY, FULL_YEARLY, YEARLY_SAVING, eur,
 } = window;
 
-const DASHBOARD_URL = 'https://app.atreoxai.com';
+const DASHBOARD_URL = 'https://app.atreox.ai';
 const GREEN = window.ACCENT;
 const GREEN_RGB = window.ACCENT_RGB;
 
@@ -37,17 +37,19 @@ const CLERK_ACTIVE_STATUSES = new Set(['active', 'trialing']);
    Pricing page's CTA wording.
 
    So the script is injected here, on first use. Everywhere else the visitor
-   simply never meets clerk.atreoxai.com.
+   simply never meets clerk.atreox.ai.
 
-   Served from our own Frontend API domain: atreoxai.com is the verified
-   Primary domain, so the session set on app.atreoxai.com hydrates here too
-   with no satellite-domain configuration.
+   Served from our own Frontend API domain: atreox.ai is the verified
+   Primary domain (moved from atreoxai.com with the panel, 2026-10), so the
+   session set on app.atreox.ai hydrates here too with no satellite-domain
+   configuration. The key below is base64("clerk.atreox.ai$"): if Clerk shows
+   a different one after the domain change, this line is wrong.
 
    One promise is cached for the life of the page: two components asking at
    once must not inject two script tags, and a second ask after it has
    loaded must not wait again. */
-const CLERK_SRC = 'https://clerk.atreoxai.com/npm/@clerk/clerk-js@6/dist/clerk.browser.js';
-const CLERK_PUBLISHABLE_KEY = 'pk_live_Y2xlcmsuYXRyZW94YWkuY29tJA';
+const CLERK_SRC = 'https://clerk.atreox.ai/npm/@clerk/clerk-js@6/dist/clerk.browser.js';
+const CLERK_PUBLISHABLE_KEY = 'pk_live_Y2xlcmsuYXRyZW94LmFpJA';
 let clerkPromise = null;
 
 function loadClerk(timeoutMs = 8000) {
