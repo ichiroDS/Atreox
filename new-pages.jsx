@@ -15,7 +15,7 @@ const {
   ArrowUpRight, Check, BookOpen, Layers, ChevronRight,
   FooterBar, CrossLinks,
   PageHero, PageSection, SectionLockup, Pill, MONO, SERIF,
-  MODULES, PRICED_MODULES, MODULE_BY_KEY, INCLUDED_MODULES,
+  MODULES, PRICED_MODULES, SEPARATE_MODULES, MODULE_BY_KEY, INCLUDED_MODULES,
   FULL_MONTHLY, FULL_YEARLY, YEARLY_SAVING, eur,
 } = window;
 
@@ -440,6 +440,75 @@ function SelectionPanel({ keys, total, onClear, sub }) {
   return docked ? ReactDOM.createPortal(dock, document.body) : dock;
 }
 
+/* ─── Autoreger: priced, but never part of a licence ───
+
+   The one module sold as its own subscription (the panel's
+   LICENCE_EXCLUDED_MODULES). It cannot join the picker above: a day pass
+   on a DAY billing interval can never share a Stripe subscription with
+   monthly modules, and the licence never includes it. So it gets a band
+   of its own below the picker, with both its intervals side by side —
+   the same separation a first-time buyer sees on the panel's billing
+   page, arrived at before they ever reach the panel. */
+function AutoregerBand({ sub }) {
+  const mod = SEPARATE_MODULES[0];
+  if (!mod) return null;
+  const Icon = mod.icon;
+  /* ?modules=autoreger lands on the panel's billing page with the monthly
+     card already selected — the same deep link every other module uses.
+     The day pass has no preselection (it is its own button there), so the
+     CTA simply opens billing. */
+  const cta = billingCTA(sub, 'Get the Autoreger', { modules: mod.billing });
+  return (
+    <div className="panel" style={{ padding: '26px 28px', borderColor: `rgba(${GREEN_RGB},0.3)` }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 13, marginBottom: 16 }}>
+        <span aria-hidden="true" style={{
+          width: 34, height: 34, borderRadius: 4, flexShrink: 0,
+          background: `rgba(${GREEN_RGB},0.08)`, border: `1px solid rgba(${GREEN_RGB},0.22)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <Icon size={16} color={GREEN} />
+        </span>
+        <span style={{
+          fontFamily: MONO, fontWeight: 500, fontSize: '0.72rem',
+          letterSpacing: '0.14em', textTransform: 'uppercase', color: 'white',
+        }}>
+          {mod.name}
+        </span>
+        <Pill>Separate subscription</Pill>
+      </div>
+
+      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.92rem', color: 'rgba(255,255,255,0.62)', lineHeight: 1.7, marginBottom: 20 }}>
+        {mod.desc} Billed on its own — never part of a module selection or the licence.
+      </p>
+
+      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'stretch' }}>
+        {[
+          { label: '/ month', price: mod.price, note: 'The subscription — register any day, cancel any day.' },
+          { label: '/ day', price: mod.dayPrice, note: 'The day pass — one heavy registration day, nothing recurring.' },
+        ].map((opt) => (
+          <div key={opt.label} style={{
+            flex: '1 1 180px', padding: '16px 18px', borderRadius: 4,
+            border: `1px solid rgba(${GREEN_RGB},0.16)`, background: `rgba(${GREEN_RGB},0.025)`,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 7 }}>
+              <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '2rem', color: GREEN, lineHeight: 1 }}>{eur(opt.price)}</span>
+              <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.6rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>{opt.label}</span>
+            </div>
+            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginTop: 10 }}>
+              {opt.note}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <a href={cta.href} target="_self" className="btn-outline"
+        style={{ width: '100%', justifyContent: 'center', padding: '13px', fontSize: '0.74rem', marginTop: 18 }}>
+        {cta.label} <ArrowUpRight size={14} />
+      </a>
+    </div>
+  );
+}
+
 /* ─── the two exits from the picker: what a module is, and how to run it ─── */
 function ModuleHelpRail({ setPage }) {
   return (
@@ -546,11 +615,11 @@ function CatalogueBanner({ setPage }) {
 const HERO = {
   badge: 'Pricing',
   title: 'Pay for what you run.',
-  sub: 'ATREOX is modular. Take the modules you need, or take the whole licence — two of the eight are free either way.',
+  sub: 'ATREOX is modular. Take the modules you need, or take the whole licence — two of the nine are free either way.',
 };
 
 const BUILD_LEDE =
-  'The six you pay for, in the order they appear in the panel. Select what you need — the total '
+  'The seven you pay for, in the order they appear in the panel. Select what you need — the total '
   + 'updates as you go, and the full licence sits beside it for comparison.';
 
 const WHY_PRICES_DIFFER =
@@ -628,6 +697,17 @@ function PricingPage({ setPage }) {
 
             <LicenceCard term={term} setTerm={setTerm} sub={sub} />
           </div>
+        </div>
+      </PageSection>
+
+      {/* Autoreger in its own band, below the picker — the same separation
+          the panel's billing page draws. See AutoregerBand above. */}
+      <PageSection style={{ paddingTop: 0 }}>
+        <SectionLockup title="Autoreger">
+          {'Accounts, made not bought — its own subscription, with a monthly price and a 24-hour day pass.'}
+        </SectionLockup>
+        <div style={{ maxWidth: 720 }}>
+          <AutoregerBand sub={sub} />
         </div>
       </PageSection>
 

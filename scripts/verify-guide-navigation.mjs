@@ -18,7 +18,7 @@ assert.deepEqual(Array.from(box.GUIDE_FOLDERS, f => f.title), ['Start here', 'Pr
 const EXPECTED = {
   start: ['buying-telegram-accounts', 'proxies-for-telegram-accounts'],
   protection: ['account-manager', 'account-protection', 'active-warmup'],
-  modules: ['channel-parser', 'group-parser', 'neurocommenting', 'neurodialogs', 'mass-reactions'],
+  modules: ['channel-parser', 'group-parser', 'neurocommenting', 'neurodialogs', 'mass-reactions', 'autoreger'],
 };
 for (const folder of box.GUIDE_FOLDERS) {
   assert.deepEqual(Array.from(folder.urls), EXPECTED[folder.id], `folder ${folder.id} lists the agreed guides`);

@@ -11,7 +11,7 @@
 ══════════════════════════════════════════════════════════════════ */
 
 const {
-  MessageSquare, Brain, Zap, Sparkles, Globe, Users, Layers, Palette,
+  MessageSquare, Brain, Zap, Sparkles, Globe, Users, Layers, Palette, UserPlus,
 } = window;
 
 /* ── Modules ──────────────────────────────────────────────────────
@@ -214,12 +214,40 @@ const MODULES = [
       'Promote or reject each group, and export the results as CSV',
     ],
   },
+  {
+    key: 'autoreger',
+    billing: 'autoreger',
+    name: 'Autoreger',
+    price: 200,
+    dayPrice: 20,
+    /* Sold as its own subscription and never part of the licence — the
+       engine's LICENCE_EXCLUDED_MODULES. The Pricing page renders it in a
+       band of its own below the picker, with both its intervals, exactly
+       like the panel's billing page does. */
+    separate: true,
+    icon: UserPlus,
+    guide: 'autoreger',
+    desc: 'Registers new Telegram accounts from your own keys and proxies — SMS, captcha and email handled automatically.',
+    tagline: 'Accounts, made not bought',
+    summary: 'Registers new Telegram accounts on your keys: SMS verification (HeroSMS), captcha solving (CapSolver, 2Captcha, Anti-Captcha), email confirmation — through your own socks5 proxies, one account per proxy. Registered accounts land straight in Account Manager.',
+    can: [
+      'Bring your own keys: SMS (HeroSMS), captcha and email verification',
+      'Your own socks5 proxies — one account per proxy, never the server IP',
+      'Survival-first pacing: geo-coherent proxies, honest device fingerprints, human timing',
+      'Silence after registration: no warmup, username or avatar until the account settles',
+      'Daily and global caps keep the pace gentle',
+      'Every registered account lands in Account Manager with its creation date and proxy',
+    ],
+  },
 ];
 
 const MODULE_BY_KEY = Object.fromEntries(MODULES.map(m => [m.key, m]));
 
-/* Modules that carry their own price — the Pricing picker's universe. */
-const PRICED_MODULES = MODULES.filter(m => !m.included);
+/* Modules that carry their own price — the Pricing picker's universe.
+   `separate` modules (Autoreger) are priced but sold as their own
+   subscription, so they never join a selection or the licence. */
+const PRICED_MODULES = MODULES.filter(m => !m.included && !m.separate);
+const SEPARATE_MODULES = MODULES.filter(m => m.separate);
 const INCLUDED_MODULES = MODULES.filter(m => m.included);
 
 const FULL_MONTHLY  = 120;
@@ -1855,6 +1883,105 @@ const GUIDES = [
       },
     ],
   },
+  {
+    slug: 'autoreger',
+    url: 'autoreger',
+    group: 'module',
+    short: 'Register accounts, not buy them',
+    title: 'Autoreger',
+    summary:
+      'Register new Telegram accounts on your own keys and proxies: SMS, captcha and email handled automatically, with pacing built for survival.',
+    seoTitle: 'Auto-register Telegram accounts with your own proxies',
+    seoDescription:
+      'Automatic Telegram account registration: SMS verification through your own provider key, captcha and email solved, one socks5 proxy per account, silence after registration. A guide to the ATREOX Autoreger module.',
+    module: 'autoreger',
+    video: null,
+    body: [
+      {
+        id: 'what-it-does',
+        title: 'What it does',
+        blocks: [
+          ['p', "Autoreger registers new Telegram accounts. It goes through the whole flow — sign up, SMS verification, captcha, email confirmation — on accounts that land straight in Account Manager when they are done."],
+          ['p', "It runs on your keys and your proxies. You bring your own SMS provider key (HeroSMS), your own captcha solver (CapSolver, 2Captcha or Anti-Captcha), your own email key, and your own socks5 proxies. Nothing is registered from our addresses, ever: one account, one proxy, and a proxy is never reused for a second registration on the same day."],
+          ['callout', [
+            "Autoreger is its own subscription — it is not part of the full licence and cannot be bought as part of a module selection. There is a monthly price and a 24-hour day pass for one heavy registration day.",
+          ]],
+        ],
+      },
+      {
+        id: 'survival-first',
+        title: 'Survival first',
+        blocks: [
+          ['p', "The module's one goal is accounts Telegram does not ban. Everything else — speed, volume — comes second. The rules it runs by:"],
+          ['bullets', [
+            "Geo coherence: the proxy's country must match the SMS number's country. A Russian number through a US proxy is the loudest possible signal.",
+            "Honest device fingerprints: a real device model, a real system version, a language that matches the proxy's country. Never the newest flagship, never a blank profile.",
+            "Human pacing: pauses between steps, retries that wait, registrations spread over the day — never a burst at 03:00.",
+            "Silence after registration: no username, no avatar, no bio, no warmup, no comments. A fresh account that starts posting within minutes of birth is the definition of a bot. Let it rest.",
+            "Gentle failure: if Telegram refuses a step, the attempt stops and the proxy cools down. Pushing through a refusal is how batches die.",
+          ]],
+          ['p', "A registered account rests after creation. It appears in Account Manager with its creation date and the proxy it was born on, and it joins the normal protection flow from there."],
+        ],
+      },
+      {
+        id: 'setup',
+        title: 'Set it up',
+        blocks: [
+          ['steps', [
+            "Buy the Autoreger module — monthly, or a day pass if one heavy day is the plan.",
+            "In the module's Settings, paste your SMS provider key (HeroSMS). The same key also covers email verification if the provider offers it.",
+            "Paste your captcha solver key (CapSolver, 2Captcha or Anti-Captcha).",
+            "Add socks5 proxies — one per account you want to register. Each proxy is used for exactly one registration, then rests.",
+            "Set your daily cap. The default is gentle on purpose; the ceiling exists so nobody burns a batch in a night.",
+            "Press Start. Each finished account lands in Account Manager, marked as registered, with its creation date.",
+          ]],
+          ['p', "Registration needs an SMS number for each account. Numbers come from your provider's pool and cost per number on their pricing — that is paid to them, not to us."],
+        ],
+      },
+      {
+        id: 'costs',
+        title: 'What it costs you',
+        blocks: [
+          ['table', {
+            head: ['Item', 'Paid to', 'Roughly'],
+            rows: [
+              ['The module', 'ATREOX', 'A monthly subscription or a 24-hour day pass.'],
+              ['SMS numbers', 'Your SMS provider', 'Per number, by country.'],
+              ['Captcha solving', 'Your solver service', 'Per solved captcha.'],
+              ['Email verification', 'Your provider', 'Usually part of the same key as SMS.'],
+              ['Proxies', 'Your proxy provider', 'One clean socks5 per account.'],
+            ],
+          }],
+          ['p', "The module fee is the engine. The rest is usage, on your accounts, at your provider's prices."],
+        ],
+      },
+      {
+        id: 'after-registration',
+        title: 'After registration',
+        blocks: [
+          ['p', "A fresh account does nothing for a while — that is deliberate. When it settles, the normal flow applies: give it a profile template, a proxy of its own if you are moving it off its birth proxy, and start Active Warmup gently. The Buying guide's two-week testing plan applies to registered accounts the same as bought ones."],
+          ['plink', [
+            'More: ',
+            { text: 'warming accounts', href: '/guides/active-warmup' },
+            '.',
+          ]],
+        ],
+      },
+      {
+        id: 'mistakes',
+        title: 'Common mistakes',
+        blocks: [
+          ['bullets', [
+            "Registering through the server's own IP. It never happens here — the module refuses to run without proxies.",
+            "Sharing one proxy across several registrations the same day. The engine refuses that too: one proxy, one registration, then a cooldown.",
+            "Matching a number from one country with a proxy from another. The engine checks and refuses.",
+            "Starting warmup or commenting on the day of registration. Let it rest.",
+            "Raising the daily cap to go faster. Speed is the one thing that cannot be bought back after a ban wave.",
+          ]],
+        ],
+      },
+    ],
+  },
 ];
 
 /* ── The free tools, and the one place their addresses are spelled ──
@@ -1938,7 +2065,7 @@ const GUIDE_FOLDER_SPECS = [
   { id: 'protection', title: 'Protection',
     urls: ['account-manager', 'account-protection', 'active-warmup'] },
   { id: 'modules', title: 'Modules',
-    urls: ['channel-parser', 'group-parser', 'neurocommenting', 'neurodialogs', 'mass-reactions'] },
+    urls: ['channel-parser', 'group-parser', 'neurocommenting', 'neurodialogs', 'mass-reactions', 'autoreger'] },
 ];
 const GUIDE_FOLDERS = GUIDE_FOLDER_SPECS.map(f => ({
   ...f, guides: f.urls.map(url => GUIDES.find(g => g.url === url)).filter(Boolean),
@@ -1980,7 +2107,7 @@ const guideFromPath = pathname => {
 };
 
 Object.assign(window, {
-  MODULES, MODULE_BY_KEY, PRICED_MODULES, INCLUDED_MODULES,
+  MODULES, MODULE_BY_KEY, PRICED_MODULES, SEPARATE_MODULES, INCLUDED_MODULES,
   FULL_MONTHLY, FULL_YEARLY, YEARLY_SAVING, CHEAPEST_MODULE, eur,
   PIPELINE,
   GUIDES, GUIDE_FOLDERS, GUIDE_BY_SLUG, GUIDE_BY_URL, GUIDE_BY_MODULE,

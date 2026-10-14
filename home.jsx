@@ -33,7 +33,7 @@ const GREEN_RGB = window.ACCENT_RGB;
    string below when the real line is settled and nothing else needs
    to change.
    ───────────────────────────────────────────────────────────────── */
-const POSITIONING = 'The whole Telegram growth stack — eight modules, one panel.';
+const POSITIONING = 'The whole Telegram growth stack — nine modules, one panel.';
 
 /* ══════════════════════════════════════════════════════════════════
    THE ENGINE GRID — the hero's right-hand card.
@@ -1510,7 +1510,7 @@ function ComparisonSection() {
                     ATREOX
                   </span>
                   <span style={{ display: 'block', marginTop: 5, fontFamily: MONO, fontWeight: 400, fontSize: '0.54rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)' }}>
-                    All eight modules
+                    All nine modules
                   </span>
                 </th>
                 {COMPARISON_COLUMNS.map(col => (
@@ -1581,8 +1581,8 @@ const FAQS = [
       a: 'Accounts warm up before they do anything that earns: scheduled reading, joins and reactions at a pace matched to the account\'s age. Once working, each one runs behind its own proxy inside its own hourly and daily budget, with randomised delays between actions. Floodwait and peerflood put an account into cooldown automatically, and repeated ones stop it rather than retrying into a ban.' },
     { q: 'Can I bring my own Telegram accounts?',
       a: 'Yes — that is the only way it works. Import them individually, in bulk up to 100 per request, or by converting tdata folders. Every account then goes through the same health checks and warmup as any other.' },
-    { q: 'Do I have to buy all eight modules?',
-      a: 'No. Each priced module bills separately and runs on its own, so you can run discovery and commenting and nothing else. Account Manager and Profile Templates come with any purchase — they are how accounts get into the system, so they are never sold alone. If you want everything, the full licence costs less than the six added up.' },
+    { q: 'Do I have to buy all the modules?',
+      a: 'No. Each priced module bills separately and runs on its own, so you can run discovery and commenting and nothing else. Account Manager and Profile Templates come with any purchase — they are how accounts get into the system, so they are never sold alone. Autoreger is its own subscription, separate from the licence. If you want everything else, the full licence costs less than the modules added up.' },
     { q: 'Does this only work for crypto and tech channels?',
       a: 'No. The parsers search on your keywords in ten languages, and the comment and reply engines work from a prompt you write. Crypto and tech are where many users started; the same pipeline runs an AI-creator funnel or a content community without changing anything but the targets and the persona.' },
     { q: 'Is there a contract, or can I cancel anytime?',
@@ -1807,14 +1807,14 @@ Object.assign(window, { HomePage });
       ['p', WHAT_THIS_IS.body],
       ['note', HERO.builtFor],
     ] },
-    { title: 'The eight modules', blocks: [
+    { title: 'The nine modules', blocks: [
       ['kv', MODULES.map((m) => [m.name, m.desc])],
       ['linkout', { href: '/functions', label: 'What each module does, in full' }],
     ] },
     { title: 'What it costs', blocks: [
       ['p', 'Modules are billed one at a time from ' + eur(CHEAPEST_MODULE)
         + ' a month; the full licence is ' + eur(FULL_MONTHLY) + ' a month or '
-        + eur(FULL_YEARLY) + ' a year. Two of the eight are included either way.'],
+        + eur(FULL_YEARLY) + ' a year. Two of the nine are included either way.'],
       ['linkout', { href: '/pricing', label: 'Pricing' }],
     ] },
     { title: 'How it compares', blocks: [
