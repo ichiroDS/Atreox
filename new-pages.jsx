@@ -12,7 +12,7 @@ const ReactDOM = window.ReactDOM;
 const { useRef, useState, useEffect } = React;
 const {
   motion, useInView,
-  ArrowUpRight, Check, BookOpen, Layers, ChevronRight,
+  ArrowUpRight, Check, X, BookOpen, Layers, ChevronRight,
   FooterBar, CrossLinks,
   PageHero, PageSection, SectionLockup, Pill, MONO, SERIF,
   MODULES, PRICED_MODULES, SEPARATE_MODULES, MODULE_BY_KEY, INCLUDED_MODULES,
@@ -147,58 +147,29 @@ function billingCTA(sub, label, params) {
   return { label, href: billingHref(params) };
 }
 
-/* ─── one selectable module ─── */
-function ModuleCard({ mod, selected, onToggle }) {
+/* ─── one selectable module, as a row ───
+   checkbox · icon · full name and blurb · price — the panel's billing
+   rows, drawn with the classes in index.html (.pick-row). The row itself
+   is the checkbox: a button with role="checkbox", so Space and Enter both
+   toggle it and a screen reader hears "checked", not "pressed". `tag` is
+   the one extra word a row may carry (Autoreger's "not in licence"). */
+function PickRow({ mod, selected, onToggle, tag }) {
   const Icon = mod.icon;
   return (
-    <button
-      type="button"
-      aria-pressed={selected}
-      onClick={onToggle}
-      className={'panel panel-hover' + (selected ? ' ticks' : '')}
-      style={{
-        padding: '26px 26px 28px', textAlign: 'left', width: '100%', height: '100%',
-        display: 'flex', flexDirection: 'column', gap: 18,
-        borderColor: selected ? `rgba(${GREEN_RGB},0.45)` : undefined,
-        // backgroundColor, not the shorthand — the shorthand would drop .panel's gradient layer
-        backgroundColor: selected ? `rgba(${GREEN_RGB},0.05)` : undefined,
-        transition: 'border-color 0.16s ease, background-color 0.16s ease, box-shadow 0.18s ease, transform 0.18s cubic-bezier(0.2,0.9,0.3,1)',
-      }}>
-      {/* icon · name · checkbox — the dashboard's module-tile anatomy */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 13 }}>
-        <span aria-hidden="true" style={{
-          width: 34, height: 34, borderRadius: 4, flexShrink: 0,
-          background: `rgba(${GREEN_RGB},0.08)`, border: `1px solid rgba(${GREEN_RGB},${selected ? 0.4 : 0.22})`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'border-color 0.16s ease',
-        }}>
-          <Icon size={16} color={GREEN} />
-        </span>
-        <span style={{
-          flex: 1, minWidth: 0, fontFamily: MONO, fontWeight: 500, fontSize: '0.72rem',
-          letterSpacing: '0.14em', textTransform: 'uppercase', color: 'white', lineHeight: 1.3,
-        }}>
-          {mod.name}
-        </span>
-        <span aria-hidden="true" style={{
-          width: 20, height: 20, borderRadius: 3, flexShrink: 0,
-          border: `1px solid rgba(${GREEN_RGB},${selected ? 1 : 0.3})`,
-          background: selected ? GREEN : 'transparent',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'background-color 0.16s ease, border-color 0.16s ease',
-        }}>
-          {selected && <Check size={13} color="#00141c" style={{ strokeWidth: 3 }} />}
-        </span>
-      </div>
-
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 7 }}>
-        <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '2.1rem', color: GREEN, lineHeight: 1 }}>{eur(mod.price)}</span>
-        <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.62rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>/ month</span>
-      </div>
-
-      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.87rem', color: 'rgba(255,255,255,0.52)', lineHeight: 1.7, marginTop: 'auto' }}>
-        {mod.desc}
-      </p>
+    <button type="button" role="checkbox" aria-checked={selected} onClick={onToggle}
+      className={'pick-row' + (selected ? ' is-on' : '')}>
+      <span className="pick-box" aria-hidden="true">
+        {selected && <Check size={13} color="#00141c" style={{ strokeWidth: 3 }} />}
+      </span>
+      <span className="pick-icon" aria-hidden="true"><Icon size={16} color={GREEN} /></span>
+      <span className="pick-text">
+        <span className="pick-name">{mod.name}{tag && <span className="pick-tag">{tag}</span>}</span>
+        <span className="pick-blurb">{mod.desc}</span>
+      </span>
+      <span className="pick-price">
+        <span className="pick-amount">{eur(mod.price)}</span>
+        <span className="pick-per">/mo</span>
+      </span>
     </button>
   );
 }
@@ -270,17 +241,19 @@ function LicenceCard({ term, setTerm, sub }) {
           : `Pay yearly: ${eur(FULL_YEARLY)} — saves ${eur(YEARLY_SAVING)}`}
       </p>
 
-      {/* two lines, not three — "Account Manager included" is already said in
-          the hero and again below; repeating it here is what makes a card read
-          as filled rather than composed */}
+      {/* What is in it and the one thing that is not — the same two lines
+          the panel's licence card carries. "Account Manager included" is
+          said in the banner above; repeating it here is what makes a card
+          read as filled rather than composed. */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 11, marginTop: 18, borderTop: `1px solid rgba(${GREEN_RGB},0.12)`, paddingTop: 16 }}>
-        {[
-          `All ${PRICED_MODULES.length} modules, including both parsers`,
-          'Any module released while your licence is active, at no extra cost',
-        ].map((f, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-            <Check size={14} color={GREEN} style={{ marginTop: 2, flexShrink: 0 }} />
-            <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.68)', lineHeight: 1.5 }}>{f}</span>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+          <Check size={14} color={GREEN} style={{ marginTop: 2, flexShrink: 0 }} />
+          <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.68)', lineHeight: 1.5 }}>All {PRICED_MODULES.length} modules</span>
+        </div>
+        {SEPARATE_MODULES.map(m => (
+          <div key={m.key} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+            <X size={14} color="rgba(255,255,255,0.35)" style={{ marginTop: 2, flexShrink: 0 }} />
+            <span style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>{m.name} not included</span>
           </div>
         ))}
       </div>
@@ -310,39 +283,48 @@ function useDocked() {
   return docked;
 }
 
-/* ─── running total, stacked straight above the licence price ───
+/* ─── the selection, itemised, stacked straight above the licence price ───
 
-   On a phone the rail wraps below the module grid, which puts this
-   panel under the whole module list — the total lands about 1500px
-   further down than the tap that changed it, so nobody choosing
-   modules ever sees what they add up to. Below the breakpoint the
-   panel is therefore docked: a bar across the bottom of the viewport
-   with the total and the button, opening back into this same panel
-   when tapped. The look of all that is CSS (.sel-dock in index.html);
-   what lives here is the bar's markup, whether it is open, and the one
-   thing CSS cannot do on its own — see the portal below. ─── */
-function SelectionPanel({ keys, total, onClear, sub }) {
-  const n = keys.length;
-  const gap = FULL_MONTHLY - total;
-  /* keys are this page's own module keys; MODULE_BY_KEY[k].billing is the
-     same module as the panel spells it. Order follows PRICED_MODULES
-     rather than the order they were ticked, so the same three modules
-     always produce the same link. */
-  const cta = billingCTA(sub, `Continue · ${eur(total)}/mo`, {
-    modules: PRICED_MODULES.filter(m => keys.includes(m.key)).map(m => m.billing).join(','),
-  });
+   One line per ticked module with its price, Autoreger's line tagged as
+   outside the licence, then the total — the same reading order as the
+   panel's billing page, so the list a buyer builds here is the list they
+   find there.
+
+   On a phone the rail wraps below the module list, which puts this
+   panel under every row — the total lands far below the tap that
+   changed it, so nobody choosing modules ever sees what they add up
+   to. Below the breakpoint the panel is therefore docked: a bar across
+   the bottom of the viewport with the total and the button, opening
+   back into this same panel when tapped. The look of all that is CSS
+   (.sel-dock in index.html); what lives here is the bar's markup,
+   whether it is open, and the one thing CSS cannot do on its own — see
+   the portal below. ─── */
+function SelectionPanel({ keys, onClear, sub }) {
+  /* Lines follow catalogue order rather than the order they were ticked,
+     so the same selection always reads — and links — the same way:
+     licence modules first, then anything sold outside the licence. */
+  const lines = [...PRICED_MODULES, ...SEPARATE_MODULES].filter(m => keys.includes(m.key));
+  const total = lines.reduce((sum, m) => sum + m.price, 0);
+  /* The licence is compared against the modules it actually covers.
+     Autoreger is never in it, so ticking Autoreger must not make the
+     licence look like a cheaper way to buy the same thing. */
+  const licenceTotal = lines.filter(m => !m.separate).reduce((sum, m) => sum + m.price, 0);
+  const gap = FULL_MONTHLY - licenceTotal;
+  const n = lines.filter(m => !m.separate).length;
+  const extras = lines.filter(m => m.separate);
+  /* m.billing is the module as the panel spells it — see billingHref. */
+  const cta = billingCTA(sub, 'Continue', { modules: lines.map(m => m.billing).join(',') });
   const [open, setOpen] = useState(false);
   const docked = useDocked();
 
   /* The bar and the panel offer the same button, and the empty state is
-     the half worth keeping identical: with nothing picked the total is
-     €0, so Continue is dead rather than absent — the row keeps its
-     shape and the reason is written on it. */
+     the half worth keeping identical: with nothing picked Continue is
+     dead rather than absent, so the row keeps its shape. */
   const action = (className, style) => (total === 0
     ? (
       <button type="button" disabled className={className}
         style={{ justifyContent: 'center', opacity: 0.4, cursor: 'not-allowed', ...style }}>
-        Select modules
+        Continue
       </button>
     ) : (
       <a href={cta.href} target="_self" className={className}
@@ -350,6 +332,12 @@ function SelectionPanel({ keys, total, onClear, sub }) {
         {cta.label} <ArrowUpRight size={14} />
       </a>
     ));
+
+  const countText = lines.length === 0
+    ? 'none selected'
+    : `${n} of ${PRICED_MODULES.length}` + extras.map(m => ' + ' + m.name).join('');
+
+  const note = { fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: `rgba(${GREEN_RGB},0.85)`, lineHeight: 1.55, marginTop: 12 };
 
   const dock = (
     <div className={'sel-dock' + (open ? ' sel-dock-open' : '')}>
@@ -362,17 +350,15 @@ function SelectionPanel({ keys, total, onClear, sub }) {
             <span className={'sel-dock-total' + (total ? '' : ' is-empty')}>{eur(total)}</span>
             <span className="sel-dock-caret" aria-hidden="true"><ChevronRight size={13} /></span>
           </span>
-          <span className="sel-dock-count">
-            / mo · {n === 0 ? 'none selected' : `${n} of ${PRICED_MODULES.length}`}
-          </span>
+          <span className="sel-dock-count">/ mo · {countText}</span>
         </button>
-        {action('btn-outline sel-dock-cta', { padding: '14px', fontSize: '0.66rem', whiteSpace: 'nowrap' })}
+        {action('btn-outline sel-dock-cta', { padding: '14px 18px', fontSize: '0.66rem', whiteSpace: 'nowrap' })}
       </div>
 
-      <div className="panel sel-dock-panel" style={{ padding: '22px 26px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
+      <div className="panel sel-dock-panel" style={{ padding: '22px 24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
           <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.64rem', color: `rgba(${GREEN_RGB},0.75)`, letterSpacing: '0.24em', textTransform: 'uppercase' }}>{'// '}Your selection</span>
-          {n > 0 && (
+          {total > 0 && (
             <button type="button" onClick={onClear} style={{
               background: 'none', border: 'none', padding: 0,
               fontFamily: MONO, fontWeight: 400, fontSize: '0.6rem', letterSpacing: '0.14em',
@@ -381,16 +367,34 @@ function SelectionPanel({ keys, total, onClear, sub }) {
           )}
         </div>
 
-        {/* count rides the total's baseline rather than taking a line of its own —
-            the rail has to stay short enough to sit beside the licence on one screen */}
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '2.9rem', color: total ? GREEN : 'rgba(255,255,255,0.28)', lineHeight: 1, textShadow: total ? `0 0 28px rgba(${GREEN_RGB},0.28)` : 'none', transition: 'color 0.2s ease' }}>
+        {lines.length === 0 ? (
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.9rem', color: 'rgba(255,255,255,0.42)', lineHeight: 1.5 }}>
+            {docked ? 'Pick modules above' : 'Pick modules on the left'}
+          </p>
+        ) : (
+          <ul className="sel-lines">
+            {lines.map(m => (
+              <li key={m.key} className="sel-line">
+                <span className="sel-line-name">
+                  {m.name}
+                  {m.separate && <span className="pick-tag">not in licence</span>}
+                </span>
+                <span className="sel-line-fill" aria-hidden="true" />
+                <span className="sel-line-price">{eur(m.price)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <div style={{
+          display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap',
+          marginTop: 16, paddingTop: 14, borderTop: `1px solid rgba(${GREEN_RGB},0.14)`,
+        }}>
+          <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.62rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)' }}>Total</span>
+          <span style={{ marginLeft: 'auto', fontFamily: SERIF, fontWeight: 500, fontSize: '2.5rem', color: total ? GREEN : 'rgba(255,255,255,0.28)', lineHeight: 1, textShadow: total ? `0 0 28px rgba(${GREEN_RGB},0.28)` : 'none', transition: 'color 0.2s ease' }}>
             {eur(total)}
           </span>
-          <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>/ month</span>
-          <span style={{ marginLeft: 'auto', fontFamily: MONO, fontWeight: 400, fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>
-            {n === 0 ? 'none selected' : `${n} of ${PRICED_MODULES.length}`}
-          </span>
+          <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.64rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>/ month</span>
         </div>
 
         {/* The comparison, said out loud the moment it starts to matter —
@@ -399,33 +403,33 @@ function SelectionPanel({ keys, total, onClear, sub }) {
             This was two branches, and the second read "the full licence
             costs less than this" for every gap <= 0. At a gap of exactly 0
             that is false: the licence costs the SAME. It is reachable, not a
-            corner case — two of the sixty-four possible selections total
-            exactly the licence price (Active Warmup + Neurocommenting +
-            both Parsers, and Neurocommenting + Mass Reactions + both
-            Parsers), so a customer who picked either was told the cheaper
-            option was cheaper when it was not.
+            corner case — several selections total exactly the licence price
+            (Active Warmup + Neurocommenting + both Parsers, for one), so a
+            customer who picked one was told the cheaper option was cheaper
+            when it was not.
 
-            Three states now, one per sign of the gap. Below the licence
-            price nothing is claimed about which is cheaper, because nothing
-            true can be — the nudge there states a fact (what the difference
-            buys) and stops. */}
-        {total > 0 && gap > 0 && gap <= 40 && (
-          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: `rgba(${GREEN_RGB},0.85)`, lineHeight: 1.55, marginTop: 12 }}>
-            {eur(gap)} more buys all {PRICED_MODULES.length}, below.
-          </p>
+            Three states, one per sign of the gap, measured on the licence
+            modules only (see licenceTotal). Below the licence price nothing
+            is claimed about which is cheaper, because nothing true can be —
+            the nudge there states a fact (what the difference buys) and
+            stops. */}
+        {licenceTotal > 0 && gap > 0 && gap <= 40 && (
+          <p style={note}>{eur(gap)} more buys all {PRICED_MODULES.length}, below.</p>
         )}
-        {total > 0 && gap === 0 && (
-          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: `rgba(${GREEN_RGB},0.85)`, lineHeight: 1.55, marginTop: 12 }}>
-            The full licence is the same price — and includes every module.
-          </p>
+        {licenceTotal > 0 && gap === 0 && (
+          <p style={note}>The full licence is the same price as these modules — and includes all {PRICED_MODULES.length}.</p>
         )}
-        {total > 0 && gap < 0 && (
-          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.84rem', color: `rgba(${GREEN_RGB},0.85)`, lineHeight: 1.55, marginTop: 12 }}>
-            The full licence costs less than this — and includes every module.
-          </p>
+        {licenceTotal > 0 && gap < 0 && (
+          <p style={note}>The full licence costs less than these modules — and includes all {PRICED_MODULES.length}.</p>
         )}
 
-        {action('btn-outline', { width: '100%', padding: '14px', fontSize: '0.76rem', marginTop: 16 })}
+        {action('btn-solid', { width: '100%', padding: '15px', fontSize: '0.78rem', marginTop: 18 })}
+
+        {/* How, in one line. Which coin and which network is the panel's
+            question, asked after Continue — never here. */}
+        <p style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.6rem', letterSpacing: '0.06em', color: 'rgba(255,255,255,0.4)', textAlign: 'center', lineHeight: 1.6, marginTop: 12 }}>
+          Pay by card (renews monthly) or crypto (prepaid)
+        </p>
       </div>
     </div>
   );
@@ -440,71 +444,58 @@ function SelectionPanel({ keys, total, onClear, sub }) {
   return docked ? ReactDOM.createPortal(dock, document.body) : dock;
 }
 
-/* ─── Autoreger: priced, but never part of a licence ───
+/* ─── Autoreger: priced, but never part of the licence ───
 
-   The one module sold as its own subscription (the panel's
-   LICENCE_EXCLUDED_MODULES). It cannot join the picker above: a day pass
-   on a DAY billing interval can never share a Stripe subscription with
-   monthly modules, and the licence never includes it. So it gets a band
-   of its own below the picker, with both its intervals side by side —
-   the same separation a first-time buyer sees on the panel's billing
-   page, arrived at before they ever reach the panel. */
-function AutoregerBand({ sub }) {
+   The one module sold outside the licence (the panel's
+   LICENCE_EXCLUDED_MODULES), so it gets a band of its own under the
+   module list, with both its intervals — the same separation a buyer
+   meets on the panel's billing page:
+
+   - Monthly is a row like any other and ticks into the same selection;
+     the rail lists it on its own line, tagged "not in licence", and the
+     Continue link carries it as ?modules=…,autoreger.
+   - The day pass cannot: a DAY billing interval can never share a
+     Stripe subscription with monthly modules, so it is a button of its
+     own. The panel has no deep link for it (it is its own button there
+     too), so it simply opens billing. Card only — the panel's crypto
+     plans are monthly. */
+function AutoregerBand({ selected, onToggle, sub }) {
   const mod = SEPARATE_MODULES[0];
   if (!mod) return null;
-  const Icon = mod.icon;
-  /* ?modules=autoreger lands on the panel's billing page with the monthly
-     card already selected — the same deep link every other module uses.
-     The day pass has no preselection (it is its own button there), so the
-     CTA simply opens billing. */
-  const cta = billingCTA(sub, 'Get the Autoreger', { modules: mod.billing });
+  const dayCta = billingCTA(sub, 'Buy day pass', null);
   return (
-    <div className="panel" style={{ padding: '26px 28px', borderColor: `rgba(${GREEN_RGB},0.3)` }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 13, marginBottom: 16 }}>
-        <span aria-hidden="true" style={{
-          width: 34, height: 34, borderRadius: 4, flexShrink: 0,
-          background: `rgba(${GREEN_RGB},0.08)`, border: `1px solid rgba(${GREEN_RGB},0.22)`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <Icon size={16} color={GREEN} />
-        </span>
-        <span style={{
-          fontFamily: MONO, fontWeight: 500, fontSize: '0.72rem',
-          letterSpacing: '0.14em', textTransform: 'uppercase', color: 'white',
-        }}>
-          {mod.name}
-        </span>
-        <Pill>Separate subscription</Pill>
+    <div className="panel" style={{ marginTop: 16, padding: 'clamp(10px, 1.6vw, 16px)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px 12px', padding: '6px 6px 14px' }}>
+        <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.64rem', color: `rgba(${GREEN_RGB},0.75)`, letterSpacing: '0.24em', textTransform: 'uppercase' }}>{'// '}{mod.name}</span>
+        <Pill muted>Separate from the licence</Pill>
       </div>
 
-      <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.92rem', color: 'rgba(255,255,255,0.62)', lineHeight: 1.7, marginBottom: 20 }}>
-        {mod.desc} Billed on its own — never part of a module selection or the licence.
-      </p>
+      <PickRow mod={mod} selected={selected} onToggle={onToggle} tag="not in licence" />
 
-      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'stretch' }}>
-        {[
-          { label: '/ month', price: mod.price, note: 'The subscription — register any day, cancel any day.' },
-          { label: '/ day', price: mod.dayPrice, note: 'The day pass — one heavy registration day, nothing recurring.' },
-        ].map((opt) => (
-          <div key={opt.label} style={{
-            flex: '1 1 180px', padding: '16px 18px', borderRadius: 4,
-            border: `1px solid rgba(${GREEN_RGB},0.16)`, background: `rgba(${GREEN_RGB},0.025)`,
-          }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 7 }}>
-              <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: '2rem', color: GREEN, lineHeight: 1 }}>{eur(opt.price)}</span>
-              <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: '0.6rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>{opt.label}</span>
-            </div>
-            <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginTop: 10 }}>
-              {opt.note}
-            </p>
+      <div style={{
+        marginTop: 8, padding: '16px 20px', borderRadius: 5,
+        border: `1px solid rgba(${GREEN_RGB},0.14)`, background: 'rgba(0,0,0,0.22)',
+        display: 'flex', alignItems: 'center', gap: '14px 20px', flexWrap: 'wrap',
+      }}>
+        <div style={{ flex: '1 1 260px', minWidth: 0 }}>
+          <div style={{ fontFamily: MONO, fontWeight: 500, fontSize: '0.72rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'white', lineHeight: 1.3 }}>
+            Day pass
           </div>
-        ))}
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontWeight: 300, fontSize: '0.86rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.55, marginTop: 5 }}>
+            One heavy registration day. Billed per day as its own subscription, so cancel once the day's work is done. Card only.
+          </p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginLeft: 'auto' }}>
+          <span className="pick-price">
+            <span className="pick-amount">{eur(mod.dayPrice)}</span>
+            <span className="pick-per">/day</span>
+          </span>
+          <a href={dayCta.href} target="_self" className="btn-outline"
+            style={{ justifyContent: 'center', padding: '11px 16px', fontSize: '0.68rem', whiteSpace: 'nowrap' }}>
+            {dayCta.label} <ArrowUpRight size={13} />
+          </a>
+        </div>
       </div>
-
-      <a href={cta.href} target="_self" className="btn-outline"
-        style={{ width: '100%', justifyContent: 'center', padding: '13px', fontSize: '0.74rem', marginTop: 18 }}>
-        {cta.label} <ArrowUpRight size={14} />
-      </a>
     </div>
   );
 }
@@ -534,7 +525,7 @@ function ModuleHelpRail({ setPage }) {
 
    This used to be a paragraph at the bottom of the page, under the
    picker, in the same weight as everything else — which is where a fact
-   goes to not be read. "Two of the eight are free with any purchase" is
+   goes to not be read. "Two of the ten are free with any purchase" is
    the single most load-bearing thing on this page: it changes what the
    cheapest possible order actually gets you, so it runs first and at
    headline size. ─── */
@@ -543,7 +534,9 @@ function CatalogueBanner({ setPage }) {
   const inView = useInView(ref, { once: true, amount: 0.2 });
   const counts = [
     { n: MODULES.length, label: 'modules', tone: 'plain' },
-    { n: PRICED_MODULES.length, label: 'you pick and pay for', tone: 'plain' },
+    /* the licence modules plus the ones sold outside it (Autoreger), so
+       the three numbers add up: priced + free = all */
+    { n: PRICED_MODULES.length + SEPARATE_MODULES.length, label: 'you pick and pay for', tone: 'plain' },
     { n: INCLUDED_MODULES.length, label: 'free with any purchase', tone: 'accent' },
   ];
   return (
@@ -615,12 +608,13 @@ function CatalogueBanner({ setPage }) {
 const HERO = {
   badge: 'Pricing',
   title: 'Pay for what you run.',
-  sub: 'ATREOX is modular. Take the modules you need, or take the whole licence — two of the nine are free either way.',
+  sub: 'ATREOX is modular. Take the modules you need, or take the whole licence — two of the ten are free either way.',
 };
 
 const BUILD_LEDE =
-  'The seven you pay for, in the order they appear in the panel. Select what you need — the total '
-  + 'updates as you go, and the full licence sits beside it for comparison.';
+  'The seven modules of the licence, in the order they appear in the panel. Tick what you need — '
+  + 'your selection and its total build up as you go, with the full licence alongside for comparison. '
+  + 'Autoreger sits below: it can join the selection, but it is never part of the licence.';
 
 const WHY_PRICES_DIFFER =
   "A module's price tracks how much computing it needs. Neurocommenting polls hundreds of channels "
@@ -644,7 +638,7 @@ function PricingPage({ setPage }) {
   const [picked, setPicked] = useState([]);
   const [term, setTerm] = useState('monthly');
   const toggle = (key) => setPicked(p => p.includes(key) ? p.filter(k => k !== key) : [...p, key]);
-  const total = picked.reduce((sum, k) => sum + MODULE_BY_KEY[k].price, 0);
+  const autoreger = SEPARATE_MODULES[0];
 
   return (
     <div className="pricing-page">
@@ -659,32 +653,40 @@ function PricingPage({ setPage }) {
         <SectionLockup title="Build your licence">{BUILD_LEDE}</SectionLockup>
 
         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-          <div style={{ flex: '1 1 520px', minWidth: 0 }}>
-            <div ref={gridRef} style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(min(250px, 100%), 1fr))',
-              gap: 16, alignContent: 'start',
-            }}>
-              {PRICED_MODULES.map((m, i) => (
-                <motion.div key={m.key}
-                  initial={{ opacity: 0, y: 8 }} animate={gridIn ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.55, delay: i * 0.06 }}
-                  style={{ display: 'flex' }}>
-                  <ModuleCard mod={m} selected={picked.includes(m.key)} onToggle={() => toggle(m.key)} />
-                </motion.div>
-              ))}
+          <div style={{ flex: '1 1 540px', minWidth: 0 }}>
+            {/* one panel, seven rows — the panel's billing list, row for row */}
+            <div ref={gridRef} className="panel" style={{ padding: 'clamp(10px, 1.6vw, 16px)' }}>
+              <div className="pick-list">
+                {PRICED_MODULES.map((m, i) => (
+                  <motion.div key={m.key}
+                    initial={{ opacity: 0, y: 8 }} animate={gridIn ? { opacity: 1, y: 0 } : {}}
+                    transition={{ duration: 0.45, delay: i * 0.04 }}>
+                    <PickRow mod={m} selected={picked.includes(m.key)} onToggle={() => toggle(m.key)} />
+                  </motion.div>
+                ))}
+              </div>
             </div>
+
+            {/* Autoreger directly under the list it is kept apart from —
+                close enough to tick into the same selection, in a panel of
+                its own because the licence never covers it. */}
+            {autoreger && (
+              <AutoregerBand sub={sub}
+                selected={picked.includes(autoreger.key)}
+                onToggle={() => toggle(autoreger.key)} />
+            )}
+
             <ModuleHelpRail setPage={setPage} />
           </div>
 
           {/* Sticky as a direct flex child: its containing block is then the row,
-              which is as tall as the module grid, so the rail has room to travel. */}
+              which is as tall as the module list, so the rail has room to travel. */}
           <div className="price-rail" style={{
             flex: '1 1 330px', maxWidth: 400, alignSelf: 'flex-start',
             position: 'sticky', top: 80,
             display: 'flex', flexDirection: 'column', gap: 12,
           }}>
-            <SelectionPanel keys={picked} total={total} onClear={() => setPicked([])} sub={sub} />
+            <SelectionPanel keys={picked} onClear={() => setPicked([])} sub={sub} />
 
             {/* hidden on a phone, where the selection panel has been
                 docked to the bottom of the viewport and this would
@@ -697,17 +699,6 @@ function PricingPage({ setPage }) {
 
             <LicenceCard term={term} setTerm={setTerm} sub={sub} />
           </div>
-        </div>
-      </PageSection>
-
-      {/* Autoreger in its own band, below the picker — the same separation
-          the panel's billing page draws. See AutoregerBand above. */}
-      <PageSection style={{ paddingTop: 0 }}>
-        <SectionLockup title="Autoreger">
-          {'Accounts, made not bought — its own subscription, with a monthly price and a 24-hour day pass.'}
-        </SectionLockup>
-        <div style={{ maxWidth: 720 }}>
-          <AutoregerBand sub={sub} />
         </div>
       </PageSection>
 
@@ -796,8 +787,9 @@ Object.assign(window, { PricingPage });
             m.desc,
           ]),
         }],
-        ['p', 'The full licence covers every module for ' + eur(FULL_MONTHLY)
-          + ' a month, or ' + eur(FULL_YEARLY) + ' a year.'],
+        ['p', 'The full licence covers all ' + PRICED_MODULES.length + ' modules for ' + eur(FULL_MONTHLY)
+          + ' a month, or ' + eur(FULL_YEARLY) + ' a year. ' + SEPARATE_MODULES.map(m => m.name).join(' and ')
+          + ' is not included: it is sold on its own, by the month or as a day pass.'],
       ],
     },
     { title: 'Why prices differ', blocks: [['p', WHY_PRICES_DIFFER]] },

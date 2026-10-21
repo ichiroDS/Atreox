@@ -69,9 +69,13 @@ for (const src of ['/blog/telegram-account-aging-claims-tested', '/blog/telegram
 
 /* Profile Templates has no guide of its own; its module links into Account Manager. */
 assert.equal(box.moduleGuideHref(box.MODULE_BY_KEY['profile-templates']), '/guides/account-manager#profile-templates');
+/* A module either links to a live guide or says `guide: null` outright
+   (NeuroShilling, until its guide is written). A missing or misspelled
+   slug is neither, and still fails. */
 for (const m of box.MODULES) {
   const href = box.moduleGuideHref(m);
-  assert.ok(href && box.guideFromPath(href.replace(/#.*$/, '')), `module ${m.key} links to a live guide`);
+  if (m.guide === null) assert.equal(href, null, `module ${m.key} has no guide and links to none`);
+  else assert.ok(href && box.guideFromPath(href.replace(/#.*$/, '')), `module ${m.key} links to a live guide`);
   assert.ok(m.summary && Array.isArray(m.can) && m.can.length >= 3, `module ${m.key} has a summary and a short list for Functions`);
 }
 

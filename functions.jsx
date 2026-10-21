@@ -136,7 +136,7 @@ function Grid({ children }) {
 const HERO = {
   badge: 'Functions',
   title: 'Everything ATREOX does',
-  sub: 'Eight modules and two free tools, each in a few lines. Account Manager and Profile Templates come with any purchase; every other module is priced on its own.',
+  sub: 'Ten modules and two free tools, each in a few lines. Account Manager and Profile Templates come with any purchase; every other module is priced on its own.',
 };
 
 const MODULES_LEDE =

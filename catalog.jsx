@@ -11,7 +11,7 @@
 ══════════════════════════════════════════════════════════════════ */
 
 const {
-  MessageSquare, Brain, Zap, Sparkles, Globe, Users, Layers, Palette, UserPlus,
+  MessageSquare, MessagesSquare, Brain, Zap, Sparkles, Globe, Users, Layers, Palette, UserPlus,
 } = window;
 
 /* ── Modules ──────────────────────────────────────────────────────
@@ -58,6 +58,8 @@ const {
    `guide` is the slug of the guide that teaches the module, and
    `guideSection` (optional) the section id inside it when the module is
    taught as part of another guide; moduleGuideHref() below joins them.
+   `guide: null` says, on purpose, that no guide covers the module yet —
+   every page that links to a guide skips it rather than inventing one.
    The Functions section for a module is #fn-<key>.
 ─────────────────────────────────────────────────────────────────── */
 const MODULES = [
@@ -179,6 +181,29 @@ const MODULES = [
     ],
   },
   {
+    key: 'neuroshilling',
+    billing: 'neuroshilling',
+    name: 'NeuroShilling',
+    price: 40,
+    icon: MessagesSquare,
+    /* No guide yet. null, not a guess: moduleGuideHref() returns null for
+       it, so Functions shows the card without a Guide link and nothing
+       anywhere points at a page that does not exist. Give it a slug the
+       day its guide lands in GUIDES. */
+    guide: null,
+    desc: 'Performs a scripted multi-role dialog in groups and comment threads — your accounts talking to each other.',
+    tagline: 'A conversation, cast from your accounts',
+    summary: 'Plays a written conversation between several of your accounts, line by line, in the groups and channel comment threads you choose — each account speaking for its own role.',
+    can: [
+      'Write the dialog line by line, or have the AI scenario generator draft it from a topic and a brand',
+      'Groups get it as chat messages, channels as comments under the newest post; a check flags targets that cannot host one',
+      'Campaign mode plays the script target by target; Chat livening also answers real people in the room',
+      'Optional AI rewrite, so the same script never reads the same twice',
+      'Limits per account per hour, day and campaign, and dialogs per target per day',
+      'Skip young accounts, pause after FloodWaits, or do a dry run first',
+    ],
+  },
+  {
     key: 'channel-parser',
     billing: 'channel_parser',
     name: 'Channel Parser',
@@ -243,9 +268,11 @@ const MODULES = [
 
 const MODULE_BY_KEY = Object.fromEntries(MODULES.map(m => [m.key, m]));
 
-/* Modules that carry their own price — the Pricing picker's universe.
-   `separate` modules (Autoreger) are priced but sold as their own
-   subscription, so they never join a selection or the licence. */
+/* Modules that carry their own price and make up the licence — the
+   Pricing picker's rows and the "All N" everywhere. `separate` modules
+   (Autoreger) are priced but never part of the licence: Pricing gives
+   them a band of their own, whose monthly row can still be ticked into
+   the same selection, exactly as on the panel's billing page. */
 const PRICED_MODULES = MODULES.filter(m => !m.included && !m.separate);
 const SEPARATE_MODULES = MODULES.filter(m => m.separate);
 const INCLUDED_MODULES = MODULES.filter(m => m.included);

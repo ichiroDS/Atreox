@@ -46,6 +46,7 @@ const _ip = {
   Info: "M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10zM12 16v-4M12 8h.01",
   Ban: "M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10zM4.9 4.9l14.2 14.2",
   UserPlus: "M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM19 8v6M22 11h-6",
+  MessagesSquare: "M14 9a2 2 0 01-2 2H6l-4 4V4a2 2 0 012-2h8a2 2 0 012 2zM18 9h2a2 2 0 012 2v11l-4-4h-6a2 2 0 01-2-2v-1",
 };
 
 function _icon(name, filled) {
@@ -141,6 +142,7 @@ const Award         = _icon('Award');
 const Clock         = _icon('Clock');
 const MessageSquare = _icon('MessageSquare');
 const UserPlus     = _icon('UserPlus');
+const MessagesSquare = _icon('MessagesSquare');
 const Palette       = _icon('Palette');
 const TrendingUp    = _icon('TrendingUp');
 const Sparkles      = _icon('Sparkles');
@@ -913,7 +915,7 @@ Object.assign(window, {
   motion, AnimatePresence, useInView,
   ArrowUpRight, Play, Zap, Palette, BarChart3, Shield, Check, Star,
   ChevronRight, ChevronDown, Users, BookOpen, GitBranch, Code2, Cpu,
-  Layers, Server, Globe, Brain, Award, Clock, MessageSquare, UserPlus,
+  Layers, Server, Globe, Brain, Award, Clock, MessageSquare, MessagesSquare, UserPlus,
   TrendingUp, Sparkles, Network, Workflow, MonitorPlay, X, Menu, Info,
   LogoMark, Wordmark, Navbar, BlurText, FadeTop, FadeBottom,
   SectionBadge, SectionHeading, GlassBtn, FooterBar, BgColorSystem,

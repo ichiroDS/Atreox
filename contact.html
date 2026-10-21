@@ -2028,6 +2028,82 @@
     }
     .featured-pulse { animation: featured-pulse 4s ease-in-out infinite; }
 
+    /* ── Pricing: the module rows ──
+       One row per module, the same anatomy as the panel's billing page:
+       checkbox · icon · full name and one-line blurb · price on the right.
+       Rows, not cards, so a name is never squeezed into a narrow tile and
+       the prices line up in one column you can read down. The whole row
+       is the control (a checkbox-role button), so it needs its own focus
+       ring — the browser's would be lost against the hairline border. */
+    .pick-list { display: flex; flex-direction: column; gap: 8px; }
+    .pick-row {
+      display: grid; grid-template-columns: 20px 34px minmax(0, 1fr) auto;
+      align-items: center; column-gap: 16px;
+      width: 100%; padding: 16px 20px; text-align: left;
+      border: 1px solid var(--g-14); border-radius: 5px;
+      background: rgba(0,0,0,0.22); cursor: pointer;
+      transition: border-color 0.16s ease, background-color 0.16s ease;
+    }
+    .pick-row:hover { border-color: rgba(0,217,255,0.32); background: rgba(0,217,255,0.03); }
+    .pick-row.is-on { border-color: rgba(0,217,255,0.5); background: rgba(0,217,255,0.065); }
+    .pick-row:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+    .pick-box {
+      width: 20px; height: 20px; border-radius: 3px;
+      border: 1px solid rgba(0,217,255,0.3); background: transparent;
+      display: flex; align-items: center; justify-content: center;
+      transition: background-color 0.16s ease, border-color 0.16s ease;
+    }
+    .pick-row.is-on .pick-box { border-color: var(--g); background: var(--g); }
+    .pick-icon {
+      width: 34px; height: 34px; border-radius: 4px;
+      background: rgba(0,217,255,0.08); border: 1px solid var(--g-22);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pick-row.is-on .pick-icon { border-color: var(--g-40); }
+    .pick-text { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+    .pick-name {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px;
+      font-family: var(--mono); font-weight: 500; font-size: 0.72rem; line-height: 1.3;
+      letter-spacing: 0.14em; text-transform: uppercase; color: white;
+    }
+    .pick-blurb {
+      font-family: var(--sans); font-weight: 300; font-size: 0.86rem; line-height: 1.55;
+      color: rgba(255,255,255,0.55);
+    }
+    .pick-price { display: flex; align-items: baseline; gap: 5px; white-space: nowrap; }
+    .pick-amount { font-family: var(--serif); font-weight: 500; font-size: 1.55rem; line-height: 1; color: var(--g); }
+    .pick-per {
+      font-family: var(--mono); font-weight: 400; font-size: 0.6rem;
+      letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.4);
+    }
+    /* "not in licence" — a fact about the line, so it reads as a label,
+       not as a warning */
+    .pick-tag {
+      font-family: var(--mono); font-weight: 500; font-size: 0.54rem; line-height: 1;
+      letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap;
+      color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 3px; padding: 3px 6px;
+    }
+    /* The itemised selection in the rail: name … price, one per line */
+    .sel-lines { display: flex; flex-direction: column; gap: 9px; margin: 0; padding: 0; list-style: none; }
+    .sel-line { display: flex; align-items: baseline; gap: 10px; }
+    .sel-line-name {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; min-width: 0;
+      font-family: var(--sans); font-weight: 400; font-size: 0.9rem; color: rgba(255,255,255,0.8);
+    }
+    .sel-line-fill { flex: 1; min-width: 12px; border-bottom: 1px dotted rgba(0,217,255,0.2); transform: translateY(-4px); }
+    .sel-line-price { font-family: var(--mono); font-weight: 500; font-size: 0.8rem; color: white; white-space: nowrap; }
+    /* Below 480px a row has ~290px: the icon goes (the checkbox already
+       says "this is a choice"), the gaps tighten, and the longest name —
+       NEUROCOMMENTING — still fits on one line beside its price. */
+    @media (max-width: 480px) {
+      .pick-row { grid-template-columns: 20px minmax(0, 1fr) auto; column-gap: 12px; padding: 14px 14px; }
+      .pick-icon { display: none; }
+      .pick-name { letter-spacing: 0.1em; font-size: 0.68rem; }
+      .pick-blurb { font-size: 0.82rem; }
+      .pick-amount { font-size: 1.3rem; }
+    }
+
     /* ── Pricing: the running total, docked ──
        Beside the module grid the selection panel is a sticky rail and
        the price is never more than a glance away. Below this width the

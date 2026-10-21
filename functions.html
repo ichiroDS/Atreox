@@ -2028,6 +2028,82 @@
     }
     .featured-pulse { animation: featured-pulse 4s ease-in-out infinite; }
 
+    /* ── Pricing: the module rows ──
+       One row per module, the same anatomy as the panel's billing page:
+       checkbox · icon · full name and one-line blurb · price on the right.
+       Rows, not cards, so a name is never squeezed into a narrow tile and
+       the prices line up in one column you can read down. The whole row
+       is the control (a checkbox-role button), so it needs its own focus
+       ring — the browser's would be lost against the hairline border. */
+    .pick-list { display: flex; flex-direction: column; gap: 8px; }
+    .pick-row {
+      display: grid; grid-template-columns: 20px 34px minmax(0, 1fr) auto;
+      align-items: center; column-gap: 16px;
+      width: 100%; padding: 16px 20px; text-align: left;
+      border: 1px solid var(--g-14); border-radius: 5px;
+      background: rgba(0,0,0,0.22); cursor: pointer;
+      transition: border-color 0.16s ease, background-color 0.16s ease;
+    }
+    .pick-row:hover { border-color: rgba(0,217,255,0.32); background: rgba(0,217,255,0.03); }
+    .pick-row.is-on { border-color: rgba(0,217,255,0.5); background: rgba(0,217,255,0.065); }
+    .pick-row:focus-visible { outline: 1px solid var(--g); outline-offset: 2px; }
+    .pick-box {
+      width: 20px; height: 20px; border-radius: 3px;
+      border: 1px solid rgba(0,217,255,0.3); background: transparent;
+      display: flex; align-items: center; justify-content: center;
+      transition: background-color 0.16s ease, border-color 0.16s ease;
+    }
+    .pick-row.is-on .pick-box { border-color: var(--g); background: var(--g); }
+    .pick-icon {
+      width: 34px; height: 34px; border-radius: 4px;
+      background: rgba(0,217,255,0.08); border: 1px solid var(--g-22);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pick-row.is-on .pick-icon { border-color: var(--g-40); }
+    .pick-text { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+    .pick-name {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px;
+      font-family: var(--mono); font-weight: 500; font-size: 0.72rem; line-height: 1.3;
+      letter-spacing: 0.14em; text-transform: uppercase; color: white;
+    }
+    .pick-blurb {
+      font-family: var(--sans); font-weight: 300; font-size: 0.86rem; line-height: 1.55;
+      color: rgba(255,255,255,0.55);
+    }
+    .pick-price { display: flex; align-items: baseline; gap: 5px; white-space: nowrap; }
+    .pick-amount { font-family: var(--serif); font-weight: 500; font-size: 1.55rem; line-height: 1; color: var(--g); }
+    .pick-per {
+      font-family: var(--mono); font-weight: 400; font-size: 0.6rem;
+      letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.4);
+    }
+    /* "not in licence" — a fact about the line, so it reads as a label,
+       not as a warning */
+    .pick-tag {
+      font-family: var(--mono); font-weight: 500; font-size: 0.54rem; line-height: 1;
+      letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap;
+      color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 3px; padding: 3px 6px;
+    }
+    /* The itemised selection in the rail: name … price, one per line */
+    .sel-lines { display: flex; flex-direction: column; gap: 9px; margin: 0; padding: 0; list-style: none; }
+    .sel-line { display: flex; align-items: baseline; gap: 10px; }
+    .sel-line-name {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; min-width: 0;
+      font-family: var(--sans); font-weight: 400; font-size: 0.9rem; color: rgba(255,255,255,0.8);
+    }
+    .sel-line-fill { flex: 1; min-width: 12px; border-bottom: 1px dotted rgba(0,217,255,0.2); transform: translateY(-4px); }
+    .sel-line-price { font-family: var(--mono); font-weight: 500; font-size: 0.8rem; color: white; white-space: nowrap; }
+    /* Below 480px a row has ~290px: the icon goes (the checkbox already
+       says "this is a choice"), the gaps tighten, and the longest name —
+       NEUROCOMMENTING — still fits on one line beside its price. */
+    @media (max-width: 480px) {
+      .pick-row { grid-template-columns: 20px minmax(0, 1fr) auto; column-gap: 12px; padding: 14px 14px; }
+      .pick-icon { display: none; }
+      .pick-name { letter-spacing: 0.1em; font-size: 0.68rem; }
+      .pick-blurb { font-size: 0.82rem; }
+      .pick-amount { font-size: 1.3rem; }
+    }
+
     /* ── Pricing: the running total, docked ──
        Beside the module grid the selection panel is a sticky rail and
        the price is never more than a glance away. Below this width the
@@ -2514,9 +2590,9 @@
 <article>
 <p style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:#00d9ff;margin:0 0 12px">Functions</p>
 <h1 style="font-family:'Playfair Display',Georgia,serif;font-weight:500;font-size:2.6rem;line-height:1.1;letter-spacing:-0.015em;color:#fff;margin:0 0 18px">Everything ATREOX does</h1>
-<p style="font-family:Barlow,sans-serif;font-weight:300;font-size:1rem;line-height:1.8;color:rgba(255,255,255,0.72);margin:0 0 14px;font-size:1.05rem;color:rgba(255,255,255,0.78)">Eight modules and two free tools, each in a few lines. Account Manager and Profile Templates come with any purchase; every other module is priced on its own.</p>
+<p style="font-family:Barlow,sans-serif;font-weight:300;font-size:1rem;line-height:1.8;color:rgba(255,255,255,0.72);margin:0 0 14px;font-size:1.05rem;color:rgba(255,255,255,0.78)">Ten modules and two free tools, each in a few lines. Account Manager and Profile Templates come with any purchase; every other module is priced on its own.</p>
 <h2 style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px">On this page</h2>
-<div class="g-toc panel" style="padding:16px 18px"><a href="#fn-account-manager"><span class="g-toc-n">01</span><span class="g-toc-t">Account Manager</span></a><a href="#fn-active-warmup"><span class="g-toc-n">02</span><span class="g-toc-t">Active Warmup</span></a><a href="#fn-profile-templates"><span class="g-toc-n">03</span><span class="g-toc-t">Profile Templates</span></a><a href="#fn-neurocommenting"><span class="g-toc-n">04</span><span class="g-toc-t">Neurocommenting</span></a><a href="#fn-neurodialogs"><span class="g-toc-n">05</span><span class="g-toc-t">NeuroDialogs</span></a><a href="#fn-mass-reactions"><span class="g-toc-n">06</span><span class="g-toc-t">Mass Reactions</span></a><a href="#fn-channel-parser"><span class="g-toc-n">07</span><span class="g-toc-t">Channel Parser</span></a><a href="#fn-group-parser"><span class="g-toc-n">08</span><span class="g-toc-t">Group Parser</span></a><a href="#fn-autoreger"><span class="g-toc-n">09</span><span class="g-toc-t">Autoreger</span></a><a href="#fn-proxy-checker"><span class="g-toc-n">10</span><span class="g-toc-t">Telegram proxy checker</span></a><a href="#fn-account-checker"><span class="g-toc-n">11</span><span class="g-toc-t">Telegram account checker</span></a></div>
+<div class="g-toc panel" style="padding:16px 18px"><a href="#fn-account-manager"><span class="g-toc-n">01</span><span class="g-toc-t">Account Manager</span></a><a href="#fn-active-warmup"><span class="g-toc-n">02</span><span class="g-toc-t">Active Warmup</span></a><a href="#fn-profile-templates"><span class="g-toc-n">03</span><span class="g-toc-t">Profile Templates</span></a><a href="#fn-neurocommenting"><span class="g-toc-n">04</span><span class="g-toc-t">Neurocommenting</span></a><a href="#fn-neurodialogs"><span class="g-toc-n">05</span><span class="g-toc-t">NeuroDialogs</span></a><a href="#fn-mass-reactions"><span class="g-toc-n">06</span><span class="g-toc-t">Mass Reactions</span></a><a href="#fn-neuroshilling"><span class="g-toc-n">07</span><span class="g-toc-t">NeuroShilling</span></a><a href="#fn-channel-parser"><span class="g-toc-n">08</span><span class="g-toc-t">Channel Parser</span></a><a href="#fn-group-parser"><span class="g-toc-n">09</span><span class="g-toc-t">Group Parser</span></a><a href="#fn-autoreger"><span class="g-toc-n">10</span><span class="g-toc-t">Autoreger</span></a><a href="#fn-proxy-checker"><span class="g-toc-n">11</span><span class="g-toc-t">Telegram proxy checker</span></a><a href="#fn-account-checker"><span class="g-toc-n">12</span><span class="g-toc-t">Telegram account checker</span></a></div>
 <h2 id="fn-account-manager" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px">Account Manager</h2>
 <p class="g-p">Included with any purchase. Where your Telegram accounts come in and where you see their health. Every other module runs on the accounts you import here.</p>
 <ul class="g-bullets"><li>Import one account or a whole batch, from session strings or tdata folders</li><li>Give each account its own proxy, reassign proxies and check them</li><li>Run checks on any selection: health, proxy, capability and spamblock</li><li>See every account’s state at a glance: active, cooldown, spamblock, frozen, needs reauth</li><li>Protect bought accounts: Terminate other sessions, Reauthenticate, Download new tdata, Set 2FA</li><li>Apply a profile template, reset comment counts, recover from tdata or delete, in bulk</li><li>Import history: how each purchased batch is doing</li></ul>
@@ -2541,6 +2617,9 @@
 <p class="g-p">€30 per month. Adds reactions from a pool of your accounts to new posts in the channels you choose, or to the first comments under them, spread out over time like a real audience.</p>
 <ul class="g-bullets"><li>React to the posts, or to the first comments under each post</li><li>Choose the emoji, used at random or in order</li><li>Control how many accounts react and how the reactions spread over time</li><li>Limits per hour, per day, per channel and per account</li><li>Pauses an account after a FloodWait instead of pushing on</li><li>React without joining, skip messages already reacted to, or do a dry run</li></ul>
 <a href="/guides/mass-reactions" class="quiet-link" style="margin-bottom:16px">Guide: Mass Reactions →</a>
+<h2 id="fn-neuroshilling" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px">NeuroShilling</h2>
+<p class="g-p">€40 per month. Plays a written conversation between several of your accounts, line by line, in the groups and channel comment threads you choose — each account speaking for its own role.</p>
+<ul class="g-bullets"><li>Write the dialog line by line, or have the AI scenario generator draft it from a topic and a brand</li><li>Groups get it as chat messages, channels as comments under the newest post; a check flags targets that cannot host one</li><li>Campaign mode plays the script target by target; Chat livening also answers real people in the room</li><li>Optional AI rewrite, so the same script never reads the same twice</li><li>Limits per account per hour, day and campaign, and dialogs per target per day</li><li>Skip young accounts, pause after FloodWaits, or do a dry run first</li></ul>
 <h2 id="fn-channel-parser" style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin:38px 0 14px">Channel Parser</h2>
 <p class="g-p">€20 per month. Finds Telegram channels by keyword, or channels similar to ones you already have, and filters out the ones that are too small, in the wrong language or have no comments.</p>
 <ul class="g-bullets"><li>Keyword search, with suggested word endings to widen it</li><li>Similar-channel search from channels you already use</li><li>Filters: member range, languages, minimum comments on the last post</li><li>Watch the search live and stop it at any time</li><li>Send a channel straight to Neurocommenting, or reject it</li><li>Copy the results as t.me links</li></ul>
